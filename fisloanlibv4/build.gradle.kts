@@ -78,7 +78,7 @@ afterEvaluate {
                 from(components["release"])
                 groupId = "com.github.sugunasriram"
                 artifactId = "fisloanlibv4"
-                version = "1.0.0"
+                version = "1.0.1"
             }
         }
     }
