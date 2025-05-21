@@ -1,0 +1,9 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.github.sugunasriram.fisloanlibv4.fis_code",
+    "sha256_cert_fingerprints":
+    ["87:68:0C:09:C8:6B:FA:01:02:30:15:5C:1C:F1:4D:C5:2F:C4:95:8F:21:6B:2E:17:43:82:F7:E3:DC:5E:75:C5"]
+  }
+}]

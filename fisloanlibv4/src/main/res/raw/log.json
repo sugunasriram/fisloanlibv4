@@ -1,0 +1,437 @@
+{
+  "data": {
+    "data": {
+      "__v": 0,
+      "_id": "20c88966-1935-5388-9d9a-4a8efdccf38a",
+      "createdAt": "2024-09-13T05:22:54.207Z",
+      "details": {
+        "_id": "20c88966-1935-5388-9d9a-4a8efdccf38a",
+        "issue_close": {
+          "context": {
+            "action": "issue",
+            "bap_id": "stagingondcfs.jtechnoparks.in",
+            "bap_uri": "https://stagingondcfs.jtechnoparks.in/igm/api/v1/",
+            "bpp_id": "pramaan.ondc.org/beta/preprod/mock/seller",
+            "bpp_uri": "https://pramaan.ondc.org/beta/preprod/mock/seller",
+            "domain": "ONDC:FIS12",
+            "location": {
+              "city": {
+                "code": "*"
+              },
+              "country": {
+                "code": "IND"
+              }
+            },
+            "message_id": "276e26c7-284d-51a7-96f0-2ec7017e5160",
+            "timestamp": "2024-09-13T11:52:17.934Z",
+            "transaction_id": "3c5caf3f-185b-5ed2-8c23-afdbd3d23c62",
+            "ttl": "PT30S",
+            "version": "2.0.0"
+          },
+          "message": {
+            "issue": {
+              "category": "PAYMENT",
+              "complainant_info": {
+                "contact": {
+                  "email": "haisugusri@gmail.com",
+                  "phone": "9611909015"
+                },
+                "person": {
+                  "name": "Suguna Murugan"
+                }
+              },
+              "created_at": "2024-09-13T05:22:53.833Z",
+              "description": {
+                "additional_desc": {
+                  "content_type": "text/plain",
+                  "url": "AB.COM"
+                },
+                "images": [
+                  "string"
+                ],
+                "long_desc": "EMI long desc",
+                "short_desc": "EMI testing"
+              },
+              "expected_resolution_time": {
+                "duration": "PT2H"
+              },
+              "expected_response_time": {
+                "duration": "P1D"
+              },
+              "id": "20c88966-1935-5388-9d9a-4a8efdccf38a",
+              "issue_actions": {
+                "complainant_actions": [
+                  {
+                    "complainant_action": "OPEN",
+                    "short_desc": "Complaint created",
+                    "updated_at": "2024-09-13T05:22:53.833Z",
+                    "updated_by": {
+                      "contact": {
+                        "email": "ondc.support@nearshop.com",
+                        "phone": "9049245023"
+                      },
+                      "org": {
+                        "name": "stagingondcfs.jtechnoparks.in"
+                      },
+                      "person": {
+                        "name": null
+                      }
+                    }
+                  },
+                  {
+                    "complainant_action": "CLOSE",
+                    "short_desc": "Complaint closed",
+                    "updated_at": "2024-09-13T11:52:17.934Z",
+                    "updated_by": {
+                      "contact": {
+                        "email": "ondc.support@nearshop.com",
+                        "phone": "9049245023"
+                      },
+                      "org": {
+                        "name": "stagingondcfs.jtechnoparks.in"
+                      },
+                      "person": {
+                        "name": null
+                      }
+                    }
+                  }
+                ]
+              },
+              "issue_type": "ISSUE",
+              "order_details": {
+                "id": "3951d821-2e39-4e79-94a8-2eac77eb236e",
+                "provider_id": "c29d8cf3-5eeb-4aac-9eff-f5fadfd4dbc3",
+                "state": "DISBURSEMENT"
+              },
+              "rating": "THUMBS-UP",
+              "source": {
+                "network_participant_id": "stagingondcfs.jtechnoparks.in",
+                "type": "CONSUMER"
+              },
+              "status": "CLOSED",
+              "sub_category": "PMT01",
+              "updated_at": "2024-09-13T11:52:17.934Z"
+            }
+          }
+        },
+        "issue_open": {
+          "context": {
+            "action": "issue",
+            "bap_id": "stagingondcfs.jtechnoparks.in",
+            "bap_uri": "https://stagingondcfs.jtechnoparks.in/igm/api/v1/",
+            "bpp_id": "pramaan.ondc.org/beta/preprod/mock/seller",
+            "bpp_uri": "https://pramaan.ondc.org/beta/preprod/mock/seller",
+            "domain": "ONDC:FIS12",
+            "location": {
+              "city": {
+                "code": "*"
+              },
+              "country": {
+                "code": "IND"
+              }
+            },
+            "message_id": "06960e29-2384-5584-8bb6-7db20ce9f7f2",
+            "timestamp": "2024-09-13T05:22:53.844Z",
+            "transaction_id": "3c5caf3f-185b-5ed2-8c23-afdbd3d23c62",
+            "ttl": "PT30S",
+            "version": "2.0.0"
+          },
+          "message": {
+            "issue": {
+              "additional_info_required": null,
+              "category": "PAYMENT",
+              "complainant_info": {
+                "contact": {
+                  "email": "haisugusri@gmail.com",
+                  "phone": "9611909015"
+                },
+                "person": {
+                  "name": "Suguna Murugan"
+                }
+              },
+              "created_at": "2024-09-13T05:22:53.833Z",
+              "description": {
+                "additional_desc": {
+                  "content_type": "text/plain",
+                  "url": "AB.COM"
+                },
+                "images": [
+                  "string"
+                ],
+                "long_desc": "EMI long desc",
+                "short_desc": "EMI testing"
+              },
+              "expected_resolution_time": {
+                "duration": "PT2H"
+              },
+              "expected_response_time": {
+                "duration": "P1D"
+              },
+              "id": "20c88966-1935-5388-9d9a-4a8efdccf38a",
+              "issue_actions": {
+                "complainant_actions": [
+                  {
+                    "complainant_action": "OPEN",
+                    "short_desc": "Complaint created",
+                    "updated_at": "2024-09-13T05:22:53.833Z",
+                    "updated_by": {
+                      "contact": {
+                        "email": "ondc.support@nearshop.com",
+                        "phone": "9049245023"
+                      },
+                      "org": {
+                        "name": "stagingondcfs.jtechnoparks.in"
+                      },
+                      "person": {
+                        "name": null
+                      }
+                    }
+                  }
+                ]
+              },
+              "issue_type": "ISSUE",
+              "order_details": {
+                "id": "3951d821-2e39-4e79-94a8-2eac77eb236e",
+                "provider_id": "c29d8cf3-5eeb-4aac-9eff-f5fadfd4dbc3",
+                "state": "DISBURSEMENT"
+              },
+              "rating": null,
+              "source": {
+                "network_participant_id": "stagingondcfs.jtechnoparks.in",
+                "type": "CONSUMER"
+              },
+              "status": "OPEN",
+              "sub_category": "PMT01",
+              "updated_at": "2024-09-13T05:22:53.833Z"
+            }
+          }
+        },
+        "on_issue": {
+          "context": {
+            "action": "on_issue",
+            "bap_id": "stagingondcfs.jtechnoparks.in",
+            "bap_uri": "https://stagingondcfs.jtechnoparks.in/igm/api/v1/",
+            "bpp_id": "pramaan.ondc.org/beta/preprod/mock/seller",
+            "bpp_uri": "https://pramaan.ondc.org/beta/preprod/mock/seller",
+            "domain": "ONDC:FIS12",
+            "location": {
+              "city": {
+                "code": "*"
+              },
+              "country": {
+                "code": "IND"
+              }
+            },
+            "message_id": "06960e29-2384-5584-8bb6-7db20ce9f7f2",
+            "timestamp": "2024-09-13T05:23:15.541Z",
+            "transaction_id": "3c5caf3f-185b-5ed2-8c23-afdbd3d23c62",
+            "ttl": "PT30S",
+            "version": "2.0.0"
+          },
+          "message": {
+            "issue": {
+              "created_at": "2024-09-13T05:22:53.833Z",
+              "id": "20c88966-1935-5388-9d9a-4a8efdccf38a",
+              "issue_actions": {
+                "respondent_actions": [
+                  {
+                    "cascaded_level": 1,
+                    "respondent_action": "PROCESSING",
+                    "short_desc": "Complaint is being processed",
+                    "updated_at": "2024-09-13T05:23:15.512Z",
+                    "updated_by": {
+                      "contact": {
+                        "email": "customercare@ondc.com",
+                        "phone": "9350657100"
+                      },
+                      "org": {
+                        "name": "pramaan.ondc.org/beta/preprod/mock/seller::ONDC:FIS12"
+                      },
+                      "person": {
+                        "name": "ABC SINGH"
+                      }
+                    }
+                  }
+                ]
+              },
+              "updated_at": "2024-09-13T05:23:15.541Z"
+            }
+          }
+        },
+        "on_issue_status": {
+          "context": {
+            "action": "on_issue_status",
+            "bap_id": "stagingondcfs.jtechnoparks.in",
+            "bap_uri": "https://stagingondcfs.jtechnoparks.in/igm/api/v1/",
+            "bpp_id": "pramaan.ondc.org/beta/preprod/mock/seller",
+            "bpp_uri": "https://pramaan.ondc.org/beta/preprod/mock/seller",
+            "domain": "ONDC:FIS12",
+            "location": {
+              "city": {
+                "code": "*"
+              },
+              "country": {
+                "code": "IND"
+              }
+            },
+            "message_id": "97119623-5f5b-5070-80ff-d02ffe4e2296",
+            "timestamp": "2024-09-13T07:12:13.517Z",
+            "transaction_id": "3c5caf3f-185b-5ed2-8c23-afdbd3d23c62",
+            "ttl": "PT30S",
+            "version": "2.0.0"
+          },
+          "message": {
+            "issue": {
+              "created_at": "2024-09-13T05:22:53.833Z",
+              "id": "20c88966-1935-5388-9d9a-4a8efdccf38a",
+              "issue_actions": {
+                "respondent_actions": [
+                  {
+                    "cascaded_level": 1,
+                    "respondent_action": "PROCESSING",
+                    "short_desc": "Complaint is being processed",
+                    "updated_at": "2024-09-13T05:23:15.512Z",
+                    "updated_by": {
+                      "contact": {
+                        "email": "customercare@ondc.com",
+                        "phone": "9350657100"
+                      },
+                      "org": {
+                        "name": "pramaan.ondc.org/beta/preprod/mock/seller::ONDC:FIS12"
+                      },
+                      "person": {
+                        "name": "ABC SINGH"
+                      }
+                    }
+                  }
+                ]
+              },
+              "resolution": {
+                "action_triggered": "NO-ACTION",
+                "long_desc": "No action is required for this complaint",
+                "short_desc": "No action is required"
+              },
+              "resolution_provider": {
+                "respondent_info": {
+                  "organization": {
+                    "contact": {
+                      "email": "customercare@ondc.com",
+                      "phone": "9350657100"
+                    },
+                    "org": {
+                      "name": "pramaan.ondc.org/beta/preprod/mock/seller"
+                    },
+                    "person": {
+                      "name": "Customer Success Team"
+                    }
+                  },
+                  "resolution_support": {
+                    "chat_link": "https://chat_link.com",
+                    "contact": {
+                      "email": "customercare@ondc.com",
+                      "phone": "9350657100"
+                    },
+                    "gros": [
+                      {
+                        "contact": {
+                          "email": "head.services@ondc.com/grievance@ondc.com",
+                          "phone": "011-41204444"
+                        },
+                        "gro_type": "TRANSACTION-COUNTERPARTY-NP-GRO",
+                        "person": {
+                          "name": "ABC SINGH"
+                        }
+                      }
+                    ]
+                  },
+                  "type": "TRANSACTION-COUNTERPARTY-NP"
+                }
+              },
+              "updated_at": "2024-09-13T05:23:15.523Z"
+            }
+          }
+        }
+      },
+      "summary": {
+        "_id": "20c88966-1935-5388-9d9a-4a8efdccf38a",
+        "additional_description": {
+          "content_type": "text/plain",
+          "url": "AB.COM"
+        },
+        "category": "PAYMENT",
+        "complainant_actions": [
+          {
+            "complainant_action": "OPEN",
+            "short_desc": "Complaint created",
+            "updated_at": "2024-09-13T05:22:53.833Z",
+            "updated_by": {
+              "contact_email": "ondc.support@nearshop.com",
+              "contact_phone": "9049245023",
+              "org": {
+                "name": "stagingondcfs.jtechnoparks.in::ONDC:FIS12"
+              },
+              "org_name": "stagingondcfs.jtechnoparks.in"
+            }
+          }
+        ],
+        "created_at": "2024-09-13T05:22:53.833Z",
+        "expected_resolution_time": {
+          "duration": "PT2H"
+        },
+        "expected_response_time": {
+          "duration": "P1D"
+        },
+        "images": [
+          "string"
+        ],
+        "loanType": "PERSONAL_LOAN",
+        "long_description": "EMI long desc",
+        "order_id": "3951d821-2e39-4e79-94a8-2eac77eb236e",
+        "provider_id": "c29d8cf3-5eeb-4aac-9eff-f5fadfd4dbc3",
+        "provider_name": "ONDC Bank",
+        "resolutions": {
+          "action_triggered": "NO-ACTION",
+          "long_desc": "No action is required for this complaint",
+          "short_desc": "No action is required"
+        },
+        "resolutions_providers": {
+          "contact_email": "customercare@ondc.com",
+          "contact_person": "Customer Success Team",
+          "contact_phone": "9350657100",
+          "organization_name": "pramaan.ondc.org/beta/preprod/mock/seller"
+        },
+        "respondent_actions": [
+          {
+            "cascaded_level": 1,
+            "respondent_action": "PROCESSING",
+            "short_desc": "Complaint is being processed",
+            "updated_at": "2024-09-13T05:23:15.512Z",
+            "updated_by": {
+              "contact": {
+                "email": "customercare@ondc.com",
+                "phone": "9350657100"
+              },
+              "org": {
+                "name": "pramaan.ondc.org/beta/preprod/mock/seller::ONDC:FIS12"
+              },
+              "person": {
+                "name": "ABC SINGH"
+              }
+            }
+          }
+        ],
+        "short_description": "EMI testing",
+        "state": "DISBURSEMENT",
+        "status": "CLOSED",
+        "sub_category": "PMT01",
+        "sub_category_desc": "EMI not executed",
+        "updated_at": "2024-09-13T05:22:53.833Z",
+        "user_id": "b659b535-09b9-5dce-9b3d-79b40f4b249e"
+      },
+      "updatedAt": "2024-09-13T11:52:18.131Z"
+    },
+    "requestId": "c239a109-b8a7-57f5-b9b1-7a393ad09d19"
+  },
+  "status": true,
+  "statusCode": 200
+}

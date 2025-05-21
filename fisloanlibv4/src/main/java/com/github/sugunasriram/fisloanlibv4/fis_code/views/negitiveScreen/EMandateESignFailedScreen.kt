@@ -1,0 +1,73 @@
+package com.github.sugunasriram.fisloanlibv4.fis_code.views.negitiveScreen
+
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.github.sugunasriram.fisloanlibv4.R
+import com.github.sugunasriram.fisloanlibv4.fis_code.components.FixedTopBottomScreen
+import com.github.sugunasriram.fisloanlibv4.fis_code.components.RegisterText
+import com.github.sugunasriram.fisloanlibv4.fis_code.components.StartingText
+import com.github.sugunasriram.fisloanlibv4.fis_code.components.TopBar
+import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.navigateApplyByCategoryScreen
+import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.appBlack
+import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.appWhite
+import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.negativeGray
+import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.robotoSerifNormal24Text500
+
+@Composable
+fun EMandateESignFailedScreen(navController : NavHostController,title : String) {
+    BackHandler {
+        navigateApplyByCategoryScreen(navController)
+    }
+    FixedTopBottomScreen(
+        navController = navController,
+        backgroundColor= appWhite,
+        showBackButton = true,
+        onBackClick = { navController.popBackStack()},
+        topBarBackgroundColor = appWhite
+    ) {
+        Image(
+//            painter = painterResource(id = R.drawable.form_submission_failed_image),
+            painter = painterResource(id = R.drawable.error_session_time_out),
+            contentDescription = "", contentScale = ContentScale.Fit,
+            modifier = Modifier.padding(top = 100.dp).size(300.dp)
+        )
+
+        Spacer(modifier = Modifier.padding(vertical = 20.dp))
+
+        RegisterText(
+            text = title,
+            textColor = appBlack,
+            start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp,
+            style = robotoSerifNormal24Text500,
+        )
+    }
+
+}
+
+@Preview
+@Composable
+private fun KYCFailedPReviewScreen() {
+    Surface  {
+        EMandateESignFailedScreen(rememberNavController(),"LoanAgreement \nSession timed out due to inactivity")
+    }
+}
