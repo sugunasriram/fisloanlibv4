@@ -56,7 +56,7 @@ android {
 dependencies {
 
     implementation(project(":fisloanlibv4")) //Sugu1
-    //implementation("com.github.sugunasriram:myfisloanlibone:v1.0.11")
+    //implementation("com.github.sugunasriram:fisloanlibv4:v1.0.0")
 
     // Basic Android
     implementation("androidx.core:core-ktx:1.13.1")
