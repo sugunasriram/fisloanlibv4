@@ -20,7 +20,6 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.auth.ForgotPa
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.auth.GenerateAuthOtp
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.auth.GstBankDetail
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.auth.IFSCResponse
-import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.auth.LogIn
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.auth.LoginDetails
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.auth.Logout
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.auth.OrderPaymentStatusResponse
@@ -97,7 +96,8 @@ object ApiRepository {
             }
         }
     }
-    //Auth Flow Api Repository
+
+    // Auth Flow Api Repository
     suspend fun signup(profile: Profile): Signup? {
         return KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().authSignIn) {
@@ -113,7 +113,7 @@ object ApiRepository {
         }
     }
 
-    suspend fun generateAuthOtp(mobileNumber: String, countryCode: String,role:String): GenerateAuthOtp? {
+    suspend fun generateAuthOtp(mobileNumber: String, countryCode: String, role: String): GenerateAuthOtp? {
         val requestBody = mapOf("mobileNumber" to mobileNumber, "countryCode" to countryCode, "role" to role)
         return KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().authGenerateOtp) {
@@ -187,7 +187,6 @@ object ApiRepository {
                         // For example, show an error or log the issue
                         Log.e("Auth", "AccessToken is null")
                         return false
-
                     }
                 }
             }.onFailure { error ->
@@ -287,7 +286,8 @@ object ApiRepository {
 
     // Password Related Flow Api Repository
     suspend fun forgotPasswordApi(
-        mobileNumber: String, mobileNumberCountryCode: String
+        mobileNumber: String,
+        mobileNumberCountryCode: String
     ): ForgotPassword? {
         val requestBody = mapOf(
             "mobile_number" to mobileNumber,
@@ -301,11 +301,16 @@ object ApiRepository {
     }
 
     suspend fun resetPasswordApi(
-        newPassword: String, confirmPassword: String, mobileNumber: String, countryCode: String
+        newPassword: String,
+        confirmPassword: String,
+        mobileNumber: String,
+        countryCode: String
     ): ResetPassword? {
         val requestBody = mapOf(
-            "newPassword" to newPassword, "confirmPassword" to confirmPassword,
-            "mobileNumber" to mobileNumber, "countryCode" to countryCode
+            "newPassword" to newPassword,
+            "confirmPassword" to confirmPassword,
+            "mobileNumber" to mobileNumber,
+            "countryCode" to countryCode
         )
         return KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().resetPassword) {
@@ -397,7 +402,8 @@ object ApiRepository {
             }
         }
     }
-//searchApi with AA Consent
+
+// searchApi with AA Consent
     suspend fun searchApi(searchBodyModel: SearchBodyModel): SearchModel? {
         return KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().search) {
@@ -485,7 +491,6 @@ object ApiRepository {
             }
         }
     }
-
 
     suspend fun getOrderPaymentStatus(
         loanType: String,
@@ -583,9 +588,7 @@ object ApiRepository {
         }
     }
 
-
-
-    //Purchase Finance
+    // Purchase Finance
 
     suspend fun pfConfirmOffer(pfOfferConfirm: PfOfferConfirm): PfOfferConfirmResponse? {
         return KtorClient.getInstance().use { httpClient ->
@@ -633,10 +636,7 @@ object ApiRepository {
         }
     }
 
-
-
-
-    //Igm Flow Api Repository
+    // Igm Flow Api Repository
 
     suspend fun getIssueCategories(): IssueCategories? {
         return KtorClient.getInstance().use { httpClient ->
@@ -799,8 +799,8 @@ object ApiRepository {
             }
         }
     }
-    suspend fun status(loanType: String,orderId:String): StatusResponse? {
-        val requestBody = mapOf("loanType" to loanType,"orderId" to orderId)
+    suspend fun status(loanType: String, orderId: String): StatusResponse? {
+        val requestBody = mapOf("loanType" to loanType, "orderId" to orderId)
         return KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().status) {
                 val accessToken = TokenManager.read("accessToken")
@@ -880,7 +880,6 @@ object ApiRepository {
             }
         }
     }
-
 
     suspend fun financeSearch(financeSearchModel: FinanceSearchModel): SearchModel? {
         return KtorClient.getInstance().use { httpClient ->

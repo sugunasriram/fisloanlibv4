@@ -52,11 +52,12 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.viewModel.auth.OtpViewModel
 import com.github.sugunasriram.fisloanlibv4.fis_code.viewModel.auth.SignInViewModel
 import kotlinx.coroutines.delay
 
-
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun OtpScreen(
-    navController: NavHostController, number: String?, orderId: String?
+    navController: NavHostController,
+    number: String?,
+    orderId: String?
 ) {
     val textList =
         List(4) { remember { mutableStateOf(TextFieldValue(text = "", selection = TextRange(0))) } }
@@ -85,7 +86,7 @@ fun OtpScreen(
     var reSendTriggered by remember { mutableStateOf(false) }
     var reloadTimer by remember { mutableStateOf(false) }
 
-    val deviceInfo = otpViewModel.getDeviceInfo(context,configuration)
+    val deviceInfo = otpViewModel.getDeviceInfo(context, configuration)
 
     LaunchedEffect(reSendTriggered, reloadTimer) {
         if (navigationToSignIn) {
@@ -111,7 +112,7 @@ fun OtpScreen(
             CenterProgress()
         } else {
             if (isLoginOtpLoadingSuccess) {
-               navigateApplyByCategoryScreen(navController)
+                navigateApplyByCategoryScreen(navController)
             } else {
                 FixedTopBottomScreen(
                     navController = navController,
@@ -119,7 +120,7 @@ fun OtpScreen(
                     onBackClick = { navigateSignInPage(navController) },
                     topBarBackgroundColor = appWhite,
                     topBarText = stringResource(R.string.otp_verification),
-                    backgroundColor= appWhite
+                    backgroundColor = appWhite
                 ) {
                     RegisterText(
                         text = stringResource(id = R.string.please_enter_otp_sent_to),
@@ -131,12 +132,13 @@ fun OtpScreen(
                     number?.let {
                         val textToShow = "******" + it.takeLast(4)
                         RegisterText(
-                            text = textToShow,textColor = appBlack,
+                            text = textToShow,
+                            textColor = appBlack,
                             style = normal18Text500
                         )
                     }
 
-                    OtpView(textList = textList, requestList = requesterList, pastedEvent =  {
+                    OtpView(textList = textList, requestList = requesterList, pastedEvent = {
                         val annotatedString = clipboardManager.getText()
                         annotatedString?.let {
                             extractOtp(it.text)?.let {
@@ -159,11 +161,12 @@ fun OtpScreen(
                     MultipleColorText(
                         text = stringResource(id = R.string.resend_otp),
                         textColor = if (count > 0) appGray else appBlack,
-                        resendOtpColor = if (count > 0) appGray else appOrange,
+                        resendOtpColor = if (count > 0) appGray else appOrange
                     ) {
                         if (expired) {
                             signInViewModel.getUserRole(
-                                number.toString(), context.getString(R.string.country_code),
+                                number.toString(),
+                                context.getString(R.string.country_code),
                                 context
                             )
                             reSendTriggered = true
@@ -172,7 +175,8 @@ fun OtpScreen(
                         } else {
                             if (count > 0) {
                                 CommonMethods().toastMessage(
-                                    context = context, toastMsg = "Wait For $count Seconds"
+                                    context = context,
+                                    toastMsg = "Wait For $count Seconds"
                                 )
                             }
                         }
@@ -180,16 +184,17 @@ fun OtpScreen(
                     if (isOtpInvalid) {
                         StartingText(
                             text = stringResource(R.string.please_enter_valid_otp),
-                            textColor = errorRed, alignment = Alignment.Center
+                            textColor = errorRed,
+                            alignment = Alignment.Center
                         )
                     }
 
                     RegisterText(
                         text = if (expired) stringResource(id = R.string.time_expired) else "$count seconds",
-                       style = normal20Text700, textColor = appBlack,
+                        style = normal20Text700,
+                        textColor = appBlack,
                         top = 80.dp
                     )
-
 
                     val isOtpComplete = textList.all { it.value.text.length == 1 }
 
@@ -212,21 +217,22 @@ fun OtpScreen(
                                         orderId = otpId,
                                         context = context,
                                         navController = navController,
-                                        deviceInfo=deviceInfo
+                                        deviceInfo = deviceInfo
                                     )
                                 }
                                 expired = false
-
                             } else {
                                 orderId?.let { id ->
                                     otpViewModel.loginOtpValidation(
-                                        enteredOtp = otp, orderId = id, context = context,
-                                        navController = navController,deviceInfo=deviceInfo
+                                        enteredOtp = otp,
+                                        orderId = id,
+                                        context = context,
+                                        navController = navController,
+                                        deviceInfo = deviceInfo
                                     )
                                 }
                             }
                             textList.forEach { it.value = TextFieldValue("") }
-
                         }
                     }
                 }
@@ -234,8 +240,10 @@ fun OtpScreen(
         }
     } else {
         CommonMethods().HandleErrorScreens(
-            navController = navController, showInternetScreen = showInternetScreen,
-            showTimeOutScreen = showTimeOutScreen, showServerIssueScreen = showServerIssueScreen,
+            navController = navController,
+            showInternetScreen = showInternetScreen,
+            showTimeOutScreen = showTimeOutScreen,
+            showServerIssueScreen = showServerIssueScreen,
             unexpectedErrorScreen = unexpectedErrorScreen
         )
     }
@@ -252,7 +260,9 @@ private fun submitOTP(
     orderId?.let { id ->
         val otp = textList.joinToString("") { it.value.text }
         otpViewModel.loginOtpValidation(
-            enteredOtp = otp, orderId = id, context = context,
+            enteredOtp = otp,
+            orderId = id,
+            context = context,
             navController = navController,
             deviceInfo = deviceInfo
         )
@@ -269,8 +279,9 @@ fun extractOtp(input: String): String? {
 fun OtpScreenPreview() {
     Surface {
         OtpScreen(
-            navController = rememberNavController(), orderId = "1111", number = "11111"
+            navController = rememberNavController(),
+            orderId = "1111",
+            number = "11111"
         )
     }
-
 }

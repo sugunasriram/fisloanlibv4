@@ -46,7 +46,6 @@ class GetOrderPaymentStatusViewModel : BaseViewModel() {
     private val _navigationToSignIn = MutableStateFlow(false)
     val navigationToSignIn: StateFlow<Boolean> = _navigationToSignIn
 
-
     fun updateErrorMessage(message: String) {
         _errorMessage.value = message
     }
@@ -60,29 +59,31 @@ class GetOrderPaymentStatusViewModel : BaseViewModel() {
     private val _orderPaymentListLoaded = MutableStateFlow(false)
     val orderPaymentListLoaded: StateFlow<Boolean> = _orderPaymentListLoaded
 
-
     private val _orderPaymentStatusList = MutableStateFlow<ArrayList<OrderPaymentStatusItem>?>(null)
     val orderPaymentStatusList: StateFlow<ArrayList<OrderPaymentStatusItem>?> = _orderPaymentStatusList
 
-
-    fun getOrderPaymentStatus(loanType:String, loanId: String, context: Context) {
+    fun getOrderPaymentStatus(loanType: String, loanId: String, context: Context) {
         _orderPaymentListLoading.value = true
         _orderPaymentListLoaded.value = false
 
         viewModelScope.launch(Dispatchers.IO) {
-            handleGetOrderPaymentStatus(loanType,loanId, context)
+            handleGetOrderPaymentStatus(loanType, loanId, context)
         }
     }
 
-    private suspend fun handleGetOrderPaymentStatus(loanType:String,loanId:String, context: Context,
-                                                  checkForAccessToken: Boolean=true) {
+    private suspend fun handleGetOrderPaymentStatus(
+        loanType: String,
+        loanId: String,
+        context: Context,
+        checkForAccessToken: Boolean = true
+    ) {
         kotlin.runCatching {
             ApiRepository.getOrderPaymentStatus(loanType, loanId)
         }.onSuccess { response ->
 
-            if (response != null){
+            if (response != null) {
                 if (response.statusCode?.toInt() == 200) {
-                    if (response.data?.size == 0){
+                    if (response.data?.size == 0) {
                         _orderPaymentListLoaded.value = true
                         _orderPaymentListLoading.value = false
                     } else {
@@ -90,26 +91,25 @@ class GetOrderPaymentStatusViewModel : BaseViewModel() {
                     }
                 }
             }
-
         }.onFailure { error ->
-            //Session Management
+            // Session Management
             if (checkForAccessToken &&
                 error is ResponseException &&
-                error.response.status.value == 401) {
-                //Get Access Token using RefreshToken
-                if (handleAuthGetAccessTokenApi()){
+                error.response.status.value == 401
+            ) {
+                // Get Access Token using RefreshToken
+                if (handleAuthGetAccessTokenApi()) {
                     handleGetOrderPaymentStatus(loanType, loanId, context, false)
-                }else{
+                } else {
                     _navigationToSignIn.value = true
                 }
-            }else {
+            } else {
                 handleGetOrderPaymentStatusListFailure(error, context)
             }
         }
     }
 
-    private suspend fun handleGetOrderPaymentStatusSuccess(orderPaymentStatusResponse: 
-                                                           OrderPaymentStatusResponse) {
+    private suspend fun handleGetOrderPaymentStatusSuccess(orderPaymentStatusResponse: OrderPaymentStatusResponse) {
         withContext(Dispatchers.Main) {
             if (orderPaymentStatusResponse.statusCode?.toInt() == 206) {
                 _orderPaymentListLoaded.value = true
@@ -126,15 +126,21 @@ class GetOrderPaymentStatusViewModel : BaseViewModel() {
         withContext(Dispatchers.Main) {
             if (error is ResponseException) {
                 CommonMethods().handleResponseException(
-                    error = error, context = context,updateErrorMessage = ::updateErrorMessage,
-                    _showServerIssueScreen = _showServerIssueScreen, _middleLoan = _middleLoan,
-                    _unAuthorizedUser = _unAuthorizedUser, _unexpectedError = _unexpectedError,
+                    error = error,
+                    context = context,
+                    updateErrorMessage = ::updateErrorMessage,
+                    _showServerIssueScreen = _showServerIssueScreen,
+                    _middleLoan = _middleLoan,
+                    _unAuthorizedUser = _unAuthorizedUser,
+                    _unexpectedError = _unexpectedError,
                     _showLoader = _showLoader
                 )
             } else {
                 CommonMethods().handleGeneralException(
-                    error = error, _showInternetScreen = _showInternetScreen,
-                    _showTimeOutScreen = _showTimeOutScreen, _unexpectedError = _unexpectedError
+                    error = error,
+                    _showInternetScreen = _showInternetScreen,
+                    _showTimeOutScreen = _showTimeOutScreen,
+                    _unexpectedError = _unexpectedError
                 )
             }
             _orderPaymentListLoading.value = false

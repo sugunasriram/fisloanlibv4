@@ -11,7 +11,6 @@ data class IssueCategories(
 
 @Serializable
 data class CategorieItem(
-	val name: String? = null,
-	val id: String? = null
+    val name: String? = null,
+    val id: String? = null
 )
-

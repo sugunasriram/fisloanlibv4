@@ -19,9 +19,9 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.components.CenterProgress
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.CenteredMoneyImage
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.CurvedPrimaryButtonFull
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.FullWidthRoundShapedCard
-import com.github.sugunasriram.fisloanlibv4.fis_code.components.ScreenWithHamburger
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.OnlyReadAbleText
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.RegisterText
+import com.github.sugunasriram.fisloanlibv4.fis_code.components.ScreenWithHamburger
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.SignUpText
 import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.navigateToGstDetailsScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.navigateToLoanProcessScreen
@@ -38,8 +38,7 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fis_code.viewModel.gstLoan.GstInvoiceLoanViewModel
 
 @Composable
-fun GstInformationScreen(navController: NavHostController, fromFlow: String,invoiceId:String) {
-
+fun GstInformationScreen(navController: NavHostController, fromFlow: String, invoiceId: String) {
     val gstInvoiceLoanViewModel: GstInvoiceLoanViewModel = viewModel()
     val context = LocalContext.current
     val isLoading by gstInvoiceLoanViewModel.loading.collectAsState()
@@ -64,7 +63,7 @@ fun GstInformationScreen(navController: NavHostController, fromFlow: String,invo
         unAuthorizedUser -> CommonMethods().ShowUnAuthorizedErrorScreen(navController)
         middleLoan -> CommonMethods().ShowMiddleLoanErrorScreen(navController)
         else -> {
-            if(isLoading){
+            if (isLoading) {
                 CenterProgress()
             } else {
                 if (isLoaded) {
@@ -72,13 +71,16 @@ fun GstInformationScreen(navController: NavHostController, fromFlow: String,invo
                         GstInformationHeader()
                         GstBusinessDetails(invoiceData = invoiceData)
                         GstAdditionalInfo(
-                            show = true,navController = navController,fromFlow = fromFlow
+                            show = true,
+                            navController = navController,
+                            fromFlow = fromFlow
                         )
-                        ConfirmButton(navController,invoiceId = invoiceId)
+                        ConfirmButton(navController, invoiceId = invoiceId)
                     }
                 } else {
                     gstInvoiceLoanViewModel.invoiceData(
-                        context = context, gstin = "24AAHFC3011G1Z4"
+                        context = context,
+                        gstin = "24AAHFC3011G1Z4"
                     )
                 }
             }
@@ -90,15 +92,21 @@ fun GstInformationScreen(navController: NavHostController, fromFlow: String,invo
 fun GstInformationHeader() {
     CenteredMoneyImage(imageSize = 120.dp, top = 20.dp)
     RegisterText(
-        text = stringResource(id = R.string.gst_information), textColor = appBlueTitle,
+        text = stringResource(id = R.string.gst_information),
+        textColor = appBlueTitle,
         style = normal32Text700
     )
     RegisterText(
         text = stringResource(id = R.string.business_details_confirm),
-        textColor = gray4E, start = 40.dp, end = 40.dp, style = normal16Text400
+        textColor = gray4E,
+        start = 40.dp,
+        end = 40.dp,
+        style = normal16Text400
     )
     RegisterText(
-        text = stringResource(id = R.string.confirm_details), textColor = appBlueTitle, top = 40.dp,
+        text = stringResource(id = R.string.confirm_details),
+        textColor = appBlueTitle,
+        top = 40.dp,
         style = normal24Text500
     )
 }
@@ -106,34 +114,49 @@ fun GstInformationHeader() {
 @Composable
 fun GstBusinessDetails(invoiceData: GstInvoice?) {
     FullWidthRoundShapedCard(
-        onClick = { /*TODO*/ }, cardColor = skyBlueColor.copy(0.1f), shapeSize = 3.dp,
-        start = 25.dp, end = 25.dp
+        onClick = { /*TODO*/ },
+        cardColor = skyBlueColor.copy(0.1f),
+        shapeSize = 3.dp,
+        start = 25.dp,
+        end = 25.dp
     ) {
         invoiceData?.data?.gstinProfile?.forEach { profile ->
             profile?.tradeNam?.let { tradeName ->
                 OnlyReadAbleText(
-                    textHeader = stringResource(id = R.string.legal_business_name), bottom = 8.dp,
-                    top = 10.dp, textValue = tradeName, style = normal12Text400
+                    textHeader = stringResource(id = R.string.legal_business_name),
+                    bottom = 8.dp,
+                    top = 10.dp,
+                    textValue = tradeName,
+                    style = normal12Text400
                 )
             }
             profile?.adadr?.forEach { address ->
                 address?.addr?.stcd?.let { state ->
                     OnlyReadAbleText(
-                        textHeader = stringResource(id = R.string.place_of_business), bottom = 8.dp,
-                        top = 5.dp, textValue = state, style = normal12Text400
+                        textHeader = stringResource(id = R.string.place_of_business),
+                        bottom = 8.dp,
+                        top = 5.dp,
+                        textValue = state,
+                        style = normal12Text400
                     )
                 }
             }
             profile?.gstin?.let { gstNumber ->
                 OnlyReadAbleText(
-                    textHeader = stringResource(id = R.string.gstin), bottom = 8.dp, top = 5.dp,
-                    textValue = gstNumber, style = normal12Text400,
+                    textHeader = stringResource(id = R.string.gstin),
+                    bottom = 8.dp,
+                    top = 5.dp,
+                    textValue = gstNumber,
+                    style = normal12Text400
                 )
             }
             profile?.sts?.let { status ->
                 OnlyReadAbleText(
-                    textHeader = stringResource(id = R.string.gst_status), bottom = 10.dp, top = 5.dp,
-                    textValue = status, style = normal12Text400,
+                    textHeader = stringResource(id = R.string.gst_status),
+                    bottom = 10.dp,
+                    top = 5.dp,
+                    textValue = status,
+                    style = normal12Text400
                 )
             }
         }
@@ -142,15 +165,19 @@ fun GstBusinessDetails(invoiceData: GstInvoice?) {
 
 @Composable
 fun GstAdditionalInfo(
-    show: Boolean,navController: NavHostController,fromFlow: String
+    show: Boolean,
+    navController: NavHostController,
+    fromFlow: String
 ) {
     if (show) {
         SignUpText(
             text = stringResource(id = R.string.add_another_gstin).uppercase(),
-            style = semiBold24Text700, modifier = Modifier.padding(top = 40.dp)
+            style = semiBold24Text700,
+            modifier = Modifier.padding(top = 40.dp)
         ) {
             navigateToGstDetailsScreen(
-                navController = navController, fromFlow = fromFlow
+                navController = navController,
+                fromFlow = fromFlow
             )
         }
     } else {
@@ -159,15 +186,18 @@ fun GstAdditionalInfo(
 }
 
 @Composable
-fun ConfirmButton(navController: NavHostController,invoiceId: String) {
+fun ConfirmButton(navController: NavHostController, invoiceId: String) {
     CurvedPrimaryButtonFull(
         text = stringResource(id = R.string.confirm),
         modifier = Modifier.padding(start = 30.dp, end = 30.dp, bottom = 20.dp, top = 50.dp)
     ) {
         navigateToLoanProcessScreen(
-            navController, transactionId = "Sugu",10, "No need", offerId = invoiceId,
+            navController,
+            transactionId = "Sugu",
+            10,
+            "No need",
+            offerId = invoiceId,
             fromFlow = "Invoice Loan"
         )
     }
 }
-

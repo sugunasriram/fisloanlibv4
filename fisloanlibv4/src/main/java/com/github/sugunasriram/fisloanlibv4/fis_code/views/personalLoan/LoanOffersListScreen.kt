@@ -1,7 +1,6 @@
 package com.github.sugunasriram.fisloanlibv4.fis_code.views.personalLoan
 
 import android.content.Context
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -15,15 +14,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Slider
-import androidx.compose.material.SliderDefaults
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.TabRowDefaults
@@ -35,10 +30,8 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,16 +40,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -71,8 +58,6 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.components.CustomModalBotto
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.FixedTopBottomScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.HorizontalDivider
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.RegisterText
-import com.github.sugunasriram.fisloanlibv4.fis_code.components.SpaceBetweenText
-import com.github.sugunasriram.fisloanlibv4.fis_code.components.TextInputLayout
 import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.navigateSignInPage
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.personaLoan.Offer
@@ -85,19 +70,14 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.bold20Text100
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.checkBoxGray
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.cursorColor
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.errorRed
-import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.grayD9
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal14Text500
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal14Text700
-import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal16Text400
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal16Text500
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal20Text400
-import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal20Text700
-import com.github.sugunasriram.fisloanlibv4.fis_code.viewModel.personalLoan.AnnualIncomeViewModel
 import com.github.sugunasriram.fisloanlibv4.fis_code.viewModel.personalLoan.LoanAgreementViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
-import kotlin.math.roundToInt
 
 private val json1 = Json { prettyPrint = true }
 private var loanAmountVal = ""
@@ -113,7 +93,8 @@ fun LoanOffersListScreen(navController: NavHostController, offerItem: String, fr
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val filterOptionBottomSheetState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
     )
 
     BackHandler { navigateApplyByCategoryScreen(navController) }
@@ -126,9 +107,8 @@ fun LoanOffersListScreen(navController: NavHostController, offerItem: String, fr
     val navigationToSignIn by loanAgreementViewModel.navigationToSignIn.collectAsState()
 
     if (navigationToSignIn) {
-        navigateSignInPage (navController)
-    }
-    else if (offerListLoading) {
+        navigateSignInPage(navController)
+    } else if (offerListLoading) {
         CenterProgress()
     } else {
         if (offerListLoaded) {
@@ -142,8 +122,8 @@ fun LoanOffersListScreen(navController: NavHostController, offerItem: String, fr
                         selectedFilter = selectedFilter,
                         onFilterSelected = { selectedFilter = it }
                     )
-
-                }) {
+                }
+            ) {
                 FixedTopBottomScreen(
                     navController = navController,
                     topBarBackgroundColor = appOrange,
@@ -217,7 +197,7 @@ fun filterOffers(
     query: String,
     sortOption: String?
 ): List<Offer> {
-        if (offers == null) return emptyList()
+    if (offers == null) return emptyList()
 
     val trimmedQuery = query.trim().lowercase()
     val queryAsNumber = trimmedQuery.toLongOrNull()
@@ -262,16 +242,19 @@ fun getTagValue(offer: Offer, key: String): String? {
         ?.flatMap { it?.tags ?: emptyList() }
         ?.firstOrNull {
             it?.key.equals(key, ignoreCase = true) ||
-                    it?.key.equals(key.replace("_", " "), ignoreCase = true)
+                it?.key.equals(key.replace("_", " "), ignoreCase = true)
         }?.value
         ?.filter { it.isDigit() || it == '.' }
 }
+
 @Composable
-fun SearchBar(searchValue: String, placeHolderText:String=stringResource(id = R.string.search_for_amount_and_bank),
-              isFilterNeeded:Boolean=true,
-              onSearchQueryChanged: (String) -> Unit,
-              onFilterClick: () -> Unit = {}
-){
+fun SearchBar(
+    searchValue: String,
+    placeHolderText: String = stringResource(id = R.string.search_for_amount_and_bank),
+    isFilterNeeded: Boolean = true,
+    onSearchQueryChanged: (String) -> Unit,
+    onFilterClick: () -> Unit = {}
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -301,7 +284,7 @@ fun SearchBar(searchValue: String, placeHolderText:String=stringResource(id = R.
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = stringResource(id = R.string.clear),
-                        modifier = Modifier .padding(end = 8.dp).clickable { onSearchQueryChanged("") }
+                        modifier = Modifier.padding(end = 8.dp).clickable { onSearchQueryChanged("") }
                     )
                 }
             },
@@ -315,12 +298,13 @@ fun SearchBar(searchValue: String, placeHolderText:String=stringResource(id = R.
             )
         )
 
-        if(isFilterNeeded)
-        Image(
-            painter = painterResource(id = R.drawable.filter),
-            contentDescription = stringResource(id = R.string.filters),
-            modifier = Modifier.size(40.dp).padding(start = 5.dp).clickable { onFilterClick() }
-        )
+        if (isFilterNeeded) {
+            Image(
+                painter = painterResource(id = R.drawable.filter),
+                contentDescription = stringResource(id = R.string.filters),
+                modifier = Modifier.size(40.dp).padding(start = 5.dp).clickable { onFilterClick() }
+            )
+        }
     }
 }
 
@@ -333,7 +317,6 @@ fun FilterModalContent(
     selectedFilter: String?,
     onFilterSelected: (String?) -> Unit
 ) {
-
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -368,7 +351,7 @@ fun FilterModalContent(
 
         val options = listOf("Lowest Interest", "Lowest Tenure", "Highest Loan Amount")
         Column(
-            modifier = Modifier.fillMaxWidth() .padding(horizontal = 10.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp)
         ) {
             options.forEach { option ->
                 CheckBoxText(
@@ -397,14 +380,18 @@ fun FilterModalContent(
                 text = stringResource(id = R.string.reset),
                 textColor = appOrange,
                 backgroundColor = appWhite,
-                start = 35.dp, end = 35.dp, style = normal14Text700
+                start = 35.dp,
+                end = 35.dp,
+                style = normal14Text700
             ) {
                 onFilterSelected(null)
             }
 
             CurvedPrimaryButton(
                 text = stringResource(id = R.string.apply),
-                start = 35.dp, end = 35.dp, style = normal14Text700
+                start = 35.dp,
+                end = 35.dp,
+                style = normal14Text700
             ) {
                 onFilterSelected(selectedFilter)
                 coroutineScope.launch { bottomSheetState.hide() }
@@ -416,5 +403,5 @@ fun FilterModalContent(
 @Preview
 @Composable
 private fun PreviewLoanOfferListScreen() {
-    LoanOffersListScreen(rememberNavController(),"","")
+    LoanOffersListScreen(rememberNavController(), "", "")
 }

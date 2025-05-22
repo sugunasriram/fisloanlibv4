@@ -1,7 +1,6 @@
 package com.github.sugunasriram.fisloanlibv4.fis_code.components
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
@@ -15,7 +14,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -48,7 +46,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionResult
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -62,9 +59,7 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.navigateToBankDe
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.appBlack
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.appGray
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.appOrange
-import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.backgroundOrange
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.errorRed
-import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal14Text700
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal18Text500
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal36Text500
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.semiBold20Text500
@@ -76,9 +71,11 @@ import kotlinx.coroutines.delay
 fun LoaderAnimation(
     text: String = stringResource(id = R.string.we_are_currently_processing),
     updatedText: String = stringResource(id = R.string.we_are_currently_processing),
-    delayInMillis: Long = 15000, @DrawableRes image: Int = R.raw.generating_best_offers,
+    delayInMillis: Long = 15000,
+    @DrawableRes image: Int = R.raw.generating_best_offers,
     @DrawableRes updatedImage: Int = R.raw.generating_best_offers,
-    showTimer: Boolean = false, navController: NavHostController,
+    showTimer: Boolean = false,
+    navController: NavHostController
 ) {
     var sizeDepends = true
     var currentText by remember { mutableStateOf(text) }
@@ -96,7 +93,9 @@ fun LoaderAnimation(
         spec = LottieCompositionSpec.RawRes(currentImage)
     )
     val progressAnimation by animateLottieCompositionAsState(
-        compositionResult.value, isPlaying = true, iterations = LottieConstants.IterateForever,
+        compositionResult.value,
+        isPlaying = true,
+        iterations = LottieConstants.IterateForever,
         speed = 0.5f // Set the animation speed to 0.5
     )
 
@@ -110,14 +109,17 @@ fun LoaderAnimation(
         }
 
         LottieAnimation(
-            composition = compositionResult.value, progress = progressAnimation,
+            composition = compositionResult.value,
+            progress = progressAnimation,
             modifier = Modifier.size(height = 500.dp, width = 300.dp)
         )
         Text(
-            text = currentText, style = semiBold20Text500, textAlign = TextAlign.Center,
+            text = currentText,
+            style = semiBold20Text500,
+            textAlign = TextAlign.Center,
             modifier = Modifier
                 .padding(start = 25.dp, end = 25.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth()
         )
         Box(
             modifier = Modifier
@@ -142,14 +144,17 @@ fun AnimationLoader(
 //    @DrawableRes image: Int = R.raw.processing_wait,
     id: String,
     transactionId: String,
-    navController: NavHostController, fromFlow: String
+    navController: NavHostController,
+    fromFlow: String
 ) {
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
     LaunchedEffect(Unit) {
         delay(delayInMillis)
         navigateToBankDetailsScreen(
-            navController = navController, id = id, fromFlow = fromFlow,
+            navController = navController,
+            id = id,
+            fromFlow = fromFlow,
             closeCurrent = false
         )
 //        navigateToLoanProcessScreen(
@@ -163,7 +168,9 @@ fun AnimationLoader(
         spec = LottieCompositionSpec.RawRes(image)
     )
     val progressAnimation by animateLottieCompositionAsState(
-        compotionResult.value, isPlaying = true, iterations = LottieConstants.IterateForever,
+        compotionResult.value,
+        isPlaying = true,
+        iterations = LottieConstants.IterateForever,
         speed = 1.0f
     )
     Column(
@@ -174,7 +181,8 @@ fun AnimationLoader(
         verticalArrangement = Arrangement.Center
     ) {
         LottieAnimation(
-            composition = compotionResult.value, progress = progressAnimation,
+            composition = compotionResult.value,
+            progress = progressAnimation,
             modifier = Modifier.size(width = 300.dp, height = 500.dp)
         )
         Text(
@@ -182,7 +190,8 @@ fun AnimationLoader(
             modifier = Modifier
                 .padding(start = 30.dp, end = 30.dp)
                 .fillMaxWidth(),
-            style = semiBold20Text500, textAlign = TextAlign.Center
+            style = semiBold20Text500,
+            textAlign = TextAlign.Center
         )
         Box(
             modifier = Modifier
@@ -215,17 +224,23 @@ fun AnimationLoader(
 @SuppressLint("ResourceType")
 @Composable
 fun KycAnimation(
-    text: String = stringResource(id = R.string.initiating_kyc_verification), delayInMillis: Long = 5000,
-    @DrawableRes image: Int = R.raw.initiating_kyc_verification, navController: NavHostController,
-    transactionId:String, offerId: String, responseItem: String,
+    text: String = stringResource(id = R.string.initiating_kyc_verification),
+    delayInMillis: Long = 5000,
+    @DrawableRes image: Int = R.raw.initiating_kyc_verification,
+    navController: NavHostController,
+    transactionId: String,
+    offerId: String,
+    responseItem: String,
     fromFlow: String
 ) {
-
     LaunchedEffect(Unit) {
         delay(delayInMillis)
         navigateKycScreen(
-            navController = navController, transactionId =  transactionId, url =  responseItem, id
-            =  offerId,
+            navController = navController,
+            transactionId = transactionId,
+            url = responseItem,
+            id =
+            offerId,
             fromFlow = fromFlow
         )
     }
@@ -233,7 +248,9 @@ fun KycAnimation(
         spec = LottieCompositionSpec.RawRes(image)
     )
     val progressAnimation by animateLottieCompositionAsState(
-        compositionResult.value, isPlaying = true, iterations = LottieConstants.IterateForever,
+        compositionResult.value,
+        isPlaying = true,
+        iterations = LottieConstants.IterateForever,
         speed = 1.0f
     )
     Column(
@@ -241,12 +258,19 @@ fun KycAnimation(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         LottieAnimation(
-            composition = compositionResult.value, progress = progressAnimation,
+            composition = compositionResult.value,
+            progress = progressAnimation,
             modifier = Modifier.size(height = 450.dp, width = 300.dp)
         )
         MultiStyleText(
-            "Initiating ", appBlack, "KYC Verification", appOrange,
-            semiBold20Text500, semiBold20Text500, start = 0.dp, arrangement = Arrangement.Center
+            "Initiating ",
+            appBlack,
+            "KYC Verification",
+            appOrange,
+            semiBold20Text500,
+            semiBold20Text500,
+            start = 0.dp,
+            arrangement = Arrangement.Center
         )
 
         LinearProgressIndicator(
@@ -292,6 +316,7 @@ fun PreviewAgreementAnimation() {
 //        fromFlow = ""
 //    )
 }
+
 @SuppressLint("ResourceType")
 @Composable
 fun ProcessingAnimation(
@@ -302,7 +327,9 @@ fun ProcessingAnimation(
         spec = LottieCompositionSpec.RawRes(image)
     )
     val progressAnimation by animateLottieCompositionAsState(
-        compositionResult.value, isPlaying = true, iterations = LottieConstants.IterateForever,
+        compositionResult.value,
+        isPlaying = true,
+        iterations = LottieConstants.IterateForever,
         speed = 1.0f
     )
     Column(
@@ -311,13 +338,15 @@ fun ProcessingAnimation(
         verticalArrangement = Arrangement.Center
     ) {
         LottieAnimation(
-            composition = compositionResult.value, progress = progressAnimation,
+            composition = compositionResult.value,
+            progress = progressAnimation,
             modifier = Modifier.size(width = 250.dp, height = 500.dp)
         )
         Text(
             text = text,
             modifier = Modifier.padding(start = 30.dp, end = 30.dp).fillMaxWidth(),
-            style = semiBold20Text500, textAlign = TextAlign.Center
+            style = semiBold20Text500,
+            textAlign = TextAlign.Center
         )
         Box(
             modifier = Modifier.fillMaxSize().padding(bottom = 30.dp),
@@ -338,12 +367,15 @@ fun LoanDisburseAnimator() {
         spec = LottieCompositionSpec.RawRes(R.raw.disburse_gif)
     )
     val progressAnimation by animateLottieCompositionAsState(
-        compositionResult.value, isPlaying = true, iterations = LottieConstants.IterateForever,
+        compositionResult.value,
+        isPlaying = true,
+        iterations = LottieConstants.IterateForever,
         speed = 1.0f
     )
     Box(contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxWidth()) {
         LottieAnimation(
-            composition = compositionResult.value, progress = progressAnimation,
+            composition = compositionResult.value,
+            progress = progressAnimation,
             modifier = Modifier.size(150.dp)
         )
     }
@@ -355,12 +387,15 @@ fun ForeClosureAnimator() {
         spec = LottieCompositionSpec.RawRes(R.raw.force_closure_gif)
     )
     val progressAnimation by animateLottieCompositionAsState(
-        compotionResult.value, isPlaying = true, iterations = LottieConstants.IterateForever,
+        compotionResult.value,
+        isPlaying = true,
+        iterations = LottieConstants.IterateForever,
         speed = 1.0f
     )
     Box(contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxWidth()) {
         LottieAnimation(
-            composition = compotionResult.value, progress = progressAnimation,
+            composition = compotionResult.value,
+            progress = progressAnimation,
             modifier = Modifier.size(120.dp)
         )
     }
@@ -466,8 +501,12 @@ fun IncrementTimer(maxMinutes: Int = 5) {
 @Composable
 private fun PreviewIncrementTimer() {
     StatusChip(
-        statusText = "ADD ISSUE +", backGroundColor = Color.Transparent, borderColor = errorRed,
-        textColor = errorRed, cardWidth = 1.dp, textStyle = normal18Text500,
+        statusText = "ADD ISSUE +",
+        backGroundColor = Color.Transparent,
+        borderColor = errorRed,
+        textColor = errorRed,
+        cardWidth = 1.dp,
+        textStyle = normal18Text500,
         modifier = Modifier.padding(top = 5.dp, end = 0.dp)
     )
 //    IncrementTimer(maxMinutes = 2)

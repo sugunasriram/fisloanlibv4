@@ -49,7 +49,7 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.lightishGrayColor
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal12Text400
 
 @Composable
-fun CenterProgress(modifier: Modifier = Modifier,top: Dp = 0.dp) {
+fun CenterProgress(modifier: Modifier = Modifier, top: Dp = 0.dp) {
     Column(
         modifier = modifier.fillMaxSize().padding(top = top),
         verticalArrangement = Arrangement.Center,
@@ -138,7 +138,7 @@ fun LoanStatusTracker(
     val iconResources = List(visibleSteps) { index ->
         val globalIndex = startIndex + index
         when {
-            globalIndex + 1 < stepId -> R.drawable.tracker_done  // Completed steps
+            globalIndex + 1 < stepId -> R.drawable.tracker_done // Completed steps
             globalIndex + 1 == stepId -> R.drawable.tracker_in_progress // Current step
             else -> R.drawable.tracker_in_pending // Pending steps
         }
@@ -185,17 +185,23 @@ fun LoanStatusTracker(
         }
     }
 }
+
 @Composable
 fun Track(
-    items: Int, brush: (from: Int) -> Brush, modifier: Modifier = Modifier, lineWidth: Dp = 1.dp,
-    pathEffect: ((from: Int) -> PathEffect?)? = null, icon: @Composable (index: Int) -> Unit,
-    color: @Composable (index: Int) -> Color, extendLineAfterLast: Boolean = true,
+    items: Int,
+    brush: (from: Int) -> Brush,
+    modifier: Modifier = Modifier,
+    lineWidth: Dp = 1.dp,
+    pathEffect: ((from: Int) -> PathEffect?)? = null,
+    icon: @Composable (index: Int) -> Unit,
+    color: @Composable (index: Int) -> Color,
+    extendLineAfterLast: Boolean = true,
     showLineBeforeFirst: Boolean = false,
     label: @Composable (index: Int) -> Pair<String, String>
 ) {
     Box(
         modifier = modifier.padding(bottom = 0.dp),
-        contentAlignment = Alignment.TopCenter,
+        contentAlignment = Alignment.TopCenter
     ) {
         Canvas(
             modifier = Modifier
@@ -220,7 +226,7 @@ fun Track(
                     brush = brush.invoke(0),
                     start = Offset(0f, yOffset),
                     end = Offset(startOffset, yOffset),
-                    strokeWidth = barWidth,
+                    strokeWidth = barWidth
                 )
             }
 
@@ -249,11 +255,11 @@ fun Track(
 
         Row(
             Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceAround,
+            horizontalArrangement = Arrangement.SpaceAround
         ) {
             repeat(items) { index ->
                 Box(
-                    contentAlignment = Alignment.TopCenter,
+                    contentAlignment = Alignment.TopCenter
                 ) {
                     icon.invoke(index)
                     Text(
@@ -274,19 +280,26 @@ fun Track(
     }
 }
 
-
 @Composable
 fun CircularProgressBar(
-    color: Color = Color.Green, backgroundColor: Color = Color.LightGray, strokeWidth: Dp = 4.dp,
-    percentage: Float, number: Int, fontSize: TextUnit = 12.sp, radius: Dp = 20.dp,
-    animationDuration: Int = 1000, animationDelay: Int = 0, horizontalPadding: Dp = 10.dp,
+    color: Color = Color.Green,
+    backgroundColor: Color = Color.LightGray,
+    strokeWidth: Dp = 4.dp,
+    percentage: Float,
+    number: Int,
+    fontSize: TextUnit = 12.sp,
+    radius: Dp = 20.dp,
+    animationDuration: Int = 1000,
+    animationDelay: Int = 0,
+    horizontalPadding: Dp = 10.dp,
     verticalPadding: Dp = 10.dp
 ) {
     var animationPlayed by remember { mutableStateOf(false) }
     val currentPercentage = animateFloatAsState(
         targetValue = if (animationPlayed) percentage else 0f,
         animationSpec = tween(
-            durationMillis = animationDuration, delayMillis = animationDelay
+            durationMillis = animationDuration,
+            delayMillis = animationDelay
         )
     )
 
@@ -301,21 +314,25 @@ fun CircularProgressBar(
     ) {
         Canvas(modifier = Modifier.size(radius * 2f)) {
             drawArc(
-                color = backgroundColor, startAngle = -90f, sweepAngle = 360f, useCenter = true,
+                color = backgroundColor,
+                startAngle = -90f,
+                sweepAngle = 360f,
+                useCenter = true,
                 style = Stroke(strokeWidth.toPx(), cap = StrokeCap.Round)
             )
             drawArc(
-                color = color, startAngle = -90f, sweepAngle = 360 * currentPercentage.value,
-                useCenter = false, style = Stroke(strokeWidth.toPx(), cap = StrokeCap.Round)
+                color = color,
+                startAngle = -90f,
+                sweepAngle = 360 * currentPercentage.value,
+                useCenter = false,
+                style = Stroke(strokeWidth.toPx(), cap = StrokeCap.Round)
             )
         }
         Text(
-            text = "${(currentPercentage.value * 100).toInt()}%", color = Color.Black,
-            fontSize = fontSize, fontWeight = FontWeight.Bold
+            text = "${(currentPercentage.value * 100).toInt()}%",
+            color = Color.Black,
+            fontSize = fontSize,
+            fontWeight = FontWeight.Bold
         )
     }
 }
-
-
-
-

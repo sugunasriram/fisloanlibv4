@@ -29,7 +29,6 @@ import kotlinx.serialization.json.Json
 
 @Composable
 fun GstInvoiceLoansScreen(navController: NavHostController, fromFlow: String) {
-
     val gstInvoiceLoanViewModel: GstInvoiceLoanViewModel = viewModel()
     val selectedItems by gstInvoiceLoanViewModel.selectedItems.observeAsState(emptySet())
 
@@ -49,7 +48,7 @@ fun GstInvoiceLoansScreen(navController: NavHostController, fromFlow: String) {
     val errorMessage by gstInvoiceLoanViewModel.errorMessage.collectAsState()
 
     when {
-        navigationToSignIn -> navigateSignInPage (navController)
+        navigationToSignIn -> navigateSignInPage(navController)
         showInternetScreen -> CommonMethods().ShowInternetErrorScreen(navController)
         showTimeOutScreen -> CommonMethods().ShowTimeOutErrorScreen(navController)
         showServerIssueScreen -> CommonMethods().ShowServerIssueErrorScreen(navController)
@@ -57,64 +56,77 @@ fun GstInvoiceLoansScreen(navController: NavHostController, fromFlow: String) {
         unAuthorizedUser -> CommonMethods().ShowUnAuthorizedErrorScreen(navController)
         middleLoan -> CommonMethods().ShowMiddleLoanErrorScreen(navController)
         else -> {
-             if(isLoading){
-                 CenterProgress()
-             } else {
-                 if (isLoaded) {
-                     invoiceData?.data?.id?.let { gstId ->
-                         FixedTopBottomScreen(
-                             navController = navController, primaryButtonText = stringResource(id = R.string.next),
-                             onBackClick = { navController.popBackStack() },
-                             onPrimaryButtonClick = {
-                                 navigateToLoanProcessScreen(
-                                     navController = navController, transactionId="Sugu",
-                                     statusId = 11, responseItem = "No Need",
-                                     offerId = gstId, fromFlow = "Invoice Loan"
-                                 )
-                             }
-                         ) {
-                             StartingText(
-                                 text = stringResource(id = R.string.gst_invoices_for_loan),
-                                 textColor = appBlueTitle, start = 30.dp, end = 30.dp, top = 10.dp,
-                                 bottom = 5.dp, style = normal32Text700, alignment = Alignment.TopStart
-                             )
-
-                             invoiceData?.data?.invoices?.forEach { invoice ->
-                                 GstTransactionCard(
-                                     showCheckBox = false, end = 8.dp, boxState = selectedItems.contains(1),
-                                     onCheckedChange = {
-                                         gstInvoiceLoanViewModel.toggleItem(1)
-                                     },
-                                     onClick = {
-                                         val json = Json { prettyPrint = true }
-                                         invoiceData?.let { it ->
-                                             val responseItem = json.encodeToString(GstInvoice.serializer(),it)
-                                             navigateToInvoiceDetailScreen(
-                                                 navController = navController, fromFlow = fromFlow,
-                                                 invoiceId = responseItem
-                                             )
-                                         }
-                                     },
-                                     invoiceData = invoice
-                                     )
-                             }
-                         }
-                     }
+            if (isLoading) {
+                CenterProgress()
             } else {
-                gstInvoiceLoanViewModel.invoiceData(
-                    context = context, gstin = "24AAHFC3011G1Z4"
-                )
+                if (isLoaded) {
+                    invoiceData?.data?.id?.let { gstId ->
+                        FixedTopBottomScreen(
+                            navController = navController,
+                            primaryButtonText = stringResource(id = R.string.next),
+                            onBackClick = { navController.popBackStack() },
+                            onPrimaryButtonClick = {
+                                navigateToLoanProcessScreen(
+                                    navController = navController,
+                                    transactionId = "Sugu",
+                                    statusId = 11,
+                                    responseItem = "No Need",
+                                    offerId = gstId,
+                                    fromFlow = "Invoice Loan"
+                                )
+                            }
+                        ) {
+                            StartingText(
+                                text = stringResource(id = R.string.gst_invoices_for_loan),
+                                textColor = appBlueTitle,
+                                start = 30.dp,
+                                end = 30.dp,
+                                top = 10.dp,
+                                bottom = 5.dp,
+                                style = normal32Text700,
+                                alignment = Alignment.TopStart
+                            )
+
+                            invoiceData?.data?.invoices?.forEach { invoice ->
+                                GstTransactionCard(
+                                    showCheckBox = false,
+                                    end = 8.dp,
+                                    boxState = selectedItems.contains(1),
+                                    onCheckedChange = {
+                                        gstInvoiceLoanViewModel.toggleItem(1)
+                                    },
+                                    onClick = {
+                                        val json = Json { prettyPrint = true }
+                                        invoiceData?.let { it ->
+                                            val responseItem = json.encodeToString(GstInvoice.serializer(), it)
+                                            navigateToInvoiceDetailScreen(
+                                                navController = navController,
+                                                fromFlow = fromFlow,
+                                                invoiceId = responseItem
+                                            )
+                                        }
+                                    },
+                                    invoiceData = invoice
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    gstInvoiceLoanViewModel.invoiceData(
+                        context = context,
+                        gstin = "24AAHFC3011G1Z4"
+                    )
+                }
             }
-        }
         }
     }
 }
-
 
 @Preview
 @Composable
 fun GstInvoiceLoansScreenPreview() {
     GstInvoiceLoansScreen(
-        navController = rememberNavController(), fromFlow = "Invoice Loan"
+        navController = rememberNavController(),
+        fromFlow = "Invoice Loan"
     )
 }

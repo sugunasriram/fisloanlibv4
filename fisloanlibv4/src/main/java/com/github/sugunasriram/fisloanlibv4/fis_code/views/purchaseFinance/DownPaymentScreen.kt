@@ -59,13 +59,16 @@ fun DownPaymentScreen(navController: NavHostController, fromFlow: String) {
         showHyperText = false,
 //        backGroudColorChange = amount.value.text != "",
         primaryButtonText = stringResource(id = R.string.submit),
-        onBackClick = { navController.popBackStack()},
+        onBackClick = { navController.popBackStack() },
         onPrimaryButtonClick = {
             if (amount.value.text.isNotEmpty()) {
                 navigateToLoanProcessScreen(
-                    navController = navController, transactionId = "Sugu",
-                    statusId = 19, responseItem = amount.value.text,
-                    offerId = "1234", fromFlow = fromFlow
+                    navController = navController,
+                    transactionId = "Sugu",
+                    statusId = 19,
+                    responseItem = amount.value.text,
+                    offerId = "1234",
+                    fromFlow = fromFlow
                 )
             }
         }
@@ -141,7 +144,8 @@ fun ProductDetails(maxAmount: String) {
 
 @Composable
 fun DownpaymentField(
-    amount: TextFieldValue, maxAmount: String,
+    amount: TextFieldValue,
+    maxAmount: String,
     onAmountChange: (TextFieldValue) -> Unit
 ) {
     val context = LocalContext.current
@@ -157,7 +161,7 @@ fun DownpaymentField(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 35.dp, end = 35.dp),
-            fontSize = 16.sp,
+            fontSize = 16.sp
         )
         Spacer(modifier = Modifier.height(18.dp))
 
@@ -219,8 +223,5 @@ fun DownpaymentField(
 @Preview(showBackground = true)
 @Composable
 fun PreviewDownpaymentScreen() {
-    DownPaymentScreen(rememberNavController(),"Purchase Finance")
+    DownPaymentScreen(rememberNavController(), "Purchase Finance")
 }
-
-
-

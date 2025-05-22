@@ -24,9 +24,8 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.negativeGray
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal30Text700
 
 @Composable
-fun NoExistingLoanScreen(displayText:String =stringResource(id = R.string.no_existing_loans),) {
+fun NoExistingLoanScreen(displayText: String = stringResource(id = R.string.no_existing_loans)) {
     Column(modifier = Modifier.fillMaxSize().offset(y = (-30).dp), verticalArrangement = Arrangement.Center) {
-
         Image(
             painter = painterResource(id = R.drawable.error_no_existing_loan),
             contentDescription = "loan Status",
@@ -36,18 +35,22 @@ fun NoExistingLoanScreen(displayText:String =stringResource(id = R.string.no_exi
 
         Spacer(modifier = Modifier.height(30.dp))
         StartingText(
-            text =  displayText,textColor = negativeGray,
-            start = 30.dp, end = 30.dp, top = 30.dp, bottom = 5.dp, style = normal30Text700,
+            text = displayText,
+            textColor = negativeGray,
+            start = 30.dp,
+            end = 30.dp,
+            top = 30.dp,
+            bottom = 5.dp,
+            style = normal30Text700,
             alignment = Alignment.TopCenter
         )
-
     }
 }
+
 @Preview
 @Composable
 private fun NoExistingLoanScreenPreview() {
     Surface {
         NoExistingLoanScreen()
     }
-
 }

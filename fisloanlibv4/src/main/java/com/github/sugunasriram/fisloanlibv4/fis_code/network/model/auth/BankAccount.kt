@@ -11,13 +11,12 @@ data class BankAccount(
 
 @Serializable
 data class DataItem(
-	@SerialName("account_type")
-	val accountType: String? = null,
-	@SerialName("bank_account_number")
-	val bankAccountNumber: String? = null,
-	@SerialName("bank_ifsc_code")
-	val bankIfscCode: String? = null,
-	@SerialName("account_holder_name")
-	val accountHolderName: String? = null
+    @SerialName("account_type")
+    val accountType: String? = null,
+    @SerialName("bank_account_number")
+    val bankAccountNumber: String? = null,
+    @SerialName("bank_ifsc_code")
+    val bankIfscCode: String? = null,
+    @SerialName("account_holder_name")
+    val accountHolderName: String? = null
 )
-

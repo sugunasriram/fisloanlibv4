@@ -8,9 +8,9 @@ data class ForgotPassword(
     val status: Boolean? = null,
     val statusCode: Int? = null
 )
+
 @Serializable
 data class ForgotData(
-	val orderId: String? = null,
-	val message: String? = null
+    val orderId: String? = null,
+    val message: String? = null
 )
-

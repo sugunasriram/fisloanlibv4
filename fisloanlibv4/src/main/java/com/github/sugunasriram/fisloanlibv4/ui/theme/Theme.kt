@@ -1,23 +1,15 @@
 package com.github.sugunasriram.fisloanlibv4.ui.theme
 
-import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
-import androidx.core.view.WindowCompat
 
-//private val DarkColorScheme = darkColorScheme(
+// private val DarkColorScheme = darkColorScheme(
 //    primary = Purple80,
 //    secondary = PurpleGrey80,
 //    tertiary = Pink80
-//)
+// )
 //
-//private val LightColorScheme = lightColorScheme(
+// private val LightColorScheme = lightColorScheme(
 //    primary = Purple40,
 //    secondary = PurpleGrey40,
 //    tertiary = Pink40
@@ -31,7 +23,7 @@ import androidx.core.view.WindowCompat
 //    onBackground = Color(0xFF1C1B1F),
 //    onSurface = Color(0xFF1C1B1F),
 //    */
-//)
+// )
 
 @Composable
 fun FisloanoneTheme(

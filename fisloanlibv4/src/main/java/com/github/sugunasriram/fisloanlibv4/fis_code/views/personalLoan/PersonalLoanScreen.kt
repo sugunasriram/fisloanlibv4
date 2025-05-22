@@ -34,7 +34,7 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal16Text400
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal16Text700
 
 @Composable
-fun PersonaLoanScreen(navController: NavHostController,fromFlow:String) {
+fun PersonaLoanScreen(navController: NavHostController, fromFlow: String) {
     val context = LocalContext.current
     var checkboxState by remember { mutableStateOf(false) }
     var havingDocuments by remember { mutableStateOf(true) }
@@ -51,11 +51,11 @@ fun PersonaLoanScreen(navController: NavHostController,fromFlow:String) {
         showSingleButton = true,
         primaryButtonText = stringResource(R.string.next),
         onPrimaryButtonClick = {
-            if(checkboxState){
-                havingDocuments=true
-                navigateToBasicDetailsScreen(navController,fromFlow)
-            }else{
-                havingDocuments=false
+            if (checkboxState) {
+                havingDocuments = true
+                navigateToBasicDetailsScreen(navController, fromFlow)
+            } else {
+                havingDocuments = false
             }
         },
         backgroundColor = appWhite
@@ -68,36 +68,56 @@ fun PersonaLoanScreen(navController: NavHostController,fromFlow:String) {
         )
         Text(
             text = stringResource(id = R.string.please_have_following_documents),
-            modifier = Modifier.padding(start = 20.dp,end = 20.dp, top = 40.dp, bottom = 15.dp),
+            modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 40.dp, bottom = 15.dp),
             textAlign = TextAlign.Start,
             style = normal16Text700
         )
-        MultiStyleText("*  ", appOrange, stringResource(id = R.string.pan_number), appBlack,
-            style1 = normal16Text400, style2 = normal16Text400, start=50.dp)
-        MultiStyleText("*  ", appOrange, stringResource(id = R.string.adhar_linked_number),
-            appBlack,style1 = normal16Text400, style2 = normal16Text400, start=50.dp)
+        MultiStyleText(
+            "*  ",
+            appOrange,
+            stringResource(id = R.string.pan_number),
+            appBlack,
+            style1 = normal16Text400,
+            style2 = normal16Text400,
+            start = 50.dp
+        )
+        MultiStyleText(
+            "*  ",
+            appOrange,
+            stringResource(id = R.string.adhar_linked_number),
+            appBlack,
+            style1 = normal16Text400,
+            style2 = normal16Text400,
+            start = 50.dp
+        )
 //        MultiStyleText("*  ", appOrange, stringResource(id = R.string.account_aggregator_consent),
 //            appBlack, style1 = normal16Text400,style2 = normal16Text400, start=50.dp)
-        CheckBoxText(textColor = appOrange,
+        CheckBoxText(
+            textColor = appOrange,
             style = normal16Text400,
             boxState = checkboxState,
             text = stringResource(id = R.string.i_have_all_above_documents),
-            bottom = 0.dp, start = 0.dp, end = 0.dp,top=30.dp) {
-                isChecked -> checkboxState = isChecked
-            havingDocuments=true
+            bottom = 0.dp,
+            start = 0.dp,
+            end = 0.dp,
+            top = 30.dp
+        ) {
+                isChecked ->
+            checkboxState = isChecked
+            havingDocuments = true
         }
         if (!havingDocuments) {
             StartingText(
                 text = stringResource(R.string.please_confirm_you_have_all_the_documents),
-                textColor = errorRed, alignment = Alignment.Center
+                textColor = errorRed,
+                alignment = Alignment.Center
             )
         }
-
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun PersonaLoanScreenPreview(){
-    PersonaLoanScreen(rememberNavController(),"Personal")
+fun PersonaLoanScreenPreview() {
+    PersonaLoanScreen(rememberNavController(), "Personal")
 }

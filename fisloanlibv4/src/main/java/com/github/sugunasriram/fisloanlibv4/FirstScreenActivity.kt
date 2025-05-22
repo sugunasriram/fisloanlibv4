@@ -2,10 +2,8 @@ package com.github.sugunasriram.fisloanlibv4
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import android.widget.Button
-import com.github.sugunasriram.fisloanlibv4.R
-
+import androidx.appcompat.app.AppCompatActivity
 
 class FirstScreenActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -34,4 +34,3 @@ data class FinanceSearchModel(
 
     val productPrice: String? = null
 )
-

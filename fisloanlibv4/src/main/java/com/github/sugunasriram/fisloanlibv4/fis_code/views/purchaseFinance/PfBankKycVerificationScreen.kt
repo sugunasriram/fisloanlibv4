@@ -18,10 +18,12 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.pf.PfOfferCon
 import com.github.sugunasriram.fisloanlibv4.fis_code.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fis_code.viewModel.purchaseFinance.PfBankDetailViewModel
 
-
 @Composable
 fun PfBankKycVerificationScreen(
-    navController: NavHostController, transactionId: String, kycUrl: String, offerId: String,
+    navController: NavHostController,
+    transactionId: String,
+    kycUrl: String,
+    offerId: String,
     fromFlow: String
 ) {
     val context = LocalContext.current
@@ -80,38 +82,45 @@ fun PfBankKycVerificationScreenView(
         if (bankDetailCollected) {
             bankDetailResponse?.data?.catalog?.fromURL?.let { url ->
                 navigateToLoanProcessScreen(
-                    navController = navController, transactionId = transactionId, statusId = 5,
+                    navController = navController,
+                    transactionId = transactionId,
+                    statusId = 5,
                     offerId = offerId,
-                    responseItem = url, fromFlow = "Purchase Finance"
+                    responseItem = url,
+                    fromFlow = "Purchase Finance"
                 )
             }
-
         } else {
             if (kycUrl.length > 0 && !kycUrl.equals("No Need KYC URL", true)) {
                 kycUrl?.let { entityKycUrl ->
                     navigateToPfKycWebViewScreen(
-                        navController = navController, transactionId = transactionId,
+                        navController = navController,
+                        transactionId = transactionId,
                         kycUrl = entityKycUrl,
                         offerId = offerId,
-                        fromScreen = "2", fromFlow = fromFlow
+                        fromScreen = "2",
+                        fromFlow = fromFlow
                     )
                 }
             } else {
                 pfBankDetailViewModel.pfLoanApproved(
-                    id = offerId, loanType = "PURCHASE_FINANCE", context = context
+                    id = offerId,
+                    loanType = "PURCHASE_FINANCE",
+                    context = context
                 )
             }
         }
     }
 }
 
-
 @Preview
 @Composable
 private fun KycPreviewScreen() {
     PfBankKycVerificationScreen(
-        rememberNavController(), "transactionId", "kycUrl", "asdf",
+        rememberNavController(),
+        "transactionId",
+        "kycUrl",
+        "asdf",
         "Purchase Finance"
     )
-
 }

@@ -4,10 +4,9 @@ plugins {
     id("maven-publish")
 
     id("kotlinx-serialization")
-    //KTLINT
+    // KTLINT
     id("org.jlleitschuh.gradle.ktlint") version "11.6.0"
 }
-
 
 android {
     namespace = "com.github.sugunasriram.fisloanlibv4"
@@ -17,7 +16,6 @@ android {
 
         minSdk = 26
         targetSdk = 34
-
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -41,13 +39,13 @@ android {
 //            dimension = "version"
 //            buildConfigField("String", "BASE_URL", "\"https://stagingondcfs.jtechnoparks.in/jt-bap\"")
 //            buildConfigField("String", "FLAVOR_NAME", "\"PREPROD\"")
-////            buildConfigField("Boolean", "FEATURE_X_ENABLED", "true")
+// //            buildConfigField("Boolean", "FEATURE_X_ENABLED", "true")
 //        }
 //        create("PROD") {
 //            dimension = "version"
 //            buildConfigField("String", "BASE_URL", "\"https://ondcfs.jtechnoparks.in/jt-bap\"")
 //            buildConfigField("String", "FLAVOR_NAME", "\"PROD\"")
-////            buildConfigField("Boolean", "FEATURE_X_ENABLED", "false")
+// //            buildConfigField("Boolean", "FEATURE_X_ENABLED", "false")
 //        }
 //    }
 
@@ -83,7 +81,6 @@ afterEvaluate {
         }
     }
 }
-
 
 dependencies {
 
@@ -152,11 +149,10 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
     implementation("io.ktor:ktor-client-logging-jvm:1.6.4")
 
-    //SSE
+    // SSE
     implementation("io.ktor:ktor-client-websockets:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-
 
     // Android Permissions
     implementation("pub.devrel:easypermissions:3.0.0")
@@ -182,17 +178,17 @@ dependencies {
     // Lottie Animation
     implementation("com.airbnb.android:lottie-compose:4.1.0")
 
-    //Webview
+    // Webview
     implementation("androidx.compose.material:material:1.6.8")
     implementation("androidx.compose.runtime:runtime:1.6.8")
     implementation("androidx.webkit:webkit:1.11.0")
 
-    //phone verification lib
-    implementation ("com.googlecode.libphonenumber:libphonenumber:9.0.1")
+    // phone verification lib
+    implementation("com.googlecode.libphonenumber:libphonenumber:9.0.1")
 
     implementation("com.google.android.gms:play-services-auth-api-phone:18.1.0")
 
-    //In app auto update
+    // In app auto update
     implementation("com.google.android.play:app-update:2.1.0")
     implementation("com.google.android.play:app-update-ktx:2.1.0")
 }

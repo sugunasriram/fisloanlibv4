@@ -3,13 +3,10 @@ package com.github.sugunasriram.fisloanlibv4.fis_code.network.sse
 import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.github.sugunasriram.fisloanlibv4.fis_code.utils.FileLogger
-import com.github.sugunasriram.fisloanlibv4.fis_code.utils.storage.TokenManager
 import com.github.sugunasriram.fisloanlibv4.fis_code.viewModel.BaseViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
@@ -37,8 +34,8 @@ class SSEViewModel : BaseViewModel() {
                     .debounce(500) // Debounce to prevent rapid successive updates
                     .collect { event ->
                         _events.value = event // Update the StateFlow with new event
-                        Log.wtf("Checking  SSE",event)
-                        FileLogger.writeToFile(event,false)
+                        Log.wtf("Checking  SSE", event)
+                        FileLogger.writeToFile(event, false)
                     }
             } catch (e: CancellationException) {
                 // Handle coroutine cancellation (likely due to ViewModel being cleared)
@@ -69,7 +66,7 @@ class SSEViewModel : BaseViewModel() {
     // Override onCleared to ensure SSEClient stops listening when ViewModel is cleared
     override fun onCleared() {
         super.onCleared()
-        //Sugu - to check
+        // Sugu - to check
 //        stopListening() // Stop listening to avoid memory leaks or unfinished coroutines
         emptyEvents()
     }

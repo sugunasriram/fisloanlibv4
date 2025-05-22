@@ -21,3 +21,5 @@
 #-renamesourcefileattribute SourceFile
 
 -keep class com.github.sugunasriram.fisloanlibv4.** { *; }
+-keep class com.github.sugunasriram.fisloanlibv4.fis_code.app.MainActivity { *; }
+

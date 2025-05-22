@@ -12,5 +12,5 @@ data class Signup(
 @Serializable
 data class Data(
     val orderId: String? = null,
-    val message:String? = null
+    val message: String? = null
 )

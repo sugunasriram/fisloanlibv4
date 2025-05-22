@@ -35,52 +35,71 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.primaryOrange
 
 @Composable
 fun CheckBoxText(
-    boxState: Boolean, textColor: Color = appBlack, modifier: Modifier = Modifier,
-    style: TextStyle = normal14Text400, start: Dp = 0.dp, end: Dp = 10.dp, bottom: Dp = 10.dp,
-    top: Dp = 0.dp, boxStart: Dp = 10.dp, text: String, boxBackground: Color = Color.Transparent,
-    contentArrangement:Arrangement.Horizontal=Arrangement.Center,checkedColor:Color= appOrange,
-    uncheckedColor:Color= appOrange,
+    boxState: Boolean,
+    textColor: Color = appBlack,
+    modifier: Modifier = Modifier,
+    style: TextStyle = normal14Text400,
+    start: Dp = 0.dp,
+    end: Dp = 10.dp,
+    bottom: Dp = 10.dp,
+    top: Dp = 0.dp,
+    boxStart: Dp = 10.dp,
+    text: String,
+    boxBackground: Color = Color.Transparent,
+    contentArrangement: Arrangement.Horizontal = Arrangement.Center,
+    checkedColor: Color = appOrange,
+    uncheckedColor: Color = appOrange,
     onCheckedChange: ((Boolean) -> Unit)
 ) {
     Row(
-        modifier = modifier.fillMaxWidth().padding(start = start, bottom = bottom, end = end, top = top).
-        background(boxBackground),
+        modifier = modifier.fillMaxWidth().padding(start = start, bottom = bottom, end = end, top = top)
+            .background(boxBackground),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = contentArrangement
     ) {
         Checkbox(
-            checked = boxState, onCheckedChange = onCheckedChange,
+            checked = boxState,
+            onCheckedChange = onCheckedChange,
             modifier = Modifier.padding(start = boxStart),
             colors = CheckboxDefaults.colors(
                 checkedColor = checkedColor,
-                uncheckedColor = uncheckedColor,
-            ),
+                uncheckedColor = uncheckedColor
+            )
         )
         Text(
-            text = text, style = style, color = textColor, textAlign = TextAlign.Justify,
+            text = text,
+            style = style,
+            color = textColor,
+            textAlign = TextAlign.Justify,
             modifier = modifier
                 .clickable { onCheckedChange(!boxState) }
-                .padding(end = 20.dp, top = 4.dp, bottom = 4.dp),
+                .padding(end = 20.dp, top = 4.dp, bottom = 4.dp)
         )
     }
 }
 
 @Composable
 fun OnlyCheckBox(
-    boxState: Boolean, modifier: Modifier = Modifier, start: Dp = 30.dp, end: Dp = 10.dp,
-    bottom: Dp = 10.dp, top: Dp = 0.dp, onCheckedChange: ((Boolean) -> Unit)
+    boxState: Boolean,
+    modifier: Modifier = Modifier,
+    start: Dp = 30.dp,
+    end: Dp = 10.dp,
+    bottom: Dp = 10.dp,
+    top: Dp = 0.dp,
+    onCheckedChange: ((Boolean) -> Unit)
 ) {
     Row(
         modifier = modifier.padding(start = start, bottom = bottom, end = end, top = top),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Checkbox(
-            checked = boxState, onCheckedChange = onCheckedChange,
+            checked = boxState,
+            onCheckedChange = onCheckedChange,
             modifier = Modifier.padding(start = 10.dp),
             colors = CheckboxDefaults.colors(
                 checkedColor = primaryOrange,
-                uncheckedColor = primaryOrange,
-            ),
+                uncheckedColor = primaryOrange
+            )
         )
     }
 }
@@ -136,7 +155,7 @@ fun ImageTextWithCheckbox(
                                 .weight(1f)
                                 .padding(start = 30.dp, end = 30.dp, bottom = 5.dp),
                             style = bold14Text500,
-                            textAlign = TextAlign.Start,
+                            textAlign = TextAlign.Start
                         )
                     }
                     Checkbox(
@@ -159,7 +178,3 @@ fun ImageTextWithCheckbox(
         }
     }
 }
-
-
-
-

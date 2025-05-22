@@ -1,10 +1,8 @@
 package com.github.sugunasriram.fisloanlibv4.fis_code.network.core
 
-
 import android.util.Log
-import com.github.sugunasriram.fisloanlibv4.fis_code.utils.CommonMethods.Companion.BASE_URL
 import com.github.sugunasriram.fisloanlibv4.fis_code.FsApp
-import com.github.sugunasriram.fisloanlibv4.fis_code.utils.FileLogger
+import com.github.sugunasriram.fisloanlibv4.fis_code.utils.CommonMethods.Companion.BASE_URL
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
 import io.ktor.client.features.HttpTimeout
@@ -23,18 +21,17 @@ import io.ktor.http.Url
 import io.ktor.http.contentType
 import io.ktor.http.takeFrom
 
-
 open class KtorClient {
-    //Prod
+    // Prod
 //   private val baseUrl = Url("https://ondcfs.jtechnoparks.in/jt-bap${ApiPaths().baseUrl}")
-    //Preprod
-   private val baseUrl = Url("${BASE_URL}${ApiPaths().baseUrl}")
+    // Preprod
+    private val baseUrl = Url("${BASE_URL}${ApiPaths().baseUrl}")
 
 //   private val baseUrl = Url("https://stagingondcfs.jtechnoparks.in/jt-bap${ApiPaths().baseUrl}")
-    //PreProd - with and Without AA
+    // PreProd - with and Without AA
 //    private val baseUrl = Url("https://stagingondcfs.jtechnoparks.in/jt-bap-test${ApiPaths().baseUrl}")
 
-    //Staging
+    // Staging
 //   private val baseUrl = Url("https://stagingondcfs.jtechnoparks.in/staging-jt-bap${ApiPaths().baseUrl}")
 
     companion object {
@@ -82,12 +79,14 @@ open class KtorClient {
             }
 
             install(JsonFeature) {
-                serializer = KotlinxSerializer(kotlinx.serialization.json.Json {
-                    prettyPrint = true
-                    isLenient = true
-                    encodeDefaults = true
-                    ignoreUnknownKeys = true
-                })
+                serializer = KotlinxSerializer(
+                    kotlinx.serialization.json.Json {
+                        prettyPrint = true
+                        isLenient = true
+                        encodeDefaults = true
+                        ignoreUnknownKeys = true
+                    }
+                )
             }
 
             install(HttpTimeout) {
@@ -107,11 +106,13 @@ open class KtorClient {
                 accept(ContentType.Application.Json)
 
                 if (isBaseUrl) {
-                    url.takeFrom(URLBuilder().takeFrom(baseUrl).apply {
-                        encodedPath += url.encodedPath
-                    })
+                    url.takeFrom(
+                        URLBuilder().takeFrom(baseUrl).apply {
+                            encodedPath += url.encodedPath
+                        }
+                    )
                 }
-                FsApp.getInstance().token?.let {token ->
+                FsApp.getInstance().token?.let { token ->
                     header("Authorization", getUserToken(token))
                 }
             }

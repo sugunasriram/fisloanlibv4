@@ -17,15 +17,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.mutableStateOf
 import com.github.sugunasriram.fisloanlibv4.fis_code.appBridge.AppBridgeManager
-import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.AppScreens
-import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.LaunchScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.utils.CommonMethods
-import com.github.sugunasriram.fisloanlibv4.fis_code.views.auth.InAppUpdateScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.views.webview.personalLoan.mGeoLocationCallback
 import com.github.sugunasriram.fisloanlibv4.fis_code.views.webview.personalLoan.mGeoLocationRequestOrigin
 
 class MainActivity : ComponentActivity() {
-
 
     private val updateCompleted = mutableStateOf(false)
     private lateinit var bridgeManager: AppBridgeManager
@@ -45,7 +41,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onRequestPermissionsResult(
 
-        requestCode: Int, permissions: Array<String>, grantResults: IntArray
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
@@ -68,7 +66,7 @@ class MainActivity : ComponentActivity() {
                     // Check if location services are enabled
                     val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
                     val isLocationEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
-                            locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+                        locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 
                     if (!isLocationEnabled) {
                         AlertDialog.Builder(this)
@@ -83,16 +81,13 @@ class MainActivity : ComponentActivity() {
                     } else {
 //                        webPermissionRequest?.grant(webPermissionRequest?.resources)
                         mGeoLocationCallback?.invoke(mGeoLocationRequestOrigin, true, false)
-
                     }
                 } else {
                     // Location permission denied
                     Log.d("MainActivity", "Location permission denied")
 //                    webPermissionRequest?.deny()
                     mGeoLocationCallback?.invoke(mGeoLocationRequestOrigin, false, false)
-
                 }
-
             }
         }
         // Clear the webPermissionRequest after handling it
@@ -103,24 +98,19 @@ class MainActivity : ComponentActivity() {
         const val REQUEST_CODE_UPDATE = 2001
     }
 
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_CODE_UPDATE) {
             if (resultCode != Activity.RESULT_OK) {
                 Toast.makeText(this, "Update failed!", Toast.LENGTH_SHORT).show()
                 updateCompleted.value = false // if canceled
-            }else if (resultCode == Activity.RESULT_CANCELED) {
-                Toast.makeText(this, "Update cancelled !",  Toast.LENGTH_SHORT).show()
+            } else if (resultCode == Activity.RESULT_CANCELED) {
+                Toast.makeText(this, "Update cancelled !", Toast.LENGTH_SHORT).show()
                 updateCompleted.value = false // if canceled
             } else {
                 Toast.makeText(this, "Update completed!", Toast.LENGTH_SHORT).show()
                 updateCompleted.value = true // Continue to app even if canceled
             }
         }
-
     }
-
-
-
 }

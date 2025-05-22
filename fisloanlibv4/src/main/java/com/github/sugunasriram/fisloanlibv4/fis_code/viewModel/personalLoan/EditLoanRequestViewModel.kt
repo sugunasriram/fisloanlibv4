@@ -1,7 +1,6 @@
 package com.github.sugunasriram.fisloanlibv4.fis_code.viewModel.personalLoan
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -13,7 +12,6 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.network.core.ApiRepository.
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.gst.GstOfferConfirm
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.gst.GstOfferConfirmResponse
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.personaLoan.UpdateLoanAmountBody
-import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.personaLoan.UpdateLoanAmountPfResponse
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.personaLoan.UpdateResponse
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.pf.PfOfferConfirm
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.pf.PfOfferConfirmResponse
@@ -119,11 +117,9 @@ class EditLoanRequestViewModel(maxAmount: String, minAmount: String, tenure: Str
         _loanTenure.value = tenureValue
     }
 
-
-    fun updatePfApiFlow(flow : String){
+    fun updatePfApiFlow(flow: String) {
         pfApiFlow = flow
     }
-
 
     // Update loan maxAmount
     fun updateLoanAmount(updateLoanAmountBody: UpdateLoanAmountBody, context: Context) {
@@ -134,8 +130,9 @@ class EditLoanRequestViewModel(maxAmount: String, minAmount: String, tenure: Str
     }
 
     private suspend fun handleUpdateLoanAmount(
-        updateLoanAmountBody: UpdateLoanAmountBody, context: Context,
-        checkForAccessToken: Boolean=true
+        updateLoanAmountBody: UpdateLoanAmountBody,
+        context: Context,
+        checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
             ApiRepository.updateLoanAmount(updateLoanAmountBody)
@@ -144,17 +141,18 @@ class EditLoanRequestViewModel(maxAmount: String, minAmount: String, tenure: Str
                 handleUpdateSuccess(response)
             }
         }.onFailure { error ->
-            //Session Management
+            // Session Management
             if (checkForAccessToken &&
                 error is ResponseException &&
-                error.response.status.value == 401) {
-                //Get Access Token using RefreshToken
-                if (handleAuthGetAccessTokenApi()){
+                error.response.status.value == 401
+            ) {
+                // Get Access Token using RefreshToken
+                if (handleAuthGetAccessTokenApi()) {
                     handleUpdateLoanAmount(updateLoanAmountBody, context, false)
-                }else{
+                } else {
                     _navigationToSignIn.value = true
                 }
-            }else {
+            } else {
                 handleFailure(error = error, context = context)
             }
         }
@@ -169,17 +167,26 @@ class EditLoanRequestViewModel(maxAmount: String, minAmount: String, tenure: Str
     }
 
     fun checkValid(
-        loanAmount: String, loanTenure: String, context: Context,initialLoanBeginAmount:String,
-        initialLoanEndAmount:String,
-        updateLoanAmountBody: UpdateLoanAmountBody, fromFlow: String
+        loanAmount: String,
+        loanTenure: String,
+        context: Context,
+        initialLoanBeginAmount: String,
+        initialLoanEndAmount: String,
+        updateLoanAmountBody: UpdateLoanAmountBody,
+        fromFlow: String
     ) {
-        if (isInputValid(loanAmount, loanTenure,initialLoanBeginAmount,initialLoanEndAmount, context)) {
+        if (isInputValid(loanAmount, loanTenure, initialLoanBeginAmount, initialLoanEndAmount, context)) {
             updateLoanAmount(updateLoanAmountBody, context)
         }
     }
 
-    private fun isInputValid(loanAmount: String, loanTenure: String,initialLoanBeginAmount:String,
-                             initialLoanEndAmount:String, context: Context): Boolean {
+    private fun isInputValid(
+        loanAmount: String,
+        loanTenure: String,
+        initialLoanBeginAmount: String,
+        initialLoanEndAmount: String,
+        context: Context
+    ): Boolean {
         val parsedIncome: Double = loanAmount.toDoubleOrNull() ?: 0.0
         val tenureValue: Int = loanTenure.substringBefore(" ").toIntOrNull() ?: 0
         return when {
@@ -191,12 +198,12 @@ class EditLoanRequestViewModel(maxAmount: String, minAmount: String, tenure: Str
                 CommonMethods().toastMessage(context, context.getString(R.string.loan_tenure_message))
                 false
             }
-            parsedIncome < initialLoanBeginAmount.toDouble() || parsedIncome > initialLoanEndAmount.toDouble()-> {
-                CommonMethods().toastMessage(context,context.getString(R.string.please_enter_valid_income_within_limits))
+            parsedIncome < initialLoanBeginAmount.toDouble() || parsedIncome > initialLoanEndAmount.toDouble() -> {
+                CommonMethods().toastMessage(context, context.getString(R.string.please_enter_valid_income_within_limits))
                 false
             }
             parsedIncome <= 0 -> {
-                CommonMethods().toastMessage(context,context.getString(R.string.please_enter_valid_income_within_limits))
+                CommonMethods().toastMessage(context, context.getString(R.string.please_enter_valid_income_within_limits))
                 false
             }
 //            tenureValue < initialLoanBeginTenure || tenureValue > initialLoanEndTenure -> {
@@ -204,7 +211,7 @@ class EditLoanRequestViewModel(maxAmount: String, minAmount: String, tenure: Str
 //                false
 //            }
             tenureValue <= 0 -> {
-                CommonMethods().toastMessage(context,context.getString(R.string.please_enter_valid_tenure))
+                CommonMethods().toastMessage(context, context.getString(R.string.please_enter_valid_tenure))
                 false
             }
             else -> true
@@ -214,15 +221,19 @@ class EditLoanRequestViewModel(maxAmount: String, minAmount: String, tenure: Str
     private val _gstOfferConfirmResponse = MutableStateFlow<GstOfferConfirmResponse?>(null)
     val gstOfferConfirmResponse: StateFlow<GstOfferConfirmResponse?> = _gstOfferConfirmResponse
 
-    private fun gstOfferConfirmApi(gstOfferConfirm: GstOfferConfirm, context: Context){
+    private fun gstOfferConfirmApi(gstOfferConfirm: GstOfferConfirm, context: Context) {
         _isEditProcess.value = true
         viewModelScope.launch(Dispatchers.IO) {
             handleGstOfferConfirmApi(gstOfferConfirm, context)
         }
     }
 
-    private suspend fun handleGstOfferConfirmApi(gstOfferConfirm: GstOfferConfirm, context:
-    Context, checkForAccessToken: Boolean = true) {
+    private suspend fun handleGstOfferConfirmApi(
+        gstOfferConfirm: GstOfferConfirm,
+        context:
+            Context,
+        checkForAccessToken: Boolean = true
+    ) {
         kotlin.runCatching {
             ApiRepository.gstConfirmOffer(gstOfferConfirm)
         }.onSuccess { response ->
@@ -230,43 +241,44 @@ class EditLoanRequestViewModel(maxAmount: String, minAmount: String, tenure: Str
                 handleGstOfferConfirmApiSuccess(response)
             }
         }.onFailure { error ->
-            //Session Management
+            // Session Management
             if (checkForAccessToken &&
                 error is ResponseException &&
-                error.response.status.value == 401) {
-                //Get Access Token using RefreshToken
-                if (handleAuthGetAccessTokenApi()){
+                error.response.status.value == 401
+            ) {
+                // Get Access Token using RefreshToken
+                if (handleAuthGetAccessTokenApi()) {
                     handleGstOfferConfirmApi(gstOfferConfirm, context, false)
-                }else{
+                } else {
                     _navigationToSignIn.value = true
                 }
-            }else {
+            } else {
                 handleFailure(error = error, context = context)
             }
         }
     }
 
     private suspend fun handleGstOfferConfirmApiSuccess(response: GstOfferConfirmResponse) {
-        withContext(Dispatchers.Main){
+        withContext(Dispatchers.Main) {
             _isEditProcess.value = false
             _isEdited.value = true
             _gstOfferConfirmResponse.value = response
         }
     }
 
-    fun gstInitiateOffer(id: String,loanType: String,context: Context){
+    fun gstInitiateOffer(id: String, loanType: String, context: Context) {
         _isEditProcess.value = true
         viewModelScope.launch(Dispatchers.IO) {
-            handleGstInitiateOfferApi(id, loanType,context)
+            handleGstInitiateOfferApi(id, loanType, context)
         }
     }
 
-    private suspend fun handleGstInitiateOfferApi(id: String,loanType: String,context: Context, checkForAccessToken: Boolean = true) {
+    private suspend fun handleGstInitiateOfferApi(id: String, loanType: String, context: Context, checkForAccessToken: Boolean = true) {
         kotlin.runCatching {
-            ApiRepository.gstInitiateOffer(id,loanType)
+            ApiRepository.gstInitiateOffer(id, loanType)
         }.onSuccess { response ->
             response?.let {
-                handleGstInitiateOfferApiSuccess(response,context)
+                handleGstInitiateOfferApiSuccess(response, context)
             }
         }.onFailure { error ->
             if (checkForAccessToken &&
@@ -275,7 +287,10 @@ class EditLoanRequestViewModel(maxAmount: String, minAmount: String, tenure: Str
             ) {
                 if (handleAuthGetAccessTokenApi()) {
                     handleGstInitiateOfferApi(
-                        id = id, loanType = loanType, context = context, checkForAccessToken =
+                        id = id,
+                        loanType = loanType,
+                        context = context,
+                        checkForAccessToken =
                         false
                     )
                 } else {
@@ -288,11 +303,11 @@ class EditLoanRequestViewModel(maxAmount: String, minAmount: String, tenure: Str
     }
 
     private suspend fun handleGstInitiateOfferApiSuccess(response: GstOfferConfirmResponse, context: Context) {
-        withContext(Dispatchers.Main){
+        withContext(Dispatchers.Main) {
             _isEdited.value = true
             _gstOfferConfirmResponse.value = response
 
-            //Get Principal
+            // Get Principal
             var loanAmount = response?.data?.offerResponse?.itemTags
                 ?.firstNotNullOfOrNull { it?.tags?.principal }
                 ?: response?.data?.catalog?.itemTags
@@ -300,40 +315,44 @@ class EditLoanRequestViewModel(maxAmount: String, minAmount: String, tenure: Str
                 ?: response?.data?.catalog?.itemPrice?.value
                 ?: ""
 
-            //Get id
+            // Get id
             var id = response?.data?.catalog?.itemID
                 ?: response?.data?.offerResponse?.itemID
                 ?: ""
 
             loanAmount.let { loanAmount ->
-                    gstOfferConfirmApi(
-                        GstOfferConfirm(
-                            id = id,
-                            requestAmount = loanAmount,
-                            loanType = "INVOICE_BASED_LOAN"
-                        ),
-                        context
-                    )
+                gstOfferConfirmApi(
+                    GstOfferConfirm(
+                        id = id,
+                        requestAmount = loanAmount,
+                        loanType = "INVOICE_BASED_LOAN"
+                    ),
+                    context
+                )
             }
-
-
         }
     }
 
-    fun gstInitiateOffer(offerId: String,loanType: String,context: Context,loanAmount:String,id:String){
+    fun gstInitiateOffer(offerId: String, loanType: String, context: Context, loanAmount: String, id: String) {
         _isEditProcess.value = true
         viewModelScope.launch(Dispatchers.IO) {
-            handleGstInitiateOfferApi(offerId, loanType,context,loanAmount,id)
+            handleGstInitiateOfferApi(offerId, loanType, context, loanAmount, id)
         }
     }
 
-    private suspend fun handleGstInitiateOfferApi(offerId: String,loanType: String,context: Context,
-                                                  loanAmount: String,id:String, checkForAccessToken: Boolean = true) {
+    private suspend fun handleGstInitiateOfferApi(
+        offerId: String,
+        loanType: String,
+        context: Context,
+        loanAmount: String,
+        id: String,
+        checkForAccessToken: Boolean = true
+    ) {
         kotlin.runCatching {
-            ApiRepository.gstInitiateOffer(id,loanType)
+            ApiRepository.gstInitiateOffer(id, loanType)
         }.onSuccess { response ->
             response?.let {
-                handleGstInitiateOfferApiSuccess(response,context,loanAmount,offerId)
+                handleGstInitiateOfferApiSuccess(response, context, loanAmount, offerId)
             }
         }.onFailure { error ->
             if (checkForAccessToken &&
@@ -342,8 +361,13 @@ class EditLoanRequestViewModel(maxAmount: String, minAmount: String, tenure: Str
             ) {
                 if (handleAuthGetAccessTokenApi()) {
                     handleGstInitiateOfferApi(
-                        offerId = offerId, loanType = loanType, context = context, loanAmount =
-                        loanAmount, id = id, checkForAccessToken = false
+                        offerId = offerId,
+                        loanType = loanType,
+                        context = context,
+                        loanAmount =
+                        loanAmount,
+                        id = id,
+                        checkForAccessToken = false
                     )
                 } else {
                     _navigationToSignIn.value = true
@@ -355,34 +379,43 @@ class EditLoanRequestViewModel(maxAmount: String, minAmount: String, tenure: Str
     }
 
     private suspend fun handleGstInitiateOfferApiSuccess(
-        response: GstOfferConfirmResponse, context: Context, loanAmount: String, offerId: String
+        response: GstOfferConfirmResponse,
+        context: Context,
+        loanAmount: String,
+        offerId: String
     ) {
-        withContext(Dispatchers.Main){
+        withContext(Dispatchers.Main) {
             _isEdited.value = true
             _gstOfferConfirmResponse.value = response
             gstOfferConfirmApi(
                 GstOfferConfirm(
-                    id = offerId, requestAmount = loanAmount,
-                    loanType = "INVOICE_BASED_LOAN"), context
+                    id = offerId,
+                    requestAmount = loanAmount,
+                    loanType = "INVOICE_BASED_LOAN"
+                ),
+                context
             )
         }
     }
 
-
-    //Purchase Finance
+    // Purchase Finance
 
     private val _pfOfferConfirmResponse = MutableStateFlow<PfOfferConfirmResponse?>(null)
     val pfOfferConfirmResponse: StateFlow<PfOfferConfirmResponse?> = _pfOfferConfirmResponse
 
-    private fun pfOfferConfirmApi(pfOfferConfirm: PfOfferConfirm, context: Context){
+    private fun pfOfferConfirmApi(pfOfferConfirm: PfOfferConfirm, context: Context) {
         _isEditProcess.value = true
         viewModelScope.launch(Dispatchers.IO) {
             handlePfOfferConfirmApi(pfOfferConfirm, context)
         }
     }
 
-    private suspend fun handlePfOfferConfirmApi(pfOfferConfirm: PfOfferConfirm, context:
-    Context, checkForAccessToken: Boolean = true) {
+    private suspend fun handlePfOfferConfirmApi(
+        pfOfferConfirm: PfOfferConfirm,
+        context:
+            Context,
+        checkForAccessToken: Boolean = true
+    ) {
         kotlin.runCatching {
             ApiRepository.pfConfirmOffer(pfOfferConfirm)
         }.onSuccess { response ->
@@ -390,29 +423,30 @@ class EditLoanRequestViewModel(maxAmount: String, minAmount: String, tenure: Str
                 handlePfOfferConfirmApiSuccess(response)
             }
         }.onFailure { error ->
-            //Session Management
+            // Session Management
             if (checkForAccessToken &&
                 error is ResponseException &&
-                error.response.status.value == 401) {
-                //Get Access Token using RefreshToken
-                if (handleAuthGetAccessTokenApi()){
+                error.response.status.value == 401
+            ) {
+                // Get Access Token using RefreshToken
+                if (handleAuthGetAccessTokenApi()) {
                     handlePfOfferConfirmApi(pfOfferConfirm, context, false)
-                }else{
+                } else {
                     _navigationToSignIn.value = true
                 }
-            }else {
+            } else {
                 handleFailure(error = error, context = context)
             }
         }
     }
 
     private suspend fun handlePfOfferConfirmApiSuccess(response: PfOfferConfirmResponse) {
-        withContext(Dispatchers.Main){
+        withContext(Dispatchers.Main) {
             _isEditProcess.value = false
-            if(pfApiFlow == PfFlow.Normal.status){
+            if (pfApiFlow == PfFlow.Normal.status) {
                 _isEdited.value = true
                 _pfOfferConfirmResponse.value = response
-            }else if (pfApiFlow == PfFlow.Edited.status){
+            } else if (pfApiFlow == PfFlow.Edited.status) {
                 _isPfEdited.value = true
                 _pfOfferConfirmResponse.value = response
             }
@@ -425,19 +459,19 @@ class EditLoanRequestViewModel(maxAmount: String, minAmount: String, tenure: Str
         context: Context,
         paymentAmount: String,
         loanTenure: String
-    ){
+    ) {
         _isEditProcess.value = true
         viewModelScope.launch(Dispatchers.IO) {
-            handlePfInitiateOfferApi(id, loanType,context,paymentAmount = paymentAmount, loanTenure = loanTenure)
+            handlePfInitiateOfferApi(id, loanType, context, paymentAmount = paymentAmount, loanTenure = loanTenure)
         }
     }
 
-    private suspend fun handlePfInitiateOfferApi(id: String,loanType: String,context: Context, checkForAccessToken: Boolean = true,paymentAmount: String,loanTenure : String) {
+    private suspend fun handlePfInitiateOfferApi(id: String, loanType: String, context: Context, checkForAccessToken: Boolean = true, paymentAmount: String, loanTenure: String) {
         kotlin.runCatching {
-            ApiRepository.pfInitiateOffer(id,loanType)
+            ApiRepository.pfInitiateOffer(id, loanType)
         }.onSuccess { response ->
             response?.let {
-                handlePfInitiateOfferApiSuccess(response,context,paymentAmount,loanTenure)
+                handlePfInitiateOfferApiSuccess(response, context, paymentAmount, loanTenure)
             }
         }.onFailure { error ->
             if (checkForAccessToken &&
@@ -446,8 +480,13 @@ class EditLoanRequestViewModel(maxAmount: String, minAmount: String, tenure: Str
             ) {
                 if (handleAuthGetAccessTokenApi()) {
                     handlePfInitiateOfferApi(
-                        id = id, loanType = loanType, context = context, checkForAccessToken =
-                        false,paymentAmount,loanTenure
+                        id = id,
+                        loanType = loanType,
+                        context = context,
+                        checkForAccessToken =
+                        false,
+                        paymentAmount,
+                        loanTenure
                     )
                 } else {
                     _navigationToSignIn.value = true
@@ -464,42 +503,46 @@ class EditLoanRequestViewModel(maxAmount: String, minAmount: String, tenure: Str
         downPaymentAmount: String,
         loanTenure: String
     ) {
-        withContext(Dispatchers.Main){
+        withContext(Dispatchers.Main) {
             _isEdited.value = true
             _pfOfferConfirmResponse.value = response
 
-            //Get id
+            // Get id
             var id = response?.data?.catalog?.id
                 ?: response?.data?.offerResponse?.id
                 ?: ""
 
-                pfOfferConfirmApi(
-                    PfOfferConfirm(
-                        id = id,
-                        requestAmount = downPaymentAmount,
-                        loanType = "PURCHASE_FINANCE",
-                        requestTerm = loanTenure
-                    ),
-                    context
-                )
-
-
+            pfOfferConfirmApi(
+                PfOfferConfirm(
+                    id = id,
+                    requestAmount = downPaymentAmount,
+                    loanType = "PURCHASE_FINANCE",
+                    requestTerm = loanTenure
+                ),
+                context
+            )
         }
     }
 
-    private suspend fun handleFailure(error: Throwable,context: Context) {
+    private suspend fun handleFailure(error: Throwable, context: Context) {
         withContext(Dispatchers.Main) {
             if (error is ResponseException) {
                 CommonMethods().handleResponseException(
-                    error = error, context = context,updateErrorMessage = ::updateErrorMessage,
-                    _showServerIssueScreen = _showServerIssueScreen, _middleLoan = _middleLoan,
-                    _unAuthorizedUser = _unAuthorizedUser, _unexpectedError = _unexpectedError,
+                    error = error,
+                    context = context,
+                    updateErrorMessage = ::updateErrorMessage,
+                    _showServerIssueScreen = _showServerIssueScreen,
+                    _middleLoan = _middleLoan,
+                    _unAuthorizedUser = _unAuthorizedUser,
+                    _unexpectedError = _unexpectedError,
                     _showLoader = _showLoader
                 )
             } else {
                 CommonMethods().handleGeneralException(
-                    error = error, _showInternetScreen = _showInternetScreen,
-                    _showTimeOutScreen = _showTimeOutScreen, _unexpectedError = _unexpectedError
+                    error = error,
+                    _showInternetScreen = _showInternetScreen,
+                    _showTimeOutScreen = _showTimeOutScreen,
+                    _unexpectedError = _unexpectedError
                 )
             }
             _isEditProcess.value = false
@@ -507,8 +550,11 @@ class EditLoanRequestViewModel(maxAmount: String, minAmount: String, tenure: Str
     }
 }
 
-class EditLoanRequestViewModelFactory(private val amount: String, private val minAmount: String,
-                                      private val tenure: String) : ViewModelProvider.Factory {
+class EditLoanRequestViewModelFactory(
+    private val amount: String,
+    private val minAmount: String,
+    private val tenure: String
+) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(EditLoanRequestViewModel::class.java)) {
             return EditLoanRequestViewModel(amount, minAmount, tenure) as T

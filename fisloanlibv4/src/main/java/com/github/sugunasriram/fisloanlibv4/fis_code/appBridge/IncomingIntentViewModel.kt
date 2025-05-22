@@ -5,8 +5,6 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.core.ApiRepository
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.auth.AuthOtp
 import com.github.sugunasriram.fisloanlibv4.fis_code.utils.storage.TokenManager
@@ -44,7 +42,7 @@ class IncomingIntentViewModel : BaseViewModel() {
     }
 
     private val _isVerifySessionChecking = MutableStateFlow(false)
-        val isVerifySessionChecking: StateFlow<Boolean> = _isVerifySessionChecking
+    val isVerifySessionChecking: StateFlow<Boolean> = _isVerifySessionChecking
 
     private val _isVerifySessionSuccess = MutableStateFlow(false)
     val isVerifySessionSuccess: StateFlow<Boolean> = _isVerifySessionSuccess
@@ -79,7 +77,6 @@ class IncomingIntentViewModel : BaseViewModel() {
             response.data?.accessToken?.let { accessToken ->
                 TokenManager.save("accessToken", accessToken)
                 _isVerifySessionSuccess.value = true
-
             }
             response.data?.refreshToken?.let { refreshToken ->
                 TokenManager.save("refreshToken", refreshToken)

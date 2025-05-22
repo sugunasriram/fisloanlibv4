@@ -1,11 +1,10 @@
 package com.github.sugunasriram.fisloanlibv4.fis_code.network.core
 
 import com.github.sugunasriram.fisloanlibv4.fis_code.utils.CommonMethods.Companion.BASE_URL
-import io.ktor.http.Url
 
 class ApiPaths {
 
-    //Session related Api Paths
+    // Session related Api Paths
     val verifySession = "superAppSessions/verifySession"
 
     // Base URL Flow Api Path
@@ -47,7 +46,7 @@ class ApiPaths {
 
     val resendOTP = "auth/resendOTP"
 
-    //Bank Related Api Paths
+    // Bank Related Api Paths
     val getBankAccounts = "Bank/getBankAccounts"
 
     val addBank = "Bank/addBank"
@@ -55,16 +54,16 @@ class ApiPaths {
     val getBanksList = "static/getBanksList"
 
     // Server side Events Api Paths
-    val sse = "${BASE_URL}"+"/api/v1/sse"
-    //Prod
+    val sse = "$BASE_URL" + "/api/v1/sse"
+    // Prod
 //    val sse = "https://ondcfs.jtechnoparks.in/jt-bap/api/v1/sse"
-    //Preprod
+    // Preprod
 //    val sse = "https://stagingondcfs.jtechnoparks.in/jt-bap/api/v1/sse"
 
-    //PreProd - with and Without AA
+    // PreProd - with and Without AA
 //    val sse = "https://stagingondcfs.jtechnoparks.in/jt-bap-test/api/v1/sse"
 
-    //Staging
+    // Staging
 //    val sse = "https://stagingondcfs.jtechnoparks.in/staging-jt-bap/api/v1/sse"
 
     // ONDC Flow Api paths
@@ -111,7 +110,7 @@ class ApiPaths {
 
     val orderIssues = "issues/orderIssues"
 
-    //Cygnet Related Api Paths
+    // Cygnet Related Api Paths
 
     val cygnetGenerateOtp = "cygnet/cygnetGenerateOtp"
 
@@ -120,9 +119,9 @@ class ApiPaths {
     val gstInDetails = "cygnet/gstinDetails"
 
     // Document
-    val aboutUs ="static/about-us"
+    val aboutUs = "static/about-us"
 
-        val termsOfUse = "static/terms-of-use"
+    val termsOfUse = "static/terms-of-use"
 
     val privacyPolicy = "static/privacy-policy"
 }

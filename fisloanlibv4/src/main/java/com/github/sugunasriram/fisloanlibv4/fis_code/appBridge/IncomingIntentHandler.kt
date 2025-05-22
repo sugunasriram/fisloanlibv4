@@ -13,25 +13,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.rememberNavController
 import com.github.sugunasriram.fisloanlibv4.LoanLib
 import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.AppScreens
 import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.LaunchScreen
-import com.github.sugunasriram.fisloanlibv4.fis_code.views.auth.InAppUpdateScreen
-import com.github.sugunasriram.fisloanlibv4.fis_code.appBridge.IncomingIntentViewModel
-import com.github.sugunasriram.fisloanlibv4.fis_code.viewModel.auth.OtpViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.navigateApplyByCategoryScreen
-import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.navigateSignInPage
 import com.github.sugunasriram.fisloanlibv4.fis_code.utils.CommonMethods
-import com.github.sugunasriram.fisloanlibv4.fis_code.views.documents.PrivacyPolicyView
-
+import com.github.sugunasriram.fisloanlibv4.fis_code.views.auth.InAppUpdateScreen
 
 class AppBridgeManager(private val activity: ComponentActivity) {
 
@@ -39,7 +27,6 @@ class AppBridgeManager(private val activity: ComponentActivity) {
     var showDialog = mutableStateOf(true)
     var verifySessionDone = false
     private val context: Context = activity.applicationContext
-
 
     @Composable
     fun RenderContent(intent: Intent?) {
@@ -63,7 +50,6 @@ class AppBridgeManager(private val activity: ComponentActivity) {
         sessionDetails?.let { Log.d("AppBridge", "Received sessionDetails: $it") }
 
         if (showDialog.value) {
-
             AlertDialog(
                 onDismissRequest = { showDialog.value = false },
                 title = { Text("Details") },
@@ -83,11 +69,11 @@ class AppBridgeManager(private val activity: ComponentActivity) {
         }
 
         when {
-            showInternetScreen -> CommonMethods().ShowInternetErrorScreen(navController= rememberNavController())
-            showTimeOutScreen -> CommonMethods().ShowTimeOutErrorScreen(navController= rememberNavController())
-            showServerIssueScreen -> CommonMethods().ShowServerIssueErrorScreen(navController= rememberNavController())
-            unexpectedErrorScreen -> CommonMethods().ShowUnexpectedErrorScreen(navController= rememberNavController())
-            unAuthorizedUser -> CommonMethods().ShowUnAuthorizedErrorScreen(navController= rememberNavController())
+            showInternetScreen -> CommonMethods().ShowInternetErrorScreen(navController = rememberNavController())
+            showTimeOutScreen -> CommonMethods().ShowTimeOutErrorScreen(navController = rememberNavController())
+            showServerIssueScreen -> CommonMethods().ShowServerIssueErrorScreen(navController = rememberNavController())
+            unexpectedErrorScreen -> CommonMethods().ShowUnexpectedErrorScreen(navController = rememberNavController())
+            unAuthorizedUser -> CommonMethods().ShowUnAuthorizedErrorScreen(navController = rememberNavController())
             else -> {
                 sessionDetails?.sessionId?.let { sessionId ->
                     Log.d("fisloanone", "Session ID: $sessionId")
@@ -124,12 +110,5 @@ class AppBridgeManager(private val activity: ComponentActivity) {
                 }
             }
         }
-
-
     }
-
-
-
-
 }
-

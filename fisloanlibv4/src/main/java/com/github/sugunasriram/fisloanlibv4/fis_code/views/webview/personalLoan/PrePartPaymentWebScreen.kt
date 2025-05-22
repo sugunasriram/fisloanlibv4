@@ -29,8 +29,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.github.sugunasriram.fisloanlibv4.R
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.TopBar
-import com.github.sugunasriram.fisloanlibv4.fis_code.components.WebViewTopBar
-import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.navigateToLoanDetailScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.navigateToPrePaymentStatusScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.core.ApiPaths
@@ -44,7 +42,10 @@ private val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun PrePartPaymentWebView(
-    navController: NavHostController, url: String, orderId: String, status: String,
+    navController: NavHostController,
+    url: String,
+    orderId: String,
+    status: String,
     fromFlow: String
 ) {
     val sseViewModel: SSEViewModel = viewModel()
@@ -54,17 +55,25 @@ fun PrePartPaymentWebView(
         sseViewModel.startListening(ApiPaths().sse)
     }
 
-    BackHandler { navigateToLoanDetailScreen(
-        navController = navController, orderId = orderId, fromFlow = fromFlow,
-        fromScreen = "PrePart Payment WebView"
-    )  }
+    BackHandler {
+        navigateToLoanDetailScreen(
+            navController = navController,
+            orderId = orderId,
+            fromFlow = fromFlow,
+            fromScreen = "PrePart Payment WebView"
+        )
+    }
     Column(modifier = Modifier.fillMaxSize()) {
         TopBar(
             navController = navController,
-            onBackClick = {navigateToLoanDetailScreen(
-                navController = navController, orderId = orderId, fromFlow = fromFlow,
-                fromScreen = "PrePart Payment WebView"
-            )  },
+            onBackClick = {
+                navigateToLoanDetailScreen(
+                    navController = navController,
+                    orderId = orderId,
+                    fromFlow = fromFlow,
+                    fromScreen = "PrePart Payment WebView"
+                )
+            },
             topBarText = stringResource(R.string.pre_payment)
         )
         AndroidView(
@@ -96,8 +105,10 @@ fun PrePartPaymentWebView(
                         ViewGroup.LayoutParams.MATCH_PARENT
                     )
                     webViewClient = createWebViewClient(
-                        navController = navController, orderId = orderId,
-                        status = status, fromFlow = fromFlow
+                        navController = navController,
+                        orderId = orderId,
+                        status = status,
+                        fromFlow = fromFlow
                     )
                     webChromeClient = createWebChromeClient()
                 }
@@ -121,20 +132,22 @@ fun PrePartPaymentWebView(
         Handler(Looper.getMainLooper()).apply {
             postDelayed({
                 if (sseEvents.isEmpty()) {
-                    navigateToLoanDetailScreen(navController = navController, orderId = orderId, fromFlow = fromFlow,
-                        fromScreen = "PrePart Payment WebView")
+                    navigateToLoanDetailScreen(
+                        navController = navController,
+                        orderId = orderId,
+                        fromFlow = fromFlow,
+                        fromScreen = "PrePart Payment WebView"
+                    )
                 }
             }, 3 * 60 * 1000)
         }
     }
-
 
     // Handle the events and navigate based on the presence of events
     LaunchedEffect(sseEvents) {
         if (sseEvents.isNotEmpty()) {
             handler.removeCallbacksAndMessages(null)
             try {
-
                 val sseData: SSEData? = try {
                     json.decodeFromString<SSEData>(sseEvents)
                 } catch (e: Exception) {
@@ -158,14 +171,11 @@ fun PrePartPaymentWebView(
                     }
                 }
 
-                Log.d("Prepayment", "sseData : ${sseData}")
-
-
+                Log.d("Prepayment", "sseData : $sseData")
             } catch (e: Exception) {
                 Log.e("SSEParsingError", "Error parsing SSE data", e)
             }
         }
-
     }
 }
 
@@ -187,7 +197,10 @@ private fun WebView.configureWebViewSettings() {
 }
 
 private fun createWebViewClient(
-    navController: NavHostController, orderId: String, status: String, fromFlow: String
+    navController: NavHostController,
+    orderId: String,
+    status: String,
+    fromFlow: String
 ) = object : WebViewClient() {
     override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
         url?.let {
@@ -205,14 +218,19 @@ private fun createWebViewClient(
 }
 
 private fun handleUrlLoading(
-    navController: NavHostController, orderId: String, status: String, url: String,
+    navController: NavHostController,
+    orderId: String,
+    status: String,
+    url: String,
     fromFlow: String
 ) {
     val delay = 5000L
     if (url.contains("https://pramaan.ondc.org/beta/staging/mock/seller/toPaymentUtility?")) {
         Handler(Looper.getMainLooper()).postDelayed({
             navigateToPrePaymentStatusScreen(
-                navController = navController, orderId = orderId, headerText = status,
+                navController = navController,
+                orderId = orderId,
+                headerText = status,
                 fromFlow = fromFlow
             )
         }, delay)
@@ -221,7 +239,9 @@ private fun handleUrlLoading(
     if (url.contains("https://pramaan.ondc.org/beta/staging/mock/seller/toPaymentUtility?amount=451300&order_id=f695e959-3ae2-4053-b5a3-7df64c577e50&label=FORECLOSURE")) {
         Handler(Looper.getMainLooper()).postDelayed({
             navigateToPrePaymentStatusScreen(
-                navController = navController, orderId = orderId, headerText = status,
+                navController = navController,
+                orderId = orderId,
+                headerText = status,
                 fromFlow = fromFlow
             )
         }, delay)
@@ -230,7 +250,10 @@ private fun handleUrlLoading(
 
 private fun createWebChromeClient() = object : WebChromeClient() {
     override fun onCreateWindow(
-        view: WebView?, isDialog: Boolean, isUserGesture: Boolean, resultMsg: Message?
+        view: WebView?,
+        isDialog: Boolean,
+        isUserGesture: Boolean,
+        resultMsg: Message?
     ): Boolean {
         val newWebView = view?.context?.let { WebView(it) }
         newWebView?.apply {
@@ -241,7 +264,8 @@ private fun createWebChromeClient() = object : WebChromeClient() {
             )
             webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(
-                    view: WebView, request: WebResourceRequest
+                    view: WebView,
+                    request: WebResourceRequest
                 ): Boolean {
                     val url = request.url.toString()
                     if (view != null && url != null) {
@@ -255,7 +279,6 @@ private fun createWebChromeClient() = object : WebChromeClient() {
                         return super.shouldOverrideUrlLoading(view, request)
                     }
                 }
-
             }
         }
 
@@ -287,7 +310,7 @@ private fun createWebChromeClient() = object : WebChromeClient() {
         cookieManager.setAcceptCookie(true)
         cookieManager.setAcceptThirdPartyCookies(newWebView, true)
         cookieManager.setAcceptThirdPartyCookies(view, true)
-        newWebView?.setWebChromeClient(this);
+        newWebView?.setWebChromeClient(this)
 
         view?.addView(newWebView)
         (resultMsg?.obj as? WebView.WebViewTransport)?.webView = newWebView

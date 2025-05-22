@@ -40,12 +40,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.github.sugunasriram.fisloanlibv4.R
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.CenterProgress
-import com.github.sugunasriram.fisloanlibv4.fis_code.components.ClickableLoanStatusCard
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.DisplayCard
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.FixedTopBottomScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.RegisterText
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.StartingText
-import com.github.sugunasriram.fisloanlibv4.fis_code.components.TextHyphenValueInARow
 import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.navigateToLoanDetailScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.auth.CustomerLoanList
@@ -63,7 +61,6 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.loanStatusRed
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal14Text700
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal16Text500
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal16Text700
-import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal20Text400
 import com.github.sugunasriram.fisloanlibv4.fis_code.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fis_code.viewModel.personalLoan.LoanAgreementViewModel
 import com.github.sugunasriram.fisloanlibv4.fis_code.views.invalid.NoExistingLoanScreen
@@ -101,7 +98,8 @@ fun LoanStatusScreen(navController: NavHostController) {
         showBackButton = true,
         onBackClick = { navigateApplyByCategoryScreen(navController) },
         backgroundColor = appWhite,
-        contentStart = 0.dp, contentEnd = 0.dp
+        contentStart = 0.dp,
+        contentEnd = 0.dp
     ) {
         Column {
             TabRow(
@@ -136,7 +134,8 @@ fun LoanStatusScreen(navController: NavHostController) {
                 }
             }
             SearchBar(
-                searchValue = searchQuery, placeHolderText = "Search By Lender",
+                searchValue = searchQuery,
+                placeHolderText = "Search By Lender",
                 isFilterNeeded = false,
                 onSearchQueryChanged = { searchQuery = it }
             )
@@ -169,14 +168,22 @@ fun LoanStatusScreen(navController: NavHostController) {
 
 @Composable
 fun ActiveLoanScreen(
-    navController: NavHostController, showInternetScreen: Boolean, showTimeOutScreen: Boolean,
-    middleLoan: Boolean, showServerIssueScreen: Boolean, unexpectedErrorScreen: Boolean,
-    unAuthorizedUser: Boolean, loanListLoading: Boolean, loanListLoaded: Boolean,
-    errorMessage: String, loanAgreementViewModel: LoanAgreementViewModel, context: Context,
-    loanList: CustomerLoanList?, showActiveLoanScreen: Boolean,
+    navController: NavHostController,
+    showInternetScreen: Boolean,
+    showTimeOutScreen: Boolean,
+    middleLoan: Boolean,
+    showServerIssueScreen: Boolean,
+    unexpectedErrorScreen: Boolean,
+    unAuthorizedUser: Boolean,
+    loanListLoading: Boolean,
+    loanListLoaded: Boolean,
+    errorMessage: String,
+    loanAgreementViewModel: LoanAgreementViewModel,
+    context: Context,
+    loanList: CustomerLoanList?,
+    showActiveLoanScreen: Boolean,
     searchQuery: String
 ) {
-
     when {
         showInternetScreen -> CommonMethods().ShowInternetErrorScreen(navController)
         showTimeOutScreen -> CommonMethods().ShowTimeOutErrorScreen(navController)
@@ -186,9 +193,12 @@ fun ActiveLoanScreen(
         middleLoan -> CommonMethods().ShowMiddleLoanErrorScreen(navController, errorMessage)
         else -> {
             ActiveLoanScreenView(
-                loanListLoading = loanListLoading, loanListLoaded = loanListLoaded,
-                loanAgreementViewModel = loanAgreementViewModel, context = context,
-                loanList = loanList, navController = navController,
+                loanListLoading = loanListLoading,
+                loanListLoaded = loanListLoaded,
+                loanAgreementViewModel = loanAgreementViewModel,
+                context = context,
+                loanList = loanList,
+                navController = navController,
                 showActiveLoanScreen = showActiveLoanScreen,
                 searchQuery = searchQuery
             )
@@ -198,9 +208,13 @@ fun ActiveLoanScreen(
 
 @Composable
 fun ActiveLoanScreenView(
-    loanListLoading: Boolean, loanListLoaded: Boolean,
-    loanAgreementViewModel: LoanAgreementViewModel, context: Context,
-    loanList: CustomerLoanList?, navController: NavHostController, showActiveLoanScreen: Boolean,
+    loanListLoading: Boolean,
+    loanListLoaded: Boolean,
+    loanAgreementViewModel: LoanAgreementViewModel,
+    context: Context,
+    loanList: CustomerLoanList?,
+    navController: NavHostController,
+    showActiveLoanScreen: Boolean,
     searchQuery: String
 ) {
     if (loanListLoading) {
@@ -208,7 +222,8 @@ fun ActiveLoanScreenView(
     } else {
         if (loanListLoaded) {
             ShowLoans(
-                loanList = loanList, navController = navController,
+                loanList = loanList,
+                navController = navController,
                 showActiveLoanScreen = showActiveLoanScreen,
                 searchQuery = searchQuery
             )
@@ -220,7 +235,9 @@ fun ActiveLoanScreenView(
 
 @Composable
 fun ShowLoans(
-    loanList: CustomerLoanList?, navController: NavHostController, showActiveLoanScreen: Boolean,
+    loanList: CustomerLoanList?,
+    navController: NavHostController,
+    showActiveLoanScreen: Boolean,
     searchQuery: String
 ) {
     val filteredBySearch = loanList?.data?.filter { item ->
@@ -238,9 +255,9 @@ fun ShowLoans(
         item.fulfillments?.any { fulfilment ->
             fulfilment?.state?.descriptor?.name?.let { status ->
                 val isInactive = status.contains("closed", ignoreCase = true) ||
-                        status.contains("completed", ignoreCase = true) ||
-                        status.contains("cancelled", ignoreCase = true) ||
-                        status.contains("rejected", ignoreCase = true)
+                    status.contains("completed", ignoreCase = true) ||
+                    status.contains("cancelled", ignoreCase = true) ||
+                    status.contains("rejected", ignoreCase = true)
                 return@let if (showActiveLoanScreen) !isInactive else isInactive
             } ?: false
         } ?: false
@@ -278,11 +295,11 @@ fun ShowLoans(
         }
     }
 }
-//@Composable
-//fun ShowLoans(
+// @Composable
+// fun ShowLoans(
 //    loanList: CustomerLoanList?, navController: NavHostController, showActiveLoanScreen: Boolean,
 //    searchQuery: String
-//) {
+// ) {
 //    val filteredList = loanList?.data?.filter { item ->
 //        val lenderName = item.providerDescriptor?.name.orEmpty().lowercase()
 //        val amount = item.quoteBreakUp?.firstOrNull {
@@ -340,12 +357,14 @@ fun ShowLoans(
 //            }
 //        }
 //    }
-//}
-
+// }
 
 @Composable
 fun LoanStatusCard(
-    data: OfferResponseItem, navController: NavHostController, cardColor: Color, statusColor: Color,
+    data: OfferResponseItem,
+    navController: NavHostController,
+    cardColor: Color,
+    statusColor: Color,
     loanStatus: String
 ) {
     val applicationId = data.itemId
@@ -353,16 +372,20 @@ fun LoanStatusCard(
     data.itemDescriptor?.let { itemDescriptor ->
         itemDescriptor.name?.let { loanType ->
             Spacer(modifier = Modifier.height(10.dp))
-            DisplayCard(cardColor = cardColor, borderColor = Color.Transparent,
+            DisplayCard(
+                cardColor = cardColor,
+                borderColor = Color.Transparent,
                 modifier = Modifier.clickable {
                     data.id?.let { orderId ->
                         navigateToLoanDetailScreen(
-                            navController = navController, orderId = orderId, fromFlow = loanType,
+                            navController = navController,
+                            orderId = orderId,
+                            fromFlow = loanType,
                             fromScreen = "Loan Status"
                         )
                     }
-                }) {
-
+                }
+            ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
@@ -376,30 +399,35 @@ fun LoanStatusCard(
                     ) {
                         StartingText(
                             text = "Loan ID",
-                            bottom = 5.dp, top = 5.dp,
-                            style = normal16Text500, textColor = gray4E,
+                            bottom = 5.dp,
+                            top = 5.dp,
+                            style = normal16Text500,
+                            textColor = gray4E
                         )
                         if (applicationId != null) {
                             StartingText(
                                 text = applicationId,
-                                bottom = 20.dp, textOverflow = TextOverflow.Ellipsis,
-                                style = normal16Text700, textColor = appBlack,
+                                bottom = 20.dp,
+                                textOverflow = TextOverflow.Ellipsis,
+                                style = normal16Text700,
+                                textColor = appBlack
                             )
                         }
 
                         StartingText(
                             text = "Lender",
                             bottom = 5.dp,
-                            style = normal16Text500, textColor = gray4E,
+                            style = normal16Text500,
+                            textColor = gray4E
                         )
                         data.providerDescriptor?.name?.let { lenderName ->
                             StartingText(
                                 text = lenderName,
                                 bottom = 10.dp,
-                                style = normal16Text700, textColor = appBlack,
+                                style = normal16Text700,
+                                textColor = appBlack
                             )
                         }
-
                     }
                     Column(
                         modifier = Modifier.weight(1f),
@@ -453,17 +481,13 @@ fun LoanStatusCard(
                                         }
                                     }
                                 }
-
                             }
                         }
                     }
-
                 }
-
             }
         }
     }
-
 }
 
 @Preview
@@ -471,5 +495,3 @@ fun LoanStatusCard(
 private fun LoanStatusPreview() {
     LoanStatusScreen(rememberNavController())
 }
-
-

@@ -28,15 +28,19 @@ import androidx.navigation.NavHostController
 import com.github.sugunasriram.fisloanlibv4.R
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.CurvedPrimaryButtonFull
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.TopBar
-import com.github.sugunasriram.fisloanlibv4.fis_code.components.WebViewTopBar
 import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.navigateToLoanSummaryScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.azureBlue
 
 @Composable
 fun ConsentHandlerScreen(
-    isSelfScrollable: Boolean = false, showBottom: Boolean = false, id: String,
-    navController: NavHostController, urlToOpen: String?, fromFlow: String, pageContent: () -> Unit
+    isSelfScrollable: Boolean = false,
+    showBottom: Boolean = false,
+    id: String,
+    navController: NavHostController,
+    urlToOpen: String?,
+    fromFlow: String,
+    pageContent: () -> Unit
 ) {
     val formSubmitJavaScript = """
         console.log("Adding form submit listeners");
@@ -81,16 +85,19 @@ fun ConsentHandlerScreen(
                 AndroidView(
                     factory = { context ->
                         WebView(context).apply {
-                            //Sugu - need to test with other lender, commented for Lint
+                            // Sugu - need to test with other lender, commented for Lint
                             settings.javaScriptEnabled = true
                             settings.setSupportMultipleWindows(true)
 
-                            addJavascriptInterface(object {
-                                @JavascriptInterface
-                                fun onFormSubmitted() {
-                                    Log.d("WebView", "Form submitted")
-                                }
-                            }, "Android")
+                            addJavascriptInterface(
+                                object {
+                                    @JavascriptInterface
+                                    fun onFormSubmitted() {
+                                        Log.d("WebView", "Form submitted")
+                                    }
+                                },
+                                "Android"
+                            )
 
                             // Enable hardware acceleration for better performance
                             setLayerType(View.LAYER_TYPE_HARDWARE, null)
@@ -115,8 +122,10 @@ fun ConsentHandlerScreen(
                                             Log.v("Redirect URL ==>", it)
                                             val encodedUrl = Uri.encode(url)
                                             navigateToLoanSummaryScreen(
-                                                navController = navController, id = id,
-                                                consentHandler = "2", fromFlow
+                                                navController = navController,
+                                                id = id,
+                                                consentHandler = "2",
+                                                fromFlow
                                             )
                                             return true
                                         }
@@ -203,9 +212,13 @@ fun ConsentHandlerScreen(
                     CurvedPrimaryButtonFull(
                         text = stringResource(id = R.string.accept),
                         modifier = Modifier.padding(
-                            start = 30.dp, end = 30.dp, top = 30.dp, bottom = 30.dp
+                            start = 30.dp,
+                            end = 30.dp,
+                            top = 30.dp,
+                            bottom = 30.dp
                         ),
-                        backgroundColor = azureBlue, textColor = Color.White
+                        backgroundColor = azureBlue,
+                        textColor = Color.White
                     ) {}
                 }
             }

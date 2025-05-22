@@ -13,7 +13,6 @@ val normal20Text500 = TextStyle(
     fontWeight = FontWeight(500)
 )
 
-
 val normal14Text400 = TextStyle(
     fontSize = 14.sp,
     fontFamily = FontFamily(Font(R.font.robotocondensed_regular)),
@@ -23,13 +22,13 @@ val normal14Text400 = TextStyle(
 val normal20Text400 = TextStyle(
     fontSize = 20.sp,
     fontFamily = FontFamily(Font(R.font.robotocondensed_regular)),
-    fontWeight = FontWeight(400),
+    fontWeight = FontWeight(400)
 )
 
 val normal32Text500 = TextStyle(
     fontSize = 32.sp,
     fontFamily = FontFamily(Font(R.font.robotocondensed_regular)),
-    fontWeight = FontWeight(500),
+    fontWeight = FontWeight(500)
 )
 
 val normal18Text400 = TextStyle(
@@ -48,79 +47,78 @@ val normal16Text500Orange = TextStyle(
 val bold18Text100 = TextStyle(
     fontSize = 18.sp,
     fontFamily = FontFamily(Font(R.font.robotocondensed_bold)),
-    fontWeight = FontWeight(100),
+    fontWeight = FontWeight(100)
 )
 val bold20Text100 = TextStyle(
     fontSize = 20.sp,
     fontFamily = FontFamily(Font(R.font.robotocondensed_bold)),
-    fontWeight = FontWeight(100),
+    fontWeight = FontWeight(100)
 )
 val normal14Text500 = TextStyle(
     fontSize = 14.sp,
     lineHeight = 22.sp,
     fontFamily = FontFamily(Font(R.font.robotocondensed_regular)),
     fontWeight = FontWeight(500),
-    letterSpacing = 0.14.sp,
+    letterSpacing = 0.14.sp
 )
 val normal26Text700 = TextStyle(
     fontSize = 26.sp,
     fontFamily = FontFamily(Font(R.font.robotocondensed_regular)),
     fontWeight = FontWeight(700),
-    color = appOrange,
+    color = appOrange
 )
 
 val normal36Text700 = TextStyle(
     fontSize = 36.sp,
     fontFamily = FontFamily(Font(R.font.robotocondensed_regular)),
     fontWeight = FontWeight(700),
-    color = appBlueTitle,
+    color = appBlueTitle
 )
 val bold36Text700 = TextStyle(
     fontSize = 36.sp,
     fontFamily = FontFamily(Font(R.font.robotocondensed_bold)),
     fontWeight = FontWeight(700),
-    color = appBlueTitle,
+    color = appBlueTitle
 )
-
 
 val normal20Text700 = TextStyle(
     fontSize = 20.sp,
     fontFamily = FontFamily(Font(R.font.robotocondensed_regular)),
-    fontWeight = FontWeight(700),
+    fontWeight = FontWeight(700)
 )
 
 val normal32Text700 = TextStyle(
     fontSize = 32.sp,
     fontFamily = FontFamily(Font(R.font.robotocondensed_regular)),
     fontWeight = FontWeight(700),
-    color = appBlueTitle,
+    color = appBlueTitle
 
-    )
+)
 val normal16Text400 = TextStyle(
     fontSize = 16.sp,
     lineHeight = 22.sp,
     fontFamily = FontFamily(Font(R.font.robotocondensed_regular)),
     fontWeight = FontWeight(400),
     color = appGray,
-    letterSpacing = 0.14.sp,
+    letterSpacing = 0.14.sp
 )
 
 val normal36Text500 = TextStyle(
     fontSize = 36.sp,
     fontFamily = FontFamily(Font(R.font.robotocondensed_regular)),
-    fontWeight = FontWeight(500),
+    fontWeight = FontWeight(500)
 )
 
 val normal24Text700 = TextStyle(
     fontSize = 24.sp,
     fontFamily = FontFamily(Font(R.font.robotocondensed_regular)),
-    fontWeight = FontWeight(700),
+    fontWeight = FontWeight(700)
 )
 
 val normal24Text500 = TextStyle(
     fontSize = 24.sp,
     fontFamily = FontFamily(Font(R.font.robotocondensed_regular)),
-    fontWeight = FontWeight(500),
+    fontWeight = FontWeight(500)
 )
 val normal12Text400 = TextStyle(
     fontSize = 12.sp,
@@ -139,59 +137,59 @@ val normal16Text700 = TextStyle(
     fontSize = 16.sp,
     fontFamily = FontFamily(Font(R.font.robotocondensed_regular)),
     fontWeight = FontWeight(700),
-    letterSpacing = 0.14.sp,
+    letterSpacing = 0.14.sp
 )
 
 val normal11Text500 = TextStyle(
     fontSize = 11.sp,
     fontFamily = FontFamily(Font(R.font.robotocondensed_regular)),
     fontWeight = FontWeight(500),
-    letterSpacing = 0.14.sp,
+    letterSpacing = 0.14.sp
 )
 val normal30Text700 = TextStyle(
     fontSize = 30.sp,
     fontFamily = FontFamily(Font(R.font.robotocondensed_regular)),
     fontWeight = FontWeight(700),
-    color = appBlueTitle,
+    color = appBlueTitle
 )
 val serif28Text700 = TextStyle(
     fontSize = 28.sp,
     fontFamily = FontFamily(Font(R.font.roboto_serif_regular)),
     fontWeight = FontWeight(700),
-    color = appBlueTitle,
+    color = appBlueTitle
 )
 
 val normal35Text700 = TextStyle(
     fontSize = 35.sp,
     fontFamily = FontFamily(Font(R.font.robotocondensed_regular)),
     fontWeight = FontWeight(700),
-    color = appBlueTitle,
+    color = appBlueTitle
 )
 val normal16Text500 = TextStyle(
     fontSize = 16.sp,
     lineHeight = 18.sp,
     fontFamily = FontFamily(Font(R.font.robotocondensed_regular)),
-    fontWeight = FontWeight(500),
+    fontWeight = FontWeight(500)
 )
 val normal14Text700 = TextStyle(
     fontSize = 14.sp,
     lineHeight = 22.sp,
     fontFamily = FontFamily(Font(R.font.robotocondensed_regular)),
     fontWeight = FontWeight(700),
-    color = appBlack,
+    color = appBlack
 )
 
 val normal18Text500 = TextStyle(
     fontSize = 18.sp,
     lineHeight = 25.sp,
     fontFamily = FontFamily(Font(R.font.robotocondensed_regular)),
-    fontWeight = FontWeight(500),
+    fontWeight = FontWeight(500)
 )
 val normal18Text700 = TextStyle(
     fontSize = 18.sp,
     lineHeight = 25.sp,
     fontFamily = FontFamily(Font(R.font.robotocondensed_regular)),
-    fontWeight = FontWeight(700),
+    fontWeight = FontWeight(700)
 )
 val semiBold20Text500 = TextStyle(
     fontSize = 20.sp,
@@ -210,7 +208,7 @@ val bold16Text400 = TextStyle(
     fontFamily = FontFamily(Font(R.font.robotocondensed_semibold)),
     fontWeight = FontWeight(400),
     color = appGray,
-    letterSpacing = 0.14.sp,
+    letterSpacing = 0.14.sp
 )
 
 val bold14Text500 = TextStyle(
@@ -218,7 +216,7 @@ val bold14Text500 = TextStyle(
     lineHeight = 22.sp,
     fontFamily = FontFamily(Font(R.font.robotocondensed_semibold)),
     fontWeight = FontWeight(500),
-    letterSpacing = 0.14.sp,
+    letterSpacing = 0.14.sp
 )
 
 val robotoSerifNormal24Text500 = TextStyle(
@@ -226,7 +224,7 @@ val robotoSerifNormal24Text500 = TextStyle(
     lineHeight = 35.sp,
     fontFamily = FontFamily(Font(R.font.roboto_serif_regular)),
     fontWeight = FontWeight(500),
-    letterSpacing = 0.14.sp,
+    letterSpacing = 0.14.sp
 )
 
 val robotoSerifNormal16Text500 = TextStyle(
@@ -234,7 +232,7 @@ val robotoSerifNormal16Text500 = TextStyle(
     lineHeight = 21.sp,
     fontFamily = FontFamily(Font(R.font.roboto_serif_regular)),
     fontWeight = FontWeight(500),
-    letterSpacing = 0.sp,
+    letterSpacing = 0.sp
 )
 
 val semibold14Text500 = TextStyle(
@@ -242,24 +240,20 @@ val semibold14Text500 = TextStyle(
     lineHeight = 21.sp,
     fontFamily = FontFamily(Font(R.font.roboto_serif_semi_bold)),
     fontWeight = FontWeight(700),
-    letterSpacing = 0.14.sp,
+    letterSpacing = 0.14.sp
 )
 
 val normalSerif32Text500 = TextStyle(
     fontSize = 32.sp,
     lineHeight = 21.sp,
     fontFamily = FontFamily(Font(R.font.roboto_serif_regular)),
-    fontWeight = FontWeight(500),
+    fontWeight = FontWeight(500)
 )
-
 
 val semibold32Text500 = TextStyle(
     fontSize = 32.sp,
     lineHeight = 35.sp,
     fontFamily = FontFamily(Font(R.font.roboto_serif_semi_bold)),
     fontWeight = FontWeight(700),
-    letterSpacing = 0.14.sp,
+    letterSpacing = 0.14.sp
 )
-
-
-

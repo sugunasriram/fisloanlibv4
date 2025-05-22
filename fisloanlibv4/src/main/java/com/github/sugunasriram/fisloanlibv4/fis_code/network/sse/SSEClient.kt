@@ -1,7 +1,6 @@
 package com.github.sugunasriram.fisloanlibv4.fis_code.network.sse
 
 import android.util.Log
-import com.github.sugunasriram.fisloanlibv4.fis_code.network.core.ApiPaths
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.core.ApiRepository
 import com.github.sugunasriram.fisloanlibv4.fis_code.utils.storage.TokenManager
 import io.ktor.client.HttpClient
@@ -20,8 +19,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import okio.FileNotFoundException
 import java.io.BufferedReader
 import java.io.EOFException
 import java.io.InputStreamReader
@@ -59,7 +56,6 @@ class SSEClient(private val url: String, private val scope: CoroutineScope) {
     private var isListening = false
     private var reconnectJob: Job? = null
 
-
     fun startListening() {
         if (isListening) return
         isListening = true
@@ -77,18 +73,17 @@ class SSEClient(private val url: String, private val scope: CoroutineScope) {
                     connection.setRequestProperty("Authorization", token)
                     connection.connect()
 
-                    Log.d("SSELOGS","BearerToken : ${token}")
-
+                    Log.d("SSELOGS", "BearerToken : $token")
 
                     val responseCode = connection.responseCode
-                    if(responseCode == 401){
-                        if(ApiRepository.handleAuthGetAccessTokenApi()){
-                                connection.disconnect()
-                                stopListening()
-                                startListening()
+                    if (responseCode == 401) {
+                        if (ApiRepository.handleAuthGetAccessTokenApi()) {
+                            connection.disconnect()
+                            stopListening()
+                            startListening()
                         }
-                    }else if (responseCode == HttpURLConnection.HTTP_OK) {
-                        val  reader = BufferedReader(InputStreamReader(connection.inputStream))
+                    } else if (responseCode == HttpURLConnection.HTTP_OK) {
+                        val reader = BufferedReader(InputStreamReader(connection.inputStream))
 
                         attempt = 0 // Reset attempt on successful connection
 
@@ -102,7 +97,6 @@ class SSEClient(private val url: String, private val scope: CoroutineScope) {
                         reader.close()
                         connection.disconnect()
                     }
-
                 } catch (e: EOFException) {
                     Log.w("SSEClient", "EOFException occurred: ${e.message}")
                     handleReconnection(attempt++)
@@ -121,7 +115,7 @@ class SSEClient(private val url: String, private val scope: CoroutineScope) {
         delay((attempt * 1000L).coerceAtMost(10000L)) // Exponential backoff, max 10 seconds
     }
 
-    //Sugu
+    // Sugu
     fun clearEvents() {
         _events.value = "" // Reset to default or empty value
     }
@@ -129,7 +123,7 @@ class SSEClient(private val url: String, private val scope: CoroutineScope) {
     fun stopListening() {
         isListening = false
         reconnectJob?.cancel()
-        clearEvents() //Clear Old Events
+        clearEvents() // Clear Old Events
     }
 
     companion object {

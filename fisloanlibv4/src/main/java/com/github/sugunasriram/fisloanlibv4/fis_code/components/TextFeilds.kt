@@ -1,6 +1,5 @@
 package com.github.sugunasriram.fisloanlibv4.fis_code.components
 
-
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -100,7 +99,6 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.hyperTextColor
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal12Text400
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal14Text400
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal14Text500
-import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal16Text400
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal16Text500
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal16Text700
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal18Text400
@@ -113,24 +111,31 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fis_code.viewModel.auth.OtpViewModel
 import java.util.Locale
 
-
 @Composable
 fun OutlinedTextFieldValidation(
-    value: String, onValueChange: (String) -> Unit, enabled: Boolean = true, error: String? = null,
-    modifier: Modifier = Modifier.fillMaxWidth(0.8f), readOnly: Boolean = false,
-    textStyle: TextStyle = LocalTextStyle.current, label: @Composable (() -> Unit)? = null,
-    placeholder: @Composable (() -> Unit)? = null, leadingIcon: @Composable (() -> Unit)? = null,
+    value: String,
+    onValueChange: (String) -> Unit,
+    enabled: Boolean = true,
+    error: String? = null,
+    modifier: Modifier = Modifier.fillMaxWidth(0.8f),
+    readOnly: Boolean = false,
+    textStyle: TextStyle = LocalTextStyle.current,
+    label: @Composable (() -> Unit)? = null,
+    placeholder: @Composable (() -> Unit)? = null,
+    leadingIcon: @Composable (() -> Unit)? = null,
     singleLine: Boolean = true,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    keyboardActions: KeyboardActions = KeyboardActions.Default, maxLines: Int = Int.MAX_VALUE,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    maxLines: Int = Int.MAX_VALUE,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     shape: Shape = MaterialTheme.shapes.small,
     colors: TextFieldColors = TextFieldDefaults.outlinedTextFieldColors(disabledTextColor = Color.Black),
     trailingIcon: @Composable (() -> Unit)? = {
-        if (error?.isNotEmpty() == true)
+        if (error?.isNotEmpty() == true) {
             Icon(Icons.Filled.Error, "error", tint = MaterialTheme.colors.error)
-    },
+        }
+    }
 ) {
     Column() {
         Box(
@@ -160,13 +165,14 @@ fun OutlinedTextFieldValidation(
                 maxLines = maxLines,
                 interactionSource = interactionSource,
                 shape = shape,
-                colors = colors,
+                colors = colors
 
             )
         }
         if (!error.isNullOrEmpty()) {
             Text(
-                text = error,style = normal12Text400,
+                text = error,
+                style = normal12Text400,
                 color = errorRed,
                 modifier = Modifier.padding(start = 16.dp, top = 2.dp)
             )
@@ -176,8 +182,13 @@ fun OutlinedTextFieldValidation(
 
 @Composable
 fun InputField(
-    inputText: String?, onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier, start: Dp = 40.dp, end: Dp = 40.dp, top: Dp = 0.dp, bottom: Dp = 0.dp,
+    inputText: String?,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    start: Dp = 40.dp,
+    end: Dp = 40.dp,
+    top: Dp = 0.dp,
+    bottom: Dp = 0.dp,
     hint: String = "",
     hintAlign: TextAlign = TextAlign.Start,
     visualTransformation: VisualTransformation = VisualTransformation.None,
@@ -197,7 +208,9 @@ fun InputField(
     topText: String = stringResource(id = R.string.first_name),
     showStar: Boolean = false,
     showOptional: Boolean = false,
-    topTextStart: Dp = 40.dp, topTextBottom: Dp = 0.dp, topTextTop: Dp = 8.dp,
+    topTextStart: Dp = 40.dp,
+    topTextBottom: Dp = 0.dp,
+    topTextTop: Dp = 8.dp,
 
     showBox: Boolean = false,
     boxText: String = "",
@@ -209,8 +222,10 @@ fun InputField(
     selectedRadio: String = radioList.first(),
     onRadioSelected: (String) -> Unit = {},
     colors: TextFieldColors = TextFieldDefaults.outlinedTextFieldColors(
-        focusedBorderColor = appTheme, unfocusedBorderColor = backgroundOrange,
-        cursorColor = cursorColor, errorBorderColor = errorRed,
+        focusedBorderColor = appTheme,
+        unfocusedBorderColor = backgroundOrange,
+        cursorColor = cursorColor,
+        errorBorderColor = errorRed,
         disabledBorderColor = Color.Transparent
     )
 ) {
@@ -226,7 +241,9 @@ fun InputField(
             shape = RoundedCornerShape(16.dp),
             label = {
                 Text(
-                    text = hint, color = hintGray, style = normal18Text500,
+                    text = hint,
+                    color = hintGray,
+                    style = normal18Text500,
                     textAlign = hintAlign
                 )
             },
@@ -242,23 +259,28 @@ fun InputField(
         )
     } else {
         Column() {
-            if(showTopText){
+            if (showTopText) {
                 OutLineTextFieldHeader(
-                    topText = topText,showOptional = showOptional, showStar = showStar,
-                    topTextStart = topTextStart, topTextBottom = topTextBottom, topTextTop = topTextTop
+                    topText = topText,
+                    showOptional = showOptional,
+                    showStar = showStar,
+                    topTextStart = topTextStart,
+                    topTextBottom = topTextBottom,
+                    topTextTop = topTextTop
                 )
             }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(bottom = 8.dp)
             ) {
-                if (showLeadingImage){
+                if (showLeadingImage) {
                     Image(
-                        painter = leadingImage, contentDescription = null,
+                        painter = leadingImage,
+                        contentDescription = null,
                         modifier = Modifier.padding(start = 10.dp).size(24.dp)
                     )
                 }
-                if (!showBox){
+                if (!showBox) {
                     OutlinedTextFieldValidation(
                         value = inputText ?: "",
                         onValueChange = onValueChange,
@@ -270,8 +292,10 @@ fun InputField(
                         shape = RoundedCornerShape(16.dp),
                         label = {
                             Text(
-                                text = hint, color = hintGray, style = normal14Text500,
-                                textAlign = hintAlign,
+                                text = hint,
+                                color = hintGray,
+                                style = normal14Text500,
+                                textAlign = hintAlign
                             )
                         },
                         colors = colors,
@@ -284,9 +308,8 @@ fun InputField(
                         enabled = enable,
                         error = error ?: ""
                     )
-
                 } else {
-                    Column(){
+                    Column() {
                         Box(
                             modifier = Modifier
                                 .focusRequester(FocusRequester())
@@ -303,7 +326,7 @@ fun InputField(
                                 .clip(RoundedCornerShape(8.dp))
 
                         ) {
-                            if (showRadio){
+                            if (showRadio) {
                                 Row(
                                     modifier = modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceEvenly
@@ -322,18 +345,20 @@ fun InputField(
                                     }
                                 }
                             } else {
-                                Row(horizontalArrangement = Arrangement.SpaceBetween,
+                                Row(
+                                    horizontalArrangement = Arrangement.SpaceBetween,
                                     modifier = Modifier.fillMaxWidth()
-                                        .padding(vertical = 10.dp, horizontal = 10.dp)) {
+                                        .padding(vertical = 10.dp, horizontal = 10.dp)
+                                ) {
                                     Text(
                                         text = boxText,
                                         style = normal16Text500,
                                         textAlign = TextAlign.Start,
                                         modifier = Modifier.padding(5.dp).weight(0.9f),
                                         minLines = 3,
-                                        maxLines = 6,
+                                        maxLines = 6
                                     )
-                                    if(!readOnly) {
+                                    if (!readOnly) {
                                         Icon(
                                             painter = painterResource(id = R.drawable.edit_icon),
                                             contentDescription = "",
@@ -345,35 +370,42 @@ fun InputField(
                                         )
                                     }
                                 }
-
                             }
                         }
                         if (!error.isNullOrEmpty()) {
                             Text(
-                                text = error,style = normal12Text400,
+                                text = error,
+                                style = normal12Text400,
                                 color = errorRed,
                                 modifier = Modifier.padding(start = 16.dp, top = 2.dp)
                             )
                         }
-
                     }
-
                 }
             }
         }
     }
 }
+
 @Composable
 fun OutLineTextFieldHeader(
-    topText: String, showOptional: Boolean, showStar: Boolean, topTextStart: Dp,
-    topTextBottom: Dp, topTextTop: Dp,starTop:Dp = 8.dp
+    topText: String,
+    showOptional: Boolean,
+    showStar: Boolean,
+    topTextStart: Dp,
+    topTextBottom: Dp,
+    topTextTop: Dp,
+    starTop: Dp = 8.dp
 ) {
     Row() {
         Text(
-            text = topText, color =if(showOptional) appBlack else appOrange,
+            text = topText,
+            color = if (showOptional) appBlack else appOrange,
             style = normal14Text400,
             modifier = Modifier.padding(
-                start = topTextStart, bottom = topTextBottom, top = topTextTop
+                start = topTextStart,
+                bottom = topTextBottom,
+                top = topTextTop
             )
         )
         if (showOptional) {
@@ -384,7 +416,7 @@ fun OutLineTextFieldHeader(
                 modifier = Modifier.padding(bottom = 0.dp, top = 8.dp)
             )
         }
-        if(showStar){
+        if (showStar) {
             Text(
                 text = " *",
                 color = appRed,
@@ -395,12 +427,17 @@ fun OutLineTextFieldHeader(
     }
 }
 
-
 @Composable
 fun SignUpText(
-    text: String, modifier: Modifier = Modifier, textColor: Color = hyperTextColor,
-    start: Dp = 8.dp, end: Dp = 8.dp, top: Dp = 8.dp, bottom: Dp = 8.dp,
-    style: TextStyle = normal14Text500, onClick: () -> Unit,
+    text: String,
+    modifier: Modifier = Modifier,
+    textColor: Color = hyperTextColor,
+    start: Dp = 8.dp,
+    end: Dp = 8.dp,
+    top: Dp = 8.dp,
+    bottom: Dp = 8.dp,
+    style: TextStyle = normal14Text500,
+    onClick: () -> Unit
 ) {
     Box(
         contentAlignment = Alignment.BottomCenter,
@@ -412,48 +449,58 @@ fun SignUpText(
             style = style,
             modifier = modifier
                 .clickable { onClick() }
-                .padding(start = start, end = end, top = top, bottom = bottom),
+                .padding(start = start, end = end, top = top, bottom = bottom)
         )
     }
 }
 
 @Composable
 fun HyperText(
-    text: String, modifier: Modifier = Modifier, textColor: Color = primaryOrange, start: Dp = 8.dp,
-    end: Dp = 8.dp, top: Dp = 8.dp, bottom: Dp = 8.dp, boxTop: Dp = 0.dp,
-    alignment: Alignment = Alignment.TopEnd, onClick: () -> Unit
+    text: String,
+    modifier: Modifier = Modifier,
+    textColor: Color = primaryOrange,
+    start: Dp = 8.dp,
+    end: Dp = 8.dp,
+    top: Dp = 8.dp,
+    bottom: Dp = 8.dp,
+    boxTop: Dp = 0.dp,
+    alignment: Alignment = Alignment.TopEnd,
+    onClick: () -> Unit
 ) {
     Box(
         contentAlignment = alignment,
         modifier = modifier
-            .padding( top = boxTop)
+            .padding(top = boxTop)
             .fillMaxSize()
     ) {
-        Box(contentAlignment=Alignment.Center,
+        Box(
+            contentAlignment = Alignment.Center,
             modifier = modifier.wrapContentWidth()
                 .background(backgroundOrange, RoundedCornerShape(8.dp))
-        ){
+        ) {
             Text(
                 text = text,
                 color = textColor,
                 modifier = modifier
                     .clickable { onClick() }
-                    .padding(start = start, top = top, bottom = bottom,end = end,),
+                    .padding(start = start, top = top, bottom = bottom, end = end),
                 style = normal20Text500
             )
-
         }
-
     }
 }
 
-
-
-
 @Composable
 fun LanguageText(
-    language: String, showIcon: Boolean, style: TextStyle = normal14Text400, start: Dp = 24.dp,
-    end: Dp = 24.dp, top: Dp = 10.dp, bottom: Dp = 10.dp, height: Dp = 35.dp, width: Dp = 1.dp,
+    language: String,
+    showIcon: Boolean,
+    style: TextStyle = normal14Text400,
+    start: Dp = 24.dp,
+    end: Dp = 24.dp,
+    top: Dp = 10.dp,
+    bottom: Dp = 10.dp,
+    height: Dp = 35.dp,
+    width: Dp = 1.dp,
     onClick: () -> Unit
 ) {
     Row(
@@ -476,11 +523,19 @@ fun LanguageText(
 
 @Composable
 fun SpaceBetweenText(
-    offer: Boolean = false, text: String = "", value: String = "", top: Dp = 20.dp,
-    image: Painter = painterResource(id = R.drawable.app_logo), showImage: Boolean = false,
-    showText: Boolean = true, start: Dp = 10.dp, end: Dp = 10.dp,
-    color: Color = appOrange, offerText: String = stringResource(id = R.string.order_value),
-    style: TextStyle = normal14Text400,textColor: Color= appBlack
+    offer: Boolean = false,
+    text: String = "",
+    value: String = "",
+    top: Dp = 20.dp,
+    image: Painter = painterResource(id = R.drawable.app_logo),
+    showImage: Boolean = false,
+    showText: Boolean = true,
+    start: Dp = 10.dp,
+    end: Dp = 10.dp,
+    color: Color = appOrange,
+    offerText: String = stringResource(id = R.string.order_value),
+    style: TextStyle = normal14Text400,
+    textColor: Color = appBlack
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -508,7 +563,7 @@ fun SpaceBetweenText(
         } else {
             Text(text = text, style = style, color = textColor)
             Column(horizontalAlignment = Alignment.End) {
-                Text(text = value, style = style,color = textColor)
+                Text(text = value, style = style, color = textColor)
                 if (offer) {
                     Text(text = offerText, style = style, modifier = Modifier.padding(0.dp))
                 }
@@ -519,10 +574,17 @@ fun SpaceBetweenText(
 
 @Composable
 fun TextValueInARow(
-    textHeader: String, textValue: String, modifier: Modifier = Modifier, end: Dp = 20.dp,
-    textColorHeader: Color = appBlueTitle, textColorValue: Color = appBlueTitle, start: Dp = 10.dp,
-    style: TextStyle = normal14Text400, style1: TextStyle = normal20Text700, top: Dp = 8.dp,
-    bottom: Dp = 0.dp,
+    textHeader: String,
+    textValue: String,
+    modifier: Modifier = Modifier,
+    end: Dp = 20.dp,
+    textColorHeader: Color = appBlueTitle,
+    textColorValue: Color = appBlueTitle,
+    start: Dp = 10.dp,
+    style: TextStyle = normal14Text400,
+    style1: TextStyle = normal20Text700,
+    top: Dp = 8.dp,
+    bottom: Dp = 0.dp
 ) {
     Row(
         horizontalArrangement = Arrangement.Start,
@@ -548,10 +610,17 @@ fun TextValueInARow(
 
 @Composable
 fun TextHyphenValueInARow(
-    textHeader: String, textValue: String, modifier: Modifier = Modifier, end: Dp = 20.dp,
-    textColorHeader: Color = appBlueTitle, textColorValue: Color = appBlueTitle, start: Dp = 10.dp,
-    style: TextStyle = normal14Text400, style1: TextStyle = normal20Text700, top: Dp = 8.dp,
-    bottom: Dp = 0.dp,
+    textHeader: String,
+    textValue: String,
+    modifier: Modifier = Modifier,
+    end: Dp = 20.dp,
+    textColorHeader: Color = appBlueTitle,
+    textColorValue: Color = appBlueTitle,
+    start: Dp = 10.dp,
+    style: TextStyle = normal14Text400,
+    style1: TextStyle = normal20Text700,
+    top: Dp = 8.dp,
+    bottom: Dp = 0.dp
 ) {
     Row(
         horizontalArrangement = Arrangement.Start,
@@ -584,11 +653,22 @@ fun TextHyphenValueInARow(
 
 @Composable
 fun SpaceBetweenTextIcon(
-    modifier: Modifier = Modifier, text: String, @DrawableRes image: Int,
-    style: TextStyle = normal16Text700, start: Dp = 0.dp, end: Dp = 0.dp, top: Dp = 10.dp,
-    bottom: Dp = 10.dp, height: Dp = 35.dp, width: Dp = 1.dp, textColor: Color = appBlack,
-    backGroundColor: Color = Color.Transparent, imageSize: Dp = 30.dp, textStart: Dp = 0.dp,
-    imageEnd: Dp = 8.dp, onClick: () -> Unit
+    modifier: Modifier = Modifier,
+    text: String,
+    @DrawableRes image: Int,
+    style: TextStyle = normal16Text700,
+    start: Dp = 0.dp,
+    end: Dp = 0.dp,
+    top: Dp = 10.dp,
+    bottom: Dp = 10.dp,
+    height: Dp = 35.dp,
+    width: Dp = 1.dp,
+    textColor: Color = appBlack,
+    backGroundColor: Color = Color.Transparent,
+    imageSize: Dp = 30.dp,
+    textStart: Dp = 0.dp,
+    imageEnd: Dp = 8.dp,
+    onClick: () -> Unit
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -616,21 +696,23 @@ fun SpaceBetweenTextIcon(
     }
 }
 
-
-
-
-
-
 @Composable
 fun HeaderNextRowValue(
-    textHeader: String, textValue: String, modifier: Modifier, textColorHeader: Color = appBlack,
-    textColorValue: Color = appBlueTitle, rowBackground: Color = Color.Transparent,
-    start: Dp = 10.dp, end: Dp = 20.dp, top: Dp = 8.dp, bottom: Dp = 0.dp,
+    textHeader: String,
+    textValue: String,
+    modifier: Modifier,
+    textColorHeader: Color = appBlack,
+    textColorValue: Color = appBlueTitle,
+    rowBackground: Color = Color.Transparent,
+    start: Dp = 10.dp,
+    end: Dp = 20.dp,
+    top: Dp = 8.dp,
+    bottom: Dp = 0.dp,
     style: TextStyle = TextStyle(
         fontSize = 14.sp,
         fontFamily = FontFamily(Font(R.font.robotocondensed_regular)),
         fontWeight = FontWeight(400)
-    ),
+    )
 ) {
     Column(
         modifier = modifier
@@ -666,12 +748,20 @@ fun HeaderNextRowValue(
 
 @Composable
 fun ImageHeaderRow(
-    spaceBeforeImage: Dp = 0.dp, imagePainter: Painter, top: Dp = 0.dp, bottom: Dp = 0.dp,
-    start: Dp = 0.dp, end: Dp = 0.dp, textHeader: String = "header", textStyle: TextStyle,
-    textColor: Color, imageSize: Dp = 14.dp, contentScale: ContentScale = ContentScale.Fit,
+    spaceBeforeImage: Dp = 0.dp,
+    imagePainter: Painter,
+    top: Dp = 0.dp,
+    bottom: Dp = 0.dp,
+    start: Dp = 0.dp,
+    end: Dp = 0.dp,
+    textHeader: String = "header",
+    textStyle: TextStyle,
+    textColor: Color,
+    imageSize: Dp = 14.dp,
+    contentScale: ContentScale = ContentScale.Fit,
     modifier: Modifier = Modifier
         .size(imageSize)
-        .padding(top = top, bottom = bottom, start = start, end = end),
+        .padding(top = top, bottom = bottom, start = start, end = end)
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -689,14 +779,11 @@ fun ImageHeaderRow(
         Text(
             text = textHeader,
             style = textStyle,
-            color = textColor,
+            color = textColor
         )
         Spacer(modifier = Modifier.weight(1f)) // Pushes the button to the end of the row
-
     }
 }
-
-
 
 @Composable
 fun WebViewTopBar(navController: NavHostController, title: String) {
@@ -720,7 +807,8 @@ fun WebViewTopBar(navController: NavHostController, title: String) {
                         navigateApplyByCategoryScreen(navController)
                     } else {
                         CommonMethods().toastMessage(
-                            context = context, toastMsg = "Press back again to go to the home page"
+                            context = context,
+                            toastMsg = "Press back again to go to the home page"
                         )
                         backPressedTime = currentTime
                     }
@@ -750,10 +838,15 @@ fun WebViewTopBar(navController: NavHostController, title: String) {
 
 @Composable
 fun TextInputLayout(
-    text: String = "", textFieldVal: TextFieldValue, onTextChanged: (TextFieldValue) -> Unit,
-    onLostFocusValidation: (TextFieldValue) -> Unit, hintText: String = "",
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default, readOnly: Boolean = false,
-    keyboardActions: KeyboardActions = KeyboardActions.Default, modifier: Modifier = Modifier,
+    text: String = "",
+    textFieldVal: TextFieldValue,
+    onTextChanged: (TextFieldValue) -> Unit,
+    onLostFocusValidation: (TextFieldValue) -> Unit,
+    hintText: String = "",
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    readOnly: Boolean = false,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    modifier: Modifier = Modifier
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
@@ -776,7 +869,8 @@ fun TextInputLayout(
             onLostFocusValidation(textFieldVal)
         }
         OutlinedTextField(
-            value = textFieldVal, onValueChange = onTextChanged,
+            value = textFieldVal,
+            onValueChange = onTextChanged,
             modifier = Modifier
                 .fillMaxWidth()
                 .onFocusChanged { focusState ->
@@ -794,7 +888,7 @@ fun TextInputLayout(
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = appTheme,
                 unfocusedBorderColor = appTheme,
-                cursorColor = cursorColor,
+                cursorColor = cursorColor
             ),
             readOnly = readOnly,
             shape = RoundedCornerShape(16.dp)
@@ -804,20 +898,24 @@ fun TextInputLayout(
 
 @Composable
 fun TextInputLayoutForTenure(
-    text: String = "", onTextChanged: (String) -> Unit, hintText: String = "",
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default, modifier: Modifier = Modifier,
+    text: String = "",
+    onTextChanged: (String) -> Unit,
+    hintText: String = "",
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    modifier: Modifier = Modifier,
     readOnly: Boolean = false
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
     Column(modifier = modifier) {
-
         var newText: String
 
         // Display hint text only when the field is not focused and empty
         if (isFocused) {
             Text(
-                text = hintText, color = hintGray, style = normal18Text400,
+                text = hintText,
+                color = hintGray,
+                style = normal18Text400,
                 textAlign = TextAlign.Start
             )
             newText = text.replace(hintText.lowercase(Locale.ROOT), "").trim()
@@ -828,10 +926,10 @@ fun TextInputLayoutForTenure(
         } else {
             Text(text = "")
             newText = text
-
         }
         OutlinedTextField(
-            value = newText, onValueChange = onTextChanged,
+            value = newText,
+            onValueChange = onTextChanged,
             modifier = Modifier
                 .fillMaxWidth()
                 .onFocusChanged { focusState ->
@@ -840,13 +938,16 @@ fun TextInputLayoutForTenure(
 
             keyboardOptions = keyboardOptions,
             textStyle = TextStyle(
-                textAlign = TextAlign.Center, fontSize = 30.sp, color = appOrange,
+                textAlign = TextAlign.Center,
+                fontSize = 30.sp,
+                color = appOrange,
                 fontFamily = FontFamily(Font(R.font.robotocondensed_bold)),
-                fontWeight = FontWeight(800),
+                fontWeight = FontWeight(800)
 
-                ),
+            ),
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = appTheme, unfocusedBorderColor = appTheme,
+                focusedBorderColor = appTheme,
+                unfocusedBorderColor = appTheme,
                 cursorColor = cursorColor
             ),
             readOnly = readOnly
@@ -856,8 +957,10 @@ fun TextInputLayoutForTenure(
 
 @Composable
 fun InputView(
-    value: TextFieldValue, onValueChange: (value: TextFieldValue) -> Unit,
-    focusRequester: FocusRequester, onKeyEvent: (KeyEvent) -> Boolean
+    value: TextFieldValue,
+    onValueChange: (value: TextFieldValue) -> Unit,
+    focusRequester: FocusRequester,
+    onKeyEvent: (KeyEvent) -> Boolean
 ) {
     BasicTextField(
         value = value,
@@ -870,9 +973,9 @@ fun InputView(
             .width(40.dp)
             .height(50.dp)
             .drawBehind {
-                val strokeWidth = 2.dp.toPx()  // Adjust thickness of the underline
+                val strokeWidth = 2.dp.toPx() // Adjust thickness of the underline
                 drawLine(
-                    color = appOrange,  // Change this to your desired line color
+                    color = appOrange, // Change this to your desired line color
                     start = Offset(0f, size.height),
                     end = Offset(size.width, size.height),
                     strokeWidth = strokeWidth
@@ -900,13 +1003,15 @@ fun InputView(
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Number,
             imeAction = ImeAction.Done
-        ),
+        )
     )
 }
 
 @Composable
 fun OtpView(
-    textList: List<MutableState<TextFieldValue>>, requestList: List<FocusRequester>,pastedEvent: () -> Unit
+    textList: List<MutableState<TextFieldValue>>,
+    requestList: List<FocusRequester>,
+    pastedEvent: () -> Unit
 ) {
     val otpViewModel: OtpViewModel = viewModel()
     Box(
@@ -916,7 +1021,7 @@ fun OtpView(
     ) {
         Row(
             modifier = Modifier
-                .padding(horizontal = 0.dp) //Sugu1
+                .padding(horizontal = 0.dp) // Sugu1
                 .padding(top = 30.dp)
                 .align(Alignment.TopCenter)
         ) {
@@ -924,8 +1029,8 @@ fun OtpView(
                 InputView(
                     value = textList[i].value,
                     onValueChange = { newValue ->
-                        //pasted event
-                        if( newValue.text.length - textList[i].value.text.length  > 1){
+                        // pasted event
+                        if (newValue.text.length - textList[i].value.text.length > 1) {
                             pastedEvent()
                             return@InputView
                         }
@@ -972,8 +1077,14 @@ fun OtpView(
 
 @Composable
 fun GstTransactionCard(
-    boxState: Boolean = true, showCheckBox: Boolean = true, start: Dp = 8.dp, end: Dp = 0.dp,
-    top: Dp = 8.dp, bottom: Dp = 8.dp, onCheckedChange: ((Boolean) -> Unit), onClick: () -> Unit,
+    boxState: Boolean = true,
+    showCheckBox: Boolean = true,
+    start: Dp = 8.dp,
+    end: Dp = 0.dp,
+    top: Dp = 8.dp,
+    bottom: Dp = 8.dp,
+    onCheckedChange: ((Boolean) -> Unit),
+    onClick: () -> Unit,
     invoiceData: InvoicesItem?
 ) {
     Row(
@@ -1053,10 +1164,18 @@ fun GstTransactionCard(
 
 @Composable
 fun OnlyClickAbleText(
-    textHeader: String, textValue: String, modifier: Modifier = Modifier, end: Dp = 20.dp,
-    textColorHeader: Color = appBlueTitle, textColorValue: Color = appOrange, start: Dp = 10.dp,
-    top: Dp = 8.dp, bottom: Dp = 0.dp, style: TextStyle = normal14Text400,
-    textValueAlignment:TextAlign=TextAlign.Start, onClick: () -> Unit
+    textHeader: String,
+    textValue: String,
+    modifier: Modifier = Modifier,
+    end: Dp = 20.dp,
+    textColorHeader: Color = appBlueTitle,
+    textColorValue: Color = appOrange,
+    start: Dp = 10.dp,
+    top: Dp = 8.dp,
+    bottom: Dp = 0.dp,
+    style: TextStyle = normal14Text400,
+    textValueAlignment: TextAlign = TextAlign.Start,
+    onClick: () -> Unit
 ) {
     Row(
         horizontalArrangement = Arrangement.Start,
@@ -1085,11 +1204,19 @@ fun OnlyClickAbleText(
 
 @Composable
 fun ClickableHeaderValueInARow(
-    textHeader: String, textValue: String, modifier: Modifier = Modifier, end: Dp = 20.dp,
-    textColorHeader: Color = appBlueTitle, textColorValue: Color = appBlueTitle, start: Dp = 10.dp,
-    headerStyle: TextStyle = normal14Text400, valueStyle: TextStyle = normal20Text700,
-    valueTextAlign: TextAlign = TextAlign.End, onClick: () -> Unit, top: Dp = 8.dp,
-    bottom: Dp = 0.dp,
+    textHeader: String,
+    textValue: String,
+    modifier: Modifier = Modifier,
+    end: Dp = 20.dp,
+    textColorHeader: Color = appBlueTitle,
+    textColorValue: Color = appBlueTitle,
+    start: Dp = 10.dp,
+    headerStyle: TextStyle = normal14Text400,
+    valueStyle: TextStyle = normal20Text700,
+    valueTextAlign: TextAlign = TextAlign.End,
+    onClick: () -> Unit,
+    top: Dp = 8.dp,
+    bottom: Dp = 0.dp
 ) {
     Row(
         horizontalArrangement = Arrangement.Start,
@@ -1117,12 +1244,14 @@ fun ClickableHeaderValueInARow(
     }
 }
 
-
-
 @Composable
 fun ContinueText(
-    startText: String, endText: String, start: Dp = 0.dp, end: Dp = 0.dp, top: Dp = 0.dp,
-    bottom: Dp = 0.dp,
+    startText: String,
+    endText: String,
+    start: Dp = 0.dp,
+    end: Dp = 0.dp,
+    top: Dp = 0.dp,
+    bottom: Dp = 0.dp
 ) {
     Row(
         modifier = Modifier
@@ -1132,15 +1261,16 @@ fun ContinueText(
     ) {
         StartingText(text = startText, modifier = Modifier.weight(1f), start = 5.dp)
         StartingText(
-            text = endText, modifier = Modifier.weight(1f), start = 5.dp, style = bold14Text500,
+            text = endText,
+            modifier = Modifier.weight(1f),
+            start = 5.dp,
+            style = bold14Text500
         )
     }
 }
 
-
-
 @Preview
 @Composable
 private fun PreviewTopBar() {
-    TopBar(rememberNavController(),true,)
+    TopBar(rememberNavController(), true)
 }

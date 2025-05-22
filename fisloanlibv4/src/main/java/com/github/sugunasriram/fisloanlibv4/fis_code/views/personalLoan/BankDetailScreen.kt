@@ -5,7 +5,6 @@ import android.content.Context
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -91,7 +90,7 @@ fun BankDetailScreen(navController: NavHostController, id: String, fromFlow: Str
     val (selectedBankDetail, setSelectedBankDetail) = remember { mutableStateOf<DataItem?>(null) }
     var backPressedTime by remember { mutableLongStateOf(0L) }
 
-    BackHandler {navigateApplyByCategoryScreen(navController) }
+    BackHandler { navigateApplyByCategoryScreen(navController) }
 
     when {
         navigationToSignIn -> navigateSignInPage(navController)
@@ -108,11 +107,12 @@ fun BankDetailScreen(navController: NavHostController, id: String, fromFlow: Str
                 if (gotBank) {
                     if (bankAccount?.data?.isEmpty() != true) {
                         if (bankDetailCollecting) {
-                            ProcessingAnimation(text = "",  image = R.raw.we_are_currently_processing_hour_glass)
+                            ProcessingAnimation(text = "", image = R.raw.we_are_currently_processing_hour_glass)
                         }
                         if (bankDetailCollected) {
                             onBankDetailsCollected(
-                                fromFlow = fromFlow, navController = navController,
+                                fromFlow = fromFlow,
+                                navController = navController,
                                 gstBankDetailResponse = gstBankDetailResponse,
                                 pfBankDetailResponse = pfBankDetailResponse,
                                 bankDetailResponse = bankDetailResponse
@@ -123,13 +123,15 @@ fun BankDetailScreen(navController: NavHostController, id: String, fromFlow: Str
                                 navController = navController,
                                 selectedBankDetail = selectedBankDetail,
                                 accountDetailViewModel = accountDetailViewModel,
-                                fromFlow = fromFlow, context = context, id = id,
+                                fromFlow = fromFlow,
+                                context = context,
+                                id = id,
                                 bankAccount = bankAccount,
                                 setSelectedBankDetail = setSelectedBankDetail
                             )
                         }
                     } else {
-                        navigateToAccountDetailsScreen(navController, id, fromFlow,"Bank Details")
+                        navigateToAccountDetailsScreen(navController, id, fromFlow, "Bank Details")
                     }
                 } else {
                     accountDetailViewModel.getBankAccount(context)
@@ -139,49 +141,60 @@ fun BankDetailScreen(navController: NavHostController, id: String, fromFlow: Str
     }
 }
 
-    @Composable
-    fun BankDetailCollecting(
-        navController: NavHostController, selectedBankDetail: DataItem?,
-        accountDetailViewModel: AccountDetailViewModel, fromFlow: String, context: Context,
-        id: String, bankAccount: BankAccount?, setSelectedBankDetail: (DataItem?) -> Unit
-    ) {
-        var backPressedTime by remember { mutableLongStateOf(0L) }
-        FixedTopBottomScreen(
-            navController = navController,
-            topBarBackgroundColor = appOrange,
-            topBarText = stringResource(R.string.disbursement_account_details),
-            showBackButton = true,
-            onBackClick = {navigateApplyByCategoryScreen(navController) },
-            showBottom = true,
-            showSingleButton = true,
-            primaryButtonText = stringResource(R.string.submit),
-            onPrimaryButtonClick = {
-                onBankDetailsSubmit(
-                    selectedBankDetail = selectedBankDetail,
-                    accountDetailViewModel = accountDetailViewModel,
-                    fromFlow = fromFlow, context = context,
-                    navController = navController, id = id
-                )
-            },
-            backgroundColor = appWhite
-        ) {
-            RegisterText(
-                text = stringResource(id = R.string.adding_your_bank_account),
-                style = normal12Text400, textColor = hintGray,
-                top = 8.dp, start = 10.dp, end = 10.dp
+@Composable
+fun BankDetailCollecting(
+    navController: NavHostController,
+    selectedBankDetail: DataItem?,
+    accountDetailViewModel: AccountDetailViewModel,
+    fromFlow: String,
+    context: Context,
+    id: String,
+    bankAccount: BankAccount?,
+    setSelectedBankDetail: (DataItem?) -> Unit
+) {
+    var backPressedTime by remember { mutableLongStateOf(0L) }
+    FixedTopBottomScreen(
+        navController = navController,
+        topBarBackgroundColor = appOrange,
+        topBarText = stringResource(R.string.disbursement_account_details),
+        showBackButton = true,
+        onBackClick = { navigateApplyByCategoryScreen(navController) },
+        showBottom = true,
+        showSingleButton = true,
+        primaryButtonText = stringResource(R.string.submit),
+        onPrimaryButtonClick = {
+            onBankDetailsSubmit(
+                selectedBankDetail = selectedBankDetail,
+                accountDetailViewModel = accountDetailViewModel,
+                fromFlow = fromFlow,
+                context = context,
+                navController = navController,
+                id = id
             )
-            LoanStatusTracker(stepId = 5)
-            AccountDetailsHeader(context)
-            bankAccount?.data?.forEach { bankDetails ->
-                val isChecked = selectedBankDetail == bankDetails
+        },
+        backgroundColor = appWhite
+    ) {
+        RegisterText(
+            text = stringResource(id = R.string.adding_your_bank_account),
+            style = normal12Text400,
+            textColor = hintGray,
+            top = 8.dp,
+            start = 10.dp,
+            end = 10.dp
+        )
+        LoanStatusTracker(stepId = 5)
+        AccountDetailsHeader(context)
+        bankAccount?.data?.forEach { bankDetails ->
+            val isChecked = selectedBankDetail == bankDetails
 
-                BorderCardWithElevation (
-                    bottom = 20.dp){
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 5.dp)
+            BorderCardWithElevation(
+                bottom = 20.dp
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 5.dp)
 //                            .clickable {
 //                                onBankCardClicked(
 //                                    bankDetails = bankDetails,
@@ -195,86 +208,93 @@ fun BankDetailScreen(navController: NavHostController, id: String, fromFlow: Str
 //                                    id = id
 //                                )
 //                            }
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.bank),
-                            contentDescription = stringResource(id = R.string.bank_image),
-                            modifier = Modifier.size(28.dp)
-                        )
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.bank),
+                        contentDescription = stringResource(id = R.string.bank_image),
+                        modifier = Modifier.size(28.dp)
+                    )
 
-                        Column(
-                            verticalArrangement = Arrangement.Center,
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            bankDetails?.accountHolderName?.let { holderName ->
-                                StartingText(
-                                    text = holderName,
-                                    bottom = 5.dp,
-                                    top = 15.dp,
-                                    start = 30.dp,
-                                    end = 20.dp,
-                                    style = normal20Text700,
-                                    textColor = appBlack,
-                                    textAlign = TextAlign.Start,
-                                )
-                            }
-                            bankDetails?.bankAccountNumber?.let { accountNumber ->
-                                StartingText(
-                                    text = accountNumber,
-                                    bottom = 5.dp,
-                                    start = 30.dp,
-                                    end = 20.dp,
-                                    style = normal16Text400,
-                                    textColor = hintGray,
-                                    textAlign = TextAlign.Start,
-                                )
-                            }
-                            bankDetails?.bankIfscCode?.let { ifscCode ->
-                                StartingText(
-                                    text = ifscCode,
-                                    bottom = 15.dp,
-                                    start = 30.dp,
-                                    end = 20.dp,
-                                    style = normal16Text400,
-                                    textColor = hintGray,
-                                    textAlign = TextAlign.Start,
-                                )
+                    Column(
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        bankDetails?.accountHolderName?.let { holderName ->
+                            StartingText(
+                                text = holderName,
+                                bottom = 5.dp,
+                                top = 15.dp,
+                                start = 30.dp,
+                                end = 20.dp,
+                                style = normal20Text700,
+                                textColor = appBlack,
+                                textAlign = TextAlign.Start
+                            )
+                        }
+                        bankDetails?.bankAccountNumber?.let { accountNumber ->
+                            StartingText(
+                                text = accountNumber,
+                                bottom = 5.dp,
+                                start = 30.dp,
+                                end = 20.dp,
+                                style = normal16Text400,
+                                textColor = hintGray,
+                                textAlign = TextAlign.Start
+                            )
+                        }
+                        bankDetails?.bankIfscCode?.let { ifscCode ->
+                            StartingText(
+                                text = ifscCode,
+                                bottom = 15.dp,
+                                start = 30.dp,
+                                end = 20.dp,
+                                style = normal16Text400,
+                                textColor = hintGray,
+                                textAlign = TextAlign.Start
+                            )
+                        }
+                    }
+
+                    OnlyCheckBox(
+                        start = 20.dp,
+                        boxState = isChecked,
+                        onCheckedChange = { checked ->
+                            if (checked) {
+                                setSelectedBankDetail(bankDetails)
+                            } else if (selectedBankDetail == bankDetails) {
+                                setSelectedBankDetail(null)
                             }
                         }
-
-                        OnlyCheckBox(
-                            start = 20.dp,
-                            boxState = isChecked,
-                            onCheckedChange = { checked ->
-                                if (checked) {
-                                    setSelectedBankDetail(bankDetails)
-                                } else if (selectedBankDetail == bankDetails) {
-                                    setSelectedBankDetail(null)
-                                }
-                            }
-                        )
-                    }
+                    )
                 }
             }
-            HyperText(
-                text = stringResource(id = R.string.add_account_details_plus),
-                alignment = Alignment.TopCenter, boxTop = 15.dp,
-                modifier = Modifier.padding(start = 8.dp)
-            ) {
-                navigateToAccountDetailsScreen(navController, id, fromFlow,"Add New Bank")
-            }
+        }
+        HyperText(
+            text = stringResource(id = R.string.add_account_details_plus),
+            alignment = Alignment.TopCenter,
+            boxTop = 15.dp,
+            modifier = Modifier.padding(start = 8.dp)
+        ) {
+            navigateToAccountDetailsScreen(navController, id, fromFlow, "Add New Bank")
         }
     }
+}
 
 @Composable
-fun AccountDetailsHeader(context: Context){
-    Row(modifier = Modifier.padding(horizontal = 30.dp, vertical = 15.dp),
+fun AccountDetailsHeader(context: Context) {
+    Row(
+        modifier = Modifier.padding(horizontal = 30.dp, vertical = 15.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically) {
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         StartingText(
             text = stringResource(id = R.string.account_details),
-            start =0.dp, end = 0.dp, bottom = 0.dp, top = 0.dp,
-            style = normal16Text700, modifier = Modifier.weight(0.8f)
+            start = 0.dp,
+            end = 0.dp,
+            bottom = 0.dp,
+            top = 0.dp,
+            style = normal16Text700,
+            modifier = Modifier.weight(0.8f)
         )
 //        Image(
 //            painter = painterResource(R.drawable.edit),
@@ -291,10 +311,10 @@ fun AccountDetailsHeader(context: Context){
 //            }
 //        )
     }
-
 }
 fun onBankDetailsCollected(
-    fromFlow: String, navController: NavHostController,
+    fromFlow: String,
+    navController: NavHostController,
     gstBankDetailResponse: GstOfferConfirmResponse?,
     pfBankDetailResponse: PfOfferConfirmResponse?,
     bankDetailResponse: BankDetailResponse?
@@ -303,10 +323,15 @@ fun onBankDetailsCollected(
         bankDetailResponse?.let { response ->
             response.data?.eNACHUrlObject?.txnId?.let { transactionId ->
                 response.data?.eNACHUrlObject?.formUrl?.let { url ->
-                    Log.d("res_H_Bank",url)
+                    Log.d("res_H_Bank", url)
                     response.data.id?.let { id ->
-                        navigateToRepaymentScreen(navController, transactionId, url, id,
-                            fromFlow)
+                        navigateToRepaymentScreen(
+                            navController,
+                            transactionId,
+                            url,
+                            id,
+                            fromFlow
+                        )
 //                        navigateToLoanProcessScreen(
 //                            navController = navController, transactionId = transactionId,
 //                            statusId = 5,
@@ -316,15 +341,18 @@ fun onBankDetailsCollected(
                 }
             }
         }
-    } else if(fromFlow.equals("Purchase Finance", ignoreCase = true)){
+    } else if (fromFlow.equals("Purchase Finance", ignoreCase = true)) {
         pfBankDetailResponse?.let { response ->
             response.data?.eNACHUrlObject?.txnID?.let { transactionId ->
                 response.data?.eNACHUrlObject?.fromURL?.let { eNachUrl ->
                     response.data.eNACHUrlObject.itemID?.let { offerId ->
                         navigateToLoanProcessScreen(
                             navController = navController,
-                            statusId = 15, transactionId=transactionId,
-                            responseItem = eNachUrl, offerId = offerId, fromFlow = fromFlow
+                            statusId = 15,
+                            transactionId = transactionId,
+                            responseItem = eNachUrl,
+                            offerId = offerId,
+                            fromFlow = fromFlow
                         )
                     }
                 }
@@ -338,8 +366,11 @@ fun onBankDetailsCollected(
                     response.data.eNACHUrlObject.itemID?.let { offerId ->
                         navigateToLoanProcessScreen(
                             navController = navController,
-                            statusId = 15, transactionId=transactionId,
-                            responseItem = eNachUrl, offerId = offerId, fromFlow = fromFlow
+                            statusId = 15,
+                            transactionId = transactionId,
+                            responseItem = eNachUrl,
+                            offerId = offerId,
+                            fromFlow = fromFlow
                         )
                     }
                 }
@@ -349,8 +380,12 @@ fun onBankDetailsCollected(
 }
 
 fun onBankDetailsSubmit(
-    selectedBankDetail: DataItem?, accountDetailViewModel: AccountDetailViewModel,
-    fromFlow: String, context: Context, navController: NavHostController, id: String
+    selectedBankDetail: DataItem?,
+    accountDetailViewModel: AccountDetailViewModel,
+    fromFlow: String,
+    context: Context,
+    navController: NavHostController,
+    id: String
 ) {
     selectedBankDetail?.let { selectedDetail ->
         if (fromFlow.equals("Personal Loan", ignoreCase = true)) {
@@ -363,15 +398,18 @@ fun onBankDetailsSubmit(
                             "Saving",
                             ignoreCase = true
                         )
-                    )
-                        "saving" else "saving",
+                    ) {
+                        "saving"
+                    } else {
+                        "saving"
+                    },
                     id = id,
                     ifscCode = selectedDetail.bankIfscCode.toString(),
                     loanType = "PERSONAL_LOAN"
                 ),
                 navController
             )
-        } else if(fromFlow.equals("Purchase Finance", ignoreCase = true)){
+        } else if (fromFlow.equals("Purchase Finance", ignoreCase = true)) {
             accountDetailViewModel.pfLoanEntityApproval(
                 bankDetail = PfBankDetail(
                     accountNumber = selectedDetail.bankAccountNumber.toString(),
@@ -412,8 +450,11 @@ fun onBankCardClicked(
             bankDetails.bankAccountNumber?.let { bankAccountNumber ->
                 bankDetails.accountType?.let { accountType ->
                     if (fromFlow.equals("Personal Loan", ignoreCase = true)) {
-                        val accountType = if (accountType.equals("Saving", ignoreCase = true))
-                            "saving" else "current"
+                        val accountType = if (accountType.equals("Saving", ignoreCase = true)) {
+                            "saving"
+                        } else {
+                            "current"
+                        }
                         accountDetailViewModel.addBankDetail(
                             context = context,
                             bankDetail = BankDetail(
@@ -443,7 +484,6 @@ fun onBankCardClicked(
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable
@@ -483,7 +523,7 @@ fun BankDetailCollectingPreview() {
                 bankAccountNumber = "987654321098",
                 bankIfscCode = "XYZD0987654",
                 accountType = "Current"
-            ),
+            )
 
         ),
         status = true,
@@ -503,4 +543,3 @@ fun BankDetailCollectingPreview() {
         setSelectedBankDetail = { selectedBankDetail = it }
     )
 }
-

@@ -35,11 +35,11 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 import java.util.concurrent.TimeoutException
 import java.util.regex.Pattern
-import java.time.format.DateTimeParseException
 
 class CommonMethods {
 
@@ -68,24 +68,24 @@ class CommonMethods {
     private val ifscPattern = "^[A-Z]{4}0[A-Z0-9]{6}\$"
 
     /***
-    5 uppercase letters,
-    a hyphen,
-    2 uppercase letters,
-    another hyphen,
-    2 digits,
-    another hyphen,
-    and finally, 7 digits*/
+     5 uppercase letters,
+     a hyphen,
+     2 uppercase letters,
+     another hyphen,
+     2 digits,
+     another hyphen,
+     and finally, 7 digits*/
     private val udyamPattern = "^[A-Z]{5}-[A-Z]{2}-[0-9]{2}-[0-9]{7}\$"
 
 //    fun isValidEmail(email: String?) = email?.let {
 //        Pattern.compile(emailPattern).matcher(it).find()
 //    }
-fun isValidEmail(email: String): Boolean {
-    val emailRegex = Regex(
-        "^(?!.*\\.\\.)(?!.*\\.@)(?!.*@\\.)(?!.*\\s)([a-zA-Z0-9]+[\\w.-]*)@([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,10}$"
-    )
-    return emailRegex.matches(email)
-}
+    fun isValidEmail(email: String): Boolean {
+        val emailRegex = Regex(
+            "^(?!.*\\.\\.)(?!.*\\.@)(?!.*@\\.)(?!.*\\s)([a-zA-Z0-9]+[\\w.-]*)@([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,10}$"
+        )
+        return emailRegex.matches(email)
+    }
 
     fun isValidPanNumber(panNumber: String?) = panNumber?.let {
         Pattern.compile(panNumberPattern).matcher(it).find()
@@ -102,7 +102,6 @@ fun isValidEmail(email: String): Boolean {
     fun isValidUdyamNumber(udyamNumber: String?) = udyamNumber?.let {
         Pattern.compile(udyamPattern).matcher(it).find()
     }
-
 
     fun parseErrorMessage(responseBody: String): String {
         // Parse the JSON response body to extract the error message
@@ -159,7 +158,6 @@ fun isValidEmail(email: String): Boolean {
 //            val localDateTime = zonedDateTime.toLocalDateTime()
             val localDateTime = zonedDateTime.withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime()
 
-
             // Define the formatter
             val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
 //            val formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy, hh:mm a")
@@ -187,9 +185,13 @@ fun isValidEmail(email: String): Boolean {
             return when {
                 number < 20 -> units[number.toInt()]
                 number < 100 -> tens[(number / 10).toInt()] + if (number % 10 != 0L) " " + units[(number % 10).toInt()] else ""
-                number < 1000 -> units[(number / 100).toInt()] + " Hundred" + if (number % 100 != 0L) " " + convertChunk(
-                    number % 100
-                ) else ""
+                number < 1000 -> units[(number / 100).toInt()] + " Hundred" + if (number % 100 != 0L) {
+                    " " + convertChunk(
+                        number % 100
+                    )
+                } else {
+                    ""
+                }
 
                 else -> throw IllegalArgumentException("Chunk conversion only supports numbers < 1000")
             }
@@ -208,7 +210,6 @@ fun isValidEmail(email: String): Boolean {
         return (crorePart + lakhPart + thousandPart + hundredPart).trim()
     }
 
-
     @Composable
     fun ShowInternetErrorScreen(navController: NavHostController) {
         NegativeCommonScreen(
@@ -221,7 +222,7 @@ fun isValidEmail(email: String): Boolean {
 
     @Composable
     fun ShowTimeOutErrorScreen(navController: NavHostController) {
-        RequestTimeOutScreen (navController, onClick = { navigateApplyByCategoryScreen(navController) })
+        RequestTimeOutScreen(navController, onClick = { navigateApplyByCategoryScreen(navController) })
     }
 
     @Composable
@@ -236,19 +237,20 @@ fun isValidEmail(email: String): Boolean {
 
     @Composable
     fun ShowUnexpectedErrorScreen(navController: NavHostController) {
-        UnexpectedErrorScreen(navController = navController,onClick = { navigateApplyByCategoryScreen(navController) })
+        UnexpectedErrorScreen(navController = navController, onClick = { navigateApplyByCategoryScreen(navController) })
     }
 
     @Composable
     fun ShowUnAuthorizedErrorScreen(navController: NavHostController) {
-        UnAuthorizedScreen (navController,onClick = { navigateSignInPage(navController)})
+        UnAuthorizedScreen(navController, onClick = { navigateSignInPage(navController) })
     }
 
     @Composable
     fun ShowMiddleLoanErrorScreen(
         navController: NavHostController
     ) {
-        UnexpectedErrorScreen(navController=navController,
+        UnexpectedErrorScreen(
+            navController = navController,
             errorMsg = stringResource(id = R.string.middle_loan_error_message),
             onClick = { navigateApplyByCategoryScreen(navController) }
         )
@@ -257,10 +259,14 @@ fun isValidEmail(email: String): Boolean {
 
     @Composable
     fun ShowMiddleLoanErrorScreen(
-        navController: NavHostController, errorMessage: String, errorMsgShow: Boolean = false
+        navController: NavHostController,
+        errorMessage: String,
+        errorMsgShow: Boolean = false
     ) {
-        UnexpectedErrorScreen(navController=navController,
-            errorMsgShow = errorMsgShow, errorText = errorMessage,
+        UnexpectedErrorScreen(
+            navController = navController,
+            errorMsgShow = errorMsgShow,
+            errorText = errorMessage,
             errorMsg = stringResource(id = R.string.middle_loan_error_message),
             onClick = { navigateApplyByCategoryScreen(navController) }
         )
@@ -268,7 +274,11 @@ fun isValidEmail(email: String): Boolean {
     }
 
     data class RemainingTime(
-        val isFuture: Boolean, val days: Long, val hours: Long, val minutes: Long, val seconds: Long
+        val isFuture: Boolean,
+        val days: Long,
+        val hours: Long,
+        val minutes: Long,
+        val seconds: Long
     )
 
     @Composable
@@ -339,28 +349,32 @@ fun isValidEmail(email: String): Boolean {
 
     @Composable
     fun HandleErrorScreens(
-        navController: NavHostController, showInternetScreen: Boolean, showTimeOutScreen: Boolean,
-        showServerIssueScreen: Boolean, unexpectedErrorScreen: Boolean,
+        navController: NavHostController,
+        showInternetScreen: Boolean,
+        showTimeOutScreen: Boolean,
+        showServerIssueScreen: Boolean,
+        unexpectedErrorScreen: Boolean,
         unAuthorizedUser: Boolean = false
     ) {
         when {
-            //No internet connection
+            // No internet connection
             showInternetScreen -> {
                 NegativeCommonScreen(
                     navController = navController,
                     errorImage = painterResource(id = R.drawable.error_no_internet_image),
-                    errorTextTop = 0.dp, showRefreshButton= false,
+                    errorTextTop = 0.dp,
+                    showRefreshButton = false,
                     errorText = stringResource(id = R.string.unable_to_connect),
                     solutionText = stringResource(id = R.string.check_your_internet),
-                    onClick = { navigateSignInPage(navController) },
+                    onClick = { navigateSignInPage(navController) }
                 )
             }
-            //Request timed out
+            // Request timed out
             showTimeOutScreen -> {
-                RequestTimeOutScreen (navController, onClick = { navigateSignInPage(navController)})
+                RequestTimeOutScreen(navController, onClick = { navigateSignInPage(navController) })
             }
 
-            //Server Unavailable
+            // Server Unavailable
             showServerIssueScreen -> {
                 NegativeCommonScreen(
                     navController = navController,
@@ -371,27 +385,28 @@ fun isValidEmail(email: String): Boolean {
                 )
             }
 
-            //oops-something went wrong
+            // oops-something went wrong
             unexpectedErrorScreen -> {
-                UnexpectedErrorScreen(navController=navController,onClick = { navigateApplyByCategoryScreen(navController = navController)  })
+                UnexpectedErrorScreen(navController = navController, onClick = { navigateApplyByCategoryScreen(navController = navController) })
             }
-            //unAuthUser
+            // unAuthUser
             unAuthorizedUser -> {
-                UnAuthorizedScreen (navController=navController,onClick = { navigateSignInPage(navController) })
+                UnAuthorizedScreen(navController = navController, onClick = { navigateSignInPage(navController) })
             }
         }
     }
+
     @Preview(showBackground = true)
     @Composable
     fun PreviewHandleErrorScreens() {
         val navController = rememberNavController()
         HandleErrorScreens(
             navController = navController,
-            showInternetScreen = false, //done
-            showTimeOutScreen = true,//done
-            showServerIssueScreen = false,//done
-            unexpectedErrorScreen = false,//done
-            unAuthorizedUser = false,//done
+            showInternetScreen = false, // done
+            showTimeOutScreen = true, // done
+            showServerIssueScreen = false, // done
+            unexpectedErrorScreen = false, // done
+            unAuthorizedUser = false // done
         )
     }
 
@@ -425,8 +440,10 @@ fun isValidEmail(email: String): Boolean {
     }
 
     fun handleGeneralException(
-        error: Throwable, _showInternetScreen: MutableLiveData<Boolean>,
-        _showTimeOutScreen: MutableLiveData<Boolean>, _unexpectedError: MutableLiveData<Boolean>
+        error: Throwable,
+        _showInternetScreen: MutableLiveData<Boolean>,
+        _showTimeOutScreen: MutableLiveData<Boolean>,
+        _unexpectedError: MutableLiveData<Boolean>
     ) {
         when (error) {
             is IOException -> {
@@ -444,11 +461,16 @@ fun isValidEmail(email: String): Boolean {
     }
 
     suspend fun handleResponseException(
-        error: ResponseException, _showServerIssueScreen: MutableLiveData<Boolean>,
-        _middleLoan: MutableLiveData<Boolean>, _unAuthorizedUser: MutableLiveData<Boolean>,
-        _unexpectedError: MutableLiveData<Boolean>, updateErrorMessage: (String) -> Unit,
-        context: Context,_showLoader: MutableLiveData<Boolean>, isFormSearch : Boolean = false,
-        searchError : () -> Unit = { }
+        error: ResponseException,
+        _showServerIssueScreen: MutableLiveData<Boolean>,
+        _middleLoan: MutableLiveData<Boolean>,
+        _unAuthorizedUser: MutableLiveData<Boolean>,
+        _unexpectedError: MutableLiveData<Boolean>,
+        updateErrorMessage: (String) -> Unit,
+        context: Context,
+        _showLoader: MutableLiveData<Boolean>,
+        isFormSearch: Boolean = false,
+        searchError: () -> Unit = { }
     ) {
         val statusCode = error.response.status.value
         val responseBody = error.response.readText()
@@ -471,9 +493,9 @@ fun isValidEmail(email: String): Boolean {
 
             417 -> {
                 if (isFormSearch) {
-                    if(responseBody.contains("already user in the middle of loan application")){
+                    if (responseBody.contains("already user in the middle of loan application")) {
                         _middleLoan.value = true
-                    }else{
+                    } else {
                         searchError()
                     }
                 } else {
@@ -504,16 +526,16 @@ fun isValidEmail(email: String): Boolean {
         }
     }
 
-    fun editingDate(date:String):String{
+    fun editingDate(date: String): String {
         val dateString = date
         val actualDate = dateString.split("T")[0]
         return actualDate
     }
 
-    fun isValidDob(dob : String) : Boolean  {
+    fun isValidDob(dob: String): Boolean {
         val pattern = """^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$"""
 //        val pattern = """^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/\d{4}$"""
-        if(!dob.matches(Regex(pattern))) return false
+        if (!dob.matches(Regex(pattern))) return false
 
         return try {
             val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
@@ -536,5 +558,4 @@ fun isValidEmail(email: String): Boolean {
             return ""
         }
     }
-
 }

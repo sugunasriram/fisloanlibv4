@@ -34,7 +34,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.appBlack
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.appOrange
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.appWhite
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.backgroundOrange
@@ -45,39 +44,48 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.views.personalLoan.TableRow
 
 @Composable
 fun DisplayCard(
-    modifier: Modifier = Modifier, cardColor: Color = backgroundOrange,
+    modifier: Modifier = Modifier,
+    cardColor: Color = backgroundOrange,
     borderColor: Color = appOrange,
-    start: Dp = 20.dp, end: Dp = 20.dp,roundedCornerDp:Dp=16.dp,
-    top: Dp = 0.dp, bottom: Dp = 0.dp, content: @Composable () -> Unit
+    start: Dp = 20.dp,
+    end: Dp = 20.dp,
+    roundedCornerDp: Dp = 16.dp,
+    top: Dp = 0.dp,
+    bottom: Dp = 0.dp,
+    content: @Composable () -> Unit
 ) {
-
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         modifier = modifier
             .fillMaxWidth()
             .padding(start = start, end = end, top = top, bottom = bottom)
-            .background(cardColor,RoundedCornerShape(roundedCornerDp))
+            .background(cardColor, RoundedCornerShape(roundedCornerDp))
             .border(1.dp, borderColor, RoundedCornerShape(roundedCornerDp))
     ) {
         content()
     }
-
 }
+
 @Composable
 fun FullWidthRoundShapedCard(
-    modifier: Modifier = Modifier, start: Dp = 15.dp, end: Dp = 15.dp, top: Dp = 15.dp,
-    shapeSize: Dp = 12.dp, bottomPadding: Dp = 20.dp, cardColor: Color = greenCard,
-    onClick: () -> Unit, alignment: Alignment.Horizontal = Alignment.CenterHorizontally,
+    modifier: Modifier = Modifier,
+    start: Dp = 15.dp,
+    end: Dp = 15.dp,
+    top: Dp = 15.dp,
+    shapeSize: Dp = 12.dp,
+    bottomPadding: Dp = 20.dp,
+    cardColor: Color = greenCard,
+    onClick: () -> Unit,
+    alignment: Alignment.Horizontal = Alignment.CenterHorizontally,
     gradientColors: List<Color> = listOf(
-        backgroundOrange,appOrange, Color(0xFFFF7043)
+        backgroundOrange,
+        appOrange,
+        Color(0xFFFF7043)
     ), // orange gradient
-    bottom: Dp = 15.dp, content: @Composable () -> Unit
+    bottom: Dp = 15.dp,
+    content: @Composable () -> Unit
 ) {
-
-
-
-
 //    val gradient = Brush.linearGradient(
 //        colors = listOf(backgroundOrange,appOrange, Color(0xFFFF7043)) // orange gradient
 //    )
@@ -93,7 +101,7 @@ fun FullWidthRoundShapedCard(
                 shape = RoundedCornerShape(shapeSize),
                 brush = gradient
             )
-            .padding(bottomPadding),
+            .padding(bottomPadding)
     ) {
         content()
     }
@@ -101,10 +109,14 @@ fun FullWidthRoundShapedCard(
 
 @Composable
 fun NumberFullWidthCard(
-    modifier: Modifier = Modifier, cardColor: Color = greenCard, start: Dp = 20.dp, end: Dp = 20.dp,
-    top: Dp = 0.dp, bottom: Dp = 0.dp, content: @Composable () -> Unit
+    modifier: Modifier = Modifier,
+    cardColor: Color = greenCard,
+    start: Dp = 20.dp,
+    end: Dp = 20.dp,
+    top: Dp = 0.dp,
+    bottom: Dp = 0.dp,
+    content: @Composable () -> Unit
 ) {
-
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -118,16 +130,18 @@ fun NumberFullWidthCard(
     ) {
         content()
     }
-
 }
 
 @Composable
 fun BorderCardWithElevation(
     modifier: Modifier = Modifier,
-    contentColor: Color=Color.Transparent,
-    backgroundColor:Color= appWhite,
+    contentColor: Color = Color.Transparent,
+    backgroundColor: Color = appWhite,
     borderColor: Color = appOrange,
-    start: Dp = 20.dp, end: Dp = 20.dp, top: Dp = 0.dp, bottom: Dp = 0.dp,
+    start: Dp = 20.dp,
+    end: Dp = 20.dp,
+    top: Dp = 0.dp,
+    bottom: Dp = 0.dp,
     content: @Composable () -> Unit
 ) {
     Card(
@@ -152,9 +166,15 @@ fun BorderCardWithElevation(
 
 @Composable
 fun ClickableLoanStatusCard(
-    modifier: Modifier = Modifier, cardColor: Color = greenCard, borderColor: Color = lightGray,
-    start: Dp = 20.dp, end: Dp = 20.dp, top: Dp = 0.dp, bottom: Dp = 0.dp,
-    onClick: () -> Unit, content: @Composable () -> Unit
+    modifier: Modifier = Modifier,
+    cardColor: Color = greenCard,
+    borderColor: Color = lightGray,
+    start: Dp = 20.dp,
+    end: Dp = 20.dp,
+    top: Dp = 0.dp,
+    bottom: Dp = 0.dp,
+    onClick: () -> Unit,
+    content: @Composable () -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.Start,
@@ -175,9 +195,17 @@ fun ClickableLoanStatusCard(
 
 @Composable
 fun HeaderCard(
-    modifier: Modifier = Modifier, cardColor: Color = appOrange, borderColor: Color = appOrange,
-    start: Dp = 0.dp, end: Dp = 0.dp, top: Dp = 0.dp, bottom: Dp = 0.dp, bottomStart: Dp = 20.dp,
-    bottomEnd: Dp = 20.dp, topStart: Dp = 0.dp, topEnd: Dp = 0.dp,
+    modifier: Modifier = Modifier,
+    cardColor: Color = appOrange,
+    borderColor: Color = appOrange,
+    start: Dp = 0.dp,
+    end: Dp = 0.dp,
+    top: Dp = 0.dp,
+    bottom: Dp = 0.dp,
+    bottomStart: Dp = 20.dp,
+    bottomEnd: Dp = 20.dp,
+    topStart: Dp = 0.dp,
+    topEnd: Dp = 0.dp,
     content: @Composable () -> Unit
 ) {
     Column(
@@ -188,15 +216,20 @@ fun HeaderCard(
             .padding(start = start, end = end, top = top, bottom = bottom)
             .background(
                 shape = RoundedCornerShape(
-                    bottomStart = bottomStart, bottomEnd = bottomEnd, topStart = topStart,
+                    bottomStart = bottomStart,
+                    bottomEnd = bottomEnd,
+                    topStart = topStart,
                     topEnd = topEnd
                 ),
                 color = cardColor
             )
             .border(
-                width = 1.dp, color = borderColor,
+                width = 1.dp,
+                color = borderColor,
                 shape = RoundedCornerShape(
-                    bottomStart = bottomStart, bottomEnd = bottomEnd, topStart = topStart,
+                    bottomStart = bottomStart,
+                    bottomEnd = bottomEnd,
+                    topStart = topStart,
                     topEnd = topEnd
                 )
             )
@@ -205,24 +238,32 @@ fun HeaderCard(
     }
 }
 
-
 @Preview
 @Composable
 fun FullWidthRoundShapedCardPreview() {
     FullWidthRoundShapedCard(
-        onClick = { }, cardColor = lightishGray,
-        start = 0.dp, end = 0.dp, top = 0.dp, bottom = 0.dp
+        onClick = { },
+        cardColor = lightishGray,
+        start = 0.dp,
+        end = 0.dp,
+        top = 0.dp,
+        bottom = 0.dp
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             TableRow(
-                emiNumber = "1", dueDate = "20-July-2024", amount = "88846.00", status = "NOT-PAID"
+                emiNumber = "1",
+                dueDate = "20-July-2024",
+                amount = "88846.00",
+                status = "NOT-PAID"
             )
             TableRow(
-                emiNumber = "1", dueDate = "20-July-2024", amount = "88846.00", status = "NOT-PAID"
+                emiNumber = "1",
+                dueDate = "20-July-2024",
+                amount = "88846.00",
+                status = "NOT-PAID"
             )
         }
     }
-
 }
 
 @Composable
@@ -274,4 +315,3 @@ fun DashedBorderCard(
         }
     }
 }
-

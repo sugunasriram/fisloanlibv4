@@ -14,8 +14,13 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.grayD9
 
 @Composable
 fun VerticalDivider(
-    color: Color = grayD6, start: Dp = 24.dp, end: Dp = 0.dp, top: Dp = 0.dp, bottom: Dp = 0.dp,
-    height: Dp = 35.dp, width: Dp = 1.dp
+    color: Color = grayD6,
+    start: Dp = 24.dp,
+    end: Dp = 0.dp,
+    top: Dp = 0.dp,
+    bottom: Dp = 0.dp,
+    height: Dp = 35.dp,
+    width: Dp = 1.dp
 ) {
     Divider(
         color = color,
@@ -28,7 +33,11 @@ fun VerticalDivider(
 
 @Composable
 fun HorizontalDivider(
-    color: Color = grayD9, start: Dp = 10.dp, end: Dp = 10.dp, top: Dp = 8.dp,bottom: Dp=0.dp,
+    color: Color = grayD9,
+    start: Dp = 10.dp,
+    end: Dp = 10.dp,
+    top: Dp = 8.dp,
+    bottom: Dp = 0.dp,
     modifier: Modifier = Modifier.padding(start = start, end = end, top = top, bottom = bottom)
 ) {
     Divider(

@@ -9,36 +9,3 @@ data class CustomerLoanList(
     val data: ArrayList<OfferResponseItem>? = null,
     val statusCode: Long? = null
 )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

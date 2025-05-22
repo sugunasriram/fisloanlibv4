@@ -7,7 +7,6 @@ import android.view.Gravity
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Toast
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,7 +26,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-
 import com.github.sugunasriram.fisloanlibv4.fis_code.app.MainActivity
 import com.github.sugunasriram.fisloanlibv4.fis_code.dataStore
 import com.github.sugunasriram.fisloanlibv4.fis_code.utils.storage.TokenManager
@@ -159,35 +157,35 @@ object LoanLib {
     }
 
     data class PersonalDetails(
-        val name: String="",
-        val dob: String="",
-        val personalEmailId: String="",
-        val officialEmailId: String="",
-        val gender: String="",
-        val address1: String="",
-        val pincode1: String="",
-        val address2: String="",
-        val pincode2: String=""
-    ) :Serializable
+        val name: String = "",
+        val dob: String = "",
+        val personalEmailId: String = "",
+        val officialEmailId: String = "",
+        val gender: String = "",
+        val address1: String = "",
+        val pincode1: String = "",
+        val address2: String = "",
+        val pincode2: String = ""
+    ) : Serializable
 
     data class ProductDetails(
-        val productCategory: String="",
-        val productSKUID: String="",
-        val productBrand: String="",
-        val productPrice: Double=0.0,
-        val downpayment: Double=0.0,
-        val merchantPan: String="",
-        val merchantGst: String="",
-        val merchantBankAccountNumber: String="",
-        val merchantIfscCode: String="",
-        val merchantBankAccountHolderName: String=""
-    ) :Serializable
+        val productCategory: String = "",
+        val productSKUID: String = "",
+        val productBrand: String = "",
+        val productPrice: Double = 0.0,
+        val downpayment: Double = 0.0,
+        val merchantPan: String = "",
+        val merchantGst: String = "",
+        val merchantBankAccountNumber: String = "",
+        val merchantIfscCode: String = "",
+        val merchantBankAccountHolderName: String = ""
+    ) : Serializable
 
     data class SessionDetails(
-        val sessionId: String=""
-    ) :Serializable
+        val sessionId: String = ""
+    ) : Serializable
 
-    fun LaunchFISAppWithParams (
+    fun LaunchFISAppWithParams(
         context: Context,
         personalDetails: PersonalDetails,
         productDetails: ProductDetails
@@ -204,7 +202,6 @@ object LoanLib {
         context.startActivity(intent)
     }
 
-
     data class LoanDetails(
         val loanAmount: Double,
         val interestRate: Double,
@@ -214,7 +211,7 @@ object LoanLib {
         context: Context,
         personalDetails: PersonalDetails,
         productDetails: ProductDetails,
-        sessionDetails: SessionDetails ?= null,
+        sessionDetails: SessionDetails ? = null,
         callback: (LoanDetails) -> Unit
     ) {
         Toast.makeText(context, "Launching FIS with Params", Toast.LENGTH_SHORT).show()
@@ -229,7 +226,7 @@ object LoanLib {
 
         LoanLib.callback = callback
 
-        //(context as Activity).startActivityForResult(intent, 2001)
+        // (context as Activity).startActivityForResult(intent, 2001)
         context.startActivity(intent)
     }
 }

@@ -21,6 +21,7 @@ data class ConsentApprovalResponse(
     val status: Boolean? = null,
     val statusCode: Int? = null
 )
+
 @Serializable
 data class OfferResponse(
     val offerResponse: List<Offer?>? = null
@@ -34,6 +35,7 @@ data class Offer(
     @SerialName("data")
     val data: List<Offer>? = null
 )
+
 @Serializable
 data class OfferResponseItem(
     @SerialName("_id")
@@ -51,12 +53,12 @@ data class OfferResponseItem(
     @SerialName("msg_id")
     val msgId: String? = null,
 
-    //Sugu - STart
+    // Sugu - STart
     @SerialName("min_loan_amount")
     val minLoanAmount: String? = null,
     @SerialName("max_loan_amount")
     val maxLoanAmount: String? = null,
-    //Sugu - End
+    // Sugu - End
 
     @SerialName("quote_id")
     val quoteId: String? = null,
@@ -109,7 +111,7 @@ data class OfferResponseItem(
     @SerialName("city")
     val city: String? = null,
     @SerialName("domain")
-    val domain: String? = null,
+    val domain: String? = null
 )
 
 @Serializable
@@ -117,6 +119,7 @@ data class ItemPrice(
     val currency: String? = null,
     val value: String? = null
 )
+
 @Serializable
 data class Tags(
 
@@ -173,10 +176,9 @@ data class Tags(
     @SerialName("Customer support contact number")
     val customerSupportContactNumber: String? = null,
     @SerialName("Consent Handler")
-    val consentHandler: String? = null,
+    val consentHandler: String? = null
 
 )
-
 
 object TagsSerializer : KSerializer<List<Tag>> {
     override val descriptor: SerialDescriptor =
@@ -192,6 +194,7 @@ object TagsSerializer : KSerializer<List<Tag>> {
         return map.map { Tag(it.key, it.value) }
     }
 }
+
 @Serializable
 data class Tag(
     val key: String,
@@ -202,14 +205,16 @@ data class Tag(
 data class ProviderTagsItem(
     val name: String? = null,
     val tags: Map<String, String>? = null,
-    val display: String? = null,
+    val display: String? = null
 )
+
 @Serializable
 data class ImagesItem(
     @SerialName("size_type")
     val sizeType: String? = null,
-    val url: String? = null,
+    val url: String? = null
 )
+
 @Serializable
 data class ProviderDescriptor(
     val images: ArrayList<ImagesItem?>? = null,
@@ -217,24 +222,28 @@ data class ProviderDescriptor(
     @SerialName("short_desc")
     val shortDesc: String? = null,
     @SerialName("long_desc")
-    val longDesc: String? = null,
+    val longDesc: String? = null
 )
+
 @Serializable
 data class ItemDescriptor(
     val code: String? = null,
     val name: String? = null
 )
+
 @Serializable
 data class AAQuoteBreakUp(
     val currency: String? = null,
     val title: String? = null,
     val value: String? = null
 )
+
 @Serializable
 data class QuotePrice(
     val currency: String? = null,
     val value: String? = null
 )
+
 @Serializable
 data class ItemTagsItem(
     val display: Boolean? = null,
@@ -245,8 +254,7 @@ data class ItemTagsItem(
 
 @Serializable
 data class ConsentApprovalRequest(
-	val id: String? = null,
-	val url: String? = null,
+    val id: String? = null,
+    val url: String? = null,
     val loanType: String? = null
 )
-

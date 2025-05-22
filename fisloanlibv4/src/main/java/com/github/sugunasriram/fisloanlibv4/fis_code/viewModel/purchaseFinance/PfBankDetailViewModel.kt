@@ -77,7 +77,10 @@ class PfBankDetailViewModel : BaseViewModel() {
     }
 
     private suspend fun handlePfLoanApproved(
-        id: String, loanType: String, context: Context, checkForAccessToken: Boolean = true
+        id: String,
+        loanType: String,
+        context: Context,
+        checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
             ApiRepository.pfLoanApproved(id, loanType)
@@ -92,7 +95,10 @@ class PfBankDetailViewModel : BaseViewModel() {
             ) {
                 if (handleAuthGetAccessTokenApi()) {
                     handlePfLoanApproved(
-                        id = id, loanType = loanType, context = context, checkForAccessToken = false
+                        id = id,
+                        loanType = loanType,
+                        context = context,
+                        checkForAccessToken = false
                     )
                 } else {
                     _navigationToSignIn.value = true
@@ -115,15 +121,21 @@ class PfBankDetailViewModel : BaseViewModel() {
         withContext(Dispatchers.Main) {
             if (error is ResponseException) {
                 CommonMethods().handleResponseException(
-                    error = error, context = context, updateErrorMessage = ::updateErrorMessage,
-                    _showServerIssueScreen = _showServerIssueScreen, _middleLoan = _middleLoan,
-                    _unAuthorizedUser = _unAuthorizedUser, _unexpectedError = _unexpectedError,
+                    error = error,
+                    context = context,
+                    updateErrorMessage = ::updateErrorMessage,
+                    _showServerIssueScreen = _showServerIssueScreen,
+                    _middleLoan = _middleLoan,
+                    _unAuthorizedUser = _unAuthorizedUser,
+                    _unexpectedError = _unexpectedError,
                     _showLoader = _showLoader
                 )
             } else {
                 CommonMethods().handleGeneralException(
-                    error = error, _showInternetScreen = _showInternetScreen,
-                    _showTimeOutScreen = _showTimeOutScreen, _unexpectedError = _unexpectedError
+                    error = error,
+                    _showInternetScreen = _showInternetScreen,
+                    _showTimeOutScreen = _showTimeOutScreen,
+                    _unexpectedError = _unexpectedError
                 )
             }
             _bankDetailCollecting.value = false

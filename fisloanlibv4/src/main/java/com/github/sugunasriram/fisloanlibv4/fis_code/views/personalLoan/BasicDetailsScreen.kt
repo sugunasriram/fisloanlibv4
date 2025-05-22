@@ -61,13 +61,11 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.components.SpaceBetweenText
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.TextInputLayout
 import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.navigateToPersonaLoanScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.navigateToReviewDetailsScreen
-import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.auth.Profile
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.appOrange
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.appWhite
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.checkBoxGray
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.grayD9
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal14Text500
-import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal18Text400
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal20Text700
 import com.github.sugunasriram.fisloanlibv4.fis_code.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fis_code.viewModel.auth.RegisterViewModel
@@ -81,7 +79,7 @@ import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun BasicDetailsScreen(navController: NavHostController, fromFlow: String,loanPurpose :String) {
+fun BasicDetailsScreen(navController: NavHostController, fromFlow: String, loanPurpose: String) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val registerViewModel: RegisterViewModel = viewModel()
@@ -118,7 +116,6 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String,loanPu
 
     val udyamNumber by registerViewModel.udyamNumber.observeAsState("")
 
-
     val pinCode1 by registerViewModel.pinCode1.observeAsState("")
     val pinCode1Error by registerViewModel.pinCode1Error.observeAsState(null)
 
@@ -133,7 +130,6 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String,loanPu
 
     val state1 by registerViewModel.state1.observeAsState("")
     val state1Error by registerViewModel.state1Error.observeAsState(null)
-
 
     val officialAddressField by registerViewModel.officialAddressField.observeAsState()
     val officialAddressError by registerViewModel.officialAddressError.observeAsState(null)
@@ -211,7 +207,8 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String,loanPu
         formattedGender
     }
     val genderList = listOf(
-        stringResource(id = R.string.male), stringResource(id = R.string.female),
+        stringResource(id = R.string.male),
+        stringResource(id = R.string.female),
         stringResource(id = R.string.others)
 //        stringResource(id = R.string.transgender)
     )
@@ -220,15 +217,18 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String,loanPu
     } ?: ""
     var employmentSelectedText: String = formattedEmployeeType ?: ""
     val employeeTypeList = listOf(
-        stringResource(id = R.string.salaried), stringResource(id = R.string.self_employment)
+        stringResource(id = R.string.salaried),
+        stringResource(id = R.string.self_employment)
     )
 
     val scope = rememberCoroutineScope()
     val bottomSheet1Value = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
     )
     val bottomSheet2Value = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
     )
     val annualIncomeViewModel: AnnualIncomeViewModel = viewModel()
     LaunchedEffect(incomeValue) {
@@ -257,14 +257,13 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String,loanPu
         purposeFocus.requestFocus()
     }
 
-
     val onPurposeDismiss: () -> Unit = { purposeExpanded = false }
     val minRange = 30000f
     val maxRange = 2000000f
     val stepSize = 5000f
     val numberOfSteps = ((maxRange - minRange) / stepSize).toInt() - 1
 
-    BackHandler {  navigateToPersonaLoanScreen(navController,fromFlow)}
+    BackHandler { navigateToPersonaLoanScreen(navController, fromFlow) }
 
     if (!showInternetScreen && !showTimeOutScreen && !showServerIssueScreen && !unexpectedErrorScreen) {
         if (inProgress) {
@@ -280,7 +279,7 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String,loanPu
 //                    CommonMethods().toastMessage(context = context, toastMsg = "Profile updated")
 //                    registerViewModel.updateShownMsg(true)
 //                    navigateApplyByCategoryScreen(navController)
-////                    navController.popBackStack()
+// //                    navController.popBackStack()
 //                }
                 CustomModalBottomSheet(
                     bottomSheetState = bottomSheet1Value,
@@ -341,12 +340,12 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String,loanPu
                             topBarBackgroundColor = appOrange,
                             topBarText = stringResource(R.string.basic_detail),
                             showBackButton = true,
-                            onBackClick = { navigateToPersonaLoanScreen(navController,fromFlow) },
+                            onBackClick = { navigateToPersonaLoanScreen(navController, fromFlow) },
                             showBottom = true,
                             showSingleButton = true,
                             primaryButtonText = stringResource(R.string.next),
                             onPrimaryButtonClick = {
-                                annualIncomeViewModel.onNextClicked(context, selectedPurpose, income,purposeFocus)
+                                annualIncomeViewModel.onNextClicked(context, selectedPurpose, income, purposeFocus)
                                 val employmentTypeSmallCase =
                                     employeeType?.lowercase(Locale.ROOT)
                                 val genderFormat = when (genderSelectedText.lowercase(Locale.ROOT)) {
@@ -395,8 +394,10 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String,loanPu
                             RegisterText(
                                 text = stringResource(id = R.string.please_provide_more_info),
                                 style = normal20Text700,
-                                top = 20.dp, bottom = 20.dp,
-                                start = 20.dp, end = 20.dp,
+                                top = 20.dp,
+                                bottom = 20.dp,
+                                start = 20.dp,
+                                end = 20.dp
                             )
 
                             BasicDetailsInputField(
@@ -474,9 +475,12 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String,loanPu
                                 )
                             )
                             DatePickerField(
-                                dob = dob ?: " ", dobFocus = dobFocusRequester,
-                                registerViewModel = registerViewModel, dobError = dobError ?: "",
-                                context = context, readOnly = true
+                                dob = dob ?: " ",
+                                dobFocus = dobFocusRequester,
+                                registerViewModel = registerViewModel,
+                                dobError = dobError ?: "",
+                                context = context,
+                                readOnly = true
                             )
                             InputField(
                                 inputText = "",
@@ -501,14 +505,14 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String,loanPu
                                 onRadioSelected = { selectedText ->
                                     genderSelectedText = selectedText
                                     registerViewModel.onGenderChanged(selectedText, context)
-                                },
+                                }
                             )
 
                             BasicDetailsInputField(
                                 label = stringResource(id = R.string.pan),
                                 value = panNumber,
                                 readOnly = true,
-                                onValueChange = { registerViewModel.onPanNumberChanged(it, context)},
+                                onValueChange = { registerViewModel.onPanNumberChanged(it, context) },
                                 error = panError,
                                 focusRequester = panFocusRequester,
                                 leadingImage = painterResource(R.drawable.pan_icon),
@@ -545,7 +549,7 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String,loanPu
                                         selectedEmployment,
                                         context
                                     )
-                                },
+                                }
                             )
                             BasicDetailsInputField(
                                 label = stringResource(id = R.string.company_name),
@@ -581,7 +585,7 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String,loanPu
                                         topTextStart = 0.dp,
                                         topTextBottom = 0.dp,
                                         topTextTop = 0.dp,
-                                        starTop = 0.dp,
+                                        starTop = 0.dp
                                     )
 
                                     Box(
@@ -612,7 +616,7 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String,loanPu
                                                 colors = SliderDefaults.colors(
                                                     thumbColor = appOrange,
                                                     activeTickColor = appOrange,
-                                                    inactiveTickColor = grayD9,
+                                                    inactiveTickColor = grayD9
                                                 ),
                                                 modifier = Modifier.padding(
                                                     start = 30.dp,
@@ -630,7 +634,8 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String,loanPu
                                                 textColor = checkBoxGray
                                             )
                                             TextInputLayout(
-                                                textFieldVal = TextFieldValue(text = formattedIncome,
+                                                textFieldVal = TextFieldValue(
+                                                    text = formattedIncome,
                                                     selection = TextRange(formattedIncome.length)
                                                 ),
                                                 keyboardOptions = KeyboardOptions(
@@ -640,7 +645,8 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String,loanPu
                                                 keyboardActions = KeyboardActions(onDone = {}),
                                                 onTextChanged = { newText ->
                                                     annualIncomeViewModel.onIncomeChanged(
-                                                        context = context, newText.text
+                                                        context = context,
+                                                        newText.text
                                                     )
 //                                                    if (newText.text.replace("₹", "")
 //                                                            .replace(",", "")
@@ -663,9 +669,7 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String,loanPu
                                                     .focusRequester(incomeFocus),
                                                 readOnly = true
                                             )
-
                                         }
-
                                     }
                                 }
                             }
@@ -737,24 +741,24 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String,loanPu
                                 readOnly = true
                             )
                         }
-
                     }
                 }
             }
         }
     } else {
         CommonMethods().HandleErrorScreens(
-            navController = navController, showInternetScreen = showInternetScreen,
-            showTimeOutScreen = showTimeOutScreen, showServerIssueScreen = showServerIssueScreen,
-            unexpectedErrorScreen = unexpectedErrorScreen, unAuthorizedUser = unAuthorizedUser
+            navController = navController,
+            showInternetScreen = showInternetScreen,
+            showTimeOutScreen = showTimeOutScreen,
+            showServerIssueScreen = showServerIssueScreen,
+            unexpectedErrorScreen = unexpectedErrorScreen,
+            unAuthorizedUser = unAuthorizedUser
         )
     }
 }
 
-
-
 @Preview(showBackground = true)
 @Composable
 fun BasicDetailsScreenPreview() {
-    BasicDetailsScreen(rememberNavController(), "Personal","")
+    BasicDetailsScreen(rememberNavController(), "Personal", "")
 }

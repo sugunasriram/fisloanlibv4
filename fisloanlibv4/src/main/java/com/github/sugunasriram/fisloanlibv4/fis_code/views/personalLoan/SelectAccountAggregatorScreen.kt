@@ -37,11 +37,15 @@ val bankList = arrayListOf<BankItem?>(
 
 @Composable
 fun SelectAccountAggregatorScreen(
-    navController: NavHostController, loanPurpose: String, fromFlow: String,
-    id:String, transactionId:String,url:String
+    navController: NavHostController,
+    loanPurpose: String,
+    fromFlow: String,
+    id: String,
+    transactionId: String,
+    url: String
 ) {
     BackHandler {
-        navigateToAccountAggregatorScreen(navController,loanPurpose,fromFlow,  id = id, transactionId = transactionId,url = url)
+        navigateToAccountAggregatorScreen(navController, loanPurpose, fromFlow, id = id, transactionId = transactionId, url = url)
     }
     val context = LocalContext.current
     val (selectedOption, setSelectedOption) = remember { mutableStateOf<String?>(if (bankList.size == 1) bankList[0]?.bankName else null) }
@@ -53,8 +57,13 @@ fun SelectAccountAggregatorScreen(
         showBackButton = true,
         onBackClick = {
             navigateToAccountAggregatorScreen(
-                navController = navController, loanPurpose = loanPurpose, fromFlow = fromFlow,
-                id = id, transactionId = transactionId,url = url)
+                navController = navController,
+                loanPurpose = loanPurpose,
+                fromFlow = fromFlow,
+                id = id,
+                transactionId = transactionId,
+                url = url
+            )
         },
         showBottom = true,
         showErrorMsg = showError,
@@ -62,13 +71,19 @@ fun SelectAccountAggregatorScreen(
         showSingleButton = true,
         primaryButtonText = stringResource(R.string.next),
         onPrimaryButtonClick = {
-            if(selectedOption!=null){
-                navigateToWebViewFlowOneScreen(navController, loanPurpose,
-                    fromFlow,id = id, transactionId = transactionId,url = url)
+            if (selectedOption != null) {
+                navigateToWebViewFlowOneScreen(
+                    navController,
+                    loanPurpose,
+                    fromFlow,
+                    id = id,
+                    transactionId = transactionId,
+                    url = url
+                )
 //                navigateToLoanOffersScreen(navController,loanPurpose, fromFlow)
 //                navigateToWebViewFlowOneScreen(navController, purpose, fromFlow)
                 showError = false
-            }else{
+            } else {
                 showError = true
             }
         },
@@ -80,8 +95,11 @@ fun SelectAccountAggregatorScreen(
             textAlign = TextAlign.Center, alignment = Alignment.TopCenter
         )
         ImageTextWithRadioButton(
-            backGroundColor = lightishGray, radioOptions = bankList, top = 2.dp,
-            selectedOption = selectedOption, onOptionSelected = {
+            backGroundColor = lightishGray,
+            radioOptions = bankList,
+            top = 2.dp,
+            selectedOption = selectedOption,
+            onOptionSelected = {
                 setSelectedOption(it)
                 showError = false
             }
@@ -92,6 +110,12 @@ fun SelectAccountAggregatorScreen(
 @Preview
 @Composable
 fun SelectAAScreenPreview() {
-    SelectAccountAggregatorScreen(rememberNavController(), "loanPurpose", "fromFlow",
-        "id", "tnxId", "url")
+    SelectAccountAggregatorScreen(
+        rememberNavController(),
+        "loanPurpose",
+        "fromFlow",
+        "id",
+        "tnxId",
+        "url"
+    )
 }

@@ -28,7 +28,10 @@ import kotlinx.serialization.json.Json
 @SuppressLint("ResourceType")
 @Composable
 fun AAConsentApprovalScreen(
-    navController: NavHostController, id: String? = null, url: String? = null, fromFlow: String
+    navController: NavHostController,
+    id: String? = null,
+    url: String? = null,
+    fromFlow: String
 ) {
     val context = LocalContext.current
     val consentApprovalViewModel: WebViewModel = viewModel()
@@ -48,7 +51,7 @@ fun AAConsentApprovalScreen(
     val navigationToSignIn by consentApprovalViewModel.navigationToSignIn.collectAsState()
 
     when {
-        navigationToSignIn -> navigateSignInPage (navController)
+        navigationToSignIn -> navigateSignInPage(navController)
         showInternetScreen -> CommonMethods().ShowInternetErrorScreen(navController)
         showTimeOutScreen -> CommonMethods().ShowTimeOutErrorScreen(navController)
         showServerIssueScreen -> CommonMethods().ShowServerIssueErrorScreen(navController)
@@ -63,18 +66,23 @@ fun AAConsentApprovalScreen(
                     text = stringResource(R.string.generating_account_aggregator),
                     updatedText = stringResource(id = R.string.generating_best_offers),
                     image = R.raw.generating_aa_consent,
-                    showTimer = true, navController = navController
+                    showTimer = true,
+                    navController = navController
                 )
             } else {
                 if (isLoadingSuccess) {
                     ApiSuccess(
-                        fromFlow = fromFlow, consentApprovalResponse = consentApprovalResponse,
+                        fromFlow = fromFlow,
+                        consentApprovalResponse = consentApprovalResponse,
                         gstConsentApprovalResponse = gstConsentApprovalResponse,
                         navController = navController
                     )
                 } else {
                     decideApiCalling(
-                        fromFlow = fromFlow, context = context, id = id, url = url,
+                        fromFlow = fromFlow,
+                        context = context,
+                        id = id,
+                        url = url,
                         consentApprovalViewModel = consentApprovalViewModel
                     )
                 }
@@ -84,25 +92,37 @@ fun AAConsentApprovalScreen(
 }
 
 fun decideApiCalling(
-    fromFlow: String, consentApprovalViewModel: WebViewModel, context: Context, id: String?,
+    fromFlow: String,
+    consentApprovalViewModel: WebViewModel,
+    context: Context,
+    id: String?,
     url: String?
 ) {
     if (fromFlow.equals("Personal Loan", ignoreCase = true)) {
         consentApprovalViewModel.aaConsentApprovalApi(
-            context = context, consentBodyModel = ConsentApprovalRequest(
-                id = id, url = url, loanType = "PERSONAL_LOAN"
+            context = context,
+            consentBodyModel = ConsentApprovalRequest(
+                id = id,
+                url = url,
+                loanType = "PERSONAL_LOAN"
             )
         )
     } else if (fromFlow.equals("Invoice Loan", ignoreCase = true)) {
         consentApprovalViewModel.gstConsentApproval(
-            context = context, consentApproval = ConsentApprovalRequest(
-                id = id, url = url, loanType = "INVOICE_BASED_LOAN"
+            context = context,
+            consentApproval = ConsentApprovalRequest(
+                id = id,
+                url = url,
+                loanType = "INVOICE_BASED_LOAN"
             )
         )
     } else if (fromFlow.equals("Purchase Finance", ignoreCase = true)) {
         consentApprovalViewModel.financeConsentApproval(
-            context = context, consentApproval = ConsentApprovalRequest(
-                id = id, url = url, loanType = "PURCHASE_FINANCE"
+            context = context,
+            consentApproval = ConsentApprovalRequest(
+                id = id,
+                url = url,
+                loanType = "PURCHASE_FINANCE"
             )
         )
     }
@@ -110,13 +130,15 @@ fun decideApiCalling(
 
 @Composable
 fun ApiSuccess(
-    navController: NavHostController, gstConsentApprovalResponse: GstConsentResponse?,
-    fromFlow: String, consentApprovalResponse: ConsentApprovalResponse?
+    navController: NavHostController,
+    gstConsentApprovalResponse: GstConsentResponse?,
+    fromFlow: String,
+    consentApprovalResponse: ConsentApprovalResponse?
 ) {
     if (fromFlow.equals("Personal Loan", ignoreCase = true)) {
         val transactionId = consentApprovalResponse?.data?.offerResponse?.get(0)?.offer?.txnId
         transactionId?.let {
-            navigateToLoanOffersListScreen(navController,  "No Need Response Item", fromFlow)
+            navigateToLoanOffersListScreen(navController, "No Need Response Item", fromFlow)
 //            navigateToLoanProcessScreen(
 //                navController, transactionId= it,
 //                statusId = 2, responseItem = "No Need Response Item", offerId = "1234",
@@ -131,11 +153,11 @@ fun ApiSuccess(
                 val responseItem = json.encodeToString(GstData.serializer(), data)
                 navigateToLoanProcessScreen(
                     navController = navController,
-                    transactionId=it,
+                    transactionId = it,
                     statusId = 12,
                     offerId = "1234",
                     fromFlow = fromFlow,
-                    responseItem = responseItem,
+                    responseItem = responseItem
                 )
             }
         }
@@ -147,15 +169,14 @@ fun ApiSuccess(
                 val responseItem =
                     json.encodeToString(OfferResponse.serializer(), offerResponseList)
                 navigateToLoanProcessScreen(
-                    navController = navController, transactionId=it,
-                    statusId = 20, offerId = "1234",
-                    fromFlow = fromFlow, responseItem = responseItem,
+                    navController = navController,
+                    transactionId = it,
+                    statusId = 20,
+                    offerId = "1234",
+                    fromFlow = fromFlow,
+                    responseItem = responseItem
                 )
             }
         }
     }
 }
-
-
-
-

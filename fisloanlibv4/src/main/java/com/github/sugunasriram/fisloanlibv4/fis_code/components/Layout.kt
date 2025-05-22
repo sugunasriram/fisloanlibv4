@@ -51,7 +51,6 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.backgroundOrange
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.checkBoxGray
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.errorRed
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal12Text400
-import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal14Text500
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal14Text700
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal16Text500
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal16Text700
@@ -60,7 +59,8 @@ import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun FixedTopBottomScreen(
-    navController: NavHostController, modifier: Modifier = Modifier,
+    navController: NavHostController,
+    modifier: Modifier = Modifier,
     showTopBar: Boolean = true,
     showBackButton: Boolean = true,
     topBarText: String = "",
@@ -76,8 +76,8 @@ fun FixedTopBottomScreen(
     checkboxState: Boolean = false,
     checkBoxText: String = stringResource(id = R.string.accept),
     onCheckBoxChange: ((Boolean) -> Unit)? = null,
-    showErrorMsg:Boolean = false,
-    errorMsg:String="",
+    showErrorMsg: Boolean = false,
+    errorMsg: String = "",
     primaryButtonText: String = stringResource(id = R.string.accept),
     onPrimaryButtonClick: (() -> Unit)? = null,
     secondaryButtonText: String = stringResource(id = R.string.decline),
@@ -85,9 +85,15 @@ fun FixedTopBottomScreen(
     tertiaryButtonText: String = stringResource(id = R.string.home),
     onTertiaryButtonClick: (() -> Unit)? = null,
     backgroundColor: Color = backgroundOrange,
-    buttonStart: Dp = 30.dp, buttonEnd: Dp = 30.dp, buttonTop: Dp = 10.dp, buttonBottom: Dp = 20.dp,
-    contentStart: Dp = 5.dp, contentEnd: Dp = 5.dp, contentTop: Dp = 0.dp, contentBottom: Dp = 0.dp,
-    pageContent: @Composable () -> Unit,
+    buttonStart: Dp = 30.dp,
+    buttonEnd: Dp = 30.dp,
+    buttonTop: Dp = 10.dp,
+    buttonBottom: Dp = 20.dp,
+    contentStart: Dp = 5.dp,
+    contentEnd: Dp = 5.dp,
+    contentTop: Dp = 0.dp,
+    contentBottom: Dp = 0.dp,
+    pageContent: @Composable () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
@@ -114,7 +120,7 @@ fun FixedTopBottomScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .weight(1f)
-                    .padding(start =contentStart, end = contentEnd, top = contentTop, bottom = contentBottom)
+                    .padding(start = contentStart, end = contentEnd, top = contentTop, bottom = contentBottom)
                     .fillMaxSize()
             ) {
                 pageContent()
@@ -124,7 +130,7 @@ fun FixedTopBottomScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .weight(1f)
-                    .padding(start =contentStart, end = contentEnd, top = contentTop, bottom = contentBottom)
+                    .padding(start = contentStart, end = contentEnd, top = contentTop, bottom = contentBottom)
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
             ) {
@@ -133,15 +139,17 @@ fun FixedTopBottomScreen(
         }
         if (showBottom) {
             if (showHyperText) {
-                HyperlinkText(onSahamatiClick = {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://sahamati.org.in/"))
-                    context.startActivity(intent)
-                },
+                HyperlinkText(
+                    onSahamatiClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://sahamati.org.in/"))
+                        context.startActivity(intent)
+                    },
                     onRbiClick = {
                         val intent =
                             Intent(Intent.ACTION_VIEW, Uri.parse("https://rbi.org.in/"))
                         context.startActivity(intent)
-                    })
+                    }
+                )
             }
             if (showCheckBox) {
                 CheckBoxText(
@@ -156,11 +164,15 @@ fun FixedTopBottomScreen(
                     }
                 )
             }
-            if(showErrorMsg){
+            if (showErrorMsg) {
                 Row(
-                    horizontalArrangement=Arrangement.Center,
-                    modifier = Modifier.fillMaxWidth()){
-                    Text(text = errorMsg,style = normal12Text400, color = errorRed,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = errorMsg,
+                        style = normal12Text400,
+                        color = errorRed
                     )
                 }
             }
@@ -189,17 +201,18 @@ fun FixedTopBottomScreen(
                 ) {
                     BoxButton(
                         modifier = Modifier.weight(1f),
-                        buttonText = secondaryButtonText, textColor = appOrange,
+                        buttonText = secondaryButtonText,
+                        textColor = appOrange,
                         backgroundColor = appWhite
                     ) {
                         onSecondaryButtonClick?.let { onSecondaryButtonClick() }
                     }
-                    BoxButton(modifier = Modifier.weight(1f),buttonText = primaryButtonText) {
+                    BoxButton(modifier = Modifier.weight(1f), buttonText = primaryButtonText) {
                         onPrimaryButtonClick?.let { onPrimaryButtonClick() }
                     }
                 }
             }
-            if(showTripleButton){
+            if (showTripleButton) {
                 Row(
                     modifier = Modifier
                         .height(90.dp)
@@ -208,21 +221,31 @@ fun FixedTopBottomScreen(
                     horizontalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
                     CurvedPrimaryButton(
-                        text = primaryButtonText,style = normal14Text700,start = 5.dp,end=5.dp,
-                        modifier = Modifier.weight(1f).padding(horizontal = 4.dp),
+                        text = primaryButtonText,
+                        style = normal14Text700,
+                        start = 5.dp,
+                        end = 5.dp,
+                        modifier = Modifier.weight(1f).padding(horizontal = 4.dp)
                     ) {
                         onPrimaryButtonClick?.invoke()
                     }
 
                     CurvedPrimaryButton(
-                        text = secondaryButtonText, style = normal14Text700,start = 5.dp,end=5.dp,
-                        modifier = Modifier.weight(1f).padding(horizontal = 4.dp),
+                        text = secondaryButtonText,
+                        style = normal14Text700,
+                        start = 5.dp,
+                        end = 5.dp,
+                        modifier = Modifier.weight(1f).padding(horizontal = 4.dp)
                     ) {
                         onSecondaryButtonClick?.invoke()
                     }
 
-                    CurvedPrimaryButton(text = tertiaryButtonText,style = normal14Text700,start = 5.dp,end=5.dp,
-                        modifier = Modifier.weight(1f).padding(horizontal = 4.dp),
+                    CurvedPrimaryButton(
+                        text = tertiaryButtonText,
+                        style = normal14Text700,
+                        start = 5.dp,
+                        end = 5.dp,
+                        modifier = Modifier.weight(1f).padding(horizontal = 4.dp)
                     ) {
                         onTertiaryButtonClick?.invoke()
                     }
@@ -262,8 +285,11 @@ fun FixedTopBottomScreen(
 
 @Composable
 fun TopBottomBarForNegativeScreen(
-    navController: NavHostController, showTop: Boolean = true, showBottom: Boolean = false,
-    isSelfScrollable: Boolean = false, pageContent: @Composable () -> Unit,
+    navController: NavHostController,
+    showTop: Boolean = true,
+    showBottom: Boolean = false,
+    isSelfScrollable: Boolean = false,
+    pageContent: @Composable () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
     Column(
@@ -319,7 +345,7 @@ fun TopBar(
     showBackButton: Boolean = true,
     onBackClick: () -> Unit = { navController.popBackStack() },
     topBarBackgroundColor: Color = appOrange,
-    topBarText: String = "",
+    topBarText: String = ""
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -327,7 +353,7 @@ fun TopBar(
         modifier = Modifier
             .background(topBarBackgroundColor)
             .fillMaxWidth()
-            .padding(top = 10.dp, bottom = 5.dp,end=5.dp)
+            .padding(top = 10.dp, bottom = 5.dp, end = 5.dp)
     ) {
         if (showBackButton) {
             BackButton(navController = navController, onClick = onBackClick)
@@ -339,16 +365,18 @@ fun TopBar(
             text = topBarText,
             style = if (topBarBackgroundColor == appOrange) normal16Text700 else normal18Text700,
             textColor = if (topBarBackgroundColor == appOrange) appWhite else appBlack,
-            start = 5.dp, textAlign = TextAlign.Start
+            start = 5.dp,
+            textAlign = TextAlign.Start
         )
-
     }
 }
 
 @Composable
 fun ScreenWithHamburger(
-    modifier: Modifier = Modifier, isSelfScrollable: Boolean = false,
-    navController: NavHostController = rememberNavController(),topBarText: String="",
+    modifier: Modifier = Modifier,
+    isSelfScrollable: Boolean = false,
+    navController: NavHostController = rememberNavController(),
+    topBarText: String = "",
     pageContent: @Composable () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -362,15 +390,21 @@ fun ScreenWithHamburger(
                 detectTapGestures(onTap = { focusManager.clearFocus() })
             }
     ) {
-
-        ModalDrawer(drawerState = drawerState,
+        ModalDrawer(
+            drawerState = drawerState,
             drawerBackgroundColor = Color.White,
             drawerContent = {
                 SideMenuContent(coroutineScope, drawerState, navController)
-            }) {
+            }
+        ) {
             Scaffold(
-                topBar = { TopBarWithMenu(coroutineScope=coroutineScope,
-                    drawerState=drawerState, topBarText = topBarText) },
+                topBar = {
+                    TopBarWithMenu(
+                        coroutineScope = coroutineScope,
+                        drawerState = drawerState,
+                        topBarText = topBarText
+                    )
+                }
             ) { paddingValues ->
                 if (isSelfScrollable) {
                     Column(
@@ -391,16 +425,15 @@ fun ScreenWithHamburger(
                 }
             }
         }
-
-
     }
 }
 
 @Composable
 fun TopBarWithMenu(
-    coroutineScope: CoroutineScope, drawerState: DrawerState,
+    coroutineScope: CoroutineScope,
+    drawerState: DrawerState,
     topBarBackgroundColor: Color = appOrange,
-    topBarText: String = "",
+    topBarText: String = ""
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -410,7 +443,6 @@ fun TopBarWithMenu(
             .fillMaxWidth()
             .padding(top = 10.dp, bottom = 10.dp)
     ) {
-
         Image(
             painter = painterResource(R.drawable.hamburger_menu),
             contentDescription = stringResource(id = R.string.hamburger_menu),
@@ -432,10 +464,11 @@ fun TopBarWithMenu(
 
 @Composable
 fun SideBarLayout(
-    userName: String, contact: String,
+    userName: String,
+    contact: String,
     modifier: Modifier = Modifier,
     onBackClick: (() -> Unit)? = null,
-    pageContent: @Composable () -> Unit,
+    pageContent: @Composable () -> Unit
 ) {
     Column(
         modifier = modifier.fillMaxSize()
@@ -443,16 +476,24 @@ fun SideBarLayout(
         Box {
 //            Box {
             HeaderCard {
-                SideMenuProfileCard(userName = userName, contact = "+91 $contact",
+                SideMenuProfileCard(
+                    userName = userName,
+                    contact = "+91 $contact",
                     navController = rememberNavController(),
-                    onBackClick = { onBackClick?.let { onBackClick() } })
+                    onBackClick = { onBackClick?.let { onBackClick() } }
+                )
             }
 //            }
             Box(modifier = Modifier.padding(top = 230.dp)) {
                 HeaderCard(
-                    topStart = 10.dp, topEnd = 10.dp, bottomStart = 0.dp, bottomEnd = 0.dp,
-                    start = 10.dp, end = 10.dp,
-                    cardColor = appWhite, borderColor = appWhite
+                    topStart = 10.dp,
+                    topEnd = 10.dp,
+                    bottomStart = 0.dp,
+                    bottomEnd = 0.dp,
+                    start = 10.dp,
+                    end = 10.dp,
+                    cardColor = appWhite,
+                    borderColor = appWhite
                 ) {
                     Column(
                         verticalArrangement = Arrangement.SpaceEvenly,
@@ -462,10 +503,8 @@ fun SideBarLayout(
                     ) {
                         pageContent()
                     }
-
                 }
             }
         }
-
     }
 }

@@ -83,11 +83,15 @@ import java.io.ByteArrayOutputStream
 @Preview(showBackground = true)
 @Composable
 fun PreviewCreateIssueScreen() {
-    CreateIssueScreen(rememberNavController(),"","","","Personal Loan")
+    CreateIssueScreen(rememberNavController(), "", "", "", "Personal Loan")
 }
+
 @Composable
 fun CreateIssueScreen(
-    navController: NavHostController, orderId: String, providerId: String, orderState: String,
+    navController: NavHostController,
+    orderId: String,
+    providerId: String,
+    orderState: String,
     fromFlow: String
 ) {
     val context = LocalContext.current
@@ -126,10 +130,15 @@ fun CreateIssueScreen(
     val shortDescFocus = FocusRequester()
     val longDescFocus = FocusRequester()
 
-    val loanState = if (orderState.contains("Loan SANCTIONED", ignoreCase = true)) "SANCTIONED"
-    else if (orderState.contains(" Loan CONSENT_REQUIRED", ignoreCase = true)) "CONSENT_REQUIRED"
-    else if (orderState.contains("Loan Disbursed", ignoreCase = true)) "DISBURSED"
-    else "INITIATED"
+    val loanState = if (orderState.contains("Loan SANCTIONED", ignoreCase = true)) {
+        "SANCTIONED"
+    } else if (orderState.contains(" Loan CONSENT_REQUIRED", ignoreCase = true)) {
+        "CONSENT_REQUIRED"
+    } else if (orderState.contains("Loan Disbursed", ignoreCase = true)) {
+        "DISBURSED"
+    } else {
+        "INITIATED"
+    }
 
     val categoryErrorMessage = stringResource(R.string.please_select_category)
     val subCategoryErrorMessage = stringResource(R.string.please_select_sub_category)
@@ -152,7 +161,8 @@ fun CreateIssueScreen(
     var subCategoryList by remember { mutableStateOf(listOf<String>()) }
     val onSubCategoryDismiss: () -> Unit = { subCategoryExpand = false }
     val onSubCategorySelected: (String) -> Unit =
-        { selectedText -> subCategorySelectedText = selectedText
+        { selectedText ->
+            subCategorySelectedText = selectedText
             createIssuePLViewModel.updateSubCategoryError(null)
         }
 
@@ -174,7 +184,7 @@ fun CreateIssueScreen(
     }
 
     when {
-        navigationToSignIn -> navigateSignInPage (navController)
+        navigationToSignIn -> navigateSignInPage(navController)
         showInternetScreen -> CommonMethods().ShowInternetErrorScreen(navController)
         showTimeOutScreen -> CommonMethods().ShowTimeOutErrorScreen(navController)
         showServerIssueScreen -> CommonMethods().ShowServerIssueErrorScreen(navController)
@@ -186,8 +196,12 @@ fun CreateIssueScreen(
             } else {
                 if (issueCreated) {
                     navigateToIssueListScreen(
-                        navController = navController, orderId = "12345", fromFlow = fromFlow,
-                        providerId = "12345", loanState = "No Need", fromScreen = "Create Issue"
+                        navController = navController,
+                        orderId = "12345",
+                        fromFlow = fromFlow,
+                        providerId = "12345",
+                        loanState = "No Need",
+                        fromScreen = "Create Issue"
                     )
                 } else {
                     if (issueListLoaded || subIssueLoaded) {
@@ -236,9 +250,13 @@ fun CreateIssueScreen(
                         ) {
                             RegisterText(
                                 text = stringResource(id = R.string.select_the_appropriate_issue),
-                                textColor = appBlack, style = normal16Text700, bottom = 5.dp,
-                                textAlign = TextAlign.Start, boxAlign = Alignment.TopStart,
-                                start = 10.dp, top = 20.dp,
+                                textColor = appBlack,
+                                style = normal16Text700,
+                                bottom = 5.dp,
+                                textAlign = TextAlign.Start,
+                                boxAlign = Alignment.TopStart,
+                                start = 10.dp,
+                                top = 20.dp
                             )
 
                             /* Category */
@@ -267,24 +285,36 @@ fun CreateIssueScreen(
                             )
                             StartingText(
                                 text = stringResource(id = R.string.tell_us_about_the_problem_you_are_facing),
-                                style = normal16Text700, textColor = appBlack,
-                                start = 10.dp,end=10.dp,top=15.dp,
+                                style = normal16Text700,
+                                textColor = appBlack,
+                                start = 10.dp,
+                                end = 10.dp,
+                                top = 15.dp
                             )
                             RegisterText(
                                 text = stringResource(id = R.string.describe_the_issue),
-                                textColor = appBlack, style = normal16Text700, bottom = 5.dp,
-                                textAlign = TextAlign.Start, boxAlign = Alignment.TopStart,
-                                start = 10.dp, top = 15.dp,
+                                textColor = appBlack,
+                                style = normal16Text700,
+                                bottom = 5.dp,
+                                textAlign = TextAlign.Start,
+                                boxAlign = Alignment.TopStart,
+                                start = 10.dp,
+                                top = 15.dp
                             )
                             IssueDescriptionFields(
-                                shortDesc = shortDesc, shortDescFocus = shortDescFocus,
-                                shortDescError = onShortDescError, longDescFocus = longDescFocus,
+                                shortDesc = shortDesc,
+                                shortDescFocus = shortDescFocus,
+                                shortDescError = onShortDescError,
+                                longDescFocus = longDescFocus,
                                 createIssuePLViewModel = createIssuePLViewModel,
-                                longDesc = longDesc, longDescError = longDescError
+                                longDesc = longDesc,
+                                longDescError = longDescError
                             )
                             IssuesWithImage(
-                                imageUploaded = imageUploaded, imageUploading = imageUploading,
-                                context = context, createIssuePLViewModel = createIssuePLViewModel,
+                                imageUploaded = imageUploaded,
+                                imageUploading = imageUploading,
+                                context = context,
+                                createIssuePLViewModel = createIssuePLViewModel,
                                 showImageNotUploadedError = showImageNotUploadedError
                             )
                         }
@@ -299,8 +329,11 @@ fun CreateIssueScreen(
 
 @Composable
 fun IssuesWithImage(
-    imageUploaded: Boolean, imageUploading: Boolean, createIssuePLViewModel: CreateIssueViewModel,
-    context: Context,showImageNotUploadedError : Boolean,
+    imageUploaded: Boolean,
+    imageUploading: Boolean,
+    createIssuePLViewModel: CreateIssueViewModel,
+    context: Context,
+    showImageNotUploadedError: Boolean
 ) {
     Spacer(modifier = Modifier.height(8.dp))
     UploadImageCard(
@@ -311,7 +344,6 @@ fun IssuesWithImage(
         createIssueViewModel = createIssuePLViewModel,
         cardDataColor = if (showImageNotUploadedError) errorRed else appOrange
     )
-
 }
 
 fun onCreateIssueButtonClick(
@@ -338,29 +370,28 @@ fun onCreateIssueButtonClick(
     properLongDescErrorMessage: String
 ) {
     val images = imageUploadResponse?.data ?: emptyList()
-    var isValid=true
-    if(categorySelectedText.isEmpty()){
+    var isValid = true
+    if (categorySelectedText.isEmpty()) {
         createIssuePLViewModel.updateCategoryError(categoryErrorMessage)
-        isValid=false
+        isValid = false
     }
-    if(subCategorySelectedText.isEmpty()){
+    if (subCategorySelectedText.isEmpty()) {
         createIssuePLViewModel.updateSubCategoryError(subCategoryErrorMessage)
-        isValid=false
+        isValid = false
     }
-    if(images.isEmpty()){
+    if (images.isEmpty()) {
         createIssuePLViewModel.updateImageNotUploadedErrorMessage()
-        isValid=false
+        isValid = false
     }
-    if(shortDesc.isEmpty()){
+    if (shortDesc.isEmpty()) {
         createIssuePLViewModel.updateShortDescError(shortDescErrorMessage)
-        isValid=false
-
+        isValid = false
     }
-    if (longDesc.isEmpty()){
+    if (longDesc.isEmpty()) {
         createIssuePLViewModel.updateLongDescError(longDescErrorMessage)
-        isValid=false
+        isValid = false
     }
-    if(isValid){
+    if (isValid) {
         createIssuePLViewModel.updateValidation(
             shortDesc = shortDesc, longDesc = longDesc,
             categorySelectedText = categorySelectedText,
@@ -369,9 +400,7 @@ fun onCreateIssueButtonClick(
             providerId = providerId, orderState = loanState,
             fromFlow = fromFlow
         )
-
     }
-
 }
 
 private fun hasOnlyInteger(input: String): Boolean {
@@ -380,50 +409,57 @@ private fun hasOnlyInteger(input: String): Boolean {
 
 @Composable
 fun IssueDescriptionFields(
-    shortDesc: String?, shortDescFocus: FocusRequester, shortDescError: String?,
-    longDescFocus: FocusRequester, createIssuePLViewModel: CreateIssueViewModel, longDesc: String?,
+    shortDesc: String?,
+    shortDescFocus: FocusRequester,
+    shortDescError: String?,
+    longDescFocus: FocusRequester,
+    createIssuePLViewModel: CreateIssueViewModel,
+    longDesc: String?,
     longDescError: String?
 ) {
-Column(){
-    OutlinedTextField(
-        value = shortDesc.orEmpty(),
-        label = {
-            Text(
-                text = stringResource(id = R.string.short_description),
-                color = hintGray,
-                style = normal18Text500,
-                textAlign = TextAlign.Start
+    Column() {
+        OutlinedTextField(
+            value = shortDesc.orEmpty(),
+            label = {
+                Text(
+                    text = stringResource(id = R.string.short_description),
+                    color = hintGray,
+                    style = normal18Text500,
+                    textAlign = TextAlign.Start
+                )
+            },
+            onValueChange = {
+                createIssuePLViewModel.onShortDescChanged(it)
+                createIssuePLViewModel.updateShortDescError(null)
+            },
+            modifier = Modifier
+                .fillMaxWidth().padding(start = 10.dp, end = 10.dp)
+                .background(appWhite, shape = RoundedCornerShape(16.dp)),
+            textStyle = normal18Text500,
+            isError = shortDescError?.isNotEmpty() == true,
+            keyboardOptions = KeyboardOptions(
+                capitalization = KeyboardCapitalization.Sentences,
+                imeAction = ImeAction.Next,
+                keyboardType = KeyboardType.Text
+            ),
+            maxLines = 1,
+            shape = RoundedCornerShape(8.dp),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = appTheme,
+                unfocusedBorderColor = appOrange,
+                cursorColor = cursorColor,
+                errorBorderColor = errorRed
             )
-        },
-        onValueChange = {
-            createIssuePLViewModel.onShortDescChanged(it)
-            createIssuePLViewModel.updateShortDescError(null)
-        },
-        modifier = Modifier
-            .fillMaxWidth().padding(start = 10.dp, end = 10.dp)
-            .background(appWhite, shape = RoundedCornerShape(16.dp)),
-        textStyle = normal18Text500,
-        isError = shortDescError?.isNotEmpty() == true,
-        keyboardOptions = KeyboardOptions(
-            capitalization = KeyboardCapitalization.Sentences,
-            imeAction = ImeAction.Next,
-            keyboardType = KeyboardType.Text
-        ),
-        maxLines = 1,
-        shape = RoundedCornerShape(8.dp),
-        colors = TextFieldDefaults.outlinedTextFieldColors(
-            focusedBorderColor = appTheme, unfocusedBorderColor = appOrange,
-            cursorColor = cursorColor, errorBorderColor = errorRed
         )
-    )
-    if (!shortDescError.isNullOrEmpty()) {
-        Text(
-            text = shortDescError, style = normal12Text400,
-            color = errorRed,
-            modifier = Modifier.padding(start = 16.dp, top = 2.dp)
-        )
+        if (!shortDescError.isNullOrEmpty()) {
+            Text(
+                text = shortDescError,
+                style = normal12Text400,
+                color = errorRed,
+                modifier = Modifier.padding(start = 16.dp, top = 2.dp)
+            )
+        }
     }
-}
     Column() {
         OutlinedTextField(
             value = longDesc.orEmpty(),
@@ -440,7 +476,7 @@ Column(){
                 createIssuePLViewModel.updateLongDescError(null)
             },
             modifier = Modifier.height(100.dp)
-                .fillMaxWidth().padding(top=10.dp,start = 10.dp, end = 10.dp)
+                .fillMaxWidth().padding(top = 10.dp, start = 10.dp, end = 10.dp)
                 .background(appWhite, shape = RoundedCornerShape(16.dp)),
             textStyle = normal18Text500,
             isError = longDescError?.isNotEmpty() == true,
@@ -452,19 +488,23 @@ Column(){
             maxLines = 5,
             shape = RoundedCornerShape(8.dp),
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = appTheme, unfocusedBorderColor = appOrange,
-                cursorColor = cursorColor, errorBorderColor = errorRed
+                focusedBorderColor = appTheme,
+                unfocusedBorderColor = appOrange,
+                cursorColor = cursorColor,
+                errorBorderColor = errorRed
             )
         )
         if (!longDescError.isNullOrEmpty()) {
             Text(
-                text = longDescError, style = normal12Text400,
+                text = longDescError,
+                style = normal12Text400,
                 color = errorRed,
                 modifier = Modifier.padding(start = 16.dp, top = 2.dp)
             )
         }
     }
 }
+
 @Composable
 fun UploadImageCard(
     isError: Boolean,
@@ -501,22 +541,26 @@ fun UploadImageCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 10.dp, top = 10.dp, bottom = 5.dp, end = 5.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
         RegisterText(
             text = stringResource(id = R.string.upload_the_issue_photo),
-            textColor = appBlack, style = normal16Text700, bottom = 5.dp,
-            textAlign = TextAlign.Start, boxAlign = Alignment.TopStart,
+            textColor = appBlack,
+            style = normal16Text700,
+            bottom = 5.dp,
+            textAlign = TextAlign.Start,
+            boxAlign = Alignment.TopStart,
             modifier = Modifier.weight(0.8f)
         )
-        if(selectedImageUris.size ==3)
-        Image(
-            painter = painterResource(R.drawable.edit_image),
-            contentDescription = null,
-            modifier = Modifier.weight(0.2f).clickable {
-                launcher.launch("image/*")
-            }
-        )
+        if (selectedImageUris.size == 3) {
+            Image(
+                painter = painterResource(R.drawable.edit_image),
+                contentDescription = null,
+                modifier = Modifier.weight(0.2f).clickable {
+                    launcher.launch("image/*")
+                }
+            )
+        }
     }
 
     when {
@@ -559,7 +603,7 @@ fun UploadImageCard(
         else -> {
             DashedBorderCard(
                 onClick = { launcher.launch("image/*") },
-                label =if(isError) "Upload Image" else "Image ${selectedImageUris.size + 1}",
+                label = if (isError) "Upload Image" else "Image ${selectedImageUris.size + 1}",
                 tintColor = cardDataColor
             )
         }
@@ -589,4 +633,3 @@ fun bitmapToBase64(bitmap: Bitmap): String {
     val byteArray = byteArrayOutputStream.toByteArray()
     return Base64.encodeToString(byteArray, Base64.NO_WRAP)
 }
-

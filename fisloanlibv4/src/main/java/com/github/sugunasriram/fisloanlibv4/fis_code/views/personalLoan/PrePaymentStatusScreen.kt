@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -23,10 +22,7 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.components.ClickableTextWit
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.StartingText
 import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.navigateToLoanDetailScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.appBlack
-import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.appBlueTitle
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.appGreen
-import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.azureBlueColor
-import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.errorGray
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.errorRed
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.hintGray
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal14Text500
@@ -40,14 +36,18 @@ fun PrePaymentStatusScreen(
     hintText: String = stringResource(id = R.string.repayment_successfully_processed),
     image: Painter = painterResource(id = R.drawable.payment_success),
     showButton: Boolean = false,
-    orderId:String,
-    fromFlow:String,
+    orderId: String,
+    fromFlow: String,
     onClick: () -> Unit
 ) {
-    LaunchedEffect (Unit){
+    LaunchedEffect(Unit) {
         delay(5000)
-        navigateToLoanDetailScreen(navController = navController, orderId = orderId, fromFlow = fromFlow,
-            fromScreen = "PrePart Payment Status")
+        navigateToLoanDetailScreen(
+            navController = navController,
+            orderId = orderId,
+            fromFlow = fromFlow,
+            fromScreen = "PrePart Payment Status"
+        )
     }
     Box(
         modifier = Modifier
@@ -61,36 +61,49 @@ fun PrePaymentStatusScreen(
                 modifier = Modifier
                     .size(300.dp)
                     .fillMaxSize(),
-                contentScale = ContentScale.Fit,
+                contentScale = ContentScale.Fit
             )
             StartingText(
                 text = headerText,
                 textColor = appBlack,
-                start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp,
+                start = 30.dp,
+                end = 30.dp,
+                top = 10.dp,
+                bottom = 5.dp,
                 style = semiBold24Text700,
                 alignment = Alignment.TopCenter
             )
             StartingText(
-                text = if(showButton) stringResource(id = R.string.unsuccessful)
-                       else stringResource(id = R.string.successful),
-                textColor = if(showButton) errorRed else appGreen,
-                start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp,
+                text = if (showButton) {
+                    stringResource(id = R.string.unsuccessful)
+                } else {
+                    stringResource(id = R.string.successful)
+                },
+                textColor = if (showButton) errorRed else appGreen,
+                start = 30.dp,
+                end = 30.dp,
+                top = 10.dp,
+                bottom = 5.dp,
                 style = semiBold24Text700,
                 alignment = Alignment.TopCenter
             )
-            if (!showButton){
+            if (!showButton) {
                 StartingText(
                     text = hintText,
                     textColor = hintGray,
-                    start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 10.dp,
+                    bottom = 5.dp,
                     style = normal14Text500,
                     alignment = Alignment.TopCenter
                 )
             }
 
-            if (showButton){
+            if (showButton) {
                 ClickableTextWithIcon(
-                    text = stringResource(id = R.string.retry), image = R.drawable.refresh_icon
+                    text = stringResource(id = R.string.retry),
+                    image = R.drawable.refresh_icon
                 ) { onClick() }
             }
         }

@@ -20,7 +20,6 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.utils.CommonMethods
 
 @Composable
 fun LanguageSelectionScreen(navController: NavHostController) {
-
     val languagesList = listOf(
         stringResource(id = R.string.english),
         stringResource(id = R.string.kannada),
@@ -35,24 +34,26 @@ fun LanguageSelectionScreen(navController: NavHostController) {
     FixedTopBottomScreen(
         navController = navController,
         showBackButton = true,
-        onBackClick = {navController.popBackStack()},
+        onBackClick = { navController.popBackStack() },
         topBarText = stringResource(R.string.choose_language),
-        backgroundColor= appWhite
+        backgroundColor = appWhite
     ) {
         CenteredMoneyImage(
             image = R.drawable.language_screen_image,
             imageSize = 200.dp,
-            top = 40.dp, bottom = 20.dp
+            top = 40.dp,
+            bottom = 20.dp
         )
-        languagesList.forEach {language ->
-            TextWithRadioButton (
+        languagesList.forEach { language ->
+            TextWithRadioButton(
                 text = language,
                 selected = selectedLanguage == language,
                 onCheckedChange = { isSelected ->
                     if (isSelected) {
                         selectedLanguage = language
                         CommonMethods().toastMessage(
-                            context = context, toastMsg = context.getString(R.string.feature_supported_in_future)
+                            context = context,
+                            toastMsg = context.getString(R.string.feature_supported_in_future)
                         )
                         navController.popBackStack()
                     }
@@ -68,4 +69,3 @@ fun PreviewLanguageSelectionScreen() {
     val mockNavController = rememberNavController()
     LanguageSelectionScreen(navController = mockNavController)
 }
-

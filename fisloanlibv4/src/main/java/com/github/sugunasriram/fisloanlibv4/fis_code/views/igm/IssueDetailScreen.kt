@@ -72,7 +72,6 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.viewModel.igm.CreateIssueVi
 
 @Composable
 fun IssueDetailScreen(navController: NavHostController, issueId: String, fromFlow: String) {
-
     val createIssuePLViewModel: CreateIssueViewModel = viewModel()
     val context = LocalContext.current
 
@@ -83,7 +82,6 @@ fun IssueDetailScreen(navController: NavHostController, issueId: String, fromFlo
     val loadingIssue by createIssuePLViewModel.loadingIssue.collectAsState()
     val loadedIssue by createIssuePLViewModel.loadedIssue.collectAsState()
     val issueByIdResponse by createIssuePLViewModel.issueByIdResponse.collectAsState()
-
 
     val showInternetScreen by createIssuePLViewModel.showInternetScreen.observeAsState(false)
     val showTimeOutScreen by createIssuePLViewModel.showTimeOutScreen.observeAsState(false)
@@ -103,7 +101,7 @@ fun IssueDetailScreen(navController: NavHostController, issueId: String, fromFlo
                 loadingIssue = loadingIssue, checkedStatus = checkedStatus, issueId = issueId,
                 loadedIssue = loadedIssue, issueClosed = issueClosed, fromFlow = fromFlow,
                 issueByIdResponse = issueByIdResponse, navController = navController,
-                createIssuePLViewModel = createIssuePLViewModel,
+                createIssuePLViewModel = createIssuePLViewModel
             )
         }
     }
@@ -111,30 +109,49 @@ fun IssueDetailScreen(navController: NavHostController, issueId: String, fromFlo
 
 @Composable
 fun IssueDetailView(
-    issueClosing: Boolean, checkingStatus: Boolean, loadingIssue: Boolean, context: Context,
-    checkedStatus: Boolean, loadedIssue: Boolean, issueClosed: Boolean, issueId: String,
-    issueByIdResponse: IssueByIdResponse?, navController: NavHostController,
-    createIssuePLViewModel: CreateIssueViewModel, fromFlow: String
+    issueClosing: Boolean,
+    checkingStatus: Boolean,
+    loadingIssue: Boolean,
+    context: Context,
+    checkedStatus: Boolean,
+    loadedIssue: Boolean,
+    issueClosed: Boolean,
+    issueId: String,
+    issueByIdResponse: IssueByIdResponse?,
+    navController: NavHostController,
+    createIssuePLViewModel: CreateIssueViewModel,
+    fromFlow: String
 ) {
     if (issueClosing || checkingStatus || loadingIssue) {
         CenterProgress()
     } else if (!issueClosing && issueClosed) {
         navigateToIssueListScreen(
-            navController = navController, orderId = "12345", fromFlow = fromFlow,
-            providerId = "12345", loanState = "No Need", fromScreen = "Create Issue"
+            navController = navController,
+            orderId = "12345",
+            fromFlow = fromFlow,
+            providerId = "12345",
+            loanState = "No Need",
+            fromScreen = "Create Issue"
         )
     } else {
         if (checkedStatus || loadedIssue) {
             issueByIdResponse?.let {
                 IssueDetails(
-                    response = issueByIdResponse, navController = navController, issueId = issueId,
-                    createIssuePLViewModel = createIssuePLViewModel, context = context,
+                    response = issueByIdResponse,
+                    navController = navController,
+                    issueId = issueId,
+                    createIssuePLViewModel = createIssuePLViewModel,
+                    context = context
                 )
             }
         } else if (issueClosed) {
             navigateToIssueListScreen(
-                navController = navController, orderId = "12345", fromFlow = fromFlow,
-                providerId = "12345", loanState = "No Need", fromScreen = "Create Issue"
+                navController = navController,
+                orderId = "12345",
+                fromFlow = fromFlow,
+                providerId = "12345",
+                loanState = "No Need",
+                fromScreen = "Create Issue"
             )
         } else {
             createIssuePLViewModel.issueById(issueId, context)
@@ -144,11 +161,14 @@ fun IssueDetailView(
 
 @Composable
 fun IssueDetails(
-    response: IssueByIdResponse, navController: NavHostController, context: Context,
-    issueId: String, createIssuePLViewModel: CreateIssueViewModel,
+    response: IssueByIdResponse,
+    navController: NavHostController,
+    context: Context,
+    issueId: String,
+    createIssuePLViewModel: CreateIssueViewModel
 ) {
     val showCloseButton = !response.data?.data?.summary?.status?.lowercase().equals("close") &&
-            !response.data?.data?.summary?.status?.lowercase().equals("closed")
+        !response.data?.data?.summary?.status?.lowercase().equals("closed")
 
     FixedTopBottomScreen(
         navController = navController,
@@ -164,7 +184,9 @@ fun IssueDetails(
                 response.data.data.summary.id.let { issueId ->
                     createIssuePLViewModel.closeIssue(
                         CloseIssueBody(
-                            loanType = loanType, issueId = issueId, status = "CLOSED",
+                            loanType = loanType,
+                            issueId = issueId,
+                            status = "CLOSED",
                             rating = "THUMBS-UP"
                         ),
                         context = context
@@ -196,15 +218,15 @@ fun IssueDetails(
         }
 
         when (response.data?.data?.summary?.status?.lowercase()) {
-            "open" -> loanIssueCardRed     // Red color for Open
-            "processing" -> appOrange// Blue color for Processing
+            "open" -> loanIssueCardRed // Red color for Open
+            "processing" -> appOrange // Blue color for Processing
             "resolved" -> appGreen
-            "closed" -> appGreen// Green color for Resolved
+            "closed" -> appGreen // Green color for Resolved
             else -> Color.Transparent // Default color for other statuses
         }
 
         //
-        var updatedDate: String;
+        var updatedDate: String
         if (response.data?.data?.details?.issueClose?.message?.issue?.updatedAt != null) {
             updatedDate = response.data.data.details.issueClose.message.issue.updatedAt
         } else if (response.data?.data?.details?.onIssueStatus?.message?.issue?.updatedAt != null) {
@@ -226,7 +248,7 @@ fun IssueDetails(
                             updatedDate = CommonMethods().displayFormattedDate(updatedDate),
                             issueId = issueId,
                             status = status,
-                            loanId = orderId,
+                            loanId = orderId
                         )
                     }
                 }
@@ -257,24 +279,35 @@ fun IssueDetails(
 @Composable
 fun IssueHeader(headerText: String, subHeaderText: String) {
     RegisterText(
-        text = headerText, style = normal16Text700,
-        top = 10.dp, end = 10.dp, bottom = 8.dp
+        text = headerText,
+        style = normal16Text700,
+        top = 10.dp,
+        end = 10.dp,
+        bottom = 8.dp
     )
     Text(
         text = subHeaderText,
         modifier = Modifier.padding(horizontal = 25.dp),
-        textAlign = TextAlign.Start, style = normal16Text500, color = hintGray
+        textAlign = TextAlign.Start,
+        style = normal16Text500,
+        color = hintGray
     )
 }
 
 @Composable
 fun IssueStatusCard(
-    createdDate: String, updatedDate: String, issueId: String,
-    status: String, loanId: String,
+    createdDate: String,
+    updatedDate: String,
+    issueId: String,
+    status: String,
+    loanId: String
 ) {
     BorderCardWithElevation(
         borderColor = appOrange,
-        top = 10.dp, bottom = 5.dp, start = 8.dp, end = 8.dp
+        top = 10.dp,
+        bottom = 5.dp,
+        start = 8.dp,
+        end = 8.dp
     ) {
         Row(
             modifier = Modifier
@@ -285,25 +318,25 @@ fun IssueStatusCard(
                 StartingText(
                     text = "Created On : $createdDate",
                     textColor = hintGray,
-                    style = normal16Text400, bottom = 8.dp
+                    style = normal16Text400,
+                    bottom = 8.dp
                 )
                 StartingText(
                     text = "Last Updated : $updatedDate",
                     textColor = hintGray,
-                    style = normal16Text400,
+                    style = normal16Text400
                 )
             }
             StatusChip(statusText = status, modifier = Modifier.weight(0.3f))
         }
         MultiStyleText(
-            stringResource(id = R.string.loan_id)+" : ", appOrange, loanId, appBlack,
+            stringResource(id = R.string.loan_id) + " : ", appOrange, loanId, appBlack,
             normal16Text500, normal16Text500, top = 8.dp, bottom = 8.dp, start = 3.dp
         )
         MultiStyleText(
-            stringResource(id = R.string.issue_id)+" : ", appOrange, issueId, appBlack,
+            stringResource(id = R.string.issue_id) + " : ", appOrange, issueId, appBlack,
             normal16Text500, normal16Text500, top = 0.dp, bottom = 8.dp, start = 3.dp
         )
-
     }
 }
 
@@ -312,19 +345,27 @@ fun IssueDetailsCard(issueSummary: IssueSummary) {
     StartingText(
         text = stringResource(id = R.string.other_details),
         textColor = appBlack,
-        style = normal16Text700, start = 25.dp, bottom = 8.dp, top = 10.dp
+        style = normal16Text700,
+        start = 25.dp,
+        bottom = 8.dp,
+        top = 10.dp
     )
     DisplayCard(
-        cardColor = backgroundOrange, borderColor = Color.Transparent,
-        start = 25.dp, end = 25.dp
+        cardColor = backgroundOrange,
+        borderColor = Color.Transparent,
+        start = 25.dp,
+        end = 25.dp
     ) {
         StartingText(
             text = stringResource(id = R.string.item_name),
             textColor = appOrange,
-            style = normal16Text400, bottom = 3.dp, start = 10.dp, top = 8.dp
+            style = normal16Text400,
+            bottom = 3.dp,
+            start = 10.dp,
+            top = 8.dp
         )
         issueSummary.loanType?.let {
-            val loanName =  if (it == "INVOICE_BASED_LOAN"){
+            val loanName = if (it == "INVOICE_BASED_LOAN") {
                 "Invoice Based Loan"
             } else {
                 "Personal Loan"
@@ -332,66 +373,86 @@ fun IssueDetailsCard(issueSummary: IssueSummary) {
             StartingText(
                 text = loanName,
                 textColor = appBlack,
-                style = normal16Text400, bottom = 3.dp, start = 10.dp
+                style = normal16Text400,
+                bottom = 3.dp,
+                start = 10.dp
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
         StartingText(
             text = stringResource(id = R.string.issue_description),
             textColor = appOrange,
-            style = normal16Text400, bottom = 3.dp, start = 10.dp
+            style = normal16Text400,
+            bottom = 3.dp,
+            start = 10.dp
         )
         issueSummary.subCategoryDesc?.let {
             StartingText(
                 text = it,
                 textColor = appBlack,
-                style = normal16Text400, bottom = 3.dp, start = 10.dp
+                style = normal16Text400,
+                bottom = 3.dp,
+                start = 10.dp
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
         StartingText(
             text = stringResource(id = R.string.category_name),
             textColor = appOrange,
-            style = normal16Text400, bottom = 3.dp, start = 10.dp
+            style = normal16Text400,
+            bottom = 3.dp,
+            start = 10.dp
         )
         issueSummary.category?.let {
             StartingText(
                 text = it,
                 textColor = appBlack,
-                style = normal16Text400, bottom = 3.dp, start = 10.dp
+                style = normal16Text400,
+                bottom = 3.dp,
+                start = 10.dp
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
         StartingText(
             text = stringResource(id = R.string.short_description),
             textColor = appOrange,
-            style = normal16Text400, bottom = 3.dp, start = 10.dp
+            style = normal16Text400,
+            bottom = 3.dp,
+            start = 10.dp
         )
         issueSummary.shortDescription?.let {
             StartingText(
                 text = it,
                 textColor = appBlack,
-                style = normal16Text400, bottom = 3.dp, start = 10.dp
+                style = normal16Text400,
+                bottom = 3.dp,
+                start = 10.dp
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
         StartingText(
             text = stringResource(id = R.string.long_description),
             textColor = appOrange,
-            style = normal16Text400, bottom = 3.dp, start = 10.dp
+            style = normal16Text400,
+            bottom = 3.dp,
+            start = 10.dp
         )
         issueSummary.longDescription?.let {
             StartingText(
                 text = it,
                 textColor = appBlack,
-                style = normal16Text400, bottom = 3.dp, start = 10.dp
+                style = normal16Text400,
+                bottom = 3.dp,
+                start = 10.dp
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
         StartingText(
             text = stringResource(id = R.string.issue_image),
             textColor = appOrange,
-            style = normal16Text400, bottom = 3.dp, start = 10.dp
+            style = normal16Text400,
+            bottom = 3.dp,
+            start = 10.dp
         )
         issueSummary.images?.let {
             IssueImagesSection(images = it)
@@ -399,30 +460,29 @@ fun IssueDetailsCard(issueSummary: IssueSummary) {
     }
     Spacer(modifier = Modifier.height(8.dp))
 }
+
 @Composable
 fun IssueImagesSection(images: List<String?>) {
     var previewUrl by remember { mutableStateOf<String?>(null) }
     Row(
-      horizontalArrangement = Arrangement.Start,
+        horizontalArrangement = Arrangement.Start,
         modifier = Modifier.fillMaxWidth()
     ) {
         images.filterNotNull().forEach { imageUrl ->
-                AsyncImage(
-                    model = imageUrl,
-                    contentDescription = "Issue Image",
-                    modifier = Modifier.size(120.dp)
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = "Issue Image",
+                modifier = Modifier.size(120.dp)
 //                        .height(120.dp)
-                        .padding(horizontal = 10.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable { previewUrl = imageUrl },
-                    contentScale = ContentScale.Fit
-                )
-
-            }
+                    .padding(horizontal = 10.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable { previewUrl = imageUrl },
+                contentScale = ContentScale.Fit
+            )
         }
+    }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
+    Spacer(modifier = Modifier.height(16.dp))
 
     // Show dialog when image is clicked
     if (previewUrl != null) {
@@ -447,6 +507,7 @@ fun IssueImagesSection(images: List<String?>) {
         }
     }
 }
+
 @Composable
 fun IssueResolutionCard(
     issueResolutions: IssueResolutions,
@@ -455,22 +516,31 @@ fun IssueResolutionCard(
     StartingText(
         text = stringResource(id = R.string.resolutions),
         textColor = appBlack,
-        style = normal16Text700, start = 25.dp, bottom = 8.dp, top = 15.dp
+        style = normal16Text700,
+        start = 25.dp,
+        bottom = 8.dp,
+        top = 15.dp
     )
     DisplayCard(
-        cardColor = backgroundOrange, borderColor = Color.Transparent,
-        start = 25.dp, end = 25.dp
+        cardColor = backgroundOrange,
+        borderColor = Color.Transparent,
+        start = 25.dp,
+        end = 25.dp
     ) {
         issueResolutions.shortDesc?.let { shortDesc ->
             StartingText(
                 text = stringResource(id = R.string.short_description),
                 textColor = appOrange,
-                style = normal16Text400, bottom = 3.dp, start = 10.dp
+                style = normal16Text400,
+                bottom = 3.dp,
+                start = 10.dp
             )
             StartingText(
                 text = shortDesc,
                 textColor = appBlack,
-                style = normal16Text400, bottom = 3.dp, start = 10.dp
+                style = normal16Text400,
+                bottom = 3.dp,
+                start = 10.dp
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -478,12 +548,16 @@ fun IssueResolutionCard(
             StartingText(
                 text = stringResource(id = R.string.long_description),
                 textColor = appOrange,
-                style = normal16Text400, bottom = 3.dp, start = 10.dp
+                style = normal16Text400,
+                bottom = 3.dp,
+                start = 10.dp
             )
             StartingText(
                 text = longDesc,
                 textColor = appBlack,
-                style = normal16Text400, bottom = 3.dp, start = 10.dp
+                style = normal16Text400,
+                bottom = 3.dp,
+                start = 10.dp
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -492,12 +566,16 @@ fun IssueResolutionCard(
             StartingText(
                 text = stringResource(id = R.string.name),
                 textColor = appOrange,
-                style = normal16Text400, bottom = 3.dp, start = 10.dp
+                style = normal16Text400,
+                bottom = 3.dp,
+                start = 10.dp
             )
             StartingText(
                 text = contactPerson,
                 textColor = appBlack,
-                style = normal16Text400, bottom = 3.dp, start = 10.dp
+                style = normal16Text400,
+                bottom = 3.dp,
+                start = 10.dp
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -505,12 +583,16 @@ fun IssueResolutionCard(
             StartingText(
                 text = stringResource(id = R.string.email),
                 textColor = appOrange,
-                style = normal16Text400, bottom = 3.dp, start = 10.dp
+                style = normal16Text400,
+                bottom = 3.dp,
+                start = 10.dp
             )
             StartingText(
                 text = email,
                 textColor = appBlack,
-                style = normal16Text400, bottom = 3.dp, start = 10.dp
+                style = normal16Text400,
+                bottom = 3.dp,
+                start = 10.dp
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -518,12 +600,16 @@ fun IssueResolutionCard(
             StartingText(
                 text = stringResource(id = R.string.mobile_number),
                 textColor = appOrange,
-                style = normal16Text400, bottom = 3.dp, start = 10.dp
+                style = normal16Text400,
+                bottom = 3.dp,
+                start = 10.dp
             )
             StartingText(
                 text = phone,
                 textColor = appBlack,
-                style = normal16Text400, bottom = 3.dp, start = 10.dp
+                style = normal16Text400,
+                bottom = 3.dp,
+                start = 10.dp
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -531,12 +617,16 @@ fun IssueResolutionCard(
             StartingText(
                 text = stringResource(id = R.string.mobile_number),
                 textColor = appOrange,
-                style = normal16Text400, bottom = 3.dp, start = 10.dp
+                style = normal16Text400,
+                bottom = 3.dp,
+                start = 10.dp
             )
             StartingText(
                 text = org,
                 textColor = appBlack,
-                style = normal16Text400, bottom = 3.dp, start = 10.dp
+                style = normal16Text400,
+                bottom = 3.dp,
+                start = 10.dp
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -548,23 +638,33 @@ fun IssueRespondentActionCard(respondentActionList: List<RespondentActionsItem?>
     StartingText(
         text = stringResource(id = R.string.respondent_actions),
         textColor = appBlack,
-        style = normal16Text700, start = 25.dp, bottom = 8.dp, top = 15.dp
+        style = normal16Text700,
+        start = 25.dp,
+        bottom = 8.dp,
+        top = 15.dp
     )
     respondentActionList.forEach { respondentAction ->
         DisplayCard(
-            cardColor = backgroundOrange, borderColor = Color.Transparent,
-            start = 25.dp, end = 25.dp
+            cardColor = backgroundOrange,
+            borderColor = Color.Transparent,
+            start = 25.dp,
+            end = 25.dp
         ) {
             respondentAction?.respondentAction?.let { respondentAction ->
                 StartingText(
                     text = stringResource(id = R.string.action),
                     textColor = appOrange,
-                    style = normal16Text400, bottom = 3.dp, start = 10.dp, top = 10.dp
+                    style = normal16Text400,
+                    bottom = 3.dp,
+                    start = 10.dp,
+                    top = 10.dp
                 )
                 StartingText(
                     text = respondentAction,
                     textColor = appBlack,
-                    style = normal16Text400, bottom = 3.dp, start = 10.dp
+                    style = normal16Text400,
+                    bottom = 3.dp,
+                    start = 10.dp
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -572,12 +672,16 @@ fun IssueRespondentActionCard(respondentActionList: List<RespondentActionsItem?>
                 StartingText(
                     text = stringResource(id = R.string.description),
                     textColor = appOrange,
-                    style = normal16Text400, bottom = 3.dp, start = 10.dp
+                    style = normal16Text400,
+                    bottom = 3.dp,
+                    start = 10.dp
                 )
                 StartingText(
                     text = shortDesc,
                     textColor = appBlack,
-                    style = normal16Text400, bottom = 3.dp, start = 10.dp
+                    style = normal16Text400,
+                    bottom = 3.dp,
+                    start = 10.dp
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -585,33 +689,43 @@ fun IssueRespondentActionCard(respondentActionList: List<RespondentActionsItem?>
                 StartingText(
                     text = stringResource(id = R.string.updated_by),
                     textColor = appOrange,
-                    style = normal16Text400, bottom = 3.dp, start = 10.dp
+                    style = normal16Text400,
+                    bottom = 3.dp,
+                    start = 10.dp
                 )
                 StartingText(
                     text = personName,
                     textColor = appBlack,
-                    style = normal16Text400, bottom = 3.dp, start = 10.dp
+                    style = normal16Text400,
+                    bottom = 3.dp,
+                    start = 10.dp
                 )
             }
             respondentAction?.updatedBy?.org?.name?.let { organisationName ->
                 StartingText(
                     text = organisationName,
                     textColor = appBlack,
-                    style = normal16Text400, bottom = 3.dp, start = 8.dp
+                    style = normal16Text400,
+                    bottom = 3.dp,
+                    start = 8.dp
                 )
             }
             respondentAction?.updatedBy?.contact?.phone?.let { phone ->
                 StartingText(
                     text = phone,
                     textColor = appBlack,
-                    style = normal16Text400, bottom = 3.dp, start = 10.dp
+                    style = normal16Text400,
+                    bottom = 3.dp,
+                    start = 10.dp
                 )
             }
             respondentAction?.updatedBy?.contact?.email?.let { email ->
                 StartingText(
                     text = email,
                     textColor = appBlack,
-                    style = normal16Text400, bottom = 3.dp, start = 10.dp
+                    style = normal16Text400,
+                    bottom = 3.dp,
+                    start = 10.dp
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -620,16 +734,19 @@ fun IssueRespondentActionCard(respondentActionList: List<RespondentActionsItem?>
                 StartingText(
                     text = stringResource(id = R.string.updated_on),
                     textColor = appOrange,
-                    style = normal16Text400, bottom = 3.dp, start = 10.dp
+                    style = normal16Text400,
+                    bottom = 3.dp,
+                    start = 10.dp
                 )
                 StartingText(
                     text = CommonMethods().displayFormattedDate(updatedAt),
                     textColor = appBlack,
-                    style = normal16Text400, bottom = 3.dp, start = 10.dp
+                    style = normal16Text400,
+                    bottom = 3.dp,
+                    start = 10.dp
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
-
         }
         Spacer(modifier = Modifier.height(8.dp))
     }
@@ -640,23 +757,33 @@ fun IssueComplainantActionCard(complainantActionList: List<ComplainantActionsIte
     StartingText(
         text = stringResource(id = R.string.complainant_actions),
         textColor = appBlack,
-        style = normal16Text700, start = 25.dp, bottom = 8.dp, top = 15.dp
+        style = normal16Text700,
+        start = 25.dp,
+        bottom = 8.dp,
+        top = 15.dp
     )
     complainantActionList.forEach { complainantAction ->
         DisplayCard(
-            cardColor = backgroundOrange, borderColor = Color.Transparent,
-            start = 25.dp, end = 25.dp
+            cardColor = backgroundOrange,
+            borderColor = Color.Transparent,
+            start = 25.dp,
+            end = 25.dp
         ) {
             complainantAction?.complainantAction?.let { complainantAction ->
                 StartingText(
                     text = stringResource(id = R.string.action),
                     textColor = appOrange,
-                    style = normal16Text400, bottom = 3.dp, start = 10.dp ,top = 10.dp
+                    style = normal16Text400,
+                    bottom = 3.dp,
+                    start = 10.dp,
+                    top = 10.dp
                 )
                 StartingText(
                     text = complainantAction,
                     textColor = appBlack,
-                    style = normal16Text400, bottom = 3.dp, start = 10.dp
+                    style = normal16Text400,
+                    bottom = 3.dp,
+                    start = 10.dp
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -664,12 +791,16 @@ fun IssueComplainantActionCard(complainantActionList: List<ComplainantActionsIte
                 StartingText(
                     text = stringResource(id = R.string.description),
                     textColor = appOrange,
-                    style = normal16Text400, bottom = 3.dp, start = 10.dp
+                    style = normal16Text400,
+                    bottom = 3.dp,
+                    start = 10.dp
                 )
                 StartingText(
                     text = shortDesc,
                     textColor = appBlack,
-                    style = normal16Text400, bottom = 3.dp, start = 10.dp
+                    style = normal16Text400,
+                    bottom = 3.dp,
+                    start = 10.dp
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -677,12 +808,16 @@ fun IssueComplainantActionCard(complainantActionList: List<ComplainantActionsIte
                 StartingText(
                     text = stringResource(id = R.string.updated_by),
                     textColor = appOrange,
-                    style = normal16Text400, bottom = 3.dp, start = 10.dp
+                    style = normal16Text400,
+                    bottom = 3.dp,
+                    start = 10.dp
                 )
                 StartingText(
                     text = orgName,
                     textColor = appBlack,
-                    style = normal16Text400, bottom = 3.dp, start = 10.dp
+                    style = normal16Text400,
+                    bottom = 3.dp,
+                    start = 10.dp
                 )
             }
 
@@ -691,40 +826,48 @@ fun IssueComplainantActionCard(complainantActionList: List<ComplainantActionsIte
                     StartingText(
                         text = name,
                         textColor = appBlack,
-                        style = normal16Text400, bottom = 3.dp, start = 10.dp
+                        style = normal16Text400,
+                        bottom = 3.dp,
+                        start = 10.dp
                     )
                 }
                 update.contactPhone?.let { contactPhone ->
                     StartingText(
                         text = contactPhone,
                         textColor = appBlack,
-                        style = normal16Text400, bottom = 3.dp, start = 10.dp
+                        style = normal16Text400,
+                        bottom = 3.dp,
+                        start = 10.dp
                     )
                 }
                 update.contactEmail?.let { contactEmail ->
                     StartingText(
                         text = contactEmail,
                         textColor = appBlack,
-                        style = normal16Text400, bottom = 3.dp, start = 10.dp
+                        style = normal16Text400,
+                        bottom = 3.dp,
+                        start = 10.dp
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
-
             }
             complainantAction?.updatedAt?.let { updatedAt ->
                 StartingText(
                     text = stringResource(id = R.string.updated_on),
                     textColor = appOrange,
-                    style = normal16Text400, bottom = 3.dp, start = 10.dp
+                    style = normal16Text400,
+                    bottom = 3.dp,
+                    start = 10.dp
                 )
                 StartingText(
                     text = CommonMethods().displayFormattedDate(updatedAt),
                     textColor = appBlack,
-                    style = normal16Text400, bottom = 3.dp, start = 10.dp
+                    style = normal16Text400,
+                    bottom = 3.dp,
+                    start = 10.dp
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
-
         }
         Spacer(modifier = Modifier.height(8.dp))
     }
@@ -732,7 +875,10 @@ fun IssueComplainantActionCard(complainantActionList: List<ComplainantActionsIte
 
 @Composable
 fun HorizontalDashedLine(
-    color: Color = Color.Gray, lineHeight: Dp = 2.dp, dashLength: Dp = 10.dp, gapLength: Dp = 5.dp
+    color: Color = Color.Gray,
+    lineHeight: Dp = 2.dp,
+    dashLength: Dp = 10.dp,
+    gapLength: Dp = 5.dp
 ) {
     Canvas(
         modifier = Modifier
@@ -744,23 +890,34 @@ fun HorizontalDashedLine(
         val dashOff = gapLength.toPx()
 
         drawLine(
-            color = color, start = androidx.compose.ui.geometry.Offset(0f, center.y),
+            color = color,
+            start = androidx.compose.ui.geometry.Offset(0f, center.y),
             end = androidx.compose.ui.geometry.Offset(size.width, center.y),
-            strokeWidth = strokeWidth, cap = StrokeCap.Round,
-            pathEffect = PathEffect.dashPathEffect(floatArrayOf(dashOn, dashOff), 0f),
+            strokeWidth = strokeWidth,
+            cap = StrokeCap.Round,
+            pathEffect = PathEffect.dashPathEffect(floatArrayOf(dashOn, dashOff), 0f)
 
-            )
+        )
     }
 }
 
 @Composable
 fun ReusableText(
-    text: String, color: Color = softSteelGray, style: TextStyle = normal16Text700,
-    textAlign: TextAlign = TextAlign.Start, modifier: Modifier = Modifier,
-    start: Dp = 20.dp, end: Dp = 0.dp, top: Dp = 0.dp, bottom: Dp = 10.dp
+    text: String,
+    color: Color = softSteelGray,
+    style: TextStyle = normal16Text700,
+    textAlign: TextAlign = TextAlign.Start,
+    modifier: Modifier = Modifier,
+    start: Dp = 20.dp,
+    end: Dp = 0.dp,
+    top: Dp = 0.dp,
+    bottom: Dp = 10.dp
 ) {
     Text(
-        text = text, color = color, style = style, textAlign = textAlign,
+        text = text,
+        color = color,
+        style = style,
+        textAlign = textAlign,
         modifier = modifier
             .fillMaxWidth()
             .padding(start = start, bottom = bottom, end = end, top = top)

@@ -33,9 +33,5 @@ data class Profile(
     val udyamNumber: String? = null,
     val state1: String? = null,
     val state2: String? = null,
-    val officialEmail: String? = null,
+    val officialEmail: String? = null
 )
-
-
-
-

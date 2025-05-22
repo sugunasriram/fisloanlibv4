@@ -1,6 +1,6 @@
 package com.github.sugunasriram.fisloanlibv4.fis_code.views
 
-//import com.github.sugunasriram.fisloanlibv4.fis_code.views.gstLoan.json
+// import com.github.sugunasriram.fisloanlibv4.fis_code.views.gstLoan.json
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
@@ -38,9 +38,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.rememberPagerState
 import com.github.sugunasriram.fisloanlibv4.R
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.CenterProgress
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.HeaderCard
@@ -81,14 +78,15 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.viewModel.UserStatusViewMod
 import com.github.sugunasriram.fisloanlibv4.fis_code.viewModel.auth.RegisterViewModel
 import com.github.sugunasriram.fisloanlibv4.fis_code.views.invalid.UnexpectedErrorScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.views.webview.NavigateToWebView
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
-
 @Composable
 fun ApplyByCategoryScreen(navController: NavHostController) {
-
     val userStatusViewModel: UserStatusViewModel = viewModel()
     val registerViewModel: RegisterViewModel = viewModel()
 
@@ -130,8 +128,8 @@ fun ApplyByCategoryScreen(navController: NavHostController) {
             SelectingFlow(
                 checkingStatus = checkingStatus, navController = navController, context = context,
                 userStatus = userStatus, userStatusViewModel = userStatusViewModel,
-                checked = checked,showLoader = showLoader,errorMessage = errorMessage,
-                userDetails=userDetails , userDetailsAPILoading = userDetailsAPILoading
+                checked = checked, showLoader = showLoader, errorMessage = errorMessage,
+                userDetails = userDetails, userDetailsAPILoading = userDetailsAPILoading
             )
         }
     }
@@ -140,12 +138,19 @@ fun ApplyByCategoryScreen(navController: NavHostController) {
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun SelectingFlow(
-    checkingStatus: Boolean, navController: NavHostController, userStatus: UserStatus?,
-    userStatusViewModel: UserStatusViewModel, context: Context, checked: Boolean,
-    showLoader: Boolean,errorMessage: String, userDetails: ProfileResponse?,userDetailsAPILoading : Boolean
+    checkingStatus: Boolean,
+    navController: NavHostController,
+    userStatus: UserStatus?,
+    userStatusViewModel: UserStatusViewModel,
+    context: Context,
+    checked: Boolean,
+    showLoader: Boolean,
+    errorMessage: String,
+    userDetails: ProfileResponse?,
+    userDetailsAPILoading: Boolean
 ) {
     var setFlow by remember { mutableStateOf("") }
-    val  scope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
 
     var triggerApi by remember { mutableStateOf(true) }
     triggerApi = showLoader
@@ -153,29 +158,35 @@ fun SelectingFlow(
 
     if (checkingStatus) {
         CenterProgress()
-    } else if (triggerApi){
-        if (userStatus?.data?.data != null || userStatus?.data?.url != null){
+    } else if (triggerApi) {
+        if (userStatus?.data?.data != null || userStatus?.data?.url != null) {
             when {
                 setFlow.equals("Personal Loan", ignoreCase = true) -> {
                     PersonalDecidedFlow(
-                        status = userStatus, navController = navController, fromFlow = setFlow
+                        status = userStatus,
+                        navController = navController,
+                        fromFlow = setFlow
                     )
                 }
 
                 setFlow.equals("Invoice Loan", ignoreCase = true) -> {
                     InvoiceDecidedFlow(
-                        status = userStatus, navController = navController, fromFlow = setFlow
+                        status = userStatus,
+                        navController = navController,
+                        fromFlow = setFlow
                     )
                 }
 
                 setFlow.equals("Purchase Finance", ignoreCase = true) -> {
                     PurchaseDecidedFlow(
-                        status = userStatus, navController = navController, fromFlow = setFlow
+                        status = userStatus,
+                        navController = navController,
+                        fromFlow = setFlow
                     )
                 }
             }
         } else {
-            if(apiCalled){
+            if (apiCalled) {
                 scope.launch {
                     delay(60000)
                     userStatusViewModel.getUserStatus(loanType = "PERSONAL_LOAN", context = context)
@@ -185,40 +196,48 @@ fun SelectingFlow(
 
             UnexpectedErrorScreen(
                 navController = navController,
-                errorMsgShow = false, errorText = stringResource(id =R.string.request_is_still),
+                errorMsgShow = false,
+                errorText = stringResource(id = R.string.request_is_still),
                 errorMsg = stringResource(id = R.string.middle_loan_error_message),
                 onClick = {
                     userStatusViewModel.getUserStatus(
-                        loanType = "PERSONAL_LOAN", context = context
+                        loanType = "PERSONAL_LOAN",
+                        context = context
                     )
                 }
             )
         }
-
     } else {
         if (checked) {
             when {
                 setFlow.equals("Personal Loan", ignoreCase = true) -> {
                     PersonalDecidedFlow(
-                        status = userStatus, navController = navController, fromFlow = setFlow
+                        status = userStatus,
+                        navController = navController,
+                        fromFlow = setFlow
                     )
                 }
 
                 setFlow.equals("Invoice Loan", ignoreCase = true) -> {
                     InvoiceDecidedFlow(
-                        status = userStatus, navController = navController, fromFlow = setFlow
+                        status = userStatus,
+                        navController = navController,
+                        fromFlow = setFlow
                     )
                 }
 
                 setFlow.equals("Purchase Finance", ignoreCase = true) -> {
                     PurchaseDecidedFlow(
-                        status = userStatus, navController = navController, fromFlow = setFlow
+                        status = userStatus,
+                        navController = navController,
+                        fromFlow = setFlow
                     )
                 }
             }
         } else {
             LoanSelectionScreen(
-                navController = navController,userDetails=userDetails,
+                navController = navController,
+                userDetails = userDetails,
                 onLoanSelected = { loanType ->
                     setFlow = loanType
                     when (loanType) {
@@ -235,10 +254,10 @@ fun SelectingFlow(
                                 userDetails?.data?.companyName,
                                 userDetails?.data?.address1,
                                 userDetails?.data?.city1,
-                                userDetails?.data?.pincode1,
+                                userDetails?.data?.pincode1
                             )
                             if (requiredFields.any { it.isNullOrEmpty() } && !userDetailsAPILoading) {
-                                navigateToUpdateProfileScreen(navController,fromFlow = loanType)
+                                navigateToUpdateProfileScreen(navController, fromFlow = loanType)
                                 CommonMethods().toastMessage(
                                     context,
                                     "Please update your profile details"
@@ -246,15 +265,15 @@ fun SelectingFlow(
                             } else if (userDetails?.data?.udyamNumber.isNullOrEmpty()) {
                                 navigateToUpdateProfileScreen(navController, fromFlow = loanType)
                                 CommonMethods().toastMessage(context, "Update UDYAM number")
-                            }else{
+                            } else {
                                 userStatusViewModel.getUserStatus(
-                                    loanType = "INVOICE_BASED_LOAN", context = context
+                                    loanType = "INVOICE_BASED_LOAN",
+                                    context = context
                                 )
                             }
-
                         }
 
-                        "Personal Loan" ->{
+                        "Personal Loan" -> {
                             val requiredFields = listOf(
                                 userDetails?.data?.firstName,
                                 userDetails?.data?.lastName,
@@ -269,9 +288,8 @@ fun SelectingFlow(
                                 userDetails?.data?.address1,
                                 userDetails?.data?.state1,
                                 userDetails?.data?.city1,
-                                userDetails?.data?.pincode1,
+                                userDetails?.data?.pincode1
                             )
-
 
                             if (requiredFields.any { it.isNullOrEmpty() } && !userDetailsAPILoading) {
                                 navigateToUpdateProfileScreen(navController, fromFlow = loanType)
@@ -281,9 +299,9 @@ fun SelectingFlow(
                                 )
                             } else {
                                 userStatusViewModel.getUserStatus(
-                                    loanType = "PERSONAL_LOAN", context = context
+                                    loanType = "PERSONAL_LOAN",
+                                    context = context
                                 )
-
                             }
                         }
 
@@ -300,17 +318,18 @@ fun SelectingFlow(
                                 userDetails?.data?.companyName,
                                 userDetails?.data?.address1,
                                 userDetails?.data?.city1,
-                                userDetails?.data?.pincode1,
+                                userDetails?.data?.pincode1
                             )
-                            if (requiredFields.any { it.isNullOrEmpty() }  && !userDetailsAPILoading) {
-                                navigateToUpdateProfileScreen(navController,fromFlow = loanType)
+                            if (requiredFields.any { it.isNullOrEmpty() } && !userDetailsAPILoading) {
+                                navigateToUpdateProfileScreen(navController, fromFlow = loanType)
                                 CommonMethods().toastMessage(
                                     context,
                                     "Please update your profile details"
                                 )
                             } else {
                                 userStatusViewModel.getUserStatus(
-                                    loanType = "PURCHASE_FINANCE", context = context
+                                    loanType = "PURCHASE_FINANCE",
+                                    context = context
                                 )
                             }
                         }
@@ -341,15 +360,17 @@ fun CarouselContent(images: List<Int>) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         HorizontalPager(
-            count = images.size, state = pagerState,
-            modifier = Modifier.fillMaxWidth(),
+            count = images.size,
+            state = pagerState,
+            modifier = Modifier.fillMaxWidth()
         ) { page ->
             Image(
-                painter = painterResource(id = images[page]), contentDescription = null,
+                painter = painterResource(id = images[page]),
+                contentDescription = null,
                 modifier = Modifier
-                    .height(200.dp).padding(start=35.dp)
+                    .height(200.dp).padding(start = 35.dp)
                     .fillMaxWidth(),
-                contentScale = ContentScale.FillBounds,
+                contentScale = ContentScale.FillBounds
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
@@ -357,32 +378,41 @@ fun CarouselContent(images: List<Int>) {
     }
 }
 
-
-
 @Composable
 fun LoanSelectionScreen(
-    navController: NavHostController,userDetails: ProfileResponse?=null, onLoanSelected: (String) -> Unit
+    navController: NavHostController,
+    userDetails: ProfileResponse? = null,
+    onLoanSelected: (String) -> Unit
 ) {
-    ScreenWithHamburger(isSelfScrollable = false, navController = navController,
+    ScreenWithHamburger(
+        isSelfScrollable = false,
+        navController = navController,
 //        topBarText = "${userDetails?.data?.pincode1?.let { "$it-" } ?: ""}${userDetails?.data?.city1 ?: ""}") {
-        topBarText = "") {
-            CarouselContent(
-                images = listOf(R.drawable.dashboard_card,
-                    R.drawable.dashboard_card,
-                    R.drawable.dashboard_card,
-                    R.drawable.dashboard_card)
+        topBarText = ""
+    ) {
+        CarouselContent(
+            images = listOf(
+                R.drawable.dashboard_card,
+                R.drawable.dashboard_card,
+                R.drawable.dashboard_card,
+                R.drawable.dashboard_card
             )
+        )
 
         RegisterText(
-            text = stringResource(R.string.loan_types), style = normal20Text700,
-            textColor = appBlack, boxAlign = Alignment.TopStart,
-            start = 30.dp, top = 20.dp, bottom = 10.dp
+            text = stringResource(R.string.loan_types),
+            style = normal20Text700,
+            textColor = appBlack,
+            boxAlign = Alignment.TopStart,
+            start = 30.dp,
+            top = 20.dp,
+            bottom = 10.dp
         )
 
         HeaderCard(
             start = 30.dp, end = 30.dp, top = 10.dp, bottomStart = 16.dp, bottomEnd = 16.dp,
             topStart = 16.dp, topEnd = 16.dp, bottom = 20.dp,
-            cardColor = appWhite,borderColor= grayA6
+            cardColor = appWhite, borderColor = grayA6
         ) {
             Row(
                 horizontalArrangement = Arrangement.SpaceEvenly,
@@ -392,18 +422,20 @@ fun LoanSelectionScreen(
                     .padding(5.dp)
             ) {
                 Image(
-                    contentDescription = null, contentScale = ContentScale.FillBounds,
+                    contentDescription = null,
+                    contentScale = ContentScale.FillBounds,
                     painter = painterResource(R.drawable.personal_loan_image),
                     modifier = Modifier
                         .padding(5.dp)
                         .clip(RoundedCornerShape(8.dp))
                         .size(120.dp)
                         .clickable {
-                             onLoanSelected("Personal Loan")
+                            onLoanSelected("Personal Loan")
                         }
                 )
                 Image(
-                    contentDescription = null, contentScale = ContentScale.FillBounds,
+                    contentDescription = null,
+                    contentScale = ContentScale.FillBounds,
                     painter = painterResource(R.drawable.gst_loan_image),
                     modifier = Modifier
                         .padding(5.dp)
@@ -422,7 +454,8 @@ fun LoanSelectionScreen(
                     .padding(5.dp)
             ) {
                 Image(
-                    contentDescription = null, contentScale = ContentScale.FillBounds,
+                    contentDescription = null,
+                    contentScale = ContentScale.FillBounds,
                     painter = painterResource(R.drawable.purchase_finance_image),
                     modifier = Modifier
                         .padding(5.dp)
@@ -433,7 +466,8 @@ fun LoanSelectionScreen(
                         }
                 )
                 Image(
-                    contentDescription = null, contentScale = ContentScale.FillBounds,
+                    contentDescription = null,
+                    contentScale = ContentScale.FillBounds,
                     painter = painterResource(R.drawable.capital_line_image),
                     modifier = Modifier
                         .padding(5.dp)
@@ -445,171 +479,172 @@ fun LoanSelectionScreen(
                 )
             }
         }
-        VoiceRecorderButton(navController,{})
+        VoiceRecorderButton(navController, {})
         RegisterText(
-            text = stringResource(R.string.tell_us_what_you_are_looking_for), style = normal14Text400,
-            textColor = hintGray, boxAlign = Alignment.Center,
-            start = 30.dp, top = 5.dp, bottom = 10.dp
+            text = stringResource(R.string.tell_us_what_you_are_looking_for),
+            style = normal14Text400,
+            textColor = hintGray,
+            boxAlign = Alignment.Center,
+            start = 30.dp,
+            top = 5.dp,
+            bottom = 10.dp
         )
-
-
-
     }
 }
 
 @Preview
 @Composable
-fun PersonalDecidedFlowPreview(){
+fun PersonalDecidedFlowPreview() {
     val fromFlow = "Personal Loan"
     val userStatusResponse = "{\n" +
-            "    \"status\": true,\n" +
-            "    \"data\": {\n" +
-            "           \"txn_id\": \"41129b37-4ee9-5841-a86b-e3cf6ea790ec\" \n" +
-            "        \"data\": [\n" +
-            "            {\n" +
-            "                \"_id\": \"6010b8c4-2d0d-50da-b309-1b9f76a70473\",\n" +
-            "                \"step\": \"consent_select\",\n" +
-            "                \"data\": [\n" +
-            "                    {\n" +
-            "                        \"_id\": \"6010b8c4-2d0d-50da-b309-1b9f76a70473\",\n" +
-            "                        \"offer\": {\n" +
-            "                            \"user_id\": \"fe467dfd-024b-5de1-bdce-19a2fec8f004\",\n" +
-            "                            \"doc_id\": \"6010b8c4-2d0d-50da-b309-1b9f76a70473\",\n" +
-            "                            \"_id\": \"cc48bcfd-3f41-53c0-95a4-8a1c48cd70e8\",\n" +
-            "                            \"provider_id\": \"101\",\n" +
-            "                            \"provider_descriptor\": {\n" +
-            "                                \"images\": [\n" +
-            "                                    {\n" +
-            "                                        \"url\": \"https://refo-static-public.s3.ap-south-1.amazonaws.com/dmi/dmi-sm.png\",\n" +
-            "                                        \"size_type\": \"sm\"\n" +
-            "                                    },\n" +
-            "                                    {\n" +
-            "                                        \"url\": \"https://refo-static-public.s3.ap-south-1.amazonaws.com/dmi/dmi-md.png\",\n" +
-            "                                        \"size_type\": \"md\"\n" +
-            "                                    },\n" +
-            "                                    {\n" +
-            "                                        \"url\": \"https://refo-static-public.s3.ap-south-1.amazonaws.com/dmi/dmi-lg.png\",\n" +
-            "                                        \"size_type\": \"lg\"\n" +
-            "                                    }\n" +
-            "                                ],\n" +
-            "                                \"name\": \"DMI FINANCE PRIVATE LIMITED\",\n" +
-            "                                \"short_desc\": \"DMI FINANCE PRIVATE LIMITED\",\n" +
-            "                                \"long_desc\": \"DMI FINANCE PRIVATE LIMITED\"\n" +
-            "                            },\n" +
-            "                            \"provider_tags\": [\n" +
-            "                                {\n" +
-            "                                    \"name\": \"Contact Info\",\n" +
-            "                                    \"tags\": {\n" +
-            "                                        \"GRO_NAME\": \"Ashish Sarin\",\n" +
-            "                                        \"GRO_EMAIL\": \"head.services@dmifinance.in/grievance@dmifinance.in\",\n" +
-            "                                        \"GRO_CONTACT_NUMBER\": \"011-41204444\",\n" +
-            "                                        \"GRO_DESIGNATION\": \"Senior Vice President - Customer Success\",\n" +
-            "                                        \"GRO_ADDRESS\": \"Express Building, 3rd Floor, 9-10, Bahadur Shah Zafar Marg, New Delhi-110002\",\n" +
-            "                                        \"CUSTOMER_SUPPORT_LINK\": \"https://portal.dmifinance.in\",\n" +
-            "                                        \"CUSTOMER_SUPPORT_CONTACT_NUMBER\": \"9350657100\",\n" +
-            "                                        \"CUSTOMER_SUPPORT_EMAIL\": \"customercare@dmifinance.in\"\n" +
-            "                                    }\n" +
-            "                                },\n" +
-            "                                {\n" +
-            "                                    \"name\": \"Lsp Info\",\n" +
-            "                                    \"tags\": {\n" +
-            "                                        \"LSP_NAME\": \"DMI Finance Pvt. Ltd\",\n" +
-            "                                        \"LSP_EMAIL\": \"customercare@dmifinance.in\",\n" +
-            "                                        \"LSP_CONTACT_NUMBER\": \"9350657100\",\n" +
-            "                                        \"LSP_ADDRESS\": \"Express Building, 3rd Floor, 9-10, Bahadur Shah Zafar Marg New Delhi-110002\"\n" +
-            "                                    }\n" +
-            "                                }\n" +
-            "                            ],\n" +
-            "                            \"item_id\": \"d9eb81e2-96b5-477f-98dc-8518ad60d72e\",\n" +
-            "                            \"item_descriptor\": {\n" +
-            "                                \"code\": \"PERSONAL_LOAN\",\n" +
-            "                                \"name\": \"Personal Loan\"\n" +
-            "                            },\n" +
-            "                            \"item_price\": {\n" +
-            "                                \"currency\": \"INR\",\n" +
-            "                                \"value\": \"647649.13\"\n" +
-            "                            },\n" +
-            "                            \"item_tags\": [\n" +
-            "                                {\n" +
-            "                                    \"name\": \"Loan Information\",\n" +
-            "                                    \"display\": true,\n" +
-            "                                    \"tags\": {\n" +
-            "                                        \"INTEREST_RATE\": \"17.00%\",\n" +
-            "                                        \"TERM\": \"36 Months\",\n" +
-            "                                        \"INTEREST_RATE_TYPE\": \"FIXED\",\n" +
-            "                                        \"APPLICATION_FEE\": \"0.00 INR\",\n" +
-            "                                        \"FORECLOSURE_FEE\": \"4.00% + GST\",\n" +
-            "                                        \"INTEREST_RATE_CONVERSION_CHARGE\": \"0\",\n" +
-            "                                        \"DELAY_PENALTY_FEE\": \"3.00% + GST\",\n" +
-            "                                        \"OTHER_PENALTY_FEE\": \"0\",\n" +
-            "                                        \"TNC_LINK\": \"https://www.dmifinance.in/pdf/Loan-Application-Undertaking.pdf\",\n" +
-            "                                        \"ANNUAL_PERCENTAGE_RATE\": \"17.85%\",\n" +
-            "                                        \"REPAYMENT_FREQUENCY\": \"MONTHLY\",\n" +
-            "                                        \"NUMBER_OF_INSTALLMENTS_OF_REPAYMENT\": \"36\",\n" +
-            "                                        \"COOL_OFF_PERIOD\": \"2024-12-15T07:19:14.704Z\",\n" +
-            "                                        \"INSTALLMENT_AMOUNT\": \"17826.36 INR\"\n" +
-            "                                    }\n" +
-            "                                }\n" +
-            "                            ],\n" +
-            "                            \"form_id\": \"bb1673b1-239c-4310-9eda-e6536aa0839c\",\n" +
-            "                            \"from_url\": \"https://dmi-ondcpreprod.refo.dev/loans/lvform/bb1673b1-239c-4310-9eda-e6536aa0839c\",\n" +
-            "                            \"quote_id\": \"702971c2-8a3b-48f4-9bf0-3b8ab826fd0e\",\n" +
-            "                            \"quote_price\": {\n" +
-            "                                \"currency\": \"INR\",\n" +
-            "                                \"value\": \"647649.13\"\n" +
-            "                            },\n" +
-            "                            \"quote_breakup\": [\n" +
-            "                                {\n" +
-            "                                    \"title\": \"PRINCIPAL\",\n" +
-            "                                    \"value\": \"500000.00\",\n" +
-            "                                    \"currency\": \"INR\"\n" +
-            "                                },\n" +
-            "                                {\n" +
-            "                                    \"title\": \"INTEREST\",\n" +
-            "                                    \"value\": \"141749.13\",\n" +
-            "                                    \"currency\": \"INR\"\n" +
-            "                                },\n" +
-            "                                {\n" +
-            "                                    \"title\": \"NET_DISBURSED_AMOUNT\",\n" +
-            "                                    \"value\": \"494100.00\",\n" +
-            "                                    \"currency\": \"INR\"\n" +
-            "                                },\n" +
-            "                                {\n" +
-            "                                    \"title\": \"OTHER_UPFRONT_CHARGES\",\n" +
-            "                                    \"value\": \"0.00\",\n" +
-            "                                    \"currency\": \"INR\"\n" +
-            "                                },\n" +
-            "                                {\n" +
-            "                                    \"title\": \"INSURANCE_CHARGES\",\n" +
-            "                                    \"value\": \"0.00\",\n" +
-            "                                    \"currency\": \"INR\"\n" +
-            "                                },\n" +
-            "                                {\n" +
-            "                                    \"title\": \"OTHER_CHARGES\",\n" +
-            "                                    \"value\": \"0.00\",\n" +
-            "                                    \"currency\": \"INR\"\n" +
-            "                                },\n" +
-            "                                {\n" +
-            "                                    \"title\": \"PROCESSING_FEE\",\n" +
-            "                                    \"value\": \"5900.00\",\n" +
-            "                                    \"currency\": \"INR\"\n" +
-            "                                }\n" +
-            "                            ],\n" +
-            "                            \"txn_id\": \"e4b743b8-a433-5021-9845-34ba7e78b827\",\n" +
-            "                            \"msg_id\": \"a54c1805-4927-58df-8e4d-89a84ac22231\",\n" +
-            "                            \"bpp_id\": \"dmi-ondcpreprod.refo.dev\",\n" +
-            "                            \"bpp_uri\": \"https://dmi-ondcpreprod.refo.dev/app/ondc/seller\",\n" +
-            "                            \"expires_at\": \"2025-01-09T07:18:14.704Z\",\n" +
-            "                            \"settlement_amount\": \"180000.00\"\n" +
-            "                        }\n" +
-            "                    }\n" +
-            "                ]\n" +
-            "            }\n" +
-            "        ]\n" +
+        "    \"status\": true,\n" +
+        "    \"data\": {\n" +
+        "           \"txn_id\": \"41129b37-4ee9-5841-a86b-e3cf6ea790ec\" \n" +
+        "        \"data\": [\n" +
+        "            {\n" +
+        "                \"_id\": \"6010b8c4-2d0d-50da-b309-1b9f76a70473\",\n" +
+        "                \"step\": \"consent_select\",\n" +
+        "                \"data\": [\n" +
+        "                    {\n" +
+        "                        \"_id\": \"6010b8c4-2d0d-50da-b309-1b9f76a70473\",\n" +
+        "                        \"offer\": {\n" +
+        "                            \"user_id\": \"fe467dfd-024b-5de1-bdce-19a2fec8f004\",\n" +
+        "                            \"doc_id\": \"6010b8c4-2d0d-50da-b309-1b9f76a70473\",\n" +
+        "                            \"_id\": \"cc48bcfd-3f41-53c0-95a4-8a1c48cd70e8\",\n" +
+        "                            \"provider_id\": \"101\",\n" +
+        "                            \"provider_descriptor\": {\n" +
+        "                                \"images\": [\n" +
+        "                                    {\n" +
+        "                                        \"url\": \"https://refo-static-public.s3.ap-south-1.amazonaws.com/dmi/dmi-sm.png\",\n" +
+        "                                        \"size_type\": \"sm\"\n" +
+        "                                    },\n" +
+        "                                    {\n" +
+        "                                        \"url\": \"https://refo-static-public.s3.ap-south-1.amazonaws.com/dmi/dmi-md.png\",\n" +
+        "                                        \"size_type\": \"md\"\n" +
+        "                                    },\n" +
+        "                                    {\n" +
+        "                                        \"url\": \"https://refo-static-public.s3.ap-south-1.amazonaws.com/dmi/dmi-lg.png\",\n" +
+        "                                        \"size_type\": \"lg\"\n" +
+        "                                    }\n" +
+        "                                ],\n" +
+        "                                \"name\": \"DMI FINANCE PRIVATE LIMITED\",\n" +
+        "                                \"short_desc\": \"DMI FINANCE PRIVATE LIMITED\",\n" +
+        "                                \"long_desc\": \"DMI FINANCE PRIVATE LIMITED\"\n" +
+        "                            },\n" +
+        "                            \"provider_tags\": [\n" +
+        "                                {\n" +
+        "                                    \"name\": \"Contact Info\",\n" +
+        "                                    \"tags\": {\n" +
+        "                                        \"GRO_NAME\": \"Ashish Sarin\",\n" +
+        "                                        \"GRO_EMAIL\": \"head.services@dmifinance.in/grievance@dmifinance.in\",\n" +
+        "                                        \"GRO_CONTACT_NUMBER\": \"011-41204444\",\n" +
+        "                                        \"GRO_DESIGNATION\": \"Senior Vice President - Customer Success\",\n" +
+        "                                        \"GRO_ADDRESS\": \"Express Building, 3rd Floor, 9-10, Bahadur Shah Zafar Marg, New Delhi-110002\",\n" +
+        "                                        \"CUSTOMER_SUPPORT_LINK\": \"https://portal.dmifinance.in\",\n" +
+        "                                        \"CUSTOMER_SUPPORT_CONTACT_NUMBER\": \"9350657100\",\n" +
+        "                                        \"CUSTOMER_SUPPORT_EMAIL\": \"customercare@dmifinance.in\"\n" +
+        "                                    }\n" +
+        "                                },\n" +
+        "                                {\n" +
+        "                                    \"name\": \"Lsp Info\",\n" +
+        "                                    \"tags\": {\n" +
+        "                                        \"LSP_NAME\": \"DMI Finance Pvt. Ltd\",\n" +
+        "                                        \"LSP_EMAIL\": \"customercare@dmifinance.in\",\n" +
+        "                                        \"LSP_CONTACT_NUMBER\": \"9350657100\",\n" +
+        "                                        \"LSP_ADDRESS\": \"Express Building, 3rd Floor, 9-10, Bahadur Shah Zafar Marg New Delhi-110002\"\n" +
+        "                                    }\n" +
+        "                                }\n" +
+        "                            ],\n" +
+        "                            \"item_id\": \"d9eb81e2-96b5-477f-98dc-8518ad60d72e\",\n" +
+        "                            \"item_descriptor\": {\n" +
+        "                                \"code\": \"PERSONAL_LOAN\",\n" +
+        "                                \"name\": \"Personal Loan\"\n" +
+        "                            },\n" +
+        "                            \"item_price\": {\n" +
+        "                                \"currency\": \"INR\",\n" +
+        "                                \"value\": \"647649.13\"\n" +
+        "                            },\n" +
+        "                            \"item_tags\": [\n" +
+        "                                {\n" +
+        "                                    \"name\": \"Loan Information\",\n" +
+        "                                    \"display\": true,\n" +
+        "                                    \"tags\": {\n" +
+        "                                        \"INTEREST_RATE\": \"17.00%\",\n" +
+        "                                        \"TERM\": \"36 Months\",\n" +
+        "                                        \"INTEREST_RATE_TYPE\": \"FIXED\",\n" +
+        "                                        \"APPLICATION_FEE\": \"0.00 INR\",\n" +
+        "                                        \"FORECLOSURE_FEE\": \"4.00% + GST\",\n" +
+        "                                        \"INTEREST_RATE_CONVERSION_CHARGE\": \"0\",\n" +
+        "                                        \"DELAY_PENALTY_FEE\": \"3.00% + GST\",\n" +
+        "                                        \"OTHER_PENALTY_FEE\": \"0\",\n" +
+        "                                        \"TNC_LINK\": \"https://www.dmifinance.in/pdf/Loan-Application-Undertaking.pdf\",\n" +
+        "                                        \"ANNUAL_PERCENTAGE_RATE\": \"17.85%\",\n" +
+        "                                        \"REPAYMENT_FREQUENCY\": \"MONTHLY\",\n" +
+        "                                        \"NUMBER_OF_INSTALLMENTS_OF_REPAYMENT\": \"36\",\n" +
+        "                                        \"COOL_OFF_PERIOD\": \"2024-12-15T07:19:14.704Z\",\n" +
+        "                                        \"INSTALLMENT_AMOUNT\": \"17826.36 INR\"\n" +
+        "                                    }\n" +
+        "                                }\n" +
+        "                            ],\n" +
+        "                            \"form_id\": \"bb1673b1-239c-4310-9eda-e6536aa0839c\",\n" +
+        "                            \"from_url\": \"https://dmi-ondcpreprod.refo.dev/loans/lvform/bb1673b1-239c-4310-9eda-e6536aa0839c\",\n" +
+        "                            \"quote_id\": \"702971c2-8a3b-48f4-9bf0-3b8ab826fd0e\",\n" +
+        "                            \"quote_price\": {\n" +
+        "                                \"currency\": \"INR\",\n" +
+        "                                \"value\": \"647649.13\"\n" +
+        "                            },\n" +
+        "                            \"quote_breakup\": [\n" +
+        "                                {\n" +
+        "                                    \"title\": \"PRINCIPAL\",\n" +
+        "                                    \"value\": \"500000.00\",\n" +
+        "                                    \"currency\": \"INR\"\n" +
+        "                                },\n" +
+        "                                {\n" +
+        "                                    \"title\": \"INTEREST\",\n" +
+        "                                    \"value\": \"141749.13\",\n" +
+        "                                    \"currency\": \"INR\"\n" +
+        "                                },\n" +
+        "                                {\n" +
+        "                                    \"title\": \"NET_DISBURSED_AMOUNT\",\n" +
+        "                                    \"value\": \"494100.00\",\n" +
+        "                                    \"currency\": \"INR\"\n" +
+        "                                },\n" +
+        "                                {\n" +
+        "                                    \"title\": \"OTHER_UPFRONT_CHARGES\",\n" +
+        "                                    \"value\": \"0.00\",\n" +
+        "                                    \"currency\": \"INR\"\n" +
+        "                                },\n" +
+        "                                {\n" +
+        "                                    \"title\": \"INSURANCE_CHARGES\",\n" +
+        "                                    \"value\": \"0.00\",\n" +
+        "                                    \"currency\": \"INR\"\n" +
+        "                                },\n" +
+        "                                {\n" +
+        "                                    \"title\": \"OTHER_CHARGES\",\n" +
+        "                                    \"value\": \"0.00\",\n" +
+        "                                    \"currency\": \"INR\"\n" +
+        "                                },\n" +
+        "                                {\n" +
+        "                                    \"title\": \"PROCESSING_FEE\",\n" +
+        "                                    \"value\": \"5900.00\",\n" +
+        "                                    \"currency\": \"INR\"\n" +
+        "                                }\n" +
+        "                            ],\n" +
+        "                            \"txn_id\": \"e4b743b8-a433-5021-9845-34ba7e78b827\",\n" +
+        "                            \"msg_id\": \"a54c1805-4927-58df-8e4d-89a84ac22231\",\n" +
+        "                            \"bpp_id\": \"dmi-ondcpreprod.refo.dev\",\n" +
+        "                            \"bpp_uri\": \"https://dmi-ondcpreprod.refo.dev/app/ondc/seller\",\n" +
+        "                            \"expires_at\": \"2025-01-09T07:18:14.704Z\",\n" +
+        "                            \"settlement_amount\": \"180000.00\"\n" +
+        "                        }\n" +
+        "                    }\n" +
+        "                ]\n" +
+        "            }\n" +
+        "        ]\n" +
 
-            "    },\n" +
-            "    \"statusCode\": 200\n" +
-            "}"
+        "    },\n" +
+        "    \"statusCode\": 200\n" +
+        "}"
     val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
 
     val status = json.decodeFromString(UserStatus.serializer(), userStatusResponse)
@@ -630,11 +665,12 @@ fun PersonalDecidedFlow(status: UserStatus?, navController: NavHostController, f
         ) ||
         status?.data?.data?.lastOrNull()?.step.equals("loan_select_form_submission_REJECTED", true)
     ) {
-        Log.d("res_H","kyc_failed1")
+        Log.d("res_H", "kyc_failed1")
         navigateToFormRejectedScreen(
             navController = navController,
             errorTitle = stringResource(id = R.string.kyc_failed),
-            fromFlow = fromFlow, errorMsg =
+            fromFlow = fromFlow,
+            errorMsg =
             if (status?.data?.data?.lastOrNull()?.step.equals("loan_select_form_submission_PENDING", true)
             ) {
                 stringResource(id = R.string.form_submission_pending)
@@ -663,20 +699,21 @@ fun PersonalDecidedFlow(status: UserStatus?, navController: NavHostController, f
                 stringResource(id = R.string.form_submission_rejected)
             }
         )
-    } else if (status?.data?.data?.lastOrNull()?.step.equals ("account_information_form_submission_failed", true)){
+    } else if (status?.data?.data?.lastOrNull()?.step.equals("account_information_form_submission_failed", true)) {
         navigateToFormRejectedScreen(
             navController = navController,
             errorTitle = stringResource(id = R.string.repayment_failed),
-            fromFlow = fromFlow, errorMsg= stringResource(id = R.string.form_submission_rejected_or_pending)
+            fromFlow = fromFlow,
+            errorMsg = stringResource(id = R.string.form_submission_rejected_or_pending)
         )
-    }else if (status.data.data?.lastOrNull()?.step.equals ("loan_agreement_form_submission_failed", true)){
+    } else if (status.data.data?.lastOrNull()?.step.equals("loan_agreement_form_submission_failed", true)) {
         navigateToFormRejectedScreen(
             navController = navController,
             errorTitle = stringResource(id = R.string.loan_agreement_failed),
-            fromFlow = fromFlow, errorMsg= stringResource(id = R.string.form_submission_rejected_or_pending)
+            fromFlow = fromFlow,
+            errorMsg = stringResource(id = R.string.form_submission_rejected_or_pending)
         )
     } else if (status.data.data?.firstOrNull()?.step.equals("search", true)) {
-
         val offerList = status.data.data?.lastOrNull()?.offerResponse?.lastOrNull()?.data?.map { data ->
             Offer(data.offer, data.id)
         }
@@ -696,29 +733,32 @@ fun PersonalDecidedFlow(status: UserStatus?, navController: NavHostController, f
                 statusCode = 200
             )
             NavigateToWebView(
-                searchModel = searchModel, gstSearchResponse = null,
-                fromFlow = fromFlow, navController = navController, searchResponse = searchModel
+                searchModel = searchModel,
+                gstSearchResponse = null,
+                fromFlow = fromFlow,
+                navController = navController,
+                searchResponse = searchModel
             )
         } else {
-
             val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
             val searchJson = json.encodeToString(
                 SearchModel.serializer(),
                 SearchModel(data = searchResponse, status = true, statusCode = 200)
             )
-            navigateToBureauOffersScreen(navController,stringResource(R.string.getUerFlow), fromFlow,searchJson)
+            navigateToBureauOffersScreen(navController, stringResource(R.string.getUerFlow), fromFlow, searchJson)
 //            navigateToLoanOffersScreen(
 //                navController,
 //                stringResource(R.string.getUerFlow), fromFlow, searchJson
 //            )
         }
-    }
-    else {
+    } else {
         if (status.data.url != null) {
             status.data.url.let { webUrl ->
                 val transactionId = status?.data?.data?.get(0)?.data?.get(0)?.txnId
-                transactionId.let { transactionId -> transactionId?.let {
-                    Log.d("test transactionId: ", it) }
+                transactionId.let { transactionId ->
+                    transactionId?.let {
+                        Log.d("test transactionId: ", it)
+                    }
                     status.data.id?.let { searchId ->
                         transactionId?.let {
                             navigateToWebViewFlowOneScreen(
@@ -731,7 +771,6 @@ fun PersonalDecidedFlow(status: UserStatus?, navController: NavHostController, f
                             )
                         }
                     }
-
                 }
             }
         } else {
@@ -741,7 +780,7 @@ fun PersonalDecidedFlow(status: UserStatus?, navController: NavHostController, f
                 data?.step?.let { step ->
                     if (step.equals("consent_select", true)) {
                         transactionId?.let {
-                            navigateToLoanOffersListScreen(navController,  "No Need Response Item", fromFlow)
+                            navigateToLoanOffersListScreen(navController, "No Need Response Item", fromFlow)
 //                            navigateToLoanProcessScreen(
 //                                navController, statusId = 2, transactionId = transactionId,
 //                                responseItem =
@@ -754,9 +793,9 @@ fun PersonalDecidedFlow(status: UserStatus?, navController: NavHostController, f
                             item?.data?.forEach { item2 ->
                                 item2?.fromUrl?.let { kycUrl ->
                                     item2.id?.let { id ->
-                                        transactionId?.let {transactionId->
+                                        transactionId?.let { transactionId ->
                                             transactionId?.let { Log.d("test transactionId: ", it) }
-                                            navigateToKycAnimation(navController, transactionId, id, kycUrl,fromFlow = fromFlow)
+                                            navigateToKycAnimation(navController, transactionId, id, kycUrl, fromFlow = fromFlow)
 
 //                                            navigateToLoanProcessScreen(
 //                                                navController = navController,
@@ -773,9 +812,11 @@ fun PersonalDecidedFlow(status: UserStatus?, navController: NavHostController, f
                     } else if (step.equals("loan_select_form_submission_APPROVED")) {
                         status.data.data.forEach { userItem ->
                             userItem?.id?.let { id ->
-                                transactionId?.let {transactionId->
+                                transactionId?.let { transactionId ->
                                     navigateToBankDetailsScreen(
-                                        navController = navController, id = id, fromFlow = fromFlow,
+                                        navController = navController,
+                                        id = id,
+                                        fromFlow = fromFlow,
                                         closeCurrent = false
                                     )
 //                                    navigateToLoanProcessScreen(
@@ -792,12 +833,16 @@ fun PersonalDecidedFlow(status: UserStatus?, navController: NavHostController, f
                         status.data.data.forEach { userItem ->
                             userItem?.data?.forEach { item ->
                                 item?.fromUrl?.let { enachUrl ->
-                                    Log.d("res_H_AP_emandate",enachUrl)
+                                    Log.d("res_H_AP_emandate", enachUrl)
                                     userItem.id?.let { id ->
-                                        transactionId?.let {transactionId->
-                                            navigateToRepaymentScreen(navController, transactionId,
-                                                enachUrl, id,
-                                                fromFlow)
+                                        transactionId?.let { transactionId ->
+                                            navigateToRepaymentScreen(
+                                                navController,
+                                                transactionId,
+                                                enachUrl,
+                                                id,
+                                                fromFlow
+                                            )
 //                                            navigateToLoanProcessScreen(
 //                                                navController = navController,
 //                                                transactionId = transactionId,
@@ -810,17 +855,20 @@ fun PersonalDecidedFlow(status: UserStatus?, navController: NavHostController, f
                                 }
                             }
                         }
-                    }
-                    else if (step.equals("account_information_approved", true)) { //verified
+                    } else if (step.equals("account_information_approved", true)) { // verified
                         status.data.data.forEach { userItem ->
                             userItem?.data?.forEach { item ->
                                 item?.fromUrl?.let { enachUrl ->
-                                    Log.d("res_H_AP_accRepay",enachUrl)
+                                    Log.d("res_H_AP_accRepay", enachUrl)
                                     userItem.id?.let { id ->
-                                        transactionId?.let {transactionId->
-                                            navigateToRepaymentScreen(navController, transactionId,
-                                                enachUrl, id,
-                                                fromFlow)
+                                        transactionId?.let { transactionId ->
+                                            navigateToRepaymentScreen(
+                                                navController,
+                                                transactionId,
+                                                enachUrl,
+                                                id,
+                                                fromFlow
+                                            )
 //                                            navigateToLoanProcessScreen(
 //                                                navController = navController,
 //                                                transactionId = transactionId,
@@ -833,13 +881,13 @@ fun PersonalDecidedFlow(status: UserStatus?, navController: NavHostController, f
                                 }
                             }
                         }
-                    }else if (step.equals("loan_agreement_approved", true)) {
+                    } else if (step.equals("loan_agreement_approved", true)) {
                         status.data.data.forEach { userItem ->
                             userItem?.data?.forEach { item ->
                                 item?.fromUrl?.let { loanAgreementUrl ->
-                                    Log.d("res_H_AP_loanAg",loanAgreementUrl)
+                                    Log.d("res_H_AP_loanAg", loanAgreementUrl)
                                     userItem.id?.let { id ->
-                                        transactionId?.let {transactionId->
+                                        transactionId?.let { transactionId ->
                                             if (loanAgreementUrl.equals(
                                                     "No need ResponseItem",
                                                     ignoreCase = true
@@ -877,37 +925,40 @@ fun PersonalDecidedFlow(status: UserStatus?, navController: NavHostController, f
 fun InvoiceDecidedFlow(status: UserStatus?, navController: NavHostController, fromFlow: String) {
     if (status?.data == null) {
         navigateToGstInvoiceLoanScreen(navController = navController, fromFlow = "Invoice Loan")
-    }  else if (status?.data?.data?.lastOrNull()?.step.equals("individual_ekyc_form_submission_failed", true) ||
-        status?.data?.data?.lastOrNull()?.step.equals ("entity_ekyc_form_submission_failed", true)
-        ){
+    } else if (status?.data?.data?.lastOrNull()?.step.equals("individual_ekyc_form_submission_failed", true) ||
+        status?.data?.data?.lastOrNull()?.step.equals("entity_ekyc_form_submission_failed", true)
+    ) {
         navigateToFormRejectedScreen(
             navController = navController,
             errorTitle = stringResource(id = R.string.kyc_failed),
-            fromFlow = fromFlow, errorMsg= stringResource(id = R.string.form_submission_rejected_or_pending)
+            fromFlow = fromFlow,
+            errorMsg = stringResource(id = R.string.form_submission_rejected_or_pending)
         )
-    }
-    else if (status?.data?.data?.lastOrNull()?.step.equals("emandate_form_submission_failed", true)){
+    } else if (status?.data?.data?.lastOrNull()?.step.equals("emandate_form_submission_failed", true)) {
         navigateToFormRejectedScreen(
             navController = navController,
             errorTitle = stringResource(id = R.string.emandate_failed),
-            fromFlow = fromFlow, errorMsg=stringResource(id = R.string.form_submission_rejected_or_pending)
+            fromFlow = fromFlow,
+            errorMsg = stringResource(id = R.string.form_submission_rejected_or_pending)
         )
-    }else if (status?.data?.data?.lastOrNull()?.step.equals("account_information_form_submission_failed", true)){
+    } else if (status?.data?.data?.lastOrNull()?.step.equals("account_information_form_submission_failed", true)) {
         navigateToFormRejectedScreen(
             navController = navController,
             errorTitle = stringResource(id = R.string.repayment_failed),
-            fromFlow = fromFlow, errorMsg=stringResource(id = R.string.form_submission_rejected_or_pending)
+            fromFlow = fromFlow,
+            errorMsg = stringResource(id = R.string.form_submission_rejected_or_pending)
         )
-    }else if (status?.data?.data?.lastOrNull()?.step.equals("loan_agreement_form_submission_failed", true)){
+    } else if (status?.data?.data?.lastOrNull()?.step.equals("loan_agreement_form_submission_failed", true)) {
         navigateToFormRejectedScreen(
             navController = navController,
             errorTitle = stringResource(id = R.string.loan_agreement_failed),
-            fromFlow = fromFlow, errorMsg=stringResource(id = R.string.form_submission_rejected_or_pending)
+            fromFlow = fromFlow,
+            errorMsg = stringResource(id = R.string.form_submission_rejected_or_pending)
         )
-    }else if (status?.data?.data?.lastOrNull()?.step.equals ("search", true)){
+    } else if (status?.data?.data?.lastOrNull()?.step.equals("search", true)) {
         val searchResponseData = GstSearchData(
             id = status?.data?.data?.lastOrNull()?.id,
-            url = status?.data?.data?.lastOrNull()?.url?:"",
+            url = status?.data?.data?.lastOrNull()?.url ?: "",
             transactionId = status?.data?.txnId
         )
 
@@ -918,11 +969,13 @@ fun InvoiceDecidedFlow(status: UserStatus?, navController: NavHostController, fr
             statusCode = 200
         )
         NavigateToWebView(
-            searchResponse = null, gstSearchResponse = searchResponse,
-            fromFlow = fromFlow, navController = navController, searchModel = null
+            searchResponse = null,
+            gstSearchResponse = searchResponse,
+            fromFlow = fromFlow,
+            navController = navController,
+            searchModel = null
         )
-    }
-    else {
+    } else {
         if (status.data.url != null) {
             status.data.url.let { webUrl ->
                 val transactionId = status?.data?.data?.get(0)?.data?.get(0)?.txnId
@@ -946,7 +999,6 @@ fun InvoiceDecidedFlow(status: UserStatus?, navController: NavHostController, fr
 //                            )
                         }
                     }
-
                 }
             }
         } else {
@@ -954,10 +1006,9 @@ fun InvoiceDecidedFlow(status: UserStatus?, navController: NavHostController, fr
 
             transactionId?.let { Log.d("test transactionId: ", it) }
 
-
             status.data.data?.forEach { data ->
                 data?.step?.let { step ->
-                    if (step.equals("consent_select", true)) { //verified
+                    if (step.equals("consent_select", true)) { // verified
                         transactionId?.let {
                             data?.data?.let { userItem ->
                                 userItem?.let {
@@ -980,7 +1031,7 @@ fun InvoiceDecidedFlow(status: UserStatus?, navController: NavHostController, fr
                             item?.data?.forEach { item2 ->
                                 item2?.fromUrl?.let { kycUrl ->
                                     item2.id?.let { id ->
-                                        transactionId?.let {transactionId->
+                                        transactionId?.let { transactionId ->
                                             transactionId?.let { Log.d("test transactionId: ", it) }
 
 //                                            navigateToLoanProcessScreen(
@@ -991,24 +1042,30 @@ fun InvoiceDecidedFlow(status: UserStatus?, navController: NavHostController, fr
 //                                                responseItem = kycUrl
 //                                            )
                                             navigateToLoanProcessScreen(
-                                                navController = navController, statusId = 13, responseItem = kycUrl,
-                                                offerId = id, fromFlow = fromFlow, transactionId = transactionId
+                                                navController = navController,
+                                                statusId = 13,
+                                                responseItem = kycUrl,
+                                                offerId = id,
+                                                fromFlow = fromFlow,
+                                                transactionId = transactionId
                                             )
                                         }
                                     }
                                 }
                             }
                         }
-                    } else if (step.equals("offer_confirm", true)) { //verified
+                    } else if (step.equals("offer_confirm", true)) { // verified
                         status.data.data.forEach { userItem ->
                             userItem?.data?.forEach { item ->
                                 item?.fromUrl?.let { loanAgreementUrl ->
                                     userItem.id?.let { id ->
-                                        transactionId?.let {transactionId->
+                                        transactionId?.let { transactionId ->
                                             navigateToLoanProcessScreen(
                                                 transactionId = transactionId,
-                                                offerId = id, responseItem = loanAgreementUrl,
-                                                navController = navController, statusId = 13,
+                                                offerId = id,
+                                                responseItem = loanAgreementUrl,
+                                                navController = navController,
+                                                statusId = 13,
                                                 fromFlow = fromFlow
                                             )
                                         }
@@ -1016,16 +1073,18 @@ fun InvoiceDecidedFlow(status: UserStatus?, navController: NavHostController, fr
                                 }
                             }
                         }
-                    }else if (step.equals("loan_approved", true)) { //Verified
+                    } else if (step.equals("loan_approved", true)) { // Verified
                         status.data.data.forEach { userItem ->
                             userItem?.data?.forEach { item ->
                                 item?.fromUrl?.let { verificationUrl ->
                                     userItem.id?.let { id ->
-                                        transactionId?.let {transactionId->
+                                        transactionId?.let { transactionId ->
                                             navigateToBankKycVerificationScreen(
-                                                navController = navController, kycUrl = verificationUrl,
+                                                navController = navController,
+                                                kycUrl = verificationUrl,
                                                 transactionId = transactionId,
-                                                offerId = id, verificationStatus = "2",
+                                                offerId = id,
+                                                verificationStatus = "2",
                                                 fromFlow = fromFlow
                                             )
                                         }
@@ -1033,34 +1092,35 @@ fun InvoiceDecidedFlow(status: UserStatus?, navController: NavHostController, fr
                                 }
                             }
                         }
-                    }
-                    else if (step.equals("entity_ekyc_after_form_submission", true)) {
+                    } else if (step.equals("entity_ekyc_after_form_submission", true)) {
                         status.data.data.forEach { userItem ->
                             userItem?.data?.forEach { item ->
                                 userItem.id?.let { id ->
-                                    transactionId?.let {transactionId->
+                                    transactionId?.let { transactionId ->
                                         navigateToLoanProcessScreen(
                                             transactionId = transactionId,
-                                            offerId = id, responseItem = "No Need",
-                                            navController = navController, statusId = 14,
+                                            offerId = id,
+                                            responseItem = "No Need",
+                                            navController = navController,
+                                            statusId = 14,
                                             fromFlow = fromFlow
                                         )
                                     }
                                 }
                             }
                         }
-                    }
-                    else if (step.equals("account_information_approved", true)) { //verified
+                    } else if (step.equals("account_information_approved", true)) { // verified
                         status.data.data.forEach { userItem ->
                             userItem?.data?.forEach { item ->
                                 item?.fromUrl?.let { enachUrl ->
                                     userItem.id?.let { id ->
-                                        transactionId?.let {transactionId->
+                                        transactionId?.let { transactionId ->
                                             navigateToLoanProcessScreen(
                                                 navController = navController,
                                                 transactionId = transactionId,
                                                 statusId = 5,
-                                                responseItem = enachUrl, offerId = id,
+                                                responseItem = enachUrl,
+                                                offerId = id,
                                                 fromFlow = fromFlow
                                             )
                                         }
@@ -1068,17 +1128,18 @@ fun InvoiceDecidedFlow(status: UserStatus?, navController: NavHostController, fr
                                 }
                             }
                         }
-                    }
-                    else if (step.equals("loan_agreement_approved", true)) { //verified
+                    } else if (step.equals("loan_agreement_approved", true)) { // verified
                         status.data.data.forEach { userItem ->
                             userItem?.data?.forEach { item ->
                                 item?.fromUrl?.let { loanAgreementUrl ->
                                     userItem.id?.let { id ->
-                                        transactionId?.let {transactionId->
+                                        transactionId?.let { transactionId ->
                                             navigateToLoanProcessScreen(
                                                 transactionId = transactionId,
-                                                offerId = id, responseItem = loanAgreementUrl,
-                                                navController = navController, statusId = 16,
+                                                offerId = id,
+                                                responseItem = loanAgreementUrl,
+                                                navController = navController,
+                                                statusId = 16,
                                                 fromFlow = fromFlow
                                             )
                                         }
@@ -1087,10 +1148,6 @@ fun InvoiceDecidedFlow(status: UserStatus?, navController: NavHostController, fr
                             }
                         }
                     }
-
-
-
-
                 }
             }
         }
@@ -1101,37 +1158,45 @@ fun InvoiceDecidedFlow(status: UserStatus?, navController: NavHostController, fr
 fun PurchaseDecidedFlow(status: UserStatus?, navController: NavHostController, fromFlow: String) {
     if (status?.data == null) {
         navigateToLoanProcessScreen(
-            responseItem = "No Need", offerId = "1234", fromFlow = fromFlow,
-            navController = navController, statusId = 18, transactionId = "Sai"
+            responseItem = "No Need",
+            offerId = "1234",
+            fromFlow = fromFlow,
+            navController = navController,
+            statusId = 18,
+            transactionId = "Sai"
         )
-    } else if (status?.data?.data?.lastOrNull()?.step.equals("loan_select_form_submission_failed", true)){
+    } else if (status?.data?.data?.lastOrNull()?.step.equals("loan_select_form_submission_failed", true)) {
         navigateToFormRejectedScreen(
             navController = navController,
             errorTitle = stringResource(id = R.string.kyc_failed),
-            fromFlow = fromFlow, errorMsg= stringResource(id = R.string.form_submission_rejected_or_pending)
+            fromFlow = fromFlow,
+            errorMsg = stringResource(id = R.string.form_submission_rejected_or_pending)
         )
-    } else if (status?.data?.data?.lastOrNull()?.step.equals ("emandate_form_submission_failed", true)){
+    } else if (status?.data?.data?.lastOrNull()?.step.equals("emandate_form_submission_failed", true)) {
         navigateToFormRejectedScreen(
             navController = navController,
             errorTitle = stringResource(id = R.string.emandate_failed),
-            fromFlow = fromFlow, errorMsg= stringResource(id = R.string.form_submission_rejected_or_pending)
+            fromFlow = fromFlow,
+            errorMsg = stringResource(id = R.string.form_submission_rejected_or_pending)
         )
-    }else if (status?.data?.data?.lastOrNull()?.step.equals ("account_information_form_submission_failed", true)){
+    } else if (status?.data?.data?.lastOrNull()?.step.equals("account_information_form_submission_failed", true)) {
         navigateToFormRejectedScreen(
             navController = navController,
             errorTitle = stringResource(id = R.string.repayment_failed),
-            fromFlow = fromFlow, errorMsg= stringResource(id = R.string.form_submission_rejected_or_pending)
+            fromFlow = fromFlow,
+            errorMsg = stringResource(id = R.string.form_submission_rejected_or_pending)
         )
-    }else if (status?.data?.data?.lastOrNull()?.step.equals ("loan_agreement_form_submission_failed", true)){
+    } else if (status?.data?.data?.lastOrNull()?.step.equals("loan_agreement_form_submission_failed", true)) {
         navigateToFormRejectedScreen(
             navController = navController,
             errorTitle = stringResource(id = R.string.loan_agreement_failed),
-            fromFlow = fromFlow, errorMsg= stringResource(id = R.string.form_submission_rejected_or_pending)
+            fromFlow = fromFlow,
+            errorMsg = stringResource(id = R.string.form_submission_rejected_or_pending)
         )
-    }else if (status?.data?.data?.lastOrNull()?.step.equals ("search", true)){
+    } else if (status?.data?.data?.lastOrNull()?.step.equals("search", true)) {
         val searchResponse = SearchResponseModel(
             id = status?.data?.data?.lastOrNull()?.id,
-            url = status?.data?.data?.lastOrNull()?.url?:"",
+            url = status?.data?.data?.lastOrNull()?.url ?: "",
             transactionId = status?.data?.txnId
         )
 
@@ -1142,11 +1207,13 @@ fun PurchaseDecidedFlow(status: UserStatus?, navController: NavHostController, f
             statusCode = 200
         )
         NavigateToWebView(
-            searchResponse = searchModel, gstSearchResponse = null,
-            fromFlow = fromFlow, navController = navController, searchModel = searchModel
+            searchResponse = searchModel,
+            gstSearchResponse = null,
+            fromFlow = fromFlow,
+            navController = navController,
+            searchModel = searchModel
         )
-    }
-    else {
+    } else {
         if (status.data.url != null) {
             status.data.url.let { webUrl ->
                 val transactionId = status?.data?.data?.get(0)?.data?.get(0)?.txnId
@@ -1165,7 +1232,6 @@ fun PurchaseDecidedFlow(status: UserStatus?, navController: NavHostController, f
                             )
                         }
                     }
-
                 }
             }
         } else {
@@ -1173,16 +1239,18 @@ fun PurchaseDecidedFlow(status: UserStatus?, navController: NavHostController, f
 
             transactionId?.let { Log.d("test transactionId: ", it) }
 
-
             status.data.data?.forEach { data ->
                 data?.step?.let { step ->
                     if (step.equals("post_search", true)) {
                         transactionId?.let {
                             navigateToLoanProcessScreen(
-                                navController, statusId = 20, transactionId = transactionId,
+                                navController,
+                                statusId = 20,
+                                transactionId = transactionId,
                                 responseItem =
                                 "No Need Response Item",
-                                offerId = "1234", fromFlow = fromFlow
+                                offerId = "1234",
+                                fromFlow = fromFlow
                             )
                         }
                     } else if (step.equals("offer_confirm", true)) {
@@ -1190,11 +1258,13 @@ fun PurchaseDecidedFlow(status: UserStatus?, navController: NavHostController, f
                             userItem?.data?.forEach { item ->
                                 item?.fromUrl?.let { loanAgreementUrl ->
                                     userItem.id?.let { id ->
-                                        transactionId?.let {transactionId->
+                                        transactionId?.let { transactionId ->
                                             navigateToLoanProcessScreen(
                                                 transactionId = transactionId,
-                                                offerId = id, responseItem = loanAgreementUrl,
-                                                navController = navController, statusId = 13,
+                                                offerId = id,
+                                                responseItem = loanAgreementUrl,
+                                                navController = navController,
+                                                statusId = 13,
                                                 fromFlow = fromFlow
                                             )
                                         }
@@ -1210,8 +1280,10 @@ fun PurchaseDecidedFlow(status: UserStatus?, navController: NavHostController, f
                                         transactionId?.let { transactionId ->
                                             navigateToLoanProcessScreen(
                                                 transactionId = transactionId,
-                                                offerId = id, responseItem = verificationUrl,
-                                                navController = navController, statusId = 5,
+                                                offerId = id,
+                                                responseItem = verificationUrl,
+                                                navController = navController,
+                                                statusId = 5,
                                                 fromFlow = fromFlow
                                             )
                                         }
@@ -1224,11 +1296,13 @@ fun PurchaseDecidedFlow(status: UserStatus?, navController: NavHostController, f
                             userItem?.data?.forEach { item ->
                                 item?.fromUrl?.let { loanAgreementUrl ->
                                     userItem.id?.let { id ->
-                                        transactionId?.let {transactionId->
+                                        transactionId?.let { transactionId ->
                                             navigateToLoanProcessScreen(
                                                 transactionId = transactionId,
-                                                offerId = id, responseItem = loanAgreementUrl,
-                                                navController = navController, statusId = 22,
+                                                offerId = id,
+                                                responseItem = loanAgreementUrl,
+                                                navController = navController,
+                                                statusId = 22,
                                                 fromFlow = fromFlow
                                             )
                                         }

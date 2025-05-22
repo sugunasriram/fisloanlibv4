@@ -72,7 +72,7 @@ class AnnualIncomeViewModel : ViewModel() {
 
     fun onPurposeSelected(purpose: String) {
         _selectedPurpose.value = purpose
-        _purposeError.value=null
+        _purposeError.value = null
     }
 
     private val _generalError: MutableLiveData<String?> = MutableLiveData("")
@@ -106,21 +106,24 @@ class AnnualIncomeViewModel : ViewModel() {
     }
 
     fun onNextClicked(
-        context: Context, selectedPurpose: String, income: Int,focusOnPurpose: FocusRequester
+        context: Context,
+        selectedPurpose: String,
+        income: Int,
+        focusOnPurpose: FocusRequester
     ) {
         clearMessage()
-        if (selectedPurpose.isEmpty() || selectedPurpose.equals("Loan Purpose",ignoreCase = true)) {
-            _purposeError.value=context.getString(R.string.please_select_loan_purpose)
+        if (selectedPurpose.isEmpty() || selectedPurpose.equals("Loan Purpose", ignoreCase = true)) {
+            _purposeError.value = context.getString(R.string.please_select_loan_purpose)
             focusOnPurpose.requestFocus()
         } else if (income < 30000 || income > 2000000) {
 //            updateGeneralError(context.getString(R.string.please_enter_valid_income_within_limits))
-            _incomeError.value=context.getString(R.string.please_enter_valid_income_within_limits)
+            _incomeError.value = context.getString(R.string.please_enter_valid_income_within_limits)
         } else {
-            updateUserIncomeApi(context= context, income = income.toString())
+            updateUserIncomeApi(context = context, income = income.toString())
         }
     }
 
-    private  val _updatingIncome = MutableStateFlow(false)
+    private val _updatingIncome = MutableStateFlow(false)
     val updatingIncome: StateFlow<Boolean> = _updatingIncome
 
     private val _updatedIncome = MutableStateFlow(false)
@@ -132,58 +135,67 @@ class AnnualIncomeViewModel : ViewModel() {
     private val _navigationToSignIn = MutableStateFlow(false)
     val navigationToSignIn: StateFlow<Boolean> = _navigationToSignIn
 
-    fun updateUserIncomeApi(context: Context, income: String){
+    fun updateUserIncomeApi(context: Context, income: String) {
         _updatingIncome.value = true
-        viewModelScope.launch (Dispatchers.IO){
-            handleUpdateUserIncomeApi(context,income)
+        viewModelScope.launch(Dispatchers.IO) {
+            handleUpdateUserIncomeApi(context, income)
         }
     }
 
     private suspend fun handleUpdateUserIncomeApi(
-        context: Context, income: String, checkForAccessToken: Boolean=true
+        context: Context,
+        income: String,
+        checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
             ApiRepository.updateUserIncome(income)
-        }.onSuccess {response ->
+        }.onSuccess { response ->
             response?.let {
                 handleUpdateUserIncomeSuccess(response)
             }
-        }.onFailure {error ->
-            //Session Management
+        }.onFailure { error ->
+            // Session Management
             if (error is ResponseException &&
-                error.response.status.value == 401) {
-                //Get Access Token using RefreshToken
-                if (checkForAccessToken && handleAuthGetAccessTokenApi()){
-                    handleUpdateUserIncomeApi(context, income,false)
-                }else{
+                error.response.status.value == 401
+            ) {
+                // Get Access Token using RefreshToken
+                if (checkForAccessToken && handleAuthGetAccessTokenApi()) {
+                    handleUpdateUserIncomeApi(context, income, false)
+                } else {
                     _navigationToSignIn.value = true
                 }
-            }else {
-                handleFailure(error =error,context = context)
+            } else {
+                handleFailure(error = error, context = context)
             }
         }
     }
-    private suspend fun handleUpdateUserIncomeSuccess(updateIncome: UpdateIncome){
-        withContext(Dispatchers.Main){
+    private suspend fun handleUpdateUserIncomeSuccess(updateIncome: UpdateIncome) {
+        withContext(Dispatchers.Main) {
             _updatedIncome.value = true
             _updatedIncomeResponse.value = updateIncome
             _updatingIncome.value = false
         }
     }
 
-    private suspend fun handleFailure(error: Throwable,context: Context) {
+    private suspend fun handleFailure(error: Throwable, context: Context) {
         withContext(Dispatchers.Main) {
             if (error is ResponseException) {
                 CommonMethods().handleResponseException(
-                    error = error, context = context,updateErrorMessage = ::updateErrorMessage,
-                    _showServerIssueScreen = _showServerIssueScreen, _middleLoan = _middleLoan,
-                    _unAuthorizedUser = _unAuthorizedUser, _unexpectedError = _unexpectedError,
+                    error = error,
+                    context = context,
+                    updateErrorMessage = ::updateErrorMessage,
+                    _showServerIssueScreen = _showServerIssueScreen,
+                    _middleLoan = _middleLoan,
+                    _unAuthorizedUser = _unAuthorizedUser,
+                    _unexpectedError = _unexpectedError,
                     _showLoader = _showLoader
                 )
             } else {
                 CommonMethods().handleGeneralException(
-                    error = error, _showInternetScreen = _showInternetScreen,
-                    _showTimeOutScreen = _showTimeOutScreen, _unexpectedError = _unexpectedError
+                    error = error,
+                    _showInternetScreen = _showInternetScreen,
+                    _showTimeOutScreen = _showTimeOutScreen,
+                    _unexpectedError = _unexpectedError
                 )
             }
             _updatingIncome.value = false

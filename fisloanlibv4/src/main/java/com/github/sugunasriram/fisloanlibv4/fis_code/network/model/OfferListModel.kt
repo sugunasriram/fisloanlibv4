@@ -1,6 +1,5 @@
 package com.github.sugunasriram.fisloanlibv4.fis_code.network.model
 
-import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.gst.GstData
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.gst.GstOfferData
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.personaLoan.Offer
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.pf.PfOffer

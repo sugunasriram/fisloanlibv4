@@ -40,7 +40,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,28 +59,21 @@ import androidx.navigation.compose.rememberNavController
 import com.github.sugunasriram.fisloanlibv4.R
 import com.github.sugunasriram.fisloanlibv4.fis_code.app.MainActivity
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.TopBar
-import com.github.sugunasriram.fisloanlibv4.fis_code.components.WebViewTopBar
 import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.navigateToAnimationLoader
 import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.navigateToFormRejectedScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.navigateToKYCFailedScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.core.ApiPaths
-import com.github.sugunasriram.fisloanlibv4.fis_code.network.core.ApiRepository.handleAuthGetAccessTokenApi
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.sse.SSEData
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.sse.SSEViewModel
 import com.github.sugunasriram.fisloanlibv4.fis_code.utils.CommonMethods
-import com.github.sugunasriram.fisloanlibv4.fis_code.views.negitiveScreen.KYCFailedScreen
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-
 
 private val json1 = Json {
     prettyPrint = true
     ignoreUnknownKeys = true
 }
-
 
 private var filePathCallbackFn: ValueCallback<Array<Uri>>? = null
 private var uploadMessage: ValueCallback<Uri>? = null
@@ -96,7 +88,7 @@ fun WebKycScreenPreview() {
 //    var url = "https://ilpuat.finfotech.co.in/lms/ondc/kycuri?transactionId=1329fefc-86e5-5f4b-b60e-6d32a7674ef0&status=2"
 //    var url = "file:///android_asset/eKycLastPage.html"
 //    var url = "https://upsell.abfldirect.com/kyc/selfie?account_id=9d61f0949525523c8a51173b6f66dcbf&z_request_id=ONA202503214c722e3b02ca4cf&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI5ZDYxZjA5NDk1MjU1MjNjOGE1MTE3M2I2ZjY2ZGNiZiIsImF1ZCI6InVzciIsImlhdCI6MTc0MjU1OTU1MywiZXhwIjoxNzQ1MTUxNTUzLCJpc3MiOiJ3aWRnZXRfc2RrX2JhY2tlbmQifQ.10ic_goWA-LY7HWF4WKKRQ5uaTnnfypy6aoKAI5JbJw"
-        var url="https://www.google.com"
+    var url = "https://www.google.com"
     //    WebKycScreen(
 //        navController = rememberNavController(), transactionId="transactionId",
 //        url = url, id = "id", fromFlow = "Personal Loan"
@@ -107,18 +99,22 @@ fun WebKycScreenPreview() {
         context = LocalContext.current,
         url = url,
         id = "id",
-        pageContent = {  },
-        isSelfScrollable = false,
+        pageContent = { },
+        isSelfScrollable = false
     )
 }
-
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun WebKycScreen(
-    navController: NavHostController, transactionId: String, url: String, id: String, fromFlow:
-    String,
-    isSelfScrollable: Boolean = false, pageContent: () -> Unit
+    navController: NavHostController,
+    transactionId: String,
+    url: String,
+    id: String,
+    fromFlow:
+        String,
+    isSelfScrollable: Boolean = false,
+    pageContent: () -> Unit
 ) {
     var lateNavigate = false
     val sseViewModel: SSEViewModel = viewModel()
@@ -141,10 +137,13 @@ fun WebKycScreen(
         }
     }
 
-
     ProceedWithKYCProcess(
-        navController = navController, context = LocalContext.current, url = url, id = id,
-        pageContent = pageContent, isSelfScrollable = isSelfScrollable,
+        navController = navController,
+        context = LocalContext.current,
+        url = url,
+        id = id,
+        pageContent = pageContent,
+        isSelfScrollable = isSelfScrollable
     )
 
     if (sseEvents.isNotEmpty()) {
@@ -158,20 +157,19 @@ fun WebKycScreen(
             null
         }
 
-
         if (sseData != null) {
-
-        val sseTransactionId = sseData.data?.data?.txnId;//tested
-        Log.d(
-            "KyCScreen_Kyc:", "transactionId :[" + transactionId + "] " +
+            val sseTransactionId = sseData.data?.data?.txnId; // tested
+            Log.d(
+                "KyCScreen_Kyc:",
+                "transactionId :[" + transactionId + "] " +
                     "sseTransactionId:[" + sseTransactionId
-        )
+            )
             sseData.data?.data?.type.let { type ->
                 if (transactionId == sseTransactionId && (type == "ACTION" || type == "INFO")) {
                     Log.d("KyCScreen", "At SSE not empty - Sugu")
                     lateNavigate = true
 
-                    //Check if Form Rejected or Pending
+                    // Check if Form Rejected or Pending
                     if (sseData.data?.data?.data?.error != null) {
                         Log.d("KyCScreen", "Error :" + sseData.data?.data?.data?.error?.message)
                         errorMsg = sseData.data?.data?.data?.error?.message
@@ -179,28 +177,32 @@ fun WebKycScreen(
                         navigateToFormRejectedScreen(
                             navController = navController,
                             errorTitle = errorTitle,
-                            fromFlow = fromFlow, errorMsg = errorMsg
+                            fromFlow = fromFlow,
+                            errorMsg = errorMsg
                         )
                     } else {
                         lateNavigate = false
                         navigateToAnimationLoader(
-                            navController = navController, transactionId = transactionId, id = id,
+                            navController = navController,
+                            transactionId = transactionId,
+                            id = id,
                             fromFlow = fromFlow
                         )
                     }
                 }
             }
-         }
-
+        }
     }
-
 }
-
 
 @Composable
 fun ProceedWithKYCProcess(
-    navController: NavHostController, context: Context, url: String, id: String,
-    pageContent: () -> Unit, isSelfScrollable: Boolean = false
+    navController: NavHostController,
+    context: Context,
+    url: String,
+    id: String,
+    pageContent: () -> Unit,
+    isSelfScrollable: Boolean = false
 ) {
     BackHandler { navigateApplyByCategoryScreen(navController) }
     val activity = context as Activity
@@ -214,7 +216,6 @@ fun ProceedWithKYCProcess(
         )
 //        WebViewTopBar(navController, title = "Kyc Verification")
         if (isSelfScrollable) {
-
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -229,7 +230,6 @@ fun ProceedWithKYCProcess(
                     .fillMaxWidth()
                     .padding(top = 0.dp)
             ) {
-
                 val fileChooserLauncher = rememberLauncherForActivityResult(
                     contract = ActivityResultContracts.GetContent()
                 ) { uri: Uri? ->
@@ -244,11 +244,10 @@ fun ProceedWithKYCProcess(
 
                 AndroidView(
 
-
                     factory = { ctx ->
                         WebView(ctx).apply {
                             settings.setGeolocationEnabled(true)
-                            //Sugu - need to test with other lender, commented for Lint
+                            // Sugu - need to test with other lender, commented for Lint
                             settings.javaScriptEnabled = true
                             settings.loadsImagesAutomatically = true
                             settings.domStorageEnabled = true
@@ -325,13 +324,17 @@ fun ProceedWithKYCProcess(
                                 }
 
                                 override fun onReceivedSslError(
-                                    view: WebView?, handler: SslErrorHandler?, error: SslError?
+                                    view: WebView?,
+                                    handler: SslErrorHandler?,
+                                    error: SslError?
                                 ) {
                                     super.onReceivedSslError(view, handler, error)
                                 }
 
                                 override fun onPageStarted(
-                                    view: WebView?, url: String?, favicon: Bitmap?
+                                    view: WebView?,
+                                    url: String?,
+                                    favicon: Bitmap?
                                 ) {
                                     super.onPageStarted(view, url, favicon)
                                 }
@@ -358,7 +361,6 @@ fun ProceedWithKYCProcess(
                                 fun openFileChooser(uploadMsg: ValueCallback<Uri>) {
                                     openFileChooser(uploadMsg, "*/*")
                                 }
-
                             }
                             val webSettings = webViewClient?.let { it1 -> settings }
                             if (webSettings != null) {
@@ -380,10 +382,9 @@ fun ProceedWithKYCProcess(
                     },
                     update = { webView ->
 
-
                         webView.settings.setGeolocationEnabled(true)
                         webView.settings.setJavaScriptEnabled(true)
-                        //Sugu - need to test with other lender, commented for Lint
+                        // Sugu - need to test with other lender, commented for Lint
                         webView.settings.loadsImagesAutomatically = true
                         webView.settings.domStorageEnabled = true
                         webView.settings.allowFileAccess = true
@@ -459,14 +460,12 @@ fun ProceedWithKYCProcess(
                                 origin: String?,
                                 callback: GeolocationPermissions.Callback?
                             ) {
-
                                 if (ContextCompat.checkSelfPermission(
                                         activity,
                                         Manifest.permission.ACCESS_FINE_LOCATION
                                     )
                                     != PackageManager.PERMISSION_GRANTED
                                 ) {
-
                                     if (ActivityCompat.shouldShowRequestPermissionRationale(
                                             activity,
                                             Manifest.permission.ACCESS_FINE_LOCATION
@@ -484,23 +483,23 @@ fun ProceedWithKYCProcess(
                                                         arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                                                         1001
                                                     )
-                                                })
+                                                }
+                                            )
                                             .show()
-
                                     } else {
-                                        //no explanation need we can request the location
+                                        // no explanation need we can request the location
                                         mGeoLocationCallback = callback
                                         mGeoLocationRequestOrigin = origin
                                         ActivityCompat.requestPermissions(
                                             activity,
-                                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1002
+                                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                                            1002
                                         )
                                     }
                                 } else {
-                                    //tell the webview that permission has granted
+                                    // tell the webview that permission has granted
                                     callback!!.invoke(origin, true, true)
                                 }
-
                             }
 
                             private fun showPermissionDialog(request: PermissionRequest) {
@@ -509,8 +508,9 @@ fun ProceedWithKYCProcess(
                                     .setMessage("This site wants to access your camera. Do you allow it?")
                                     .setPositiveButton("Allow") { _, _ ->
                                         ActivityCompat.requestPermissions(
-                                            context, arrayOf
-                                                (Manifest.permission.CAMERA),
+                                            context,
+                                            arrayOf
+                                            (Manifest.permission.CAMERA),
                                             CommonMethods().CAMERA_PERMISSION_REQUEST_CODE
                                         )
                                     }
@@ -521,14 +521,12 @@ fun ProceedWithKYCProcess(
                                     .show()
                             }
 
-
                             override fun onConsoleMessage(consoleMessage: ConsoleMessage): Boolean {
                                 if (consoleMessage.messageLevel() == ConsoleMessage.MessageLevel.ERROR) {
                                     Log.e("WebView JS Error", consoleMessage.message())
                                 }
                                 return super.onConsoleMessage(consoleMessage)
                             }
-
 
                             // For Android 5.0+
                             override fun onShowFileChooser(
@@ -569,7 +567,6 @@ fun ProceedWithKYCProcess(
                             ): Boolean {
                                 val newWebView = view?.context?.let { WebView(it) }
                                 if (newWebView != null) {
-
                                     newWebView.webViewClient = object : WebViewClient() {
                                         override fun shouldOverrideUrlLoading(
                                             view: WebView,
@@ -594,10 +591,8 @@ fun ProceedWithKYCProcess(
                                             }
                                             return true
                                         }
-
                                     }
                                 }
-
 
                                 val webSettings = newWebView?.settings
                                 if (webSettings != null) {
@@ -655,7 +650,7 @@ fun ProceedWithKYCProcess(
                                 // Pass the WebView instance directly
                                 cookieManager.setAcceptThirdPartyCookies(newWebView, true)
                                 cookieManager.setAcceptThirdPartyCookies(view, true)
-                                newWebView?.setWebChromeClient(this);
+                                newWebView?.setWebChromeClient(this)
                                 view?.addView(newWebView)
                                 val transport = resultMsg?.obj as? WebView.WebViewTransport
                                 transport?.webView = newWebView
@@ -663,7 +658,6 @@ fun ProceedWithKYCProcess(
 
                                 return true
                             }
-
 
                             override fun onCloseWindow(window: WebView?) {
                                 super.onCloseWindow(window)
@@ -679,7 +673,7 @@ fun ProceedWithKYCProcess(
                         cookieManager.setAcceptCookie(true)
 
                         // If you want to allow third-party cookies (optional)
-                            // Pass the WebView instance directly
+                        // Pass the WebView instance directly
                         cookieManager.setAcceptThirdPartyCookies(webView, true)
 
                         webView.loadUrl(url)
@@ -689,5 +683,3 @@ fun ProceedWithKYCProcess(
         }
     }
 }
-
-

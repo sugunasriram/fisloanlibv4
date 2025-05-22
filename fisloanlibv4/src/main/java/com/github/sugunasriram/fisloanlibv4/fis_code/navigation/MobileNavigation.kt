@@ -9,6 +9,7 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.components.AnimationLoader
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.KycAnimation
 import com.github.sugunasriram.fisloanlibv4.fis_code.views.ApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.views.LoanProcessScreen
+import com.github.sugunasriram.fisloanlibv4.fis_code.views.auth.LanguageSelectionScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.views.auth.OtpScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.views.auth.SignInScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.views.auth.SpalashScreen
@@ -31,16 +32,15 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.views.igm.IssueDetailScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.views.igm.IssueListScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.views.invalid.FormRejectionScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.views.invalid.UnexpectedErrorScreen
+import com.github.sugunasriram.fisloanlibv4.fis_code.views.negitiveScreen.EMandateESignFailedScreen
+import com.github.sugunasriram.fisloanlibv4.fis_code.views.negitiveScreen.KYCFailedScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.views.personalLoan.AccountAggregatorScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.views.personalLoan.AddBankDetailScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.views.personalLoan.BankDetailScreen
-import com.github.sugunasriram.fisloanlibv4.fis_code.views.personalLoan.DownPaymentScreen
-import com.github.sugunasriram.fisloanlibv4.fis_code.views.personalLoan.EditLoanRequestScreen
-import com.github.sugunasriram.fisloanlibv4.fis_code.views.auth.LanguageSelectionScreen
-import com.github.sugunasriram.fisloanlibv4.fis_code.views.negitiveScreen.EMandateESignFailedScreen
-import com.github.sugunasriram.fisloanlibv4.fis_code.views.negitiveScreen.KYCFailedScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.views.personalLoan.BasicDetailsScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.views.personalLoan.BureauOffersScreen
+import com.github.sugunasriram.fisloanlibv4.fis_code.views.personalLoan.DownPaymentScreen
+import com.github.sugunasriram.fisloanlibv4.fis_code.views.personalLoan.EditLoanRequestScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.views.personalLoan.LoanDisbursementScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.views.personalLoan.LoanOffers
 import com.github.sugunasriram.fisloanlibv4.fis_code.views.personalLoan.LoanOffersListDetailsScreen
@@ -59,9 +59,9 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.views.sidemenu.LoanListScre
 import com.github.sugunasriram.fisloanlibv4.fis_code.views.sidemenu.LoanStatusDetailScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.views.sidemenu.LoanStatusScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.views.webview.AAConsentApprovalScreen
+import com.github.sugunasriram.fisloanlibv4.fis_code.views.webview.AAWebScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.views.webview.LoanAgreementWebScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.views.webview.RepaymentWebScreen
-import com.github.sugunasriram.fisloanlibv4.fis_code.views.webview.AAWebScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.views.webview.SearchWebViewScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.views.webview.gst.GstKycWebViewScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.views.webview.personalLoan.PrePartPaymentWebView
@@ -69,10 +69,10 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.views.webview.personalLoan.
 import com.github.sugunasriram.fisloanlibv4.fis_code.views.webview.purchaseFinance.PfKycWebViewScreen
 
 fun NavGraphBuilder.mobileNavigation(
-    navController: NavHostController, startDestination: String
+    navController: NavHostController,
+    startDestination: String
 ) {
     navigation(route = AppNavGraph.GRAPH_LAUNCH, startDestination = startDestination) {
-
         // Authentication Screen
         composable(AppScreens.SplashScreen.route) {
             SpalashScreen(navController = navController)
@@ -87,13 +87,15 @@ fun NavGraphBuilder.mobileNavigation(
             val orderId = backStackEntry.arguments?.getString("orderId")
             if (orderId != null && mobileNumber != null) {
                 OtpScreen(
-                    navController = navController, number = mobileNumber, orderId = orderId,
+                    navController = navController,
+                    number = mobileNumber,
+                    orderId = orderId
                 )
             }
         }
 
 //        composable(AppScreens.UpdateProfileScreen.route) {
-        composable("${AppScreens.UpdateProfileScreen.route}/{fromFlow}") {backStack ->
+        composable("${AppScreens.UpdateProfileScreen.route}/{fromFlow}") { backStack ->
             val fromFlow = backStack.arguments?.getString("fromFlow")
             if (fromFlow != null) {
                 UpdateProfileScreen(navController = navController, fromFlow = fromFlow)
@@ -119,8 +121,8 @@ fun NavGraphBuilder.mobileNavigation(
         composable("${AppScreens.BasicDetailsScreen.route}/{fromFlow}/{loanPurpose}") { backStack ->
             val fromFlow = backStack.arguments?.getString("fromFlow")
             val loanPurpose = backStack.arguments?.getString("loanPurpose")
-            if (fromFlow != null &&  loanPurpose != null) {
-               BasicDetailsScreen(navController = navController, fromFlow = fromFlow,loanPurpose = loanPurpose)
+            if (fromFlow != null && loanPurpose != null) {
+                BasicDetailsScreen(navController = navController, fromFlow = fromFlow, loanPurpose = loanPurpose)
             }
         }
 
@@ -129,7 +131,9 @@ fun NavGraphBuilder.mobileNavigation(
             val fromFlow = backStack.arguments?.getString("fromFlow")
             if (purpose != null && fromFlow != null) {
                 ReviewDetailsScreen(
-                    navController = navController, loanPurpose = purpose, fromFlow = fromFlow
+                    navController = navController,
+                    loanPurpose = purpose,
+                    fromFlow = fromFlow
                 )
             }
         }
@@ -138,9 +142,12 @@ fun NavGraphBuilder.mobileNavigation(
             val offerResponse = backStackEntry.arguments?.getString("offerResponse")
             val fromFlow = backStackEntry.arguments?.getString("fromFlow")
             val withoutAAResponse = backStackEntry.arguments?.getString("encodedSearchResponse")
-            if (offerResponse != null && fromFlow != null ) {
+            if (offerResponse != null && fromFlow != null) {
                 BureauOffersScreen(
-                    navController = navController, loanPurpose = offerResponse, fromFlow = fromFlow,withoutAAResponse = withoutAAResponse ?: ""
+                    navController = navController,
+                    loanPurpose = offerResponse,
+                    fromFlow = fromFlow,
+                    withoutAAResponse = withoutAAResponse ?: ""
                 )
             }
         }
@@ -151,9 +158,14 @@ fun NavGraphBuilder.mobileNavigation(
             val transactionId = backStack.arguments?.getString("transactionId")
             val id = backStack.arguments?.getString("id")
             val url = backStack.arguments?.getString("url")
-            if (purpose != null && fromFlow != null && id !=null && transactionId != null && url != null) {
+            if (purpose != null && fromFlow != null && id != null && transactionId != null && url != null) {
                 AccountAggregatorScreen(
-                    navController = navController, loanPurpose = purpose, fromFlow = fromFlow,id=id,transactionId=transactionId,url=url
+                    navController = navController,
+                    loanPurpose = purpose,
+                    fromFlow = fromFlow,
+                    id = id,
+                    transactionId = transactionId,
+                    url = url
                 )
             }
         }
@@ -164,9 +176,14 @@ fun NavGraphBuilder.mobileNavigation(
             val transactionId = backStack.arguments?.getString("transactionId")
             val id = backStack.arguments?.getString("id")
             val url = backStack.arguments?.getString("url")
-            if (purpose != null && fromFlow != null && id !=null && transactionId != null && url != null) {
+            if (purpose != null && fromFlow != null && id != null && transactionId != null && url != null) {
                 SelectAccountAggregatorScreen(
-                    navController = navController, loanPurpose = purpose, fromFlow = fromFlow,id=id,transactionId=transactionId,url=url
+                    navController = navController,
+                    loanPurpose = purpose,
+                    fromFlow = fromFlow,
+                    id = id,
+                    transactionId = transactionId,
+                    url = url
                 )
             }
         }
@@ -177,9 +194,14 @@ fun NavGraphBuilder.mobileNavigation(
             val transactionId = backStack.arguments?.getString("transactionId")
             val id = backStack.arguments?.getString("id")
             val url = backStack.arguments?.getString("url")
-            if (purpose != null && fromFlow != null&& id !=null && transactionId != null && url != null) {
+            if (purpose != null && fromFlow != null && id != null && transactionId != null && url != null) {
                 SelectBankScreen(
-                    navController = navController, loanPurpose = purpose, fromFlow = fromFlow,id=id,transactionId=transactionId,url=url
+                    navController = navController,
+                    loanPurpose = purpose,
+                    fromFlow = fromFlow,
+                    id = id,
+                    transactionId = transactionId,
+                    url = url
                 )
             }
         }
@@ -190,28 +212,39 @@ fun NavGraphBuilder.mobileNavigation(
             val transactionId = backStack.arguments?.getString("transactionId")
             val id = backStack.arguments?.getString("id")
             val url = backStack.arguments?.getString("url")
-            if (purpose != null && fromFlow != null && id !=null && transactionId != null && url != null) {
+            if (purpose != null && fromFlow != null && id != null && transactionId != null && url != null) {
                 SearchWebViewScreen(
-                    navController = navController, purpose = purpose, fromFlow = fromFlow,id=id,transactionId=transactionId,url=url
+                    navController = navController,
+                    purpose = purpose,
+                    fromFlow = fromFlow,
+                    id = id,
+                    transactionId = transactionId,
+                    url = url
                 )
             }
         }
 
-
-        composable("${AppScreens.LoanProcessScreen
-            .route}/{transactionId}/{statusId}/{responseItem}/{offerId}/{fromFlow}") { backStack ->
+        composable(
+            "${AppScreens.LoanProcessScreen
+                .route}/{transactionId}/{statusId}/{responseItem}/{offerId}/{fromFlow}"
+        ) { backStack ->
             val transactionId = backStack.arguments?.getString("transactionId")
             val statusId = backStack.arguments?.getString("statusId")
             val responseItem = backStack.arguments?.getString("responseItem")
             val offerId = backStack.arguments?.getString("offerId")
             val fromFlow = backStack.arguments?.getString("fromFlow")
             if (transactionId != null && statusId != null && responseItem != null && offerId !=
-            null &&
-                    fromFlow != null) {
+                null &&
+                fromFlow != null
+            ) {
                 LoanProcessScreen(
-                    navController = navController, transactionId = transactionId, statusId =
+                    navController = navController,
+                    transactionId = transactionId,
+                    statusId =
                     statusId,
-                    responseItem = responseItem, offerId = offerId, fromFlow = fromFlow
+                    responseItem = responseItem,
+                    offerId = offerId,
+                    fromFlow = fromFlow
                 )
             }
         }
@@ -227,18 +260,20 @@ fun NavGraphBuilder.mobileNavigation(
             KYCFailedScreen(navController = navController)
         }
 
-
         composable("${AppScreens.SearchWebView.route}/{transactionId}/{urlToOpen}/{searchId}/{fromFlow}") {
-            backStack ->
+                backStack ->
             val transactionId = backStack.arguments?.getString("transactionId")
             val urlToOpen = backStack.arguments?.getString("urlToOpen")
             val searchId = backStack.arguments?.getString("searchId")
             val fromFlow = backStack.arguments?.getString("fromFlow")
 
-            if (transactionId != null && urlToOpen != null && searchId != null && fromFlow != null){
+            if (transactionId != null && urlToOpen != null && searchId != null && fromFlow != null) {
                 AAWebScreen(
-                    navController = navController, urlToOpen = urlToOpen, searchId = searchId,
-                    fromFlow = fromFlow, transactionId=transactionId
+                    navController = navController,
+                    urlToOpen = urlToOpen,
+                    searchId = searchId,
+                    fromFlow = fromFlow,
+                    transactionId = transactionId
                 ) { }
             }
         }
@@ -249,7 +284,10 @@ fun NavGraphBuilder.mobileNavigation(
             val fromFlow = backStackEntry.arguments?.getString("fromFlow")
             if (id != null && url != null && fromFlow != null) {
                 AAConsentApprovalScreen(
-                    navController = navController, id = id, url = url, fromFlow = fromFlow
+                    navController = navController,
+                    id = id,
+                    url = url,
+                    fromFlow = fromFlow
                 )
             }
         }
@@ -257,9 +295,12 @@ fun NavGraphBuilder.mobileNavigation(
             val offerResponse = backStackEntry.arguments?.getString("offerResponse")
             val fromFlow = backStackEntry.arguments?.getString("fromFlow")
             val withoutAAResponse = backStackEntry.arguments?.getString("encodedSearchResponse")
-            if (offerResponse != null && fromFlow != null ) {
+            if (offerResponse != null && fromFlow != null) {
                 LoanOffers(
-                    navController = navController, purpose = offerResponse, fromFlow = fromFlow,withoutAAResponse = withoutAAResponse ?: ""
+                    navController = navController,
+                    purpose = offerResponse,
+                    fromFlow = fromFlow,
+                    withoutAAResponse = withoutAAResponse ?: ""
                 )
             }
         }
@@ -269,7 +310,9 @@ fun NavGraphBuilder.mobileNavigation(
             val fromFlow = backStackEntry.arguments?.getString("fromFlow")
             if (offerResponse != null && fromFlow != null) {
                 LoanOffersListScreen(
-                    navController = navController, offerItem = offerResponse, fromFlow = fromFlow
+                    navController = navController,
+                    offerItem = offerResponse,
+                    fromFlow = fromFlow
                 )
             }
         }
@@ -281,15 +324,20 @@ fun NavGraphBuilder.mobileNavigation(
             val fromFlow = it.arguments?.getString("fromFlow")
             if (responseItem != null && id != null && showButton != null && fromFlow != null) {
                 LoanOffersListDetailsScreen(
-                    navController = navController, responseItem = responseItem, id = id,
-                    showButtonId = showButton, fromFlow = fromFlow
+                    navController = navController,
+                    responseItem = responseItem,
+                    id = id,
+                    showButtonId = showButton,
+                    fromFlow = fromFlow
                 )
             }
         }
 
-        composable("${AppScreens.EditLoanRequestScreen
-            .route}/{id}/{loanAmount}/{minLoanAmount}/{loanTenure}/{offerId}/{fromFlow}") {
-            backStackEntry ->
+        composable(
+            "${AppScreens.EditLoanRequestScreen
+                .route}/{id}/{loanAmount}/{minLoanAmount}/{loanTenure}/{offerId}/{fromFlow}"
+        ) {
+                backStackEntry ->
             val offerId = backStackEntry.arguments?.getString("offerId")
             val id = backStackEntry.arguments?.getString("id")
             val loanAmount = backStackEntry.arguments?.getString("loanAmount")
@@ -298,39 +346,51 @@ fun NavGraphBuilder.mobileNavigation(
             val loanTenure =
                 backStackEntry.arguments?.getString("loanTenure")?.replace(" Months", "")
                     ?.replace(" months", "")
-            if (id != null && loanAmount != null && loanTenure != null && minLoanAmount != null
-                && offerId != null && fromFlow != null) {
+            if (id != null && loanAmount != null && loanTenure != null && minLoanAmount != null &&
+                offerId != null && fromFlow != null
+            ) {
                 EditLoanRequestScreen(
-                    navController = navController, id = id, amount = loanAmount, minAmount = minLoanAmount,
-                    tenure = loanTenure, offerId = offerId, fromFlow = fromFlow
+                    navController = navController,
+                    id = id,
+                    amount = loanAmount,
+                    minAmount = minLoanAmount,
+                    tenure = loanTenure,
+                    offerId = offerId,
+                    fromFlow = fromFlow
                 )
             }
         }
 
         composable("${AppScreens.WebKycScreen.route}/{transactionId}/{url}/{id}/{fromFlow}") {
-            backStack ->
+                backStack ->
             val transactionId = backStack.arguments?.getString("transactionId")
             val url = backStack.arguments?.getString("url")
             val id = backStack.arguments?.getString("id")
             val fromFlow = backStack.arguments?.getString("fromFlow")
             if (transactionId != null && url != null && id != null && fromFlow != null) {
                 WebKycScreen(
-                    navController = navController, transactionId = transactionId,
-                    url = url, id = id,
+                    navController = navController,
+                    transactionId = transactionId,
+                    url = url,
+                    id = id,
                     fromFlow = fromFlow
                 ) {}
             }
         }
 
         composable("${AppScreens.KycAnimation.route}/{transactionId}/{responseItem}/{offerID}/{fromFlow}") {
-            backStack ->
+                backStack ->
             val transactionId = backStack.arguments?.getString("transactionId")
             val offerID = backStack.arguments?.getString("offerID")
             val responseItem = backStack.arguments?.getString("responseItem")
             val fromFlow = backStack.arguments?.getString("fromFlow")
             if (transactionId != null && offerID != null && responseItem != null && fromFlow != null) {
                 KycAnimation(
-                    navController = navController, transactionId = transactionId, offerId = offerID, responseItem = responseItem, fromFlow = fromFlow
+                    navController = navController,
+                    transactionId = transactionId,
+                    offerId = offerID,
+                    responseItem = responseItem,
+                    fromFlow = fromFlow
                 )
             }
         }
@@ -339,7 +399,7 @@ fun NavGraphBuilder.mobileNavigation(
             val id = backStack.arguments?.getString("id")
             val fromFlow = backStack.arguments?.getString("fromFlow")
             val fromScreen = backStack.arguments?.getString("fromScreen")
-            if (id != null && fromFlow != null&& fromScreen != null) {
+            if (id != null && fromFlow != null && fromScreen != null) {
                 AddBankDetailScreen(navController = navController, id = id, fromFlow = fromFlow, fromScreen = fromScreen)
             }
         }
@@ -351,35 +411,48 @@ fun NavGraphBuilder.mobileNavigation(
             val fromFlow = backStack.arguments?.getString("fromFlow")
             if (transactionId != null && url != null && id != null && fromFlow != null) {
                 RepaymentWebScreen(
-                    navController = navController, transactionId=transactionId,
-                    url = url, id = id, fromFlow = fromFlow
+                    navController = navController,
+                    transactionId = transactionId,
+                    url = url,
+                    id = id,
+                    fromFlow = fromFlow
                 ) {}
             }
         }
 
-        composable("${AppScreens.LoanAgreementWebScreen
-            .route}/{transactionId}/{id}/{loanAgreementFormUrl}/{fromFlow}") { backStack ->
+        composable(
+            "${AppScreens.LoanAgreementWebScreen
+                .route}/{transactionId}/{id}/{loanAgreementFormUrl}/{fromFlow}"
+        ) { backStack ->
             val transactionId = backStack.arguments?.getString("transactionId")
             val id = backStack.arguments?.getString("id")
             val fromFlow = backStack.arguments?.getString("fromFlow")
             val loanAgreementFormUrl = backStack.arguments?.getString("loanAgreementFormUrl")
             if (transactionId != null && id != null && fromFlow != null && loanAgreementFormUrl !=
-                null) {
+                null
+            ) {
                 LoanAgreementWebScreen(
-                    navController = navController, id = id, transactionId = transactionId,
-                    url = loanAgreementFormUrl, fromFlow = fromFlow
+                    navController = navController,
+                    id = id,
+                    transactionId = transactionId,
+                    url = loanAgreementFormUrl,
+                    fromFlow = fromFlow
                 )
             }
         }
 
         composable("${AppScreens.LoanDisbursementScreen.route}/{transactionId}/{id}/{fromFlow}") {
-            backStack ->
+                backStack ->
             val transactionId = backStack.arguments?.getString("transactionId")
             val id = backStack.arguments?.getString("id")
             val fromFlow = backStack.arguments?.getString("fromFlow")
             if (transactionId != null && id != null && fromFlow != null) {
-                LoanDisbursementScreen(navController = navController, transactionId =
-                transactionId, id = id, fromFlow = fromFlow)
+                LoanDisbursementScreen(
+                    navController = navController,
+                    transactionId =
+                    transactionId,
+                    id = id, fromFlow = fromFlow
+                )
             }
         }
 
@@ -389,7 +462,9 @@ fun NavGraphBuilder.mobileNavigation(
             val fromFlow = backStack.arguments?.getString("fromFlow")
             if (id != null && consentHandler != null && fromFlow != null) {
                 LoanSummaryScreen(
-                    navController = navController, id = id, consentHandler = consentHandler,
+                    navController = navController,
+                    id = id,
+                    consentHandler = consentHandler,
                     fromFlow = fromFlow
                 )
             }
@@ -401,20 +476,26 @@ fun NavGraphBuilder.mobileNavigation(
             val fromScreen = backStack.arguments?.getString("fromScreen")
             if (orderId != null && fromFlow != null && fromScreen != null) {
                 RepaymentScheduleScreen(
-                    navController = navController, orderId = orderId, fromFlow = fromFlow,
-                    fromScreen=fromScreen
+                    navController = navController,
+                    orderId = orderId,
+                    fromFlow = fromFlow,
+                    fromScreen = fromScreen
                 )
             }
         }
 
         composable("${AppScreens.AnimationLoader.route}/{transactionId}/{id}/{fromFlow}") {
-            backStack ->
+                backStack ->
             val transactionId = backStack.arguments?.getString("transactionId")
             val id = backStack.arguments?.getString("id")
             val fromFlow = backStack.arguments?.getString("fromFlow")
             if (transactionId != null && id != null && fromFlow != null) {
-                AnimationLoader(navController = navController, transactionId = transactionId, id =
-                id, fromFlow = fromFlow)
+                AnimationLoader(
+                    navController = navController, transactionId = transactionId,
+                    id =
+                    id,
+                    fromFlow = fromFlow
+                )
             }
         }
 
@@ -424,7 +505,9 @@ fun NavGraphBuilder.mobileNavigation(
             val fromFlow = backStack.arguments?.getString("fromFlow")
             if (offer != null && headerText != null && fromFlow != null) {
                 PrePaymentStatusScreen(
-                    navController = navController, orderId = offer, headerText = headerText,
+                    navController = navController,
+                    orderId = offer,
+                    headerText = headerText,
                     fromFlow = fromFlow
                 ) {}
             }
@@ -436,8 +519,11 @@ fun NavGraphBuilder.mobileNavigation(
             val fromFlow = backStack.arguments?.getString("fromFlow")
             if (orderId != null && headerText != null && status != null && fromFlow != null) {
                 PrePartPaymentWebView(
-                    navController = navController, url = headerText, orderId = orderId,
-                    status = status, fromFlow = fromFlow
+                    navController = navController,
+                    url = headerText,
+                    orderId = orderId,
+                    status = status,
+                    fromFlow = fromFlow
                 )
             }
         }
@@ -449,8 +535,11 @@ fun NavGraphBuilder.mobileNavigation(
             val fromFlow = it.arguments?.getString("fromFlow")
             if (orderId != null && providerId != null && orderState != null && fromFlow != null) {
                 CreateIssueScreen(
-                    navController = navController, orderId = orderId, providerId = providerId,
-                    orderState = orderState, fromFlow = fromFlow
+                    navController = navController,
+                    orderId = orderId,
+                    providerId = providerId,
+                    orderState = orderState,
+                    fromFlow = fromFlow
                 )
             }
         }
@@ -470,40 +559,51 @@ fun NavGraphBuilder.mobileNavigation(
             val loanState = backStack.arguments?.getString("loanState")
             if (orderId != null && fromScreen != null && fromFlow != null && providerId != null && loanState != null) {
                 IssueListScreen(
-                    navController = navController, orderId = orderId, loanState = loanState,
-                    providerId = providerId, fromFlow = fromFlow, fromScreen = fromScreen
+                    navController = navController,
+                    orderId = orderId,
+                    loanState = loanState,
+                    providerId = providerId,
+                    fromFlow = fromFlow,
+                    fromScreen = fromScreen
                 )
             }
         }
 
         composable(AppScreens.UnexpectedErrorScreen.route) {
-            UnexpectedErrorScreen(navController = navController,onClick = {})
+            UnexpectedErrorScreen(navController = navController, onClick = {})
         }
 
-        composable("${AppScreens.BankKycVerificationScreen
-            .route}/{transactionId}/{kycUrl}/{offerId}/{verificationStatus}/{fromFlow}") {
-            backStack ->
+        composable(
+            "${AppScreens.BankKycVerificationScreen
+                .route}/{transactionId}/{kycUrl}/{offerId}/{verificationStatus}/{fromFlow}"
+        ) {
+                backStack ->
             val transactionId = backStack.arguments?.getString("transactionId")
             val kycUrl = backStack.arguments?.getString("kycUrl")
             val offerId = backStack.arguments?.getString("offerId")
             val verificationStatus = backStack.arguments?.getString("verificationStatus")
             val fromFlow = backStack.arguments?.getString("fromFlow")
             if (transactionId != null && kycUrl != null && offerId != null && verificationStatus !=
-                    null && fromFlow != null) {
-                if(fromFlow == "Purchase Finance"){
+                null && fromFlow != null
+            ) {
+                if (fromFlow == "Purchase Finance") {
                     PfBankKycVerificationScreen(
-                        navController = navController, transactionId = transactionId, kycUrl = kycUrl,
+                        navController = navController,
+                        transactionId = transactionId,
+                        kycUrl = kycUrl,
                         offerId = offerId,
                         fromFlow = fromFlow
                     )
-                }else{
+                } else {
                     GstBankKycVerificationScreen(
-                        navController = navController, transactionId = transactionId, kycUrl = kycUrl,
+                        navController = navController,
+                        transactionId = transactionId,
+                        kycUrl = kycUrl,
                         offerId = offerId,
-                        verificationStatus = verificationStatus, fromFlow = fromFlow
+                        verificationStatus = verificationStatus,
+                        fromFlow = fromFlow
                     )
                 }
-
             }
         }
         composable(AppScreens.LoanStatusScreen.route) {
@@ -543,7 +643,9 @@ fun NavGraphBuilder.mobileNavigation(
             val invoiceId = backStack.arguments?.getString("invoiceId")
             if (fromFlow != null && invoiceId != null) {
                 GstInformationScreen(
-                    navController = navController, fromFlow = fromFlow, invoiceId = invoiceId
+                    navController = navController,
+                    fromFlow = fromFlow,
+                    invoiceId = invoiceId
                 )
             }
         }
@@ -553,7 +655,8 @@ fun NavGraphBuilder.mobileNavigation(
             val fromFlow = backStack.arguments?.getString("fromFlow")
             if (fromFlow != null && mobileNumber != null) {
                 GstNumberVerifyScreen(
-                    navController = navController, gstMobileNumber = mobileNumber,
+                    navController = navController,
+                    gstMobileNumber = mobileNumber,
                     fromFlow = fromFlow
                 )
             }
@@ -564,7 +667,9 @@ fun NavGraphBuilder.mobileNavigation(
             val invoiceId = backStack.arguments?.getString("invoiceId")
             if (fromFlow != null && invoiceId != null) {
                 GstInvoiceDetailScreen(
-                    navController = navController, fromFlow = fromFlow,invoiceId = invoiceId
+                    navController = navController,
+                    fromFlow = fromFlow,
+                    invoiceId = invoiceId
                 )
             }
         }
@@ -581,53 +686,73 @@ fun NavGraphBuilder.mobileNavigation(
             val invoiceId = backStack.arguments?.getString("invoiceId")
             if (fromFlow != null && invoiceId != null) {
                 InvoiceDetailScreen(
-                    navController = navController, fromFlow = fromFlow,invoiceId = invoiceId
+                    navController = navController,
+                    fromFlow = fromFlow,
+                    invoiceId = invoiceId
                 )
             }
         }
         composable("${AppScreens.GstLoanOfferListScreen.route}/{transactionId}/{offerResponse}/{fromFlow}") {
-            backStackEntry ->
+                backStackEntry ->
             val transactionId = backStackEntry.arguments?.getString("transactionId")
             val offerResponse = backStackEntry.arguments?.getString("offerResponse")
             val fromFlow = backStackEntry.arguments?.getString("fromFlow")
             if (transactionId != null && offerResponse != null && fromFlow != null) {
                 GstLoanOfferListScreen(
-                    navController = navController, transactionId=transactionId, fromFlow = fromFlow,
-                    offerResponse = offerResponse,
+                    navController = navController,
+                    transactionId = transactionId,
+                    fromFlow = fromFlow,
+                    offerResponse = offerResponse
                 )
             }
         }
 
-        composable("${AppScreens.GstKycWebViewScreen
-            .route}/{transactionId}/{kycUrl}/{offerId}/{fromScreen}/{fromFlow}") { backStack ->
+        composable(
+            "${AppScreens.GstKycWebViewScreen
+                .route}/{transactionId}/{kycUrl}/{offerId}/{fromScreen}/{fromFlow}"
+        ) { backStack ->
             val transactionId = backStack.arguments?.getString("transactionId")
             val kycUrl = backStack.arguments?.getString("kycUrl")
             val offerId = backStack.arguments?.getString("offerId")
             val fromScreen = backStack.arguments?.getString("fromScreen")
             val fromFlow = backStack.arguments?.getString("fromFlow")
             if (transactionId != null && kycUrl != null && offerId != null && fromScreen != null &&
-                fromFlow != null) {
+                fromFlow != null
+            ) {
                 GstKycWebViewScreen(
-                    navController = navController, transactionId= transactionId, url = kycUrl, id
-                    = offerId,
-                    fromScreen = fromScreen, fromFlow = fromFlow, pageContent = {}
+                    navController = navController,
+                    transactionId = transactionId,
+                    url = kycUrl,
+                    id =
+                    offerId,
+                    fromScreen = fromScreen,
+                    fromFlow = fromFlow,
+                    pageContent = {}
                 )
             }
         }
 
-        composable("${AppScreens.PfKycWebViewScreen
-            .route}/{transactionId}/{kycUrl}/{offerId}/{fromScreen}/{fromFlow}") { backStack ->
+        composable(
+            "${AppScreens.PfKycWebViewScreen
+                .route}/{transactionId}/{kycUrl}/{offerId}/{fromScreen}/{fromFlow}"
+        ) { backStack ->
             val transactionId = backStack.arguments?.getString("transactionId")
             val kycUrl = backStack.arguments?.getString("kycUrl")
             val offerId = backStack.arguments?.getString("offerId")
             val fromScreen = backStack.arguments?.getString("fromScreen")
             val fromFlow = backStack.arguments?.getString("fromFlow")
             if (transactionId != null && kycUrl != null && offerId != null && fromScreen != null &&
-                fromFlow != null) {
+                fromFlow != null
+            ) {
                 PfKycWebViewScreen(
-                    navController = navController, transactionId= transactionId, url = kycUrl, id
-                    = offerId,
-                    fromScreen = fromScreen, fromFlow = fromFlow, pageContent = {}
+                    navController = navController,
+                    transactionId = transactionId,
+                    url = kycUrl,
+                    id =
+                    offerId,
+                    fromScreen = fromScreen,
+                    fromFlow = fromFlow,
+                    pageContent = {}
                 )
             }
         }
@@ -637,7 +762,8 @@ fun NavGraphBuilder.mobileNavigation(
             val fromFlow = backStackEntry.arguments?.getString("fromFlow")
             if (offerResponse != null && fromFlow != null) {
                 GstInvoiceLoanOfferScreen(
-                    navController = navController, offerResponse = offerResponse,
+                    navController = navController,
+                    offerResponse = offerResponse,
                     fromFlow = fromFlow
                 )
             }
@@ -648,7 +774,8 @@ fun NavGraphBuilder.mobileNavigation(
             val fromFlow = backStackEntry.arguments?.getString("fromFlow")
             if (offerResponse != null && fromFlow != null) {
                 PfLoanOfferScreen(
-                    navController = navController, offerResponse = offerResponse,
+                    navController = navController,
+                    offerResponse = offerResponse,
                     fromFlow = fromFlow
                 )
             }
@@ -659,12 +786,14 @@ fun NavGraphBuilder.mobileNavigation(
             val fromFlow = backStackEntry.arguments?.getString("fromFlow")
             if (issueId != null && fromFlow != null) {
                 IssueDetailScreen(
-                    navController = navController, issueId = issueId, fromFlow = fromFlow
+                    navController = navController,
+                    issueId = issueId,
+                    fromFlow = fromFlow
                 )
             }
         }
 
-        //Purchase Finance
+        // Purchase Finance
 
         composable("${AppScreens.DownPaymentScreen.route}/{fromFlow}") {
             val fromFlow = it.arguments?.getString("fromFlow")
@@ -673,7 +802,7 @@ fun NavGraphBuilder.mobileNavigation(
             }
         }
 
-        //Documents
+        // Documents
         composable(AppScreens.TermsConditionsScreen.route) {
             TermsConditionsScreen(navController = navController)
         }
@@ -685,16 +814,18 @@ fun NavGraphBuilder.mobileNavigation(
             AboutUsScreen(navController = navController)
         }
 
-        //Negative Scenario
+        // Negative Scenario
         composable("${AppScreens.FormRejectionScreen.route}/{fromFlow}/{errorTitle}/{errorMsg}") {
-            backStackEntry ->
+                backStackEntry ->
             val fromFlow = backStackEntry.arguments?.getString("fromFlow")
             val errorTitle = backStackEntry.arguments?.getString("errorTitle")
             val errorMsg = backStackEntry.arguments?.getString("errorMsg")
 
             if (errorTitle != null && errorMsg != null && fromFlow != null) {
                 FormRejectionScreen(
-                    navController = navController, errorTitle = errorTitle, errorMsg = errorMsg,
+                    navController = navController,
+                    errorTitle = errorTitle,
+                    errorMsg = errorMsg,
                     fromFlow = fromFlow
                 )
             }
@@ -708,7 +839,9 @@ fun NavGraphBuilder.mobileNavigation(
 
             if (errorTitle != null && errorMsg != null && fromFlow != null) {
                 FormRejectionScreen(
-                    navController = navController, errorTitle = errorTitle, errorMsg = errorMsg,
+                    navController = navController,
+                    errorTitle = errorTitle,
+                    errorMsg = errorMsg,
                     fromFlow = fromFlow
                 )
             }

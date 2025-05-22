@@ -3,10 +3,8 @@ package com.github.sugunasriram.fisloanlibv4.fis_code.views.auth
 import android.app.Activity
 import android.content.Context
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.AlertDialog
@@ -37,8 +34,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Size
@@ -70,11 +65,7 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.navigateToTermsC
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.appBlack
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.appOrange
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.appRed
-import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.appWhite
-import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.bold12Text400
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.errorRed
-import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.hintGray
-import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal12Text400
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal16Text400
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal16Text700
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal18Text400
@@ -87,7 +78,6 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.viewModel.auth.SignInViewMo
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SignInScreen(navController: NavHostController) {
-
     val context = LocalContext.current
     val activity = context as Activity
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -119,7 +109,6 @@ fun SignInScreen(navController: NavHostController) {
         }
     }
 
-
     BackHandler {
         if (navController.currentBackStackEntry?.destination?.route == "sign_in_screen") {
             showExitDialog = true
@@ -137,16 +126,15 @@ fun SignInScreen(navController: NavHostController) {
                     navigateToOtpScreen(
                         navController,
                         it,
-                        generatedOtpData.value?.data?.orderId.toString(),
+                        generatedOtpData.value?.data?.orderId.toString()
                     )
                 }
-
             } else {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .fillMaxSize().verticalScroll(rememberScrollState())
-                    ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .fillMaxSize().verticalScroll(rememberScrollState())
+                ) {
 //                        Box (
 //                            modifier = Modifier
 //                                .fillMaxWidth()
@@ -155,67 +143,73 @@ fun SignInScreen(navController: NavHostController) {
 //                                .shadow(elevation = 16.dp, shape = waveShape())
 //                                .background(appWhite)
 //                        ) {
-                            CenteredMoneyImage(
-                                image = R.drawable.sign_in_screen_image,
-                                imageSize = 200.dp,
-                                top = 100.dp
-                            )
+                    CenteredMoneyImage(
+                        image = R.drawable.sign_in_screen_image,
+                        imageSize = 200.dp,
+                        top = 100.dp
+                    )
 //                        }
 
-                        MultiStyleText("Sign", appBlack, "in", appOrange)
-                        PhoneNumberField(
-                            mobileNumber = mobileNumber ?: "",
-                            focusPhNumber = focusPhNumber,
-                            mobileNumberError = mobileNumberError,
-                            signInViewModel = signInViewModel,
-                            context = context,
+                    MultiStyleText("Sign", appBlack, "in", appOrange)
+                    PhoneNumberField(
+                        mobileNumber = mobileNumber ?: "",
+                        focusPhNumber = focusPhNumber,
+                        mobileNumberError = mobileNumberError,
+                        signInViewModel = signInViewModel,
+                        context = context
+                    )
+                    CheckBoxText(
+                        textColor = appOrange,
+                        style = normal16Text400,
+                        boxState = checkboxState,
+                        text = stringResource(id = R.string.i_agree_to_buyer_app_terms_and_conditions),
+                        bottom = 0.dp,
+                        start = 0.dp,
+                        end = 0.dp,
+                        top = 50.dp
+                    ) {
+                            isChecked ->
+                        checkboxState = isChecked
+                        isAgreeTermsAndConditions = true
+                    }
+                    if (!isAgreeTermsAndConditions) {
+                        StartingText(
+                            text = stringResource(R.string.please_agree_buyer_App_terms),
+                            textColor = errorRed,
+                            alignment = Alignment.Center
                         )
-                        CheckBoxText(textColor = appOrange,
-                            style = normal16Text400,
-                            boxState = checkboxState,
-                            text = stringResource(id = R.string.i_agree_to_buyer_app_terms_and_conditions),
-                            bottom = 0.dp, start = 0.dp, end = 0.dp,top=50.dp) {
-                                isChecked -> checkboxState = isChecked
-                            isAgreeTermsAndConditions=true
-                        }
-                        if (!isAgreeTermsAndConditions) {
-                            StartingText(
-                                text = stringResource(R.string.please_agree_buyer_App_terms),
-                                textColor = errorRed, alignment = Alignment.Center
-                            )
-                        }
-                        //Show Terms and Conditions as clickable text
-                        Text(
-                            text = stringResource(R.string.terms_and_conditions),
-                            color = appOrange,
-                            style = normal16Text700.copy(textDecoration = TextDecoration.Underline),
-                            modifier = Modifier
-                                .padding(top = 5.dp)
-                                .clickable {
-                                    navigateToTermsConditionsScreen(navController)
-                                }
-                        )
-                        CurvedPrimaryButton(
-                            text = stringResource(id = R.string.get_otp),
-                            modifier = Modifier.padding(top = 45.dp)
-                        ) {
-                            if(checkboxState){
-                                isAgreeTermsAndConditions=true
-                                mobileNumber?.let {
-                                    signInViewModel.signInValidation(
-                                        navController,
-                                        mobileNumber = it, mobileNumberFocus = focusPhNumber,
-                                        context = context,
-                                    )
-                                }
-                            }else{
-                                isAgreeTermsAndConditions=false
+                    }
+                    // Show Terms and Conditions as clickable text
+                    Text(
+                        text = stringResource(R.string.terms_and_conditions),
+                        color = appOrange,
+                        style = normal16Text700.copy(textDecoration = TextDecoration.Underline),
+                        modifier = Modifier
+                            .padding(top = 5.dp)
+                            .clickable {
+                                navigateToTermsConditionsScreen(navController)
                             }
-
+                    )
+                    CurvedPrimaryButton(
+                        text = stringResource(id = R.string.get_otp),
+                        modifier = Modifier.padding(top = 45.dp)
+                    ) {
+                        if (checkboxState) {
+                            isAgreeTermsAndConditions = true
+                            mobileNumber?.let {
+                                signInViewModel.signInValidation(
+                                    navController,
+                                    mobileNumber = it,
+                                    mobileNumberFocus = focusPhNumber,
+                                    context = context
+                                )
+                            }
+                        } else {
+                            isAgreeTermsAndConditions = false
                         }
-
                     }
                 }
+            }
 
             if (showExitDialog) {
                 AlertDialog(
@@ -242,8 +236,10 @@ fun SignInScreen(navController: NavHostController) {
                     },
                     title = {
                         Text(
-                            text = stringResource(id = R.string.exit_app), style = normal32Text500,
-                            modifier = Modifier, color = textBlack
+                            text = stringResource(id = R.string.exit_app),
+                            style = normal32Text500,
+                            modifier = Modifier,
+                            color = textBlack
                         )
                     },
                     text = { Text(stringResource(id = R.string.are_you_sure_you_want_to_exit)) },
@@ -255,8 +251,10 @@ fun SignInScreen(navController: NavHostController) {
         }
     } else {
         CommonMethods().HandleErrorScreens(
-            navController = navController, showInternetScreen = showInternetScreen,
-            showTimeOutScreen = showTimeOutScreen, showServerIssueScreen = showServerIssueScreen,
+            navController = navController,
+            showInternetScreen = showInternetScreen,
+            showTimeOutScreen = showTimeOutScreen,
+            showServerIssueScreen = showServerIssueScreen,
             unexpectedErrorScreen = unexpectedErrorScreen
         )
     }
@@ -272,8 +270,10 @@ private fun waveShape(): Shape {
             val path = Path().apply {
                 moveTo(0f, size.height * 0.8f)
                 quadraticBezierTo(
-                    size.width * 0.5f, size.height * 1.2f,
-                    size.width, size.height * 0.6f
+                    size.width * 0.5f,
+                    size.height * 1.2f,
+                    size.width,
+                    size.height * 0.6f
                 )
                 lineTo(size.width, 0f)
                 lineTo(0f, 0f)
@@ -289,7 +289,8 @@ fun PhoneNumberField(
     mobileNumber: String,
     focusPhNumber: FocusRequester,
     mobileNumberError: String?,
-    signInViewModel: SignInViewModel, context: Context
+    signInViewModel: SignInViewModel,
+    context: Context
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     Column(
@@ -337,7 +338,7 @@ fun PhoneNumberField(
                 cursorColor = appOrange,
                 errorBorderColor = appRed,
                 focusedBorderColor = if (mobileNumberError.isNullOrEmpty()) appOrange else appRed, // Apply red only if error exists
-                unfocusedBorderColor = if (mobileNumberError.isNullOrEmpty()) appOrange else appRed,
+                unfocusedBorderColor = if (mobileNumberError.isNullOrEmpty()) appOrange else appRed
             )
         )
         if (!mobileNumberError.isNullOrEmpty()) {
@@ -350,15 +351,8 @@ fun PhoneNumberField(
     }
 }
 
-
-
-
 @Preview
 @Composable
 fun SignInScreenPreview() {
     SignInScreen(navController = NavHostController(LocalContext.current))
 }
-
-
-
-

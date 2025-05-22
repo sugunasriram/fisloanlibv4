@@ -1,6 +1,5 @@
 package com.github.sugunasriram.fisloanlibv4.fis_code.network.sse
 
-import android.content.om.OverlayManagerTransaction
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.auth.Descriptor
 import kotlinx.serialization.Serializable
 
@@ -19,7 +18,7 @@ data class DataContent(
 
 @Serializable
 data class EventData(
-    val transactionId: String? = null, //Sugu - To remove
+    val transactionId: String? = null, // Sugu - To remove
     val txnId: String? = null,
     val type: String? = null,
     val data: Catalog? = null,
@@ -27,7 +26,7 @@ data class EventData(
     val postRequestId: String? = null,
     val consent: Boolean? = false,
     val id: String? = null,
-    val url: String? = null,
+    val url: String? = null
 
 )
 
@@ -61,9 +60,9 @@ data class Catalog(
     val SETTLEMENT_AMOUNT: String? = null,
     val quote_breakup: List<SSEQuoteBreakUp>? = null,
 
-    val error: ErrorObj? = null,
+    val error: ErrorObj? = null
 
-    )
+)
 
 @Serializable
 data class SSEProviderDescriptor(
@@ -103,8 +102,6 @@ data class ItemTag(
     val display: Boolean? = null,
     val tags: Map<String, String?>? = null
 )
-
-
 
 @Serializable
 data class Payment(

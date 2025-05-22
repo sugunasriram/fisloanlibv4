@@ -22,11 +22,11 @@ import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.github.sugunasriram.fisloanlibv4.R
-import com.github.sugunasriram.fisloanlibv4.fis_code.components.ProcessingAnimation
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.FixedTopBottomScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.FullWidthRoundShapedCard
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.HeaderWithValue
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.ImageTextButtonRow
+import com.github.sugunasriram.fisloanlibv4.fis_code.components.ProcessingAnimation
 import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.navigateToLoanDetailScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.auth.CustomerLoanList
@@ -58,7 +58,6 @@ fun LoanSummaryScreen(
     consentHandler: String,
     fromFlow: String
 ) {
-
     val context = LocalContext.current
     val loanAgreementViewModel: LoanAgreementViewModel = viewModel()
 
@@ -103,32 +102,43 @@ fun LoanSummaryScreen(
 @SuppressLint("ResourceType")
 @Composable
 fun LoanSummaryDetail(
-    loanListLoading: Boolean, loanListLoaded: Boolean, consentHandling: Boolean,fromFlow: String,
-    navController: NavHostController, id: String, consentHandler: String, context: Context,
-    loanAgreementViewModel: LoanAgreementViewModel, loanList: CustomerLoanList?,
+    loanListLoading: Boolean,
+    loanListLoaded: Boolean,
+    consentHandling: Boolean,
+    fromFlow: String,
+    navController: NavHostController,
+    id: String,
+    consentHandler: String,
+    context: Context,
+    loanAgreementViewModel: LoanAgreementViewModel,
+    loanList: CustomerLoanList?
 ) {
     if (loanListLoading || consentHandling) {
-        ProcessingAnimation(text = "Processing Please Wait...",  image = R.raw.we_are_currently_processing_hour_glass)
+        ProcessingAnimation(text = "Processing Please Wait...", image = R.raw.we_are_currently_processing_hour_glass)
     } else {
         if (loanListLoaded) {
             if (loanList != null) {
                 DashBoardView(
-                    navController = navController, context = context, loanList = loanList,
+                    navController = navController,
+                    context = context,
+                    loanList = loanList,
                     fromFlow = fromFlow
                 )
             } else {
                 LoanNotApprovedScreen(navController)
             }
 
-            //Sugu - Stop listening for SSE
+            // Sugu - Stop listening for SSE
             val sseViewModel: SSEViewModel = viewModel()
             sseViewModel.stopListening()
-            //Sugu - End
-
+            // Sugu - End
         } else {
             ConsentHandling(
-                loanAgreementViewModel = loanAgreementViewModel, id = id, context = context,
-                consentHandler = consentHandler, fromFlow = fromFlow
+                loanAgreementViewModel = loanAgreementViewModel,
+                id = id,
+                context = context,
+                consentHandler = consentHandler,
+                fromFlow = fromFlow
             )
         }
     }
@@ -136,31 +146,40 @@ fun LoanSummaryDetail(
 
 @Composable
 fun ConsentHandling(
-    consentHandler: String, fromFlow: String, loanAgreementViewModel: LoanAgreementViewModel,
-    id: String, context: Context
+    consentHandler: String,
+    fromFlow: String,
+    loanAgreementViewModel: LoanAgreementViewModel,
+    id: String,
+    context: Context
 ) {
     if (consentHandler.equals("2")) {
         if (fromFlow.equals("Personal Loan", ignoreCase = true)) {
             loanAgreementViewModel.updateConsentHandler(
                 updateConsentHandlerBody = UpdateConsentHandlerBody(
-                    subType = "CONSENT_UPDATE", id = id, amount = "", consentStatus = "SUCCESS",
+                    subType = "CONSENT_UPDATE",
+                    id = id,
+                    amount = "",
+                    consentStatus = "SUCCESS",
                     loanType = "PERSONAL_LOAN"
                 ),
-                context = context,
+                context = context
             )
         } else {
             loanAgreementViewModel.updateConsentHandler(
                 updateConsentHandlerBody = UpdateConsentHandlerBody(
-                    subType = "CONSENT_UPDATE", id = id, amount = "", consentStatus = "SUCCESS",
+                    subType = "CONSENT_UPDATE",
+                    id = id,
+                    amount = "",
+                    consentStatus = "SUCCESS",
                     loanType = "INVOICE_BASED_LOAN"
                 ),
-               context =  context,
+                context = context
             )
         }
     } else {
         if (fromFlow.equals("Personal Loan", ignoreCase = true)) {
             loanAgreementViewModel.getCustomerLoanList("PERSONAL_LOAN", context)
-        } else if(fromFlow.equals("Purchase Finance", ignoreCase = true)) {
+        } else if (fromFlow.equals("Purchase Finance", ignoreCase = true)) {
             loanAgreementViewModel.getCustomerLoanList("PURCHASE_FINANCE", context)
         } else {
             loanAgreementViewModel.getCustomerLoanList("INVOICE_BASED_LOAN", context)
@@ -170,7 +189,9 @@ fun ConsentHandling(
 
 @Composable
 fun DashBoardView(
-    navController: NavHostController, context: Context, loanList: CustomerLoanList,
+    navController: NavHostController,
+    context: Context,
+    loanList: CustomerLoanList,
     fromFlow: String
 ) {
     var backPressedTime by remember { mutableLongStateOf(0L) }
@@ -185,18 +206,17 @@ fun DashBoardView(
         showBottom = true,
         showSingleButton = true,
         primaryButtonText = stringResource(R.string.home),
-        onPrimaryButtonClick = { navigateApplyByCategoryScreen(navController) },
+        onPrimaryButtonClick = { navigateApplyByCategoryScreen(navController) }
     ) {
-            loanList.data?.forEach { offers ->
-                LoanDetailCard(navController, offer = offers, fromFlow = fromFlow)
-                Spacer(modifier = Modifier.height(16.dp))
-            }
+        loanList.data?.forEach { offers ->
+            LoanDetailCard(navController, offer = offers, fromFlow = fromFlow)
+            Spacer(modifier = Modifier.height(16.dp))
+        }
     }
 }
 
 @Composable
 fun LoanDetailCard(navController: NavHostController, offer: OfferResponseItem, fromFlow: String) {
-
     val loanDetail = json.encodeToString(OfferResponseItem.serializer(), offer)
     val bankName = offer.providerDescriptor?.name ?: "Bank"
     val logoUrl = offer.providerDescriptor?.images?.firstOrNull()?.url
@@ -216,11 +236,11 @@ fun LoanDetailCard(navController: NavHostController, offer: OfferResponseItem, f
         itemTag?.tags?.forEach { tag ->
             when {
                 tag.key.equals("interest_rate", ignoreCase = true) ||
-                        tag.key.equals("interest rate", ignoreCase = true) -> {
+                    tag.key.equals("interest rate", ignoreCase = true) -> {
                     interestRate = tag.value
                 }
                 tag.key.equals("loan_term", ignoreCase = true) ||
-                        tag.key.equals("term", ignoreCase = true) -> {
+                    tag.key.equals("term", ignoreCase = true) -> {
                     tenure = tag.value
                 }
                 tag.key.contains("INSTALLMENT_AMOUNT", ignoreCase = true) -> {
@@ -295,8 +315,9 @@ fun LoanDetailCard(navController: NavHostController, offer: OfferResponseItem, f
 
 fun onCardClick(fromFlow: String, navController: NavHostController, orderId: String) {
     navigateToLoanDetailScreen(
-        navController = navController, orderId = orderId, fromFlow = fromFlow, fromScreen = "Loan Summary"
+        navController = navController,
+        orderId = orderId,
+        fromFlow = fromFlow,
+        fromScreen = "Loan Summary"
     )
 }
-
-

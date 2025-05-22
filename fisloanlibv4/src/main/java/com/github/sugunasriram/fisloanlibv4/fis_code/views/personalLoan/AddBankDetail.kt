@@ -64,8 +64,7 @@ import java.util.Locale
 @SuppressLint("ResourceType")
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun AddBankDetailScreen(navController: NavHostController, id: String, fromFlow: String, fromScreen:String) {
-
+fun AddBankDetailScreen(navController: NavHostController, id: String, fromFlow: String, fromScreen: String) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val accountDetailViewModel: AccountDetailViewModel = viewModel()
@@ -108,7 +107,7 @@ fun AddBankDetailScreen(navController: NavHostController, id: String, fromFlow: 
     BackHandler { navigateApplyByCategoryScreen(navController) }
 
     when {
-        navigationToSignIn -> navigateSignInPage (navController)
+        navigationToSignIn -> navigateSignInPage(navController)
         showInternetScreen -> CommonMethods().ShowInternetErrorScreen(navController)
         showTimeOutScreen -> CommonMethods().ShowTimeOutErrorScreen(navController)
         showServerIssueScreen -> CommonMethods().ShowServerIssueErrorScreen(navController)
@@ -135,23 +134,37 @@ fun AddBankDetailScreen(navController: NavHostController, id: String, fromFlow: 
 @SuppressLint("ResourceType")
 @Composable
 fun AddBankDetailView(
-    bankDetailCollecting: Boolean, bankDetailCollected: Boolean, fromFlow: String,
-    bankDetailResponse: BankDetailResponse?, gstBankDetailResponse: GstOfferConfirmResponse?,
-    navController: NavHostController, context: Context, accountHolder: String, id: String,
-    accountNumber: String, ifscCode: String, accountHolderError: String?,
+    bankDetailCollecting: Boolean,
+    bankDetailCollected: Boolean,
+    fromFlow: String,
+    bankDetailResponse: BankDetailResponse?,
+    gstBankDetailResponse: GstOfferConfirmResponse?,
+    navController: NavHostController,
+    context: Context,
+    accountHolder: String,
+    id: String,
+    accountNumber: String,
+    ifscCode: String,
+    accountHolderError: String?,
     accountTypeError: String?,
-    accountNumberError: String?, accountDetailViewModel: AccountDetailViewModel,
-    focusAccountHolder: FocusRequester, focusAccountNumber: FocusRequester,
-    focusAccountType: FocusRequester, focusIfscCode: FocusRequester, ifscCodeError: String?,
-    fromScreen:String
+    accountNumberError: String?,
+    accountDetailViewModel: AccountDetailViewModel,
+    focusAccountHolder: FocusRequester,
+    focusAccountNumber: FocusRequester,
+    focusAccountType: FocusRequester,
+    focusIfscCode: FocusRequester,
+    ifscCodeError: String?,
+    fromScreen: String
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     var accountTypeExpand by remember { mutableStateOf(false) }
     val accountTypeList = listOf("Current", "Saving")
     var accountSelectedText by remember { mutableStateOf("") }
     val onAccountDismiss: () -> Unit = { accountTypeExpand = false }
-    val onAccountSelected: (String) -> Unit = { selectedText -> accountSelectedText = selectedText
-    accountDetailViewModel.onAccountTypeChanged(selectedText.lowercase())}
+    val onAccountSelected: (String) -> Unit = { selectedText ->
+        accountSelectedText = selectedText
+        accountDetailViewModel.onAccountTypeChanged(selectedText.lowercase())
+    }
 
     if (bankDetailCollecting) {
         ProcessingAnimation(
@@ -161,8 +174,10 @@ fun AddBankDetailView(
     } else {
         if (bankDetailCollected) {
             onBankDetailCollected(
-                navController = navController, gstBankDetailResponse = gstBankDetailResponse,
-                bankDetailResponse = bankDetailResponse, fromFlow = fromFlow
+                navController = navController,
+                gstBankDetailResponse = gstBankDetailResponse,
+                bankDetailResponse = bankDetailResponse,
+                fromFlow = fromFlow
             )
         } else {
             FixedTopBottomScreen(
@@ -171,13 +186,16 @@ fun AddBankDetailView(
                 topBarText = stringResource(R.string.enter_account_details),
                 showBackButton = true,
                 onBackClick = {
-                    if(fromScreen == "Add New Bank") navController.popBackStack()
-                    else navigateApplyByCategoryScreen(navController)
+                    if (fromScreen == "Add New Bank") {
+                        navController.popBackStack()
+                    } else {
+                        navigateApplyByCategoryScreen(navController)
+                    }
 //
 //                    navigateToBankDetailsScreen(
 //                        navController = navController, id = id, fromFlow = fromFlow,
 //                    )
-                              },
+                },
                 showBottom = true,
                 showSingleButton = true,
                 primaryButtonText = stringResource(R.string.submit),
@@ -189,15 +207,18 @@ fun AddBankDetailView(
                         focusIfscCode = focusIfscCode, focusAccountType = focusAccountType,
                         focusAccountNumber = focusAccountNumber, fromFlow = fromFlow,
                         focusAccountHolder = focusAccountHolder, id = id,
-                        navController = navController,
+                        navController = navController
                     )
                 },
                 backgroundColor = appWhite
             ) {
                 RegisterText(
                     text = stringResource(id = R.string.enter_account_number_for_which),
-                    style = normal12Text400, textColor = hintGray,
-                    top = 8.dp, start = 10.dp, end = 10.dp
+                    style = normal12Text400,
+                    textColor = hintGray,
+                    top = 8.dp,
+                    start = 10.dp,
+                    end = 10.dp
                 )
                 LoanStatusTracker(stepId = 5)
                 AddBankField(
@@ -219,8 +240,8 @@ fun AddBankDetailView(
                 if (fromFlow.equals("Personal Loan", ignoreCase = true)) {
                     AddBankFieldHeader(
                         label = stringResource(id = R.string.account_type),
-                        headerImage =painterResource(id = R.drawable.account_type_icon) ,
-                        )
+                        headerImage = painterResource(id = R.drawable.account_type_icon)
+                    )
                     DropDownField(
                         hint = stringResource(id = R.string.account_type),
                         expand = accountTypeExpand,
@@ -232,24 +253,24 @@ fun AddBankDetailView(
                         onNextFocus = focusAccountNumber, setExpand = { accountTypeExpand = it },
                         itemList = accountTypeList, onDismiss = onAccountDismiss,
                         modifier = Modifier.focusRequester(focusAccountType),
-                        onItemSelected = {it ->
+                        onItemSelected = { it ->
                             onAccountSelected(it)
                             accountDetailViewModel.updateAccountTypeError(null)
-
                         }
                     )
                     if (!accountTypeError.isNullOrEmpty()) {
                         StartingText(
-                            text = accountTypeError,style = normal12Text400,
+                            text = accountTypeError,
+                            style = normal12Text400,
                             textColor = errorRed,
-                            modifier = Modifier.padding(start = 15.dp, top = 2.dp, bottom = 5.dp),
+                            modifier = Modifier.padding(start = 15.dp, top = 2.dp, bottom = 5.dp)
 
                         )
                     }
                 }
                 AddBankField(
                     label = stringResource(id = R.string.bank_account_number),
-                    headerImge =painterResource(id = R.drawable.account_number_icon) ,
+                    headerImge = painterResource(id = R.drawable.account_number_icon),
                     value = accountNumber,
                     onValueChange = { input ->
                         val filteredInput = input.filter { it.isDigit() } // Only allow digits
@@ -269,7 +290,7 @@ fun AddBankDetailView(
 
                 AddBankField(
                     label = stringResource(id = R.string.bank_ifsc_code),
-                    headerImge =painterResource(id = R.drawable.bank_ifsc_icon) ,
+                    headerImge = painterResource(id = R.drawable.bank_ifsc_icon),
                     value = ifscCode,
                     onValueChange = {
                         accountDetailViewModel.onIfscCodeChanged(it)
@@ -290,26 +311,27 @@ fun AddBankDetailView(
         }
     }
 }
+
 @Composable
 fun AddBankFieldHeader(
     label: String,
-    headerImage:Painter= painterResource(id = R.drawable.account_holder_icon),
-){
+    headerImage: Painter = painterResource(id = R.drawable.account_holder_icon)
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth().padding(start = 10.dp,top=25.dp)
+        modifier = Modifier.fillMaxWidth().padding(start = 10.dp, top = 25.dp)
     ) {
         Image(
-            painter =headerImage,
+            painter = headerImage,
             contentDescription = null,
             modifier = Modifier.padding(end = 5.dp).size(22.dp)
         )
         Text(
-            text =label,
-            style = normal16Text500, color = appOrange
+            text = label,
+            style = normal16Text500,
+            color = appOrange
         )
     }
-
 }
 
 @Composable
@@ -321,9 +343,9 @@ fun AddBankField(
     error: String?,
     focusRequester: FocusRequester,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    headerImge:Painter= painterResource(id = R.drawable.account_holder_icon),
+    headerImge: Painter = painterResource(id = R.drawable.account_holder_icon)
 ) {
-    AddBankFieldHeader(label,headerImge)
+    AddBankFieldHeader(label, headerImge)
     InputField(
         inputText = value,
         topText = label,
@@ -335,12 +357,14 @@ fun AddBankField(
         showOnlyTextField = true,
         modifier = Modifier.focusRequester(focusRequester),
         keyboardOptions = keyboardOptions,
-        onValueChange = onValueChange,
+        onValueChange = onValueChange
     )
 }
 
 fun onBankDetailCollected(
-    bankDetailResponse: BankDetailResponse?, fromFlow: String, navController: NavHostController,
+    bankDetailResponse: BankDetailResponse?,
+    fromFlow: String,
+    navController: NavHostController,
     gstBankDetailResponse: GstOfferConfirmResponse?
 ) {
     if (fromFlow.equals("Personal Loan", ignoreCase = true)) {
@@ -348,8 +372,13 @@ fun onBankDetailCollected(
             response.data?.eNACHUrlObject?.txnId?.let { transactionId ->
                 response.data?.eNACHUrlObject?.formUrl?.let { enachUrl ->
                     response.data.id?.let { id ->
-                        navigateToRepaymentScreen(navController, transactionId,  enachUrl, id,
-                            fromFlow)
+                        navigateToRepaymentScreen(
+                            navController,
+                            transactionId,
+                            enachUrl,
+                            id,
+                            fromFlow
+                        )
 //                        navigateToLoanProcessScreen(
 //                            navController, transactionId=transactionId,5, enachUrl, id, fromFlow = fromFlow
 //                        )
@@ -360,44 +389,66 @@ fun onBankDetailCollected(
     } else {
         gstBankDetailResponse?.let { response ->
             response.data?.eNACHUrlObject?.txnID?.let { transactionId ->
-            response.data?.eNACHUrlObject?.fromURL?.let { eNachUrl ->
-                response.data.eNACHUrlObject.itemID?.let { offerId ->
-                    navigateToLoanProcessScreen(
-                        navController, transactionId = transactionId,15, eNachUrl, offerId,
-                        fromFlow = fromFlow
-                    )
+                response.data?.eNACHUrlObject?.fromURL?.let { eNachUrl ->
+                    response.data.eNACHUrlObject.itemID?.let { offerId ->
+                        navigateToLoanProcessScreen(
+                            navController,
+                            transactionId = transactionId,
+                            15,
+                            eNachUrl,
+                            offerId,
+                            fromFlow = fromFlow
+                        )
+                    }
                 }
-            }
             }
         }
     }
 }
 
 fun onBankSubmit(
-    fromFlow: String, navController: NavHostController, accountSelectedText: String,
-    accountDetailViewModel: AccountDetailViewModel, accountHolder: String, accountNumber: String,
-    focusIfscCode: FocusRequester, focusAccountType: FocusRequester, context: Context,
-    ifscCode: String, focusAccountNumber: FocusRequester, id: String,
+    fromFlow: String,
+    navController: NavHostController,
+    accountSelectedText: String,
+    accountDetailViewModel: AccountDetailViewModel,
+    accountHolder: String,
+    accountNumber: String,
+    focusIfscCode: FocusRequester,
+    focusAccountType: FocusRequester,
+    context: Context,
+    ifscCode: String,
+    focusAccountNumber: FocusRequester,
+    id: String,
     focusAccountHolder: FocusRequester
 ) {
     if (fromFlow.equals("Personal Loan", ignoreCase = true)) {
         val accountType = accountSelectedText.lowercase(Locale.ROOT)
         accountDetailViewModel.bankAccountDetailValidation(
-            context = context, accountNumber = accountNumber, accountHolder = accountHolder,
+            context = context,
+            accountNumber = accountNumber,
+            accountHolder = accountHolder,
             ifscCode = ifscCode,
             accountSelectedText = accountSelectedText,
             bankDetail = BankDetail(
-                accountNumber = accountNumber, accountHolderName = accountHolder,
-                ifscCode = ifscCode, accountType = accountType, id = id,
+                accountNumber = accountNumber,
+                accountHolderName = accountHolder,
+                ifscCode = ifscCode,
+                accountType = accountType,
+                id = id,
                 loanType = "PERSONAL_LOAN"
             ),
             navController
         )
     } else {
         accountDetailViewModel.accountDetailValidation(
-            context = context, accountNumber = accountNumber, accountHolder = accountHolder,
-            focusAccountNumber = focusAccountNumber, focusIfscCode = focusIfscCode, id = id,
-            ifscCode = ifscCode, focusAccountHolder = focusAccountHolder
+            context = context,
+            accountNumber = accountNumber,
+            accountHolder = accountHolder,
+            focusAccountNumber = focusAccountNumber,
+            focusIfscCode = focusIfscCode,
+            id = id,
+            ifscCode = ifscCode,
+            focusAccountHolder = focusAccountHolder
         )
     }
 }
@@ -406,7 +457,9 @@ fun onBankSubmit(
 @Composable
 fun AccountDetailsScreenPreview() {
     AddBankDetailScreen(
-        navController = NavHostController(LocalContext.current), id = "1",
-        fromFlow = "Personal Loan",""
+        navController = NavHostController(LocalContext.current),
+        id = "1",
+        fromFlow = "Personal Loan",
+        ""
     )
 }

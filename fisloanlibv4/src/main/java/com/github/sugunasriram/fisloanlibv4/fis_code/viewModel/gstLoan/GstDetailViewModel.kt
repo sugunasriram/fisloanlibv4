@@ -113,8 +113,13 @@ class GstDetailViewModel : BaseViewModel() {
     }
 
     fun verifyGstValidation(
-        gstNumber: String, gstUserName: String, navController: NavHostController, fromFlow: String,
-        context: Context, focusGstName: FocusRequester, focusGstNumber: FocusRequester,
+        gstNumber: String,
+        gstUserName: String,
+        navController: NavHostController,
+        fromFlow: String,
+        context: Context,
+        focusGstName: FocusRequester,
+        focusGstNumber: FocusRequester
     ) {
         clearMessage()
         if (gstUserName.trim().isEmpty()) {
@@ -156,19 +161,19 @@ class GstDetailViewModel : BaseViewModel() {
 
     fun cygnetGenerateOtp(gstin: String, username: String, context: Context) {
         /** Commented temporarily - Sugu - to check
-        _generatingOtp.value = true
-        viewModelScope.launch(Dispatchers.IO) {
-        handleCygnetGenerateOtp(gstin = gstin, username = username, context = context)
-        }
+         _generatingOtp.value = true
+         viewModelScope.launch(Dispatchers.IO) {
+         handleCygnetGenerateOtp(gstin = gstin, username = username, context = context)
+         }
          ***/
 
-        //To remove below - Sugu
+        // To remove below - Sugu
         _generatedOtp.value = true
         _generatingOtp.value = false
         _cygnetGenerateOtpResponse.value = dummyResponse()
     }
 
-    fun dummyResponse():GstOtpResponse {
+    fun dummyResponse(): GstOtpResponse {
         val gstOtpResponse = GstOtpResponse(
             data = GstOtpData(
                 id = "999999999",
@@ -181,7 +186,10 @@ class GstDetailViewModel : BaseViewModel() {
     }
 
     private suspend fun handleCygnetGenerateOtp(
-        gstin: String, username: String, context: Context, checkForAccessToken: Boolean = true
+        gstin: String,
+        username: String,
+        context: Context,
+        checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
             ApiRepository.cygnetGenerateOtp(gstIn = gstin, username = username)
@@ -191,7 +199,9 @@ class GstDetailViewModel : BaseViewModel() {
             if (checkForAccessToken && error is ResponseException && error.response.status.value == 401) {
                 if (handleAuthGetAccessTokenApi()) {
                     handleCygnetGenerateOtp(
-                        gstin = gstin, username = username, context = context,
+                        gstin = gstin,
+                        username = username,
+                        context = context,
                         checkForAccessToken = false
                     )
                 } else {
@@ -200,7 +210,6 @@ class GstDetailViewModel : BaseViewModel() {
             } else {
                 handleFailure(error, context)
             }
-
         }
     }
 
@@ -223,7 +232,10 @@ class GstDetailViewModel : BaseViewModel() {
     }
 
     private suspend fun handleVerifyOtpForGstin(
-        id: String, otp: String, context: Context, checkForAccessToken: Boolean = true
+        id: String,
+        otp: String,
+        context: Context,
+        checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
             ApiRepository.verifyOtpForGstIn(id = id, otp = otp)
@@ -233,7 +245,10 @@ class GstDetailViewModel : BaseViewModel() {
             if (checkForAccessToken && error is ResponseException && error.response.status.value == 401) {
                 if (handleAuthGetAccessTokenApi()) {
                     handleVerifyOtpForGstin(
-                        id = id, otp = otp, context = context, checkForAccessToken = false
+                        id = id,
+                        otp = otp,
+                        context = context,
+                        checkForAccessToken = false
                     )
                 } else {
                     _navigationToSignIn.value = true
@@ -254,15 +269,21 @@ class GstDetailViewModel : BaseViewModel() {
         withContext(Dispatchers.Main) {
             if (error is ResponseException) {
                 CommonMethods().handleResponseException(
-                    error = error, context = context, updateErrorMessage = ::updateErrorMessage,
-                    _showServerIssueScreen = _showServerIssueScreen, _middleLoan = _middleLoan,
-                    _unAuthorizedUser = _unAuthorizedUser, _unexpectedError = _unexpectedError,
+                    error = error,
+                    context = context,
+                    updateErrorMessage = ::updateErrorMessage,
+                    _showServerIssueScreen = _showServerIssueScreen,
+                    _middleLoan = _middleLoan,
+                    _unAuthorizedUser = _unAuthorizedUser,
+                    _unexpectedError = _unexpectedError,
                     _showLoader = _showLoader
                 )
             } else {
                 CommonMethods().handleGeneralException(
-                    error = error, _showInternetScreen = _showInternetScreen,
-                    _showTimeOutScreen = _showTimeOutScreen, _unexpectedError = _unexpectedError
+                    error = error,
+                    _showInternetScreen = _showInternetScreen,
+                    _showTimeOutScreen = _showTimeOutScreen,
+                    _unexpectedError = _unexpectedError
                 )
             }
             _generatingOtp.value = false
@@ -273,11 +294,13 @@ class GstDetailViewModel : BaseViewModel() {
         clearMessage()
         when {
             enteredOtp.isBlank() -> CommonMethods().toastMessage(
-                context = context, toastMsg = context.getString(R.string.enter_the_otp)
+                context = context,
+                toastMsg = context.getString(R.string.enter_the_otp)
             )
 
             enteredOtp.trim().length < 6 -> CommonMethods().toastMessage(
-               context =  context, toastMsg = context.getString(R.string.enter_valid_otp)
+                context = context,
+                toastMsg = context.getString(R.string.enter_valid_otp)
             )
 
             else -> {

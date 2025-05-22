@@ -17,12 +17,14 @@ data class LoanAgreementResponse(
     @SerialName("loanAgreementObject")
     val loanAgreementObject: OfferResponseItem? = null
 )
+
 @Serializable
 data class ConfirmLoanAgreement(
     val data: ConfirmLoanAgreementData? = null,
     val status: Boolean? = null,
     val statusCode: Int? = null
 )
+
 @Serializable
 data class ConfirmLoanAgreementData(
     val id: String? = null,
@@ -36,6 +38,7 @@ data class ListItem(
     val descriptor: Descriptor? = null,
     val value: String? = null
 )
+
 @Serializable
 data class DocumentsItem(
     val mimeType: String? = null,

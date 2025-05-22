@@ -4,8 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ResetPassword(
-	val message: String? = null,
-	val status: Boolean? = null,
-	val statusCode: Int? = null
+    val message: String? = null,
+    val status: Boolean? = null,
+    val statusCode: Int? = null
 )
-

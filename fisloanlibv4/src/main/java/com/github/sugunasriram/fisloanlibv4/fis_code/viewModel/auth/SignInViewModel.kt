@@ -7,7 +7,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
-import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.github.sugunasriram.fisloanlibv4.R
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.core.ApiRepository
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.auth.GenerateAuthOtp
@@ -37,7 +36,6 @@ class SignInViewModel : BaseViewModel() {
 
     private val _unexpectedError = MutableLiveData<Boolean>(false)
     val unexpectedError: LiveData<Boolean> = _unexpectedError
-
 
     private val _mobileNumber: MutableLiveData<String?> = MutableLiveData("")
     val mobileNumber: LiveData<String?> = _mobileNumber
@@ -70,11 +68,12 @@ class SignInViewModel : BaseViewModel() {
         updateGeneralError(newData)
     }
 
-    fun signInValidation(navController: NavHostController,
-                         mobileNumber: String,
-                         mobileNumberFocus: FocusRequester,
-                         context: Context
-    ){
+    fun signInValidation(
+        navController: NavHostController,
+        mobileNumber: String,
+        mobileNumberFocus: FocusRequester,
+        context: Context
+    ) {
         clearMessage()
         if (mobileNumber.trim().isEmpty()) {
             updateMobileNumberError(context.getString(R.string.please_enter_phone_number))
@@ -91,7 +90,6 @@ class SignInViewModel : BaseViewModel() {
         } else {
             getUserRole(mobileNumber, context.getString(R.string.country_code), context)
         }
-
     }
 
     private val _isLoginInProgress = MutableStateFlow(false)
@@ -127,19 +125,23 @@ class SignInViewModel : BaseViewModel() {
         kotlin.runCatching {
             ApiRepository.userRole()
         }.onSuccess { response ->
-            handleGetUserRoleSuccess(response,mobileNumber,countryCode,context)
+            handleGetUserRoleSuccess(response, mobileNumber, countryCode, context)
         }.onFailure { error ->
             handleGenerateLoginOtpFailure(error, context)
         }
     }
-    private suspend fun handleGetUserRoleSuccess(response: UserRole?, mobileNumber: String,
-                                                 countryCode: String,context: Context) {
+    private suspend fun handleGetUserRoleSuccess(
+        response: UserRole?,
+        mobileNumber: String,
+        countryCode: String,
+        context: Context
+    ) {
         withContext(Dispatchers.Main) {
             if (response != null) {
                 response.data?.find { it.role == "USER" }?.let { userRole ->
                     val userId = userRole._id
                     _userRoleSuccessData.value = response
-                    generateLoginOtp(mobileNumber,countryCode,userId,context)
+                    generateLoginOtp(mobileNumber, countryCode, userId, context)
                 }
             }
         }
@@ -147,26 +149,28 @@ class SignInViewModel : BaseViewModel() {
 
     private fun generateLoginOtp(
         mobileNumber: String,
-        countryCode: String,userRole:String,
+        countryCode: String,
+        userRole: String,
         context: Context
     ) {
         _isLoginInProgress.value = true
         viewModelScope.launch(Dispatchers.IO) {
-            handleGenerateLoginOtp(mobileNumber, countryCode,userRole, context)
+            handleGenerateLoginOtp(mobileNumber, countryCode, userRole, context)
         }
     }
 
     private suspend fun handleGenerateLoginOtp(
         mobileNumber: String,
-        countryCode: String, userRole:String,
+        countryCode: String,
+        userRole: String,
         context: Context
     ) {
         kotlin.runCatching {
-            ApiRepository.generateAuthOtp(mobileNumber, countryCode,userRole)
+            ApiRepository.generateAuthOtp(mobileNumber, countryCode, userRole)
         }.onSuccess { response ->
             handleGenerateLoginOtpSuccess(response)
         }.onFailure { error ->
-            Log.d("Sugu : ",error.message.toString())
+            Log.d("Sugu : ", error.message.toString())
             handleGenerateLoginOtpFailure(error, context)
         }
     }
@@ -227,5 +231,4 @@ class SignInViewModel : BaseViewModel() {
     fun resetKeyboardRequest() {
         _shouldShowKeyboard.value = false
     }
-
 }

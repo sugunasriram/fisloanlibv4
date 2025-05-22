@@ -1,7 +1,6 @@
 package com.github.sugunasriram.fisloanlibv4.fis_code.viewModel.personalLoan
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.ui.focus.FocusRequester
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -163,8 +162,10 @@ class AccountDetailViewModel : BaseViewModel() {
     }
 
     private suspend fun handleAddBankDetail(
-        context: Context, bankDetail: BankDetail,
-        navController: NavHostController, checkForAccessToken: Boolean = true
+        context: Context,
+        bankDetail: BankDetail,
+        navController: NavHostController,
+        checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
             ApiRepository.addAccountDetail(bankDetail)
@@ -176,7 +177,7 @@ class AccountDetailViewModel : BaseViewModel() {
             if (error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                //Get Access Token using RefreshToken
+                // Get Access Token using RefreshToken
                 if (checkForAccessToken && handleAuthGetAccessTokenApi()) {
                     handleAddBankDetail(context, bankDetail, navController, false)
                 } else {
@@ -219,9 +220,13 @@ class AccountDetailViewModel : BaseViewModel() {
     }
 
     fun bankAccountDetailValidation(
-        context: Context, accountNumber: String, accountHolder: String, ifscCode: String,
-         accountSelectedText: String,
-        bankDetail: BankDetail, navController: NavHostController
+        context: Context,
+        accountNumber: String,
+        accountHolder: String,
+        ifscCode: String,
+        accountSelectedText: String,
+        bankDetail: BankDetail,
+        navController: NavHostController
     ) {
         var isValid = true
         clearMessage()
@@ -275,7 +280,6 @@ class AccountDetailViewModel : BaseViewModel() {
         }
     }
 
-
     private val _inProgress = MutableStateFlow(false)
     val inProgress: StateFlow<Boolean> = _inProgress
 
@@ -296,7 +300,8 @@ class AccountDetailViewModel : BaseViewModel() {
     }
 
     private suspend fun handleGetBankList(
-        context: Context, navController: NavHostController,
+        context: Context,
+        navController: NavHostController,
         checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
@@ -309,7 +314,7 @@ class AccountDetailViewModel : BaseViewModel() {
             if (error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                //Get Access Token using RefreshToken
+                // Get Access Token using RefreshToken
                 if (checkForAccessToken && handleAuthGetAccessTokenApi()) {
                     handleGetBankList(context, navController, false)
                 } else {
@@ -363,7 +368,7 @@ class AccountDetailViewModel : BaseViewModel() {
                 error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                //Get Access Token using RefreshToken
+                // Get Access Token using RefreshToken
                 if (handleAuthGetAccessTokenApi()) {
                     handleGetBankAccount(context, false)
                 } else {
@@ -410,7 +415,9 @@ class AccountDetailViewModel : BaseViewModel() {
     }
 
     private suspend fun handleAddBank(
-        context: Context, bankDetail: AddBankDetail, checkForAccessToken: Boolean = true
+        context: Context,
+        bankDetail: AddBankDetail,
+        checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
             ApiRepository.addBank(bankDetail)
@@ -423,7 +430,7 @@ class AccountDetailViewModel : BaseViewModel() {
                 error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                //Get Access Token using RefreshToken
+                // Get Access Token using RefreshToken
                 if (handleAuthGetAccessTokenApi()) {
                     handleAddBank(context, bankDetail, false)
                 } else {
@@ -444,9 +451,14 @@ class AccountDetailViewModel : BaseViewModel() {
     }
 
     fun accountDetailValidation(
-        context: Context, accountNumber: String, accountHolder: String, ifscCode: String,
-        focusAccountHolder: FocusRequester, focusAccountNumber: FocusRequester,
-        focusIfscCode: FocusRequester, id: String,
+        context: Context,
+        accountNumber: String,
+        accountHolder: String,
+        ifscCode: String,
+        focusAccountHolder: FocusRequester,
+        focusAccountNumber: FocusRequester,
+        focusIfscCode: FocusRequester,
+        id: String
     ) {
         clearMessage()
         if (accountHolder.trim().isEmpty()) {
@@ -480,9 +492,13 @@ class AccountDetailViewModel : BaseViewModel() {
         } else {
             gstLoanEntityApproval(
                 bankDetail = GstBankDetail(
-                    accountNumber = accountNumber, ifscCode = ifscCode,
-                    accountHolderName = accountHolder, id = id, loanType = "INVOICE_BASED_LOAN"
-                ), context = context
+                    accountNumber = accountNumber,
+                    ifscCode = ifscCode,
+                    accountHolderName = accountHolder,
+                    id = id,
+                    loanType = "INVOICE_BASED_LOAN"
+                ),
+                context = context
             )
         }
     }
@@ -498,7 +514,8 @@ class AccountDetailViewModel : BaseViewModel() {
     }
 
     private suspend fun handleGstLoanEntityApproval(
-        bankDetail: GstBankDetail, context: Context,
+        bankDetail: GstBankDetail,
+        context: Context,
         checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
@@ -512,7 +529,7 @@ class AccountDetailViewModel : BaseViewModel() {
                 error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                //Get Access Token using RefreshToken
+                // Get Access Token using RefreshToken
                 if (handleAuthGetAccessTokenApi()) {
                     handleGstLoanEntityApproval(bankDetail, context, false)
                 } else {
@@ -525,7 +542,8 @@ class AccountDetailViewModel : BaseViewModel() {
     }
 
     private suspend fun handleGstLoanEntityApprovalSuccess(
-        response: GstOfferConfirmResponse, context: Context
+        response: GstOfferConfirmResponse,
+        context: Context
     ) {
         withContext(Dispatchers.Main) {
             _bankDetailCollecting.value = false
@@ -561,7 +579,7 @@ class AccountDetailViewModel : BaseViewModel() {
                 error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                //Get Access Token using RefreshToken
+                // Get Access Token using RefreshToken
                 if (handleAuthGetAccessTokenApi()) {
                     handleGstLoanApproved(id, loanType, context, false)
                 } else {
@@ -589,15 +607,21 @@ class AccountDetailViewModel : BaseViewModel() {
         withContext(Dispatchers.Main) {
             if (error is ResponseException) {
                 CommonMethods().handleResponseException(
-                    error = error, context = context, updateErrorMessage = ::updateErrorMessage,
-                    _showServerIssueScreen = _showServerIssueScreen, _middleLoan = _middleLoan,
-                    _unAuthorizedUser = _unAuthorizedUser, _unexpectedError = _unexpectedError,
+                    error = error,
+                    context = context,
+                    updateErrorMessage = ::updateErrorMessage,
+                    _showServerIssueScreen = _showServerIssueScreen,
+                    _middleLoan = _middleLoan,
+                    _unAuthorizedUser = _unAuthorizedUser,
+                    _unexpectedError = _unexpectedError,
                     _showLoader = _showLoader
                 )
             } else {
                 CommonMethods().handleGeneralException(
-                    error = error, _showInternetScreen = _showInternetScreen,
-                    _showTimeOutScreen = _showTimeOutScreen, _unexpectedError = _unexpectedError
+                    error = error,
+                    _showInternetScreen = _showInternetScreen,
+                    _showTimeOutScreen = _showTimeOutScreen,
+                    _unexpectedError = _unexpectedError
                 )
             }
             _bankDetailCollecting.value = false
@@ -606,9 +630,7 @@ class AccountDetailViewModel : BaseViewModel() {
         }
     }
 
-
-    //Purchase Finance
-
+    // Purchase Finance
 
     private val _pfBankDetailResponse = MutableStateFlow<PfOfferConfirmResponse?>(null)
     val pfBankDetailResponse: StateFlow<PfOfferConfirmResponse?> = _pfBankDetailResponse
@@ -621,7 +643,8 @@ class AccountDetailViewModel : BaseViewModel() {
     }
 
     private suspend fun handlePfLoanEntityApproval(
-        bankDetail: PfBankDetail, context: Context,
+        bankDetail: PfBankDetail,
+        context: Context,
         checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
@@ -635,7 +658,7 @@ class AccountDetailViewModel : BaseViewModel() {
                 error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                //Get Access Token using RefreshToken
+                // Get Access Token using RefreshToken
                 if (handleAuthGetAccessTokenApi()) {
                     handlePfLoanEntityApproval(bankDetail, context, false)
                 } else {
@@ -648,7 +671,8 @@ class AccountDetailViewModel : BaseViewModel() {
     }
 
     private suspend fun handlePfLoanEntityApprovalSuccess(
-        response: PfOfferConfirmResponse, context: Context
+        response: PfOfferConfirmResponse,
+        context: Context
     ) {
         withContext(Dispatchers.Main) {
             _bankDetailCollecting.value = false
@@ -656,7 +680,4 @@ class AccountDetailViewModel : BaseViewModel() {
             _pfBankDetailResponse.value = response
         }
     }
-
-
 }
-

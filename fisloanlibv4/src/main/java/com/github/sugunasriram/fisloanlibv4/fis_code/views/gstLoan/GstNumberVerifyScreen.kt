@@ -27,10 +27,10 @@ import com.github.sugunasriram.fisloanlibv4.R
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.CenterProgress
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.CenteredMoneyImage
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.CurvedPrimaryButtonFull
-import com.github.sugunasriram.fisloanlibv4.fis_code.components.ScreenWithHamburger
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.MultipleColorText
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.OtpView
 import com.github.sugunasriram.fisloanlibv4.fis_code.components.RegisterText
+import com.github.sugunasriram.fisloanlibv4.fis_code.components.ScreenWithHamburger
 import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.navigateToGstDetailsScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.navigation.navigateToGstInformationScreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.appBlack
@@ -47,7 +47,9 @@ import kotlinx.coroutines.delay
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun GstNumberVerifyScreen(
-    navController: NavHostController, gstMobileNumber: String, fromFlow: String
+    navController: NavHostController,
+    gstMobileNumber: String,
+    fromFlow: String
 ) {
     val context = LocalContext.current
     val gstDetailViewModel: GstDetailViewModel = viewModel()
@@ -94,7 +96,9 @@ fun GstNumberVerifyScreen(
                 if (generatedOtp) {
                     verifyOtpForGstIn?.data?.id?.let { gstId ->
                         navigateToGstInformationScreen(
-                            navController = navController, fromFlow = fromFlow, invoiceId = gstId
+                            navController = navController,
+                            fromFlow = fromFlow,
+                            invoiceId = gstId
                         )
                     }
                 } else {
@@ -103,41 +107,52 @@ fun GstNumberVerifyScreen(
                         navController = navController
                     ) {
                         CenteredMoneyImage(
-                            image = R.drawable.otp_page_image, imageSize = 150.dp,
-                            top = 30.dp, bottom = 30.dp
+                            image = R.drawable.otp_page_image,
+                            imageSize = 150.dp,
+                            top = 30.dp,
+                            bottom = 30.dp
                         )
 
                         RegisterText(
-                            text = stringResource(id = R.string.enter_otp), textColor = appDarkTeal,
+                            text = stringResource(id = R.string.enter_otp),
+                            textColor = appDarkTeal,
                             style = normal32Text700
                         )
                         RegisterText(
                             text = stringResource(id = R.string.please_enter_otp_sent_to),
-                            textColor = appBlack, style = normal16Text400, top = 10.dp
+                            textColor = appBlack,
+                            style = normal16Text400,
+                            top = 10.dp
                         )
                         gstMobileNumber.let {
                             val textToShow = "******" + it.takeLast(4)
                             RegisterText(
-                                text = textToShow, textColor = appBlack,
+                                text = textToShow,
+                                textColor = appBlack,
                                 style = normal16Text400
                             )
                         }
 
-                        OtpView(textList = textList, requestList = requesterList,{})
+                        OtpView(textList = textList, requestList = requesterList, {})
 
                         RegisterText(
                             text = if (expired) stringResource(id = R.string.time_expired) else "$count seconds",
-                           textColor = appBlueTitle, style = normal20Text500,
+                            textColor = appBlueTitle,
+                            style = normal20Text500,
                             bottom = 10.dp
                         )
                         MultipleColorText(
                             text = stringResource(id = R.string.resend_otp),
-                            textColor = appBlueTitle, resendOtpColor = appRed,
+                            textColor = appBlueTitle,
+                            resendOtpColor = appRed
                         ) {}
                         CurvedPrimaryButtonFull(
                             text = stringResource(id = R.string.submit),
                             modifier = Modifier.padding(
-                                start = 30.dp, end = 30.dp, bottom = 20.dp, top = 150.dp
+                                start = 30.dp,
+                                end = 30.dp,
+                                bottom = 20.dp,
+                                top = 150.dp
                             )
                         ) {
                             /*val otp = textList.joinToString("") { it.value.text }
@@ -145,7 +160,9 @@ fun GstNumberVerifyScreen(
                                 orderId = gstMobileNumber, context = context, enteredOtp = otp
                             )*/
                             navigateToGstInformationScreen(
-                                navController = navController, fromFlow = fromFlow,invoiceId = gstMobileNumber
+                                navController = navController,
+                                fromFlow = fromFlow,
+                                invoiceId = gstMobileNumber
                             )
                         }
                     }
@@ -159,6 +176,8 @@ fun GstNumberVerifyScreen(
 @Composable
 fun OtpScreenPreview() {
     GstNumberVerifyScreen(
-        navController = rememberNavController(), gstMobileNumber = "9611909015", fromFlow = "Invoice Loan"
+        navController = rememberNavController(),
+        gstMobileNumber = "9611909015",
+        fromFlow = "Invoice Loan"
     )
 }

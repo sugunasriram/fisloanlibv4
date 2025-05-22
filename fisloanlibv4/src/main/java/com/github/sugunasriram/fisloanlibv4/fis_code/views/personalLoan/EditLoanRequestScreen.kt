@@ -53,8 +53,8 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.gst.GstCatalo
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.gst.GstOfferConfirmResponse
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.personaLoan.OfferResponseItem
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.personaLoan.UpdateResponse
-import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.appOrange
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.appBlueTitle
+import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.appOrange
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.appRed
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.customBlueColor
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal30Text700
@@ -69,7 +69,6 @@ import kotlinx.serialization.json.Json
 import java.util.Locale
 import kotlin.math.roundToInt
 
-
 @Composable
 fun EditLoanRequestScreen(
     navController: NavHostController,
@@ -80,7 +79,6 @@ fun EditLoanRequestScreen(
     offerId: String,
     fromFlow: String
 ) {
-
     val context = LocalContext.current
 
     val editLoanRequestViewModel: EditLoanRequestViewModel = viewModel(
@@ -89,7 +87,6 @@ fun EditLoanRequestScreen(
     val navigationToSignIn by editLoanRequestViewModel.navigationToSignIn.collectAsState()
 
     val generalError by editLoanRequestViewModel.generalError.observeAsState("")
-
 
     val initialLoanAmount = amount.toDoubleOrNull() ?: 0.0
     val initialLoanBeginAmount = minAmount.toDoubleOrNull() ?: 0.0
@@ -104,7 +101,6 @@ fun EditLoanRequestScreen(
 
     val initialLoanEndTenure = initialLoanTenure + 10
 
-
     val loanAmount: Double by editLoanRequestViewModel.loanAmount.collectAsState(
         initialLoanBeginAmount
     )
@@ -117,7 +113,6 @@ fun EditLoanRequestScreen(
     val middleLoan by editLoanRequestViewModel.middleLoan.observeAsState(false)
     val errorMessage by editLoanRequestViewModel.errorMessage.collectAsState()
 
-
     val isEdited by editLoanRequestViewModel.isEdited.collectAsState()
     val isEditProcess by editLoanRequestViewModel.isEditProcess.collectAsState()
     val editLoanResponse by editLoanRequestViewModel.editLoanResponse.collectAsState()
@@ -128,7 +123,6 @@ fun EditLoanRequestScreen(
 
     var loanSlider by remember { mutableFloatStateOf(0f) }
     var tenureSlider by remember { mutableFloatStateOf(0f) }
-
 
     val stepSize = 1000f
     val numberOfSteps = ((initialLoanEndAmount - initialLoanBeginAmount) / stepSize).toInt() - 1
@@ -146,7 +140,6 @@ fun EditLoanRequestScreen(
         val clampedIncome =
             newIncome.coerceIn(initialLoanBeginAmount.toInt(), initialLoanEndAmount.toInt())
 
-
         // Convert the clampedIncome back to a string and pass it to the ViewModel
         editLoanRequestViewModel.onLoanAmountChanged(clampedIncome.toString())
     }
@@ -157,8 +150,10 @@ fun EditLoanRequestScreen(
         tenureSlider = tenureValue
 
         // Calculate the new income based on the slider value
-        val newTenure = ((tenureValue / 100) * (initialLoanEndTenure - initialLoanBeginTenure) +
-                initialLoanBeginTenure).toInt()
+        val newTenure = (
+            (tenureValue / 100) * (initialLoanEndTenure - initialLoanBeginTenure) +
+                initialLoanBeginTenure
+            ).toInt()
 
         // Clamp the newIncome value to stay within the range of initialLoanBeginTenure and
         // initialLoanEndTenure
@@ -172,14 +167,17 @@ fun EditLoanRequestScreen(
     DisposableEffect(loanAmount) {
         val initialIncome = loanAmount
         // Calculate position based on loan amount and loan range
-        val sliderPosition = (((initialIncome - initialLoanBeginAmount.toInt()) /
-                (initialLoanEndAmount - initialLoanBeginAmount) * 100))
+        val sliderPosition = (
+            (
+                (initialIncome - initialLoanBeginAmount.toInt()) /
+                    (initialLoanEndAmount - initialLoanBeginAmount) * 100
+                )
+            )
 
         loanSlider = sliderPosition.toFloat()
 
         onDispose { }
     }
-
 
     // Function to update slider position when Tenure changes
 //    DisposableEffect(loanTenure) {
@@ -224,37 +222,53 @@ fun EditLoanRequestScreen(
 @Composable
 @SuppressLint("ResourceType")
 fun EditLoanRequestView(
-    isEditProcess: Boolean, navController: NavHostController,
-    loanAmount: Double, editLoanRequestViewModel: EditLoanRequestViewModel,
-    initialLoanBeginAmount: Double, context: Context, loanSlider: Float,
-    initialLoanEndAmount: Double, onLoanSliderChange: (Float) -> Unit,
-    numberOfSteps: Int, initialLoanAmount: Double, loanTenure: Int,
-    generalError: String?, coroutineScope: CoroutineScope,
-    snackState: SnackbarHostState, fromFlow: String,
-    isEdited: Boolean, id: String, editLoanResponse: UpdateResponse?,
-    gstOfferConfirmResponse: GstOfferConfirmResponse?, offerId: String,
+    isEditProcess: Boolean,
+    navController: NavHostController,
+    loanAmount: Double,
+    editLoanRequestViewModel: EditLoanRequestViewModel,
+    initialLoanBeginAmount: Double,
+    context: Context,
+    loanSlider: Float,
+    initialLoanEndAmount: Double,
+    onLoanSliderChange: (Float) -> Unit,
+    numberOfSteps: Int,
+    initialLoanAmount: Double,
+    loanTenure: Int,
+    generalError: String?,
+    coroutineScope: CoroutineScope,
+    snackState: SnackbarHostState,
+    fromFlow: String,
+    isEdited: Boolean,
+    id: String,
+    editLoanResponse: UpdateResponse?,
+    gstOfferConfirmResponse: GstOfferConfirmResponse?,
+    offerId: String
 ) {
     var button1Visible = false
     var button2Visible = false
     val image: Int = R.raw.processing_wait
 
     if (isEditProcess) {
-        //Sugu
+        // Sugu
         LoaderAnimation(
             text = stringResource(id = R.string.please_wait_processing),
             updatedText = "",
-            image = image, navController = navController
+            image = image,
+            navController = navController
         )
     } else {
         FixedTopBottomScreen(
-            navController = navController, showBottom = false, isSelfScrollable = false,
+            navController = navController,
+            showBottom = false,
+            isSelfScrollable = false,
             onBackClick = { navController.popBackStack() }
         ) {
             CenteredMoneyImage(imageSize = 180.dp, top = 10.dp)
             RegisterText(
                 text = stringResource(id = R.string.edit_loan_amount),
                 textColor = appBlueTitle,
-                bottom = 20.dp, top = 20.dp,
+                bottom = 20.dp,
+                top = 20.dp,
                 style = normal30Text700
             )
             val formattedLoanAmount: String = if (loanAmount > 0.0) {
@@ -287,8 +301,10 @@ fun EditLoanRequestView(
                 ),
                 onLostFocusValidation = { newText ->
                     validateInputLoanAmount(
-                        newText, initialLoanBeginAmount,
-                        initialLoanEndAmount, context,
+                        newText,
+                        initialLoanBeginAmount,
+                        initialLoanEndAmount,
+                        context
                     )
                 },
 
@@ -306,7 +322,7 @@ fun EditLoanRequestView(
                 colors = SliderDefaults.colors(
                     thumbColor = appOrange,
                     activeTrackColor = slideActiveColor,
-                    inactiveTrackColor = customBlueColor,
+                    inactiveTrackColor = customBlueColor
                 ),
                 modifier = Modifier.padding(start = 30.dp, end = 30.dp, top = 10.dp)
             )
@@ -319,7 +335,9 @@ fun EditLoanRequestView(
             SpaceBetweenText(
                 text = formattedBeginLoanAmount,
                 value = formattedEndLoanAmount,
-                start = 45.dp, end = 45.dp, top = 0.dp
+                start = 45.dp,
+                end = 45.dp,
+                top = 0.dp
             )
 
             if (!generalError.isNullOrEmpty()) {
@@ -334,7 +352,7 @@ fun EditLoanRequestView(
                     editLoanResponse = editLoanResponse,
                     navController = navController,
                     fromFlow = fromFlow,
-                    id = id,
+                    id = id
                 )
             } else {
                 button1Visible = true
@@ -371,12 +389,15 @@ fun navigateBasedSuccess(
             editLoanResponse.data.id?.let {
                 val json = Json { prettyPrint = true }
                 val responseItem = json.encodeToString(
-                    OfferResponseItem.serializer(), offerResponse
+                    OfferResponseItem.serializer(),
+                    offerResponse
                 )
                 navigateToLoanOffersListDetailScreen(
                     navController = navController,
-                    responseItem = responseItem, id = id,
-                    showButtonId = "0", fromFlow = fromFlow
+                    responseItem = responseItem,
+                    id = id,
+                    showButtonId = "0",
+                    fromFlow = fromFlow
                 )
             }
         }
@@ -386,8 +407,11 @@ fun navigateBasedSuccess(
                 val json = Json { prettyPrint = true }
                 val responseItem = json.encodeToString(GstCatalog.serializer(), catalog)
                 navigateToLoanOffersListDetailScreen(
-                    navController = navController, responseItem = responseItem,
-                    id = id, showButtonId = "0", fromFlow = fromFlow
+                    navController = navController,
+                    responseItem = responseItem,
+                    id = id,
+                    showButtonId = "0",
+                    fromFlow = fromFlow
                 )
             }
         }
@@ -395,8 +419,10 @@ fun navigateBasedSuccess(
 }
 
 fun validateInputLoanAmount(
-    newText: TextFieldValue, initialLoanBeginAmount: Double,
-    initialLoanEndAmount: Double, context: Context
+    newText: TextFieldValue,
+    initialLoanBeginAmount: Double,
+    initialLoanEndAmount: Double,
+    context: Context
 ): Boolean {
     val convertedText = newText.text.replace("₹", "")
         .replace(",", "")
@@ -413,13 +439,18 @@ fun validateInputLoanAmount(
     return true
 }
 
-
 @Composable
 fun TwoButtonsInRow(
-    button1Visible: Boolean, button2Visible: Boolean,
+    button1Visible: Boolean,
+    button2Visible: Boolean,
     editLoanRequestViewModel: EditLoanRequestViewModel,
-    loanAmount: String, loanTenure: String, context: Context,
-    navController: NavHostController, id: String, offerId: String, fromFlow: String
+    loanAmount: String,
+    loanTenure: String,
+    context: Context,
+    navController: NavHostController,
+    id: String,
+    offerId: String,
+    fromFlow: String
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -475,12 +506,15 @@ fun TwoButtonsInRow(
 //                    )
                 } else {
                     editLoanRequestViewModel.gstInitiateOffer(
-                        offerId, "INVOICE_BASED_LOAN", context, loanAmount, id
+                        offerId,
+                        "INVOICE_BASED_LOAN",
+                        context,
+                        loanAmount,
+                        id
                     )
                 }
             }
         }
-
     }
 }
 
@@ -497,4 +531,3 @@ fun EditLoanRequestScreenPreview() {
         "Personal"
     )
 }
-

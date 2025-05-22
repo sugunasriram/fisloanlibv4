@@ -1,6 +1,5 @@
 package com.github.sugunasriram.fisloanlibv4
 
-
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -57,7 +56,7 @@ fun ThirdScreenContent() {
         ) {
             Text(
                 text = "Next",
-                style = MaterialTheme.typography.body1,
+                style = MaterialTheme.typography.body1
             )
         }
     }

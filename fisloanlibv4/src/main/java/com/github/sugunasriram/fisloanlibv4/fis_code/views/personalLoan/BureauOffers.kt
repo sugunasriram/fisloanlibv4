@@ -43,12 +43,8 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.personaLoan.O
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.personaLoan.SearchModel
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.personaLoan.SearchResponseModel
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.appBlack
-import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.appGreen
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.appOrange
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.appWhite
-import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.backgroundOrange
-import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.errorBlue
-import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.failureRed
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal12Text400
 import com.github.sugunasriram.fisloanlibv4.fis_code.ui.theme.normal14Text700
 import com.github.sugunasriram.fisloanlibv4.fis_code.utils.CommonMethods
@@ -60,18 +56,21 @@ import com.github.sugunasriram.fisloanlibv4.fis_code.views.webview.NavigateToWeb
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import java.util.Locale
-import java.util.logging.Filter
 
 private val json = Json { prettyPrint = true }
+
 @OptIn(ExperimentalMaterialApi::class)
 @SuppressLint("ResourceType")
 @Composable
-fun BureauOffersScreen(navController: NavHostController, loanPurpose: String,
-                       fromFlow: String,withoutAAResponse : String) {
-
+fun BureauOffersScreen(
+    navController: NavHostController,
+    loanPurpose: String,
+    fromFlow: String,
+    withoutAAResponse: String
+) {
     val context = LocalContext.current
     val webViewModel: WebViewModel = viewModel()
-    if(loanPurpose == stringResource(R.string.getUerFlow)) {
+    if (loanPurpose == stringResource(R.string.getUerFlow)) {
         json.decodeFromString(SearchModel.serializer(), withoutAAResponse)
             ?.takeIf { it.data != null }?.let {
                 webViewModel.updateSearchResponse(it)
@@ -100,7 +99,8 @@ fun BureauOffersScreen(navController: NavHostController, loanPurpose: String,
     val coroutineScope = rememberCoroutineScope()
     var selectedFilter by remember { mutableStateOf<String?>(null) }
     val filterOptionBottomSheetState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
     )
 
     when {
@@ -120,20 +120,26 @@ fun BureauOffersScreen(navController: NavHostController, loanPurpose: String,
         webScreenLoading.value -> LoaderAnimation(
             image = R.raw.we_are_currently_processing_clock,
             updatedImage = R.raw.we_are_currently_processing_hour_glass,
-            showTimer = true, navController = navController
+            showTimer = true,
+            navController = navController
         )
 
         else -> {
-            val endUse = if (loanPurpose.equals("Other Consumption Purpose", ignoreCase = true))
+            val endUse = if (loanPurpose.equals("Other Consumption Purpose", ignoreCase = true)) {
                 "other"
-            else if (loanPurpose.equals("Consumer Durable Purchase", ignoreCase = true))
+            } else if (loanPurpose.equals("Consumer Durable Purchase", ignoreCase = true)) {
                 "consumerDurablePurchase"
-            else loanPurpose.lowercase()
+            } else {
+                loanPurpose.lowercase()
+            }
 
             if (!webScreenLoaded.value) {
                 loadWebScreen(
-                    fromFlow = fromFlow, webViewModel = webViewModel, context = context,
-                    endUse = endUse, purpose = loanPurpose
+                    fromFlow = fromFlow,
+                    webViewModel = webViewModel,
+                    context = context,
+                    endUse = endUse,
+                    purpose = loanPurpose
                 )
             } else {
                 if (gstSearchResponse?.data?.url != null) {
@@ -152,20 +158,24 @@ fun BureauOffersScreen(navController: NavHostController, loanPurpose: String,
                                 offers = null,
                                 consentResponse = null
                             )
-                        ), searchModel = null
+                        ),
+                        searchModel = null
                     )
                 } else {
                     if (searchResponse?.data?.offerResponse.isNullOrEmpty()) {
                         if (searchResponse?.data?.url != null) {
                             navigateToAccountAggregatorScreen(
-                                navController, loanPurpose, fromFlow,
+                                navController,
+                                loanPurpose,
+                                fromFlow,
                                 searchResponse?.data?.id.toString(),
                                 searchResponse?.data?.transactionId.toString(),
                                 searchResponse?.data?.url.toString()
                             )
                         } else {
                             CommonMethods().toastMessage(
-                                context = context, toastMsg = "Unable to Load WebPage"
+                                context = context,
+                                toastMsg = "Unable to Load WebPage"
                             )
                         }
                     } else {
@@ -179,8 +189,8 @@ fun BureauOffersScreen(navController: NavHostController, loanPurpose: String,
                                     selectedFilter = selectedFilter,
                                     onFilterSelected = { selectedFilter = it }
                                 )
-
-                            }) {
+                            }
+                        ) {
                             FixedTopBottomScreen(
                                 navController = navController,
                                 topBarBackgroundColor = appOrange,
@@ -192,7 +202,9 @@ fun BureauOffersScreen(navController: NavHostController, loanPurpose: String,
                                 primaryButtonText = stringResource(R.string.get_more_offers),
                                 onPrimaryButtonClick = {
                                     navigateToAccountAggregatorScreen(
-                                        navController, loanPurpose, fromFlow,
+                                        navController,
+                                        loanPurpose,
+                                        fromFlow,
                                         searchResponse?.data?.id.toString(),
                                         searchResponse?.data?.transactionId.toString(),
                                         searchResponse?.data?.url.toString()
@@ -217,7 +229,8 @@ fun BureauOffersScreen(navController: NavHostController, loanPurpose: String,
                                 )
                                 val filteredOffers = filterOffers(
                                     searchResponse?.data?.offerResponse,
-                                    bureauOffersSearchQuery, selectedFilter
+                                    bureauOffersSearchQuery,
+                                    selectedFilter
                                 )
 
                                 filteredOffers.forEachIndexed { index, offer ->
@@ -259,11 +272,11 @@ fun OfferCard(navController: NavHostController, offerResponseItem: Offer?, fromF
                 itemTag?.tags?.forEach { tag ->
                     when {
                         tag.key.equals("interest_rate", ignoreCase = true) ||
-                                tag.key.equals("interest rate", ignoreCase = true) -> {
+                            tag.key.equals("interest rate", ignoreCase = true) -> {
                             interestRate = tag.value
                         }
                         tag.key.equals("loan_term", ignoreCase = true) ||
-                                tag.key.equals("term", ignoreCase = true) -> {
+                            tag.key.equals("term", ignoreCase = true) -> {
                             tenure = tag.value
                         }
                         tag.key.contains("INSTALLMENT_AMOUNT", ignoreCase = true) -> {
@@ -277,32 +290,30 @@ fun OfferCard(navController: NavHostController, offerResponseItem: Offer?, fromF
                 0 -> listOf(
                     Color(0xFF4CAF50), // green
                     Color(0xFF81C784), // light green
-                    Color(0xFFB2FF59), // lime
+                    Color(0xFFB2FF59) // lime
                 )
                 1 -> listOf(
                     Color(0xFFFF8A65), // light red-orange
                     Color(0xFFFF7043), // warm red
-                    Color(0xFFD84315), // deep red-orange
+                    Color(0xFFD84315) // deep red-orange
                 )
                 2 -> listOf(
                     Color(0xFF64B5F6), // light blue
                     Color(0xFF42A5F5), // blue
-                    Color(0xFF1976D2), // deep blue
+                    Color(0xFF1976D2) // deep blue
                 )
 
                 3 -> listOf(
                     Color(0xFFFF8A80), // light red
                     Color(0xFFFF5252), // red
-                    Color(0xFF800000), // deep red
+                    Color(0xFF800000) // deep red
                 )
                 else -> listOf(
                     Color(0xFFF3D5B5), // green
                     Color(0xFF8B5E34), // light green
-                    Color(0xFF533101), // lime
+                    Color(0xFF533101) // lime
                 )
-
             }
-
 
             FullWidthRoundShapedCard(
                 onClick = {
@@ -316,7 +327,7 @@ fun OfferCard(navController: NavHostController, offerResponseItem: Offer?, fromF
                         )
                     }
                 },
-                cardColor = appOrange, //Sugu
+                cardColor = appOrange, // Sugu
                 gradientColors = gradientColors,
                 bottomPadding = 15.dp,
                 start = 10.dp,
@@ -383,7 +394,6 @@ fun OfferCard(navController: NavHostController, offerResponseItem: Offer?, fromF
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable

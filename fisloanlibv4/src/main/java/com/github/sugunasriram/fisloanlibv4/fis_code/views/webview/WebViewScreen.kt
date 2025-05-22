@@ -76,10 +76,14 @@ fun SearchWebViewScreen(
         middleLoan -> CommonMethods().ShowMiddleLoanErrorScreen(navController)
         else -> {
             AAWebScreen(
-                    navController = navController, transactionId = transactionId, urlToOpen =
-                    url,
-                    searchId = id, fromFlow = fromFlow, pageContent = {}
-                )
+                navController = navController,
+                transactionId = transactionId,
+                urlToOpen =
+                url,
+                searchId = id,
+                fromFlow = fromFlow,
+                pageContent = {}
+            )
 
 //            if (webScreenLoading.value) {
 //                LoaderAnimation(
@@ -100,27 +104,27 @@ fun SearchWebViewScreen(
 //                        endUse = endUse, purpose = purpose
 //                    )
 //                } else {
-////                    NavigateToWebView(
-////                        searchResponse = searchResponse, gstSearchResponse = gstSearchResponse,
-////                        fromFlow = fromFlow, navController = navController
-////                    )
-////                    searchResponse?.let { search ->
-////                        if(search.data?.offers == true){
-////                            search.data.transactionId?.let { transactionId ->
-////                                navigateToLoanProcessScreen(
-////                                    navController, transactionId = transactionId,
-////                                    statusId = 2, responseItem = "No Need Response Item", offerId = "1234",
-////                                    fromFlow = fromFlow
-////                                )
-////                            }
-////                        }
-////                        else{
-////                            NavigateToWebView(
-////                                searchResponse = searchResponse, gstSearchResponse = gstSearchResponse,
-////                                fromFlow = fromFlow, navController = navController
-////                            )
-////                        }
-////                    }
+// //                    NavigateToWebView(
+// //                        searchResponse = searchResponse, gstSearchResponse = gstSearchResponse,
+// //                        fromFlow = fromFlow, navController = navController
+// //                    )
+// //                    searchResponse?.let { search ->
+// //                        if(search.data?.offers == true){
+// //                            search.data.transactionId?.let { transactionId ->
+// //                                navigateToLoanProcessScreen(
+// //                                    navController, transactionId = transactionId,
+// //                                    statusId = 2, responseItem = "No Need Response Item", offerId = "1234",
+// //                                    fromFlow = fromFlow
+// //                                )
+// //                            }
+// //                        }
+// //                        else{
+// //                            NavigateToWebView(
+// //                                searchResponse = searchResponse, gstSearchResponse = gstSearchResponse,
+// //                                fromFlow = fromFlow, navController = navController
+// //                            )
+// //                        }
+// //                    }
 //
 //                    searchResponse?.let { search ->
 //                        if(!search.data?.url.isNullOrEmpty()){
@@ -153,8 +157,11 @@ fun SearchWebViewScreen(
 
 @Composable
 fun NavigateToWebView(
-    searchModel: SearchModel?,fromFlow: String, navController: NavHostController,
-    gstSearchResponse: GstSearchResponse?, searchResponse: SearchModel?
+    searchModel: SearchModel?,
+    fromFlow: String,
+    navController: NavHostController,
+    gstSearchResponse: GstSearchResponse?,
+    searchResponse: SearchModel?
 ) {
     if (fromFlow.equals("Personal Loan", ignoreCase = true)) {
         searchModel.let { search ->
@@ -173,7 +180,7 @@ fun NavigateToWebView(
                 }
             }
         }
-    }else if (fromFlow.equals("Invoice Loan", ignoreCase = true)) {
+    } else if (fromFlow.equals("Invoice Loan", ignoreCase = true)) {
         gstSearchResponse.let { search ->
             search?.data?.transactionId?.let { transactionId ->
                 search?.data?.id?.let { id ->
@@ -211,19 +218,28 @@ fun NavigateToWebView(
 }
 
 fun loadWebScreen(
-    fromFlow: String, webViewModel: WebViewModel, context: Context, endUse: String, purpose: String,
+    fromFlow: String,
+    webViewModel: WebViewModel,
+    context: Context,
+    endUse: String,
+    purpose: String
 ) {
     if (fromFlow.equals("Personal Loan", ignoreCase = true)) {
         webViewModel.searchApi(
-            context = context, searchBodyModel = SearchBodyModel(
-                loanType = "PERSONAL_LOAN", endUse = endUse, bureauConsent = "on"
+            context = context,
+            searchBodyModel = SearchBodyModel(
+                loanType = "PERSONAL_LOAN",
+                endUse = endUse,
+                bureauConsent = "on"
             )
         )
     } else if (fromFlow.equals("Invoice Loan", ignoreCase = true)) {
         // Here when it in the Gst Invoice Loan purpose equals to Invoice ID
         webViewModel.searchGst(
             gstSearchBody = GstSearchBody(
-                loanType = "INVOICE_BASED_LOAN", bureauConsent = "on", tnc = "on",
+                loanType = "INVOICE_BASED_LOAN",
+                bureauConsent = "on",
+                tnc = "on",
                 id = purpose
             ),
             context = context
@@ -238,7 +254,7 @@ fun loadWebScreen(
                 productCategory = "fashion", productBrand = "style", productSKUID = "12345678",
                 productPrice = "1000"
             ),
-            context = context,
+            context = context
         )
     }
 }
@@ -246,13 +262,18 @@ fun loadWebScreen(
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun AAWebScreen(
-    isSelfScrollable: Boolean = false, transactionId: String, navController: NavHostController,
-    urlToOpen: String, searchId: String, fromFlow: String,
-    pageContent: () -> Unit,
+    isSelfScrollable: Boolean = false,
+    transactionId: String,
+    navController: NavHostController,
+    urlToOpen: String,
+    searchId: String,
+    fromFlow: String,
+    pageContent: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
-        TopBar(navController = navController,
-            onBackClick = {navigateApplyByCategoryScreen(navController) },
+        TopBar(
+            navController = navController,
+            onBackClick = { navigateApplyByCategoryScreen(navController) },
             topBarText = stringResource(R.string.account_aggregator_consent)
         )
         if (isSelfScrollable) {
@@ -262,7 +283,7 @@ fun AAWebScreen(
                 AndroidView(
                     factory = { context ->
                         WebView(context).apply {
-                            //Sugu - need to test with other lender, commented for Lint
+                            // Sugu - need to test with other lender, commented for Lint
                             settings.javaScriptEnabled = true
                             settings.setSupportMultipleWindows(true)
 
@@ -304,11 +325,12 @@ fun AAWebScreen(
                                     url: String?
                                 ): Boolean {
                                     url?.let {
-
                                         if (it.startsWith("https://stagingondcfs.jtechnoparks.in/ondc/buyer-finance/consent-callback/")) {
                                             navigateToAAConsentApprovalScreen(
-                                                navController = navController, searchId = searchId,
-                                                url = url, fromFlow = fromFlow
+                                                navController = navController,
+                                                searchId = searchId,
+                                                url = url,
+                                                fromFlow = fromFlow
                                             )
                                             return true
                                         }
@@ -328,7 +350,9 @@ fun AAWebScreen(
                     update = { webView ->
                         webView.webChromeClient = object : WebChromeClient() {
                             override fun onCreateWindow(
-                                view: WebView?, isDialog: Boolean, isUserGesture: Boolean,
+                                view: WebView?,
+                                isDialog: Boolean,
+                                isUserGesture: Boolean,
                                 resultMsg: Message?
                             ): Boolean {
                                 val newWebView = view?.context?.let { WebView(it) }
@@ -384,7 +408,7 @@ fun AAWebScreen(
                                 // Pass the WebView instance directly
                                 cookieManager.setAcceptThirdPartyCookies(newWebView, true)
                                 cookieManager.setAcceptThirdPartyCookies(view, true)
-                                newWebView?.setWebChromeClient(this);
+                                newWebView?.setWebChromeClient(this)
                                 view?.addView(newWebView)
                                 val transport = resultMsg?.obj as? WebView.WebViewTransport
                                 transport?.webView = newWebView
@@ -400,13 +424,11 @@ fun AAWebScreen(
                         }
                         urlToOpen.let {
                             Log.d("SearchWebViewScreen", " urlToOpen: $it")
-                            webView.loadUrl(it) }
+                            webView.loadUrl(it)
+                        }
                     }
                 )
             }
         }
     }
 }
-
-
-

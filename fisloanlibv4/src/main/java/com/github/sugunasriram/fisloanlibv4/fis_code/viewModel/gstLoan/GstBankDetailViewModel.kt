@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavHostController
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.core.ApiRepository
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.core.ApiRepository.handleAuthGetAccessTokenApi
 import com.github.sugunasriram.fisloanlibv4.fis_code.network.model.gst.GstOfferConfirmResponse
@@ -78,7 +77,10 @@ class GstBankDetailViewModel : BaseViewModel() {
     }
 
     private suspend fun handleGstLoanApproved(
-        id: String, loanType: String, context: Context, checkForAccessToken: Boolean = true
+        id: String,
+        loanType: String,
+        context: Context,
+        checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
             ApiRepository.gstLoanApproved(id, loanType)
@@ -93,7 +95,10 @@ class GstBankDetailViewModel : BaseViewModel() {
             ) {
                 if (handleAuthGetAccessTokenApi()) {
                     handleGstLoanApproved(
-                        id = id, loanType = loanType, context = context, checkForAccessToken = false
+                        id = id,
+                        loanType = loanType,
+                        context = context,
+                        checkForAccessToken = false
                     )
                 } else {
                     _navigationToSignIn.value = true
@@ -116,15 +121,21 @@ class GstBankDetailViewModel : BaseViewModel() {
         withContext(Dispatchers.Main) {
             if (error is ResponseException) {
                 CommonMethods().handleResponseException(
-                    error = error, context = context, updateErrorMessage = ::updateErrorMessage,
-                    _showServerIssueScreen = _showServerIssueScreen, _middleLoan = _middleLoan,
-                    _unAuthorizedUser = _unAuthorizedUser, _unexpectedError = _unexpectedError,
+                    error = error,
+                    context = context,
+                    updateErrorMessage = ::updateErrorMessage,
+                    _showServerIssueScreen = _showServerIssueScreen,
+                    _middleLoan = _middleLoan,
+                    _unAuthorizedUser = _unAuthorizedUser,
+                    _unexpectedError = _unexpectedError,
                     _showLoader = _showLoader
                 )
             } else {
                 CommonMethods().handleGeneralException(
-                    error = error, _showInternetScreen = _showInternetScreen,
-                    _showTimeOutScreen = _showTimeOutScreen, _unexpectedError = _unexpectedError
+                    error = error,
+                    _showInternetScreen = _showInternetScreen,
+                    _showTimeOutScreen = _showTimeOutScreen,
+                    _unexpectedError = _unexpectedError
                 )
             }
             _bankDetailCollecting.value = false
