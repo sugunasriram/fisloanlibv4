@@ -1,23 +1,5 @@
 package com.example.fisloanone
 
-// import android.os.Bundle
-// import androidx.appcompat.app.AppCompatActivity
-// import android.widget.Button
-// import androidx.activity.ComponentActivity
-// import androidx.compose.runtime.Composable
-
-// class MainActivity : AppCompatActivity() {
-//    override fun onCreate(savedInstanceState: Bundle?) {
-//        super.onCreate(savedInstanceState)
-//        setContentView(R.layout.activity_main)
-//
-//        val btnLaunchLoan = findViewById<Button>(R.id.btnLaunchLoan)
-//        btnLaunchLoan.setOnClickListener {
-//            LoanLib.launchFirstScreen(this)
-//        }
-//    }
-// }
-
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import com.github.sugunasriram.fisloanlibv4.LoanLib
@@ -56,14 +38,10 @@ class MainActivity : ComponentActivity() {
     private fun PopulateSessionDetails(): LoanLib.SessionDetails {
         return SessionDetails(
             sessionId = "83f29f24-704d-529f-a3b4-4a5560cd2c70"
+//            sessionId = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
         )
     }
 
-    private fun EmptySessionDetails(): LoanLib.SessionDetails {
-        return SessionDetails(
-            sessionId = "" // Provide a default value for sessionId
-        )
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -20,7 +20,7 @@
         <activity android:name=".FirstScreenActivity" android:exported="true"/>
         <activity android:name=".SecondScreenActivity" android:exported="true"/>
         <activity android:name=".ThirdScreenActivity" android:exported="true"/>
-        <activity android:name="com.github.sugunasriram.fisloanlibv4.fis_code.app.MainActivity" android:exported="true"/>
+        <activity android:name="com.github.sugunasriram.fisloanlibv4.fiscode.app.MainActivity" android:exported="true"/>
     </application>
 
 </manifest>

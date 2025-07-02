@@ -10,7 +10,11 @@ import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -26,9 +30,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.github.sugunasriram.fisloanlibv4.fis_code.app.MainActivity
-import com.github.sugunasriram.fisloanlibv4.fis_code.dataStore
-import com.github.sugunasriram.fisloanlibv4.fis_code.utils.storage.TokenManager
+import com.github.sugunasriram.fisloanlibv4.fiscode.app.MainActivity
+import com.github.sugunasriram.fisloanlibv4.fiscode.dataStore
+import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
 import java.io.Serializable
 
 object LoanLib {

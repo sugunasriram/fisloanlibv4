@@ -5,8 +5,8 @@ plugins {
 
     id("com.google.firebase.crashlytics")
 
-    // KTLINT
-    id("org.jlleitschuh.gradle.ktlint") version "11.6.0"
+    // KTLINT - Sugu11
+    //id("org.jlleitschuh.gradle.ktlint") version "11.6.0"
 }
 
 android {
@@ -15,7 +15,8 @@ android {
 
     defaultConfig {
         applicationId = "com.example.fisloanone"
-        minSdk = 26
+//        minSdk = 26
+        minSdk = 24
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -51,8 +52,8 @@ android {
 
 dependencies {
 
-    implementation(project(":fisloanlibv4")) //Sugu1
-//    implementation("com.github.sugunasriram:fisloanlibv4:1.0.1")
+    implementation(project(":fisloanlibv4")) // Sugu1
+//    implementation("com.github.sugunasriram:fisloanlibv4:v1.0.3")
 
     implementation("androidx.activity:activity-compose:1.9.1")
 //    implementation("androidx.room:room-ktx:2.6.1")
@@ -73,6 +74,7 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.6.8")
+
 //
 //    // Compose Helper for : [View Pager and Indicator] [Status bar customize]
 //    implementation("com.google.accompanist:accompanist-pager:0.20.0")
