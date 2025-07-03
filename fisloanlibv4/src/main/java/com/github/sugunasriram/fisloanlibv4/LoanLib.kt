@@ -191,8 +191,8 @@ object LoanLib {
 
     fun LaunchFISAppWithParams(
         context: Context,
-        personalDetails: PersonalDetails,
-        productDetails: ProductDetails
+//        personalDetails: PersonalDetails,
+//        productDetails: ProductDetails
     ) {
         Toast.makeText(context, "Launching FIS with Params", Toast.LENGTH_SHORT).show()
 
@@ -200,8 +200,8 @@ object LoanLib {
         init(context)
 
         val intent = Intent(context, MainActivity::class.java)
-        intent.putExtra("personalDetails", personalDetails)
-        intent.putExtra("productDetails", productDetails)
+//        intent.putExtra("personalDetails", personalDetails)
+//        intent.putExtra("productDetails", productDetails)
 
         context.startActivity(intent)
     }
@@ -211,10 +211,31 @@ object LoanLib {
         val interestRate: Double,
         val tenure: Int
     ) : Serializable
+//    fun LaunchFISAppWithParamsAndCallback(
+//        context: Context,
+//        personalDetails: PersonalDetails,
+//        productDetails: ProductDetails,
+//        sessionDetails: SessionDetails ? = null,
+//        callback: (LoanDetails) -> Unit
+//    ) {
+//        Toast.makeText(context, "Launching FIS with Params", Toast.LENGTH_SHORT).show()
+//
+//        // Initialize the library
+//        init(context)
+//
+//        val intent = Intent(context, MainActivity::class.java)
+//        intent.putExtra("personalDetails", personalDetails)
+//        intent.putExtra("productDetails", productDetails)
+//        intent.putExtra("sessionDetails", sessionDetails)
+//
+//        LoanLib.callback = callback
+//
+//        // (context as Activity).startActivityForResult(intent, 2001)
+//        context.startActivity(intent)
+//    }
+
     fun LaunchFISAppWithParamsAndCallback(
         context: Context,
-        personalDetails: PersonalDetails,
-        productDetails: ProductDetails,
         sessionDetails: SessionDetails ? = null,
         callback: (LoanDetails) -> Unit
     ) {
@@ -224,8 +245,6 @@ object LoanLib {
         init(context)
 
         val intent = Intent(context, MainActivity::class.java)
-        intent.putExtra("personalDetails", personalDetails)
-        intent.putExtra("productDetails", productDetails)
         intent.putExtra("sessionDetails", sessionDetails)
 
         LoanLib.callback = callback

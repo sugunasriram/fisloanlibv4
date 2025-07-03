@@ -283,12 +283,22 @@ fun ProductDetailsCard(verifySessionResponse: VerifySessionResponse) {
 //                    .weight(0.3f)
 //                    .height(150.dp)
 //            )
+
+
             verifySessionResponse.data.sessionData.productSymbol.let { imageUrl ->
-                rememberAsyncImagePainter(
+                Log.d("DownPaymentScreen", "Image URL: $imageUrl")
+                val imagePainter = rememberAsyncImagePainter(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(imageUrl)
                         .decoderFactory(SvgDecoder.Factory())
                         .build()
+                )
+                Image(
+                    painter = imagePainter,
+                    contentDescription = "Product Image",
+                    modifier = Modifier
+                        .weight(0.3f)
+                        .height(150.dp)
                 )
             }
 

@@ -35,8 +35,8 @@ class AppBridgeManager(private val activity: ComponentActivity) {
 
     @Composable
     fun RenderContent(intent: Intent?, navController: NavController) {
-        val personalDetails = intent?.getSerializableExtra("personalDetails") as? LoanLib.PersonalDetails
-        val productDetails = intent?.getSerializableExtra("productDetails") as? LoanLib.ProductDetails
+//        val personalDetails = intent?.getSerializableExtra("personalDetails") as? LoanLib.PersonalDetails
+//        val productDetails = intent?.getSerializableExtra("productDetails") as? LoanLib.ProductDetails
         val sessionDetails = intent?.getSerializableExtra("sessionDetails") as? LoanLib.SessionDetails
 
         val viewModel: IncomingIntentViewModel = viewModel()
@@ -53,8 +53,8 @@ class AppBridgeManager(private val activity: ComponentActivity) {
         val unAuthorizedUser by viewModel.unAuthorizedUser.observeAsState(false)
 
         // Log received data
-        personalDetails?.let { Log.d("AppBridge", "Received personalDetails: $it") }
-        productDetails?.let { Log.d("AppBridge", "Received productDetails: $it") }
+//        personalDetails?.let { Log.d("AppBridge", "Received personalDetails: $it") }
+//        productDetails?.let { Log.d("AppBridge", "Received productDetails: $it") }
         sessionDetails?.let { Log.d("AppBridge", "Received sessionDetails: $it") }
 
 //        if (showDialog.value) {
