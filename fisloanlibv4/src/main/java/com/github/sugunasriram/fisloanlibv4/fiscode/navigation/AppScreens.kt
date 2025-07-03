@@ -2,6 +2,7 @@ package com.github.sugunasriram.fisloanlibv4.fiscode.navigation
 
 sealed class AppScreens(var route: String) {
     object SplashScreen : AppScreens("splash_screen")
+    object BridgeEntryScreen : AppScreens("bridge_entry")
     object SignInScreen : AppScreens("sign_in_screen")
     object OtpScreen : AppScreens("otp_screen")
     object UpdateProfileScreen : AppScreens("update_profile_screen")

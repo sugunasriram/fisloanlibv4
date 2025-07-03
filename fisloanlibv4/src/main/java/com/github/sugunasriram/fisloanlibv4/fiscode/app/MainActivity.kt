@@ -144,6 +144,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.mutableStateOf
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.github.sugunasriram.fisloanlibv4.fiscode.appBridge.AppBridgeManager
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.AppNavGraph
@@ -169,16 +170,32 @@ class MainActivity : ComponentActivity() {
 //                bridgeManager.RenderContent(intent)
 //            }
 //        }
+
+//        setContent {
+//            val navController = rememberNavController()
+//
+//            // Provide navController to AppBridgeManager
+//            AppBridgeManager(this).RenderContent(intent, navController)
+//
+//            NavHost(
+//                navController = navController,
+//                startDestination = AppNavGraph.GRAPH_LAUNCH
+//            ) {
+//                mobileNavigation(navController, startDestination = AppScreens.SplashScreen.route)
+//            }
+//        }
+
         setContent {
             val navController = rememberNavController()
 
-            // Provide navController to AppBridgeManager
-            AppBridgeManager(this).RenderContent(intent, navController)
-
             NavHost(
                 navController = navController,
-                startDestination = AppNavGraph.GRAPH_LAUNCH
+                startDestination = AppScreens.BridgeEntryScreen.route
             ) {
+                composable(AppScreens.BridgeEntryScreen.route) {
+                    AppBridgeManager(this@MainActivity).RenderContent(intent, navController)
+                }
+
                 mobileNavigation(navController, startDestination = AppScreens.SplashScreen.route)
             }
         }
