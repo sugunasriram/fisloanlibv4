@@ -1,7 +1,7 @@
 package com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme
 
 import androidx.compose.ui.graphics.Color
-//---figmsV4 colours
+// ---figmsV4 colours
 val primaryOrange = Color(0xFFFF9900)
 val appOrange = Color(0xFFFF9900)
 val appGreen = Color(0xFF29A514)
@@ -11,12 +11,14 @@ val appGray = Color(0xFF4E4E4E)
 val appRed = Color(0xFFD63126)
 val appBlack = Color(0xFF000000)
 val appWhite = Color(0xFFFFFFFF)
+val cardWhite = Color(0xFFFCFCFC)
 val backgroundOrange = Color(0xFFFF9900).copy(alpha = 0.1f)
 val backOrange = Color(0xFFFCE9CC)
 
-//v4 negative screen
+// v4 negative screen
 val errorRed = Color(0xFFFF0000)
 val negativeGray = Color(0xFFA49EAC)
+val rejectedGray = Color(0xFF4E4E4E).copy(alpha = 0.4f)
 val gray4E = Color(0xFF4E4E4E)
 val grayA6 = Color(0xFFA6A6A6)
 val grayBackground = Color(0xFFF7F8F9)
@@ -39,21 +41,16 @@ val loanIssueCardGray = Color(0xFFF5F5F5)
 val loanIssueCardGreen = Color(0xFF0A7801)
 val loanIssueCardLightGreen = Color(0xFF43A228).copy(alpha = 0.10f)
 val loanIssueCardRed = Color(0xFFF41010)
-;
 
-
-
-//-------------------------
-//val primaryBlue = Color(0xFF2172FF)
+// -------------------------
+// val primaryBlue = Color(0xFF2172FF)
 val greenCard = Color(0xFFF2FCF3)
 val appSilver = Color(0xFFD8D8D8)
 val appDarkTeal = Color(0xFF305084)
 val azureBlue = Color(0xFF3A94FF)
-//val appBlue = Color(0xFF3893FE)
+
+// val appBlue = Color(0xFF3893FE)
 val slideActiveColor = Color(0xFF1C6FCF)
-
-
-
 
 val hyperTextColor = Color(0xFF3A94FF)
 val appBlueTitle = Color(0xFF305084)
@@ -77,7 +74,6 @@ val disableColor = Color(0xFFC7DAFD)
 val errorGray = Color(0xFF716F73)
 val hyperRedColor = Color(0xFFF04949)
 val failureRed = Color(0xFFFF4A4A)
-
 
 val newBlueColor = Color(0xFF0055CB)
 val newRedColor = Color(0xFFFE3535)

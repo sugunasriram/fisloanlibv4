@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.BaseViewModel
 
-class GstNumberVerifyViewModel: BaseViewModel() {
+class GstNumberVerifyViewModel : BaseViewModel() {
 
     private val _generalError: MutableLiveData<String?> = MutableLiveData("")
     val generalError: LiveData<String?> = _generalError

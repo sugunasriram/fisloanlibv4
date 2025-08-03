@@ -23,11 +23,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.github.sugunasriram.fisloanlibv4.R
-import com.github.sugunasriram.fisloanlibv4.fiscode.components.ProcessingAnimation
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.DisplayCard
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.FixedTopBottomScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.LoanDisburseAnimator
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.OnlyReadAbleText
+import com.github.sugunasriram.fisloanlibv4.fiscode.components.ProcessingAnimation
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.RegisterText
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.SpaceBetweenTextIcon
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
@@ -67,10 +67,11 @@ private val json1 = Json {
 @SuppressLint("ResourceType")
 @Composable
 fun LoanDisbursementScreen(
-    navController: NavHostController, transactionId: String,
-    id: String, fromFlow: String
+    navController: NavHostController,
+    transactionId: String,
+    id: String,
+    fromFlow: String
 ) {
-
     var backPressedTime by remember { mutableLongStateOf(0L) }
     val context = LocalContext.current
     val loanAgreementViewModel: LoanAgreementViewModel by lazy { LoanAgreementViewModel() }
@@ -91,8 +92,11 @@ fun LoanDisbursementScreen(
         android.util.Log.d("SSETRIGGER", "Inside  MoveToDashBoard")
         sseDataForPf?.let { data ->
             MoveToDashBoard(
-                navController = navController, id = id, fromFlow = fromFlow,
-                sseData = data, context = context
+                navController = navController,
+                id = id,
+                fromFlow = fromFlow,
+                sseData = data,
+                context = context
             )
         }
     }
@@ -109,15 +113,18 @@ fun LoanDisbursementScreen(
     }
     val type = sseData?.data?.data?.type
     var sseTransactionId = sseData?.data?.data?.txnId ?: sseData?.data?.data?.transactionId
-    ?: sseData?.data?.data?.catalog?.txn_id
+        ?: sseData?.data?.data?.catalog?.txn_id
 
     if (sseData == null || type == "INFO") {
-        ProcessingAnimation(text = "Processing Please Wait...",
-            image = R.raw.we_are_currently_processing_hour_glass)
+        ProcessingAnimation(
+            text = "Processing Please Wait...",
+            image = R.raw.we_are_currently_processing_hour_glass
+        )
     } else {
         Log.d(
-            "LoanDisbursement:", "transactionId :[" + transactionId + "] " +
-                    "sseTransactionId:[" + sseTransactionId
+            "LoanDisbursement:",
+            "transactionId :[" + transactionId + "] " +
+                "sseTransactionId:[" + sseTransactionId
         )
         if (transactionId == sseTransactionId && type == "ACTION") {
             sseData.data.data.type.let { actionType ->
@@ -128,18 +135,20 @@ fun LoanDisbursementScreen(
                         android.util.Log.d("SSETRIGGER", "INSIDE fromFlow")
                         apiTriggered = true
                         loanAgreementViewModel.updateSSEData(sseData)
-
                     } else if (transactionId == sseTransactionId && actionType == "ACTION" && consent) {
                         MoveToConsentHandlerScreen(
-                            sseData = sseData, navController = navController, fromFlow = fromFlow
+                            sseData = sseData,
+                            navController = navController,
+                            fromFlow = fromFlow
                         )
                     } else {
-
                         MoveToDashBoard(
-                            navController = navController, id = id, fromFlow = fromFlow,
-                            sseData = sseData, context = context
+                            navController = navController,
+                            id = id,
+                            fromFlow = fromFlow,
+                            sseData = sseData,
+                            context = context
                         )
-
                     }
                 }
             }
@@ -157,16 +166,18 @@ fun LoanDisbursementScreen(
                     consentStatus = "DELIVERED",
                     loanType = "PURCHASE_FINANCE"
                 ),
-                context = context,
+                context = context
             )
         }
     }
 }
 
-
 @Composable
 fun MoveToDashBoard(
-    navController: NavHostController, id: String, fromFlow: String, sseData: SSEData,
+    navController: NavHostController,
+    id: String,
+    fromFlow: String,
+    sseData: SSEData,
     context: Context
 ) {
     var backPressedTime by remember { mutableLongStateOf(0L) }
@@ -181,18 +192,28 @@ fun MoveToDashBoard(
         primaryButtonText = stringResource(R.string.home),
         onPrimaryButtonClick = {
             navigateToLoanSummaryScreen(
-                navController = navController, id = id, consentHandler = "1", fromFlow = fromFlow
+                navController = navController,
+                id = id,
+                consentHandler = "1",
+                fromFlow = fromFlow
             )
         },
         backgroundColor = appWhite
     ) {
         LoanDisburseAnimator()
-        val totalDisburseAmount = sseData.data?.data?.catalog?.item_price?.value
+//        val totalDisburseAmount = sseData.data?.data?.catalog?.item_price?.value
+        val totalDisburseAmount = sseData.data?.data?.catalog?.quote_breakup
+            ?.firstOrNull {
+                val formattedTitle = it.title?.let { title -> CommonMethods().displayFormattedText(title) }
+                formattedTitle.equals("Net Disbursed Amount", ignoreCase = true)
+            }
+            ?.value
         RegisterText(
             text = stringResource(id = R.string.loan_amount_is_approved),
             style = normal18Text700,
             textColor = appBlack,
-            top = 20.dp, bottom = 20.dp
+            top = 20.dp,
+            bottom = 20.dp
         )
 
         if (totalDisburseAmount != null) {
@@ -205,14 +226,14 @@ fun MoveToDashBoard(
         }
         RegisterText(
             text = stringResource(id = R.string.amount_disburse_time),
-            style = normal16Text400, textColor = hintGray,
-            start = 20.dp,end=20.dp
+            style = normal16Text400,
+            textColor = hintGray,
+            start = 20.dp,
+            end = 20.dp
         )
         val loanDetails = sseData.data?.data?.catalog
         if (loanDetails != null) {
-
-            var loanDetailsStr =
-                stringResource(id = R.string.loan_details) + "\n\n"
+            var loanDetailsStr = stringResource(id = R.string.loan_details) + "\n\n"
 
             loanDetails.quote_breakup?.forEach { quoteBreakUp ->
                 quoteBreakUp.let {
@@ -228,29 +249,34 @@ fun MoveToDashBoard(
                 text = stringResource(id = R.string.loan_details).uppercase(),
                 style = normal18Text700,
                 textColor = appOrange,
-                image = R.drawable.share, start = 24.dp, end = 24.dp
+                image = R.drawable.share,
+                start = 24.dp,
+                end = 24.dp
             ) {
                 shareContent(context, loanDetailsStr)
             }
             LoanDisbursementCard(loanDetails)
         }
-
     }
 }
 
 @Composable
 fun MoveToConsentHandlerScreen(
-    sseData: SSEData, navController: NavHostController, fromFlow: String
+    sseData: SSEData,
+    navController: NavHostController,
+    fromFlow: String
 ) {
     sseData.data?.data?.url?.let { url ->
         sseData.data.data.id?.let { consentId ->
             ConsentHandlerScreen(
-                navController = navController, urlToOpen = url, id = consentId, fromFlow = fromFlow
+                navController = navController,
+                urlToOpen = url,
+                id = consentId,
+                fromFlow = fromFlow
             ) {}
         }
     }
 }
-
 
 fun shareContent(context: Context, content: String) {
     val shareIntent = Intent().apply {
@@ -276,8 +302,9 @@ fun LoanDisbursementCard(loanDetail: Catalog?) {
                             textColorHeader = slateGrayColor,
                             textValue = description,
                             textColorValue = appBlack,
-                            textValueAlignment= TextAlign.End,
-                            top = 5.dp, bottom = 5.dp,
+                            textValueAlignment = TextAlign.End,
+                            top = 5.dp,
+                            bottom = 5.dp
                         )
                     }
                 }
@@ -285,7 +312,6 @@ fun LoanDisbursementCard(loanDetail: Catalog?) {
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable

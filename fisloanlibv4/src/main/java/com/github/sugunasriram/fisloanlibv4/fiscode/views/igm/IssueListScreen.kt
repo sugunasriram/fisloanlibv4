@@ -45,6 +45,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCa
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToCreateIssueScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToIssueDetailScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToLoanStatusScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToRepaymentScheduleScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.igm.IssueListBody
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.igm.IssueListResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.igm.IssueObj
@@ -70,11 +71,14 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.igm.CreateIssueViewModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.NoExistingLoanScreen
 
-
 @Composable
 fun IssueListScreen(
-    navController: NavHostController, orderId: String, loanState: String, providerId: String,
-    fromFlow: String, fromScreen: String
+    navController: NavHostController,
+    orderId: String,
+    loanState: String,
+    providerId: String,
+    fromFlow: String,
+    fromScreen: String
 ) {
     val context = LocalContext.current
     val createIssueViewModel: CreateIssueViewModel = viewModel()
@@ -91,7 +95,11 @@ fun IssueListScreen(
     val unexpectedErrorScreen by createIssueViewModel.unexpectedError.observeAsState(false)
     val unAuthorizedUser by createIssueViewModel.unAuthorizedUser.observeAsState(false)
 
-    BackHandler { onIssueBackClick(fromScreen = fromScreen, navController = navController) }
+    BackHandler { onIssueBackClick(
+        fromScreen = fromScreen, navController = navController,
+        orderId = orderId,
+        fromFlow =fromFlow
+    ) }
 
     when {
         showInternetScreen -> CommonMethods().ShowInternetErrorScreen(navController)
@@ -114,43 +122,63 @@ fun IssueListScreen(
 
 @Composable
 fun IssueListView(
-    orderIssuesResponse: OrderIssueResponse?, loanState: String, providerId: String,
-    issueListLoading: Boolean, orderIssuesLoading: Boolean, context: Context,
-    navController: NavHostController, fromScreen: String, orderId: String,
-    issueListLoaded: Boolean, orderIssuesLoaded: Boolean, issueList: IssueListResponse?,
-    createIssueViewModel: CreateIssueViewModel,fromFlow: String
+    orderIssuesResponse: OrderIssueResponse?,
+    loanState: String,
+    providerId: String,
+    issueListLoading: Boolean,
+    orderIssuesLoading: Boolean,
+    context: Context,
+    navController: NavHostController,
+    fromScreen: String,
+    orderId: String,
+    issueListLoaded: Boolean,
+    orderIssuesLoaded: Boolean,
+    issueList: IssueListResponse?,
+    createIssueViewModel: CreateIssueViewModel,
+    fromFlow: String
 ) {
     if (issueListLoading || orderIssuesLoading) {
         CenterProgress()
     } else {
         if (issueListLoaded || orderIssuesLoaded) {
-
             val issues =
-                if (issueList != null) issueList.data?.pageData?.issues else
+                if (issueList != null) {
+                    issueList.data?.pageData?.issues
+                } else {
                     orderIssuesResponse?.data?.data
+                }
             issues?.let {
                 FixedTopBottomScreen(
                     navController = navController,
                     topBarBackgroundColor = appOrange,
                     topBarText = stringResource(id = R.string.issue_list),
                     showBackButton = true,
-                    onBackClick = { onIssueBackClick(fromScreen = fromScreen, navController = navController) },
+                    onBackClick = {  onIssueBackClick(
+                        fromScreen = fromScreen, navController = navController,
+                        orderId = orderId,
+                        fromFlow =fromFlow
+                    )  },
                     backgroundColor = appWhite,
-                    contentStart = 0.dp, contentEnd = 0.dp
+                    contentStart = 0.dp,
+                    contentEnd = 0.dp
                 ) {
                     if (it.isEmpty()) {
                         Spacer(modifier = Modifier.height(150.dp))
-                        NoExistingLoanScreen(displayText =stringResource(R.string.no_existing_issues), )
+                        NoExistingLoanScreen(displayText = stringResource(R.string.no_current_issues_found),
+                            showSubText = true)
 //                        EmptyListScreen()
-                    } else {
-                        if (fromScreen.equals(stringResource(id = R.string.loan_detail), ignoreCase = true)){
-                            MultiStyleText(stringResource(id = R.string.for_loan_id), appBlack,providerId, slateGrayColor,
-                                normal16Text700, normal16Text500,top=16.dp, start = 22.dp,bottom=16.dp)
-                        }else{
+                    }
+                    else {
+                        if (fromScreen.equals(stringResource(id = R.string.loan_detail), ignoreCase = true)) {
+                            MultiStyleText(
+                                stringResource(id = R.string.for_loan_id), appBlack, providerId, slateGrayColor,
+                                normal16Text700, normal16Text500, top = 16.dp, start = 22.dp, bottom = 16.dp
+                            )
+                        } else {
                             Spacer(modifier = Modifier.height(16.dp))
                         }
 
-                        IssueCardList(navController, issues, fromFlow = fromFlow)
+                        IssueCardList(navController,  orderId = orderId, issues, fromFlow = fromFlow)
                         if (fromScreen.equals(stringResource(id = R.string.loan_detail), ignoreCase = true)) {
                             StatusChip(
                                 statusText = stringResource(id = R.string.add_issue),
@@ -172,9 +200,9 @@ fun IssueListView(
                             )
                         }
                     }
-
                 }
             }
+
         } else {
             if (fromScreen.equals(stringResource(id = R.string.loan_detail), ignoreCase = true)) {
                 createIssueViewModel.orderIssues(orderId = orderId, context = context)
@@ -186,77 +214,109 @@ fun IssueListView(
 }
 
 @Composable
-fun IssueCardList(navController: NavHostController, issueList: List<IssueObj>?,fromFlow: String) {
-        issueList?.forEach { issue ->
-            IssueCardD(issue, onClick = {
-                issue.id?.let {
-                    navigateToIssueDetailScreen(
-                        navController = navController, issueId = it, fromFlow = fromFlow
-                    )
-                }
-            })
-            Spacer(modifier = Modifier.height(16.dp))
-        }
+fun IssueCardList(navController: NavHostController, orderId:String, issueList: List<IssueObj>?, fromFlow: String) {
+    issueList?.forEach { issue ->
+        IssueCardD(issue, onClick = {
+            issue.id?.let {
+                navigateToIssueDetailScreen(
+                    navController = navController,
+                    issueId = it, orderId = orderId,
+                    fromFlow = fromFlow
+                )
+            }
+        })
+        Spacer(modifier = Modifier.height(16.dp))
+    }
 }
 
 @Composable
-fun IssueCardD(issue: IssueObj, onClick: () -> Unit){
+fun IssueCardD(issue: IssueObj, onClick: () -> Unit) {
     BorderCardWithElevation(
-        backgroundColor =loanIssueCardGray, borderColor =loanIssueCardGray,
-        top=5.dp, bottom = 5.dp, start = 15.dp, end = 15.dp,
-        modifier = Modifier.clickable {  onClick() }
-    ){
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 5.dp, start = 5.dp, end = 5.dp)){
-            Column (modifier = Modifier.weight(0.7f)){
+        backgroundColor = loanIssueCardGray,
+        borderColor = loanIssueCardGray,
+        top = 5.dp,
+        bottom = 5.dp,
+        start = 15.dp,
+        end = 15.dp,
+        modifier = Modifier.clickable { onClick() }
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 5.dp, start = 5.dp, end = 5.dp)
+        ) {
+            Column(modifier = Modifier.weight(0.7f)) {
                 issue.summary?.loanType?.let { loanType ->
-                    val loanName =  if (loanType == "INVOICE_BASED_LOAN"){
+                    val loanName = if (loanType == "INVOICE_BASED_LOAN") {
                         "Invoice Based Loan"
                     } else {
                         "Personal Loan"
                     }
-                    MultiStyleText(stringResource(id = R.string.item_name) +": ", appOrange,loanName, appBlack,
-                        normal16Text500, normal16Text500,top=0.dp, start = 0.dp)
+                    MultiStyleText(
+                        stringResource(id = R.string.item_name) + ": ",
+                        appOrange,
+                        loanName,
+                        appBlack,
+                        normal16Text500,
+                        normal16Text500,
+                        top = 0.dp,
+                        start = 0.dp
+                    )
                 }
 
-                MultiStyleText(stringResource(id = R.string.category_name) +": ", appOrange,"${issue.summary?.category}", appBlack,
-                    normal16Text500, normal16Text500,top=8.dp, start = 0.dp)
-
+                MultiStyleText(
+                    stringResource(id = R.string.category_name) + ": ",
+                    appOrange,
+                    "${issue.summary?.category}",
+                    appBlack,
+                    normal16Text500,
+                    normal16Text500,
+                    top = 8.dp,
+                    start = 0.dp
+                )
             }
             val preferredColor = when (issue.summary?.status?.lowercase()) {
-                "open" -> loanIssueCardRed       // Red color for Open
-                "processing" -> appOrange// Blue color for Processing
-                "resolved" -> loanIssueCardGreen  // Green color for Resolved
-                "closed" ->loanIssueCardGreen
-                else -> Color.Gray         // Default color for other statuses
+                "open" -> loanIssueCardRed // Red color for Open
+                "processing" -> appOrange // Blue color for Processing
+                "resolved" -> loanIssueCardGreen // Green color for Resolved
+                "closed" -> loanIssueCardGreen
+                else -> Color.Gray // Default color for other statuses
             }
             val backGroundColorColor = when (issue.summary?.status?.lowercase()) {
-                "open" -> loanStatusCardRed       // Red color for Open
-                "processing" -> backgroundOrange// Blue color for Processing
+                "open" -> loanStatusCardRed // Red color for Open
+                "processing" -> backgroundOrange // Blue color for Processing
                 "resolved" -> loanIssueCardLightGreen
-                "closed" ->loanIssueCardLightGreen// Green color for Resolved
-                else -> Color.Transparent         // Default color for other statuses
+                "closed" -> loanIssueCardLightGreen // Green color for Resolved
+                else -> Color.Transparent // Default color for other statuses
             }
 
             issue.summary?.status?.let { it ->
                 StatusChip(
-                    statusText = it.replaceFirstChar { it.uppercase() }, backGroundColor =backGroundColorColor, borderColor = preferredColor,
-                    textColor = preferredColor, cardWidth = 1.dp,
+                    statusText = it.replaceFirstChar { it.uppercase() },
+                    backGroundColor = backGroundColorColor,
+                    borderColor = preferredColor,
+                    textColor = preferredColor,
+                    cardWidth = 1.dp,
                     modifier = Modifier.weight(0.3f)
                 )
             }
         }
-        MultiStyleText(stringResource(id = R.string.issue_id) +": ", appOrange,"${issue.summary?.id}", appBlack,
-            normal16Text500, normal16Text500,top=8.dp, start = 5.dp, bottom = 5.dp)
+        MultiStyleText(
+            stringResource(id = R.string.issue_id) + ": ", appOrange, "${issue.summary?.id}", appBlack,
+            normal16Text500, normal16Text500, top = 8.dp, start = 5.dp, bottom = 5.dp
+        )
     }
 }
 
 @Composable
 fun StatusChip(
-    statusText: String, modifier: Modifier, backGroundColor: Color = greenColour,
-    borderColor: Color = greenColour, cardWidth: Dp = 0.dp, textColor: Color = Color.White,
-    textStyle: TextStyle=normal14Text500
+    statusText: String,
+    modifier: Modifier,
+    backGroundColor: Color = greenColour,
+    borderColor: Color = greenColour,
+    cardWidth: Dp = 0.dp,
+    textColor: Color = Color.White,
+    textStyle: TextStyle = normal14Text500
 ) {
     Box(
         contentAlignment = Alignment.Center,
@@ -265,48 +325,47 @@ fun StatusChip(
             .border(width = cardWidth, color = borderColor, shape = RoundedCornerShape(4.dp))
     ) {
         Text(
-            text = statusText, color = textColor, style = textStyle,
+            text = statusText,
+            color = textColor,
+            style = textStyle,
             modifier = Modifier.padding(8.dp)
         )
     }
 }
 
 fun onRaiseIssueClick(
-    orderIssuesResponse: OrderIssueResponse?, navController: NavHostController, loanState: String,
-    orderId: String, providerId: String,
+    orderIssuesResponse: OrderIssueResponse?,
+    navController: NavHostController,
+    loanState: String,
+    orderId: String,
+    providerId: String
 ) {
     orderIssuesResponse?.data?.data?.forEach { issue ->
         issue.summary?.loanType?.let { loanType ->
             val setFlow = CommonMethods().setFromFlow(loanType)
             navigateToCreateIssueScreen(
-                navController = navController, orderId = orderId, providerId = providerId,
-                orderState = loanState, fromFlow = setFlow,
+                navController = navController,
+                orderId = orderId,
+                providerId = providerId,
+                orderState = loanState,
+                fromFlow = setFlow
             )
         }
     }
 }
 
-fun onIssueBackClick(fromScreen: String, navController: NavHostController) {
+fun onIssueBackClick(fromScreen: String, orderId: String,fromFlow: String,navController: NavHostController) {
     if (fromScreen.equals("HAMBURGER", ignoreCase = true)) {
         navigateApplyByCategoryScreen(navController)
     } else {
-        navigateToLoanStatusScreen(navController)
+        navigateToRepaymentScheduleScreen(
+            navController = navController,
+            orderId = orderId,
+            fromFlow = fromFlow,
+            fromScreen = fromScreen
+//                            fromScreen = "Loan Status"
+        )
+//        navigateToLoanStatusScreen(navController)
     }
 }
-@Composable
-fun EmptyListScreen() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = stringResource(R.string.no_existing_issues),
-            textAlign = TextAlign.Center, fontSize = 32.sp, color = negativeGray,
-            fontFamily = FontFamily(Font(R.font.robotocondensed_regular)),
-            fontWeight = FontWeight(800),
 
-            )
-    }
-}

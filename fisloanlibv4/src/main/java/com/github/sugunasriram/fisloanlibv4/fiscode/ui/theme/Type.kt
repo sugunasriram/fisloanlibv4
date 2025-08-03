@@ -8,11 +8,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.github.sugunasriram.fisloanlibv4.R
 
-
 val robot = FontFamily(
     Font(R.font.robotocondensed_bold, FontWeight.Bold),
     Font(R.font.robotocondensed_regular, FontWeight.Normal),
-    Font(R.font.robotocondensed_semibold, FontWeight.SemiBold),
+    Font(R.font.robotocondensed_semibold, FontWeight.SemiBold)
 )
 
 val robotTheme = Typography(
@@ -64,7 +63,7 @@ val robotTheme = Typography(
         fontWeight = FontWeight.Medium,
         fontSize = 16.sp,
         lineHeight = 20.sp,
-        letterSpacing = 0.031.sp,
+        letterSpacing = 0.031.sp
     ),
     caption = TextStyle(
         fontFamily = robot,
@@ -81,5 +80,3 @@ val robotTheme = Typography(
     )
 
 )
-
-

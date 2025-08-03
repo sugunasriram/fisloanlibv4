@@ -74,7 +74,6 @@ class LoanAgreementViewModel : BaseViewModel() {
     private val _loanListLoaded = MutableStateFlow(false)
     val loanListLoaded: StateFlow<Boolean> = _loanListLoaded
 
-
     private val _loanList = MutableStateFlow<CustomerLoanList?>(null)
     val loanList: StateFlow<CustomerLoanList?> = _loanList
 
@@ -90,7 +89,9 @@ class LoanAgreementViewModel : BaseViewModel() {
     }
 
     private suspend fun handleGetCustomerLoanList(
-        loanType: String, context: Context, checkForAccessToken: Boolean = true
+        loanType: String,
+        context: Context,
+        checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
             ApiRepository.getCustomerLoanList(loanType)
@@ -105,14 +106,13 @@ class LoanAgreementViewModel : BaseViewModel() {
                     }
                 }
             }
-
         }.onFailure { error ->
-            //Session Management
+            // Session Management
             if (checkForAccessToken &&
                 error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                //Get Access Token using RefreshToken
+                // Get Access Token using RefreshToken
                 if (handleAuthGetAccessTokenApi()) {
                     handleGetCustomerLoanList(loanType, context, false)
                 } else {
@@ -141,7 +141,6 @@ class LoanAgreementViewModel : BaseViewModel() {
     private val _updateProcessing = MutableStateFlow(false)
     val updateProcessing: StateFlow<Boolean> = _updateProcessing
 
-
     private val _updateProcessed = MutableStateFlow(false)
     val updateProcessed: StateFlow<Boolean> = _updateProcessed
 
@@ -159,7 +158,9 @@ class LoanAgreementViewModel : BaseViewModel() {
     }
 
     private suspend fun handleUpdateLoanAgreementApi(
-        context: Context, updateLoanBody: UpdateLoanBody, checkForAccessToken: Boolean = true
+        context: Context,
+        updateLoanBody: UpdateLoanBody,
+        checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
             ApiRepository.updateLoanAgreement(updateLoanBody)
@@ -168,12 +169,12 @@ class LoanAgreementViewModel : BaseViewModel() {
                 handleUpdateLoanAgreementApiSuccess(response)
             }
         }.onFailure { error ->
-            //Session Management
+            // Session Management
             if (checkForAccessToken &&
                 error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                //Get Access Token using RefreshToken
+                // Get Access Token using RefreshToken
                 if (handleAuthGetAccessTokenApi()) {
                     handleUpdateLoanAgreementApi(context, updateLoanBody, false)
                 } else {
@@ -220,7 +221,8 @@ class LoanAgreementViewModel : BaseViewModel() {
     }
 
     private suspend fun handleUpdateConsentHandler(
-        updateConsentHandlerBody: UpdateConsentHandlerBody, context: Context,
+        updateConsentHandlerBody: UpdateConsentHandlerBody,
+        context: Context,
         checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
@@ -230,12 +232,12 @@ class LoanAgreementViewModel : BaseViewModel() {
                 handleUpdateConsentHandlerResult(response, context, updateConsentHandlerBody)
             }
         }.onFailure { error ->
-            //Session Management
+            // Session Management
             if (checkForAccessToken &&
                 error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                //Get Access Token using RefreshToken
+                // Get Access Token using RefreshToken
                 if (handleAuthGetAccessTokenApi()) {
                     handleUpdateConsentHandler(updateConsentHandlerBody, context, false)
                 } else {
@@ -261,12 +263,10 @@ class LoanAgreementViewModel : BaseViewModel() {
                 if (loanType.equals("INVOICE_BASED_LOAN", ignoreCase = true)) {
                     getCustomerLoanList("INVOICE_BASED_LOAN", context)
                 } else {
-                        getCustomerLoanList("PERSONAL_LOAN", context)
+                    getCustomerLoanList("PERSONAL_LOAN", context)
                 }
             }
-
         }
-
     }
 
     fun updateSSEData(sseData: SSEData) {
@@ -291,20 +291,24 @@ class LoanAgreementViewModel : BaseViewModel() {
         }
     }
 
-    private suspend fun handleGetOrderById(orderId: String, loanType: String, context: Context,
-                                           checkForAccessToken: Boolean = true) {
+    private suspend fun handleGetOrderById(
+        orderId: String,
+        loanType: String,
+        context: Context,
+        checkForAccessToken: Boolean = true
+    ) {
         kotlin.runCatching {
             ApiRepository.getOrderById(loanType = loanType, orderId = orderId)
         }.onSuccess {
             handleGetOrderByIdSuccess(response = it, context = context)
         }.onFailure { error ->
 
-            //Session Management
+            // Session Management
             if (checkForAccessToken &&
                 error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                //Get Access Token using RefreshToken
+                // Get Access Token using RefreshToken
                 if (handleAuthGetAccessTokenApi()) {
                     handleGetOrderById(orderId, loanType, context, false)
                 } else {
@@ -337,7 +341,8 @@ class LoanAgreementViewModel : BaseViewModel() {
     }
 
     private suspend fun handleCompleteLoanList(
-        context: Context, checkForAccessToken: Boolean = true
+        context: Context,
+        checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
             ApiRepository.completeLoanOrders()
@@ -346,12 +351,12 @@ class LoanAgreementViewModel : BaseViewModel() {
                 handleGetCustomerLoanListSuccess(response)
             }
         }.onFailure { error ->
-            //Session Management
+            // Session Management
             if (checkForAccessToken &&
                 error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                //Get Access Token using RefreshToken
+                // Get Access Token using RefreshToken
                 if (handleAuthGetAccessTokenApi()) {
                     handleCompleteLoanList(context, false)
                 } else {
@@ -372,7 +377,6 @@ class LoanAgreementViewModel : BaseViewModel() {
     private val _checkOrderIssueResponse = MutableStateFlow<CheckOrderIssueModel?>(null)
     val checkOrderIssueResponse: StateFlow<CheckOrderIssueModel?> = _checkOrderIssueResponse
 
-
     private var alreadyDone = false
 
     private fun checkOrderIssues(orderId: String, context: Context) {
@@ -385,7 +389,9 @@ class LoanAgreementViewModel : BaseViewModel() {
     }
 
     private suspend fun handleCheckOrderIssues(
-        orderId: String, context: Context, checkForAccessToken: Boolean = true
+        orderId: String,
+        context: Context,
+        checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
             ApiRepository.checkOrderIssues(orderId)
@@ -402,7 +408,9 @@ class LoanAgreementViewModel : BaseViewModel() {
             ) {
                 if (handleAuthGetAccessTokenApi()) {
                     handleCheckOrderIssues(
-                        orderId = orderId, context = context, checkForAccessToken = false
+                        orderId = orderId,
+                        context = context,
+                        checkForAccessToken = false
                     )
                 } else {
                     _navigationToSignup.value = true
@@ -410,39 +418,47 @@ class LoanAgreementViewModel : BaseViewModel() {
             } else {
                 handleFailure(error = error, context = context)
             }
-
         }
     }
 
     private suspend fun handleFailure(error: Throwable, context: Context) {
         withContext(Dispatchers.Main) {
             if (error is ResponseException) {
-                   if (error.response.status.value == 401) {
-                       val checkForAccessToken =true
-                    //Get Access Token using RefreshToken
+                if (error.response.status.value == 401) {
+                    val checkForAccessToken = true
+                    // Get Access Token using RefreshToken
                     if (checkForAccessToken && handleAuthGetAccessTokenApi()) {
                         CommonMethods().handleResponseException(
-                            error = error, context = context, updateErrorMessage = ::updateErrorMessage,
-                            _showServerIssueScreen = _showServerIssueScreen, _middleLoan = _middleLoan,
-                            _unAuthorizedUser = _unAuthorizedUser, _unexpectedError = _unexpectedError,
+                            error = error,
+                            context = context,
+                            updateErrorMessage = ::updateErrorMessage,
+                            _showServerIssueScreen = _showServerIssueScreen,
+                            _middleLoan = _middleLoan,
+                            _unAuthorizedUser = _unAuthorizedUser,
+                            _unexpectedError = _unexpectedError,
                             _showLoader = _showLoader
                         )
                     } else {
                         _navigationToSignup.value = true
                     }
                 } else {
-                       CommonMethods().handleResponseException(
-                           error = error, context = context, updateErrorMessage = ::updateErrorMessage,
-                           _showServerIssueScreen = _showServerIssueScreen, _middleLoan = _middleLoan,
-                           _unAuthorizedUser = _unAuthorizedUser, _unexpectedError = _unexpectedError,
-                           _showLoader = _showLoader
-                       )
+                    CommonMethods().handleResponseException(
+                        error = error,
+                        context = context,
+                        updateErrorMessage = ::updateErrorMessage,
+                        _showServerIssueScreen = _showServerIssueScreen,
+                        _middleLoan = _middleLoan,
+                        _unAuthorizedUser = _unAuthorizedUser,
+                        _unexpectedError = _unexpectedError,
+                        _showLoader = _showLoader
+                    )
                 }
-
             } else {
                 CommonMethods().handleGeneralException(
-                    error = error, _showInternetScreen = _showInternetScreen,
-                    _showTimeOutScreen = _showTimeOutScreen, _unexpectedError = _unexpectedError
+                    error = error,
+                    _showInternetScreen = _showInternetScreen,
+                    _showTimeOutScreen = _showTimeOutScreen,
+                    _unexpectedError = _unexpectedError
                 )
             }
             _checkingOrderIssues.value = false
@@ -472,8 +488,12 @@ class LoanAgreementViewModel : BaseViewModel() {
         }
     }
 
-    private suspend fun handleStatus(loanType: String, context: Context, orderId: String,
-                                     checkForAccessToken: Boolean = true) {
+    private suspend fun handleStatus(
+        loanType: String,
+        context: Context,
+        orderId: String,
+        checkForAccessToken: Boolean = true
+    ) {
         kotlin.runCatching {
             ApiRepository.status(loanType = loanType, orderId = orderId)
         }.onSuccess { response ->
@@ -485,7 +505,10 @@ class LoanAgreementViewModel : BaseViewModel() {
             ) {
                 if (handleAuthGetAccessTokenApi()) {
                     handleStatus(
-                        orderId = orderId, loanType = loanType, context = context, checkForAccessToken =
+                        orderId = orderId,
+                        loanType = loanType,
+                        context = context,
+                        checkForAccessToken =
                         false
                     )
                 } else {
@@ -507,25 +530,28 @@ class LoanAgreementViewModel : BaseViewModel() {
 
     private val _offerList = MutableStateFlow<OfferListModel?>(null)
     val offerList: StateFlow<OfferListModel?> = _offerList
-    
+
     private val _offerListLoading = MutableStateFlow(false)
     val offerListLoading: StateFlow<Boolean> = _offerListLoading
-    
+
     private val _navigationToSignup = MutableStateFlow(false)
     val navigationToSignIn: StateFlow<Boolean> = _navigationToSignup
 
     private val _offerListLoaded = MutableStateFlow(false)
     val offerListLoaded: StateFlow<Boolean> = _offerListLoaded
-    
-    fun offerList(loanType: String, context: Context){
+
+    fun offerList(loanType: String, context: Context) {
         _offerListLoading.value = true
         viewModelScope.launch(Dispatchers.IO) {
             handleOfferList(loanType = loanType, context = context)
         }
     }
 
-    private suspend fun handleOfferList(loanType: String, context: Context,
-                                        checkForAccessToken: Boolean = true) {
+    private suspend fun handleOfferList(
+        loanType: String,
+        context: Context,
+        checkForAccessToken: Boolean = true
+    ) {
         kotlin.runCatching {
             ApiRepository.offerList(loanType = loanType)
         }.onSuccess { response ->
@@ -537,7 +563,9 @@ class LoanAgreementViewModel : BaseViewModel() {
             ) {
                 if (handleAuthGetAccessTokenApi()) {
                     handleOfferList(
-                        loanType = loanType, context = context, checkForAccessToken =
+                        loanType = loanType,
+                        context = context,
+                        checkForAccessToken =
                         false
                     )
                 } else {
@@ -550,13 +578,12 @@ class LoanAgreementViewModel : BaseViewModel() {
     }
 
     private suspend fun handleOfferListSuccess(response: OfferListModel?) {
-        withContext(Dispatchers.Main){
+        withContext(Dispatchers.Main) {
             _offerList.value = response
             _offerListLoading.value = false
             _offerListLoaded.value = true
         }
     }
-
 
     private val _gstOfferList = MutableStateFlow<GstOfferListModel?>(null)
     val gstOfferList: StateFlow<GstOfferListModel?> = _gstOfferList
@@ -570,15 +597,18 @@ class LoanAgreementViewModel : BaseViewModel() {
     private val _gstOfferListLoaded = MutableStateFlow(false)
     val gstOfferListLoaded: StateFlow<Boolean> = _gstOfferListLoaded
 
-    fun gstOfferList(loanType: String, context: Context){
+    fun gstOfferList(loanType: String, context: Context) {
         _gstOfferListLoading.value = true
         viewModelScope.launch(Dispatchers.IO) {
             handleGstOfferList(loanType = loanType, context = context)
         }
     }
 
-    private suspend fun handleGstOfferList(loanType: String, context: Context,
-                                           checkForAccessToken: Boolean = true) {
+    private suspend fun handleGstOfferList(
+        loanType: String,
+        context: Context,
+        checkForAccessToken: Boolean = true
+    ) {
         kotlin.runCatching {
             ApiRepository.gstOfferList(loanType = loanType)
         }.onSuccess { response ->
@@ -590,7 +620,9 @@ class LoanAgreementViewModel : BaseViewModel() {
             ) {
                 if (handleAuthGetAccessTokenApi()) {
                     handleGstOfferList(
-                        loanType = loanType, context = context, checkForAccessToken =
+                        loanType = loanType,
+                        context = context,
+                        checkForAccessToken =
                         false
                     )
                 } else {
@@ -603,7 +635,7 @@ class LoanAgreementViewModel : BaseViewModel() {
     }
 
     private suspend fun handleGstOfferListSuccess(response: GstOfferListModel?) {
-        withContext(Dispatchers.Main){
+        withContext(Dispatchers.Main) {
             _gstOfferList.value = response
             _gstOfferListLoading.value = false
             _gstOfferListLoaded.value = true
@@ -613,27 +645,27 @@ class LoanAgreementViewModel : BaseViewModel() {
     private val _pfOfferList = MutableStateFlow<PfOfferListModel?>(null)
     val pfOfferList: StateFlow<PfOfferListModel?> = _pfOfferList
 
-
 //    private val _navigationToSignup = MutableStateFlow(false)
 //    val navigationToSignIn: StateFlow<Boolean> = _navigationToSignup
 
     private val _pfOfferListLoaded = MutableStateFlow(false)
     val pfOfferListLoaded: StateFlow<Boolean> = _pfOfferListLoaded
 
-
     private val _pfOfferListLoading = MutableStateFlow(false)
     val pfOfferListLoading: StateFlow<Boolean> = _pfOfferListLoading
 
-
-    fun pfOfferList(loanType: String, context: Context){
+    fun pfOfferList(loanType: String, context: Context) {
         _pfOfferListLoading.value = true
         viewModelScope.launch(Dispatchers.IO) {
             handlePfOfferList(loanType = loanType, context = context)
         }
     }
 
-    private suspend fun handlePfOfferList(loanType: String, context: Context,
-                                           checkForAccessToken: Boolean = true) {
+    private suspend fun handlePfOfferList(
+        loanType: String,
+        context: Context,
+        checkForAccessToken: Boolean = true
+    ) {
         kotlin.runCatching {
             ApiRepository.pfOfferList(loanType = loanType)
         }.onSuccess { response ->
@@ -645,7 +677,9 @@ class LoanAgreementViewModel : BaseViewModel() {
             ) {
                 if (handleAuthGetAccessTokenApi()) {
                     handlePfOfferList(
-                        loanType = loanType, context = context, checkForAccessToken =
+                        loanType = loanType,
+                        context = context,
+                        checkForAccessToken =
                         false
                     )
                 } else {
@@ -658,11 +692,10 @@ class LoanAgreementViewModel : BaseViewModel() {
     }
 
     private suspend fun handlePfOfferListSuccess(response: PfOfferListModel?) {
-        withContext(Dispatchers.Main){
+        withContext(Dispatchers.Main) {
             _pfOfferList.value = response
             _pfOfferListLoading.value = false
             _pfOfferListLoaded.value = true
         }
     }
-
 }

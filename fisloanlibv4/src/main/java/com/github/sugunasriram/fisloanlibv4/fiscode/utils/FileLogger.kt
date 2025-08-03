@@ -10,19 +10,19 @@ import java.util.Date
 import java.util.Locale
 
 object FileLogger {
-     const val FOLDER_NAME = "Fs"
-     private const val API_FILE_NAME = "API_Logs.txt"
-     private const val SSE_FILE_NAME = "SSE_Logs.txt"
+    const val FOLDER_NAME = "Fs"
+    private const val API_FILE_NAME = "API_Logs.txt"
+    private const val SSE_FILE_NAME = "SSE_Logs.txt"
 
     @SuppressLint("SuspiciousIndentation")
-    fun writeToFile(content: String, isApiLong : Boolean) {
+    fun writeToFile(content: String, isApiLong: Boolean) {
         try {
-        val folder = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), FOLDER_NAME)
-            if(!folder.exists()){
+            val folder = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), FOLDER_NAME)
+            if (!folder.exists()) {
                 folder.mkdirs()
             }
 
-        val file = if (isApiLong) {
+            val file = if (isApiLong) {
                 File(folder, API_FILE_NAME)
             } else {
                 File(folder, SSE_FILE_NAME)
@@ -37,6 +37,4 @@ object FileLogger {
 //            e.printStackTrace()
         }
     }
-
-    
 }

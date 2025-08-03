@@ -6,6 +6,8 @@ sealed class AppScreens(var route: String) {
     object SignInScreen : AppScreens("sign_in_screen")
     object OtpScreen : AppScreens("otp_screen")
     object UpdateProfileScreen : AppScreens("update_profile_screen")
+    object ContactUsScreen : AppScreens("contact_us")
+    object ReportedIssuesScreen : AppScreens("reported_issues_screen")
     object LanguageSelectionScreen : AppScreens("language_selection_screen")
     object ApplyByCategoryScreen : AppScreens("apply_by_category_screen")
 
@@ -28,7 +30,6 @@ sealed class AppScreens(var route: String) {
     object LoanSummary : AppScreens("dashboard_screen")
     object RepaymentScheduleScreen : AppScreens("repayment_Schedule_Screen")
 
-
     object LoanProcessScreen : AppScreens("loan_process_screen")
 
     object BankKycVerificationScreen : AppScreens("bank_kyc_verification_screen")
@@ -38,12 +39,15 @@ sealed class AppScreens(var route: String) {
     object SearchWebViewScreen : AppScreens("search_web_view_screen")
     object SearchWebView : AppScreens("search_web_view")
     object WebKycScreen : AppScreens("web_kyc_screen")
+    object FormSubmissionWebScreen : AppScreens("form_submission_web_screen")
+    object ConsentSubmissionWebScreen : AppScreens("consent_submission_web_screen")
     object RepaymentWebScreen : AppScreens("repayment_web_screen")
     object LoanAgreementWebScreen : AppScreens("loan_agreement_web_screen")
     object AnimationLoader : AppScreens("animation_loader")
+    object LoanAgreementAnimationLoader : AppScreens("loan_agreement_animation_loader")
     object KycAnimation : AppScreens("kyc_animation")
-    object KycFailedScreen: AppScreens("kyc_failed_screen")
-    object EMandateESignFailedScreen: AppScreens("emandate_esign_failed_screen")
+    object KycFailedScreen : AppScreens("kyc_failed_screen")
+    object EMandateESignFailedScreen : AppScreens("emandate_esign_failed_screen")
     object AccountAgreegatorScreen : AppScreens("account_agreegator_screen")
     object SelectAccountAgreegatorScreen : AppScreens("select_account_agreegator_screen")
     object PrePaymentStatusScreen : AppScreens("pre_payment_status_screen")
@@ -54,9 +58,8 @@ sealed class AppScreens(var route: String) {
     object IssueListScreen : AppScreens("issue_list_screen")
     object UnexpectedErrorScreen : AppScreens("un_expected_error_screen")
 
-    //Negative Scenario
+    // Negative Scenario
     object FormRejectionScreen : AppScreens("form_rejection_screen")
-
 
     // Gst Loan Flow App Screens Navigation
     object GstInvoiceLoanScreen : AppScreens("gst_invoice_loan_screen")
@@ -71,15 +74,14 @@ sealed class AppScreens(var route: String) {
     object GstInvoiceLoanOfferScreen : AppScreens("gst_invoice_loan_offer_screen")
     object IssueDetailScreen : AppScreens("igm_issue_detail_screen")
 
-    //Purchase Finance
+    // Purchase Finance
     object DownPaymentScreen : AppScreens("down_payment_screen")
     object PfLoanOfferListScreen : AppScreens("pf_loan_offer_list_screen")
     object PfLoanOfferScreen : AppScreens("pf_loan_offers_screen")
     object PfKycWebViewScreen : AppScreens("pf_kyc_web_view_screen")
 
-    //Documents
-    object TermsConditionsScreen :AppScreens("terms_conditions_screen")
+    // Documents
+    object TermsConditionsScreen : AppScreens("terms_conditions_screen")
     object PrivacyPolicyScreen : AppScreens("privacy_policy_screen")
     object AboutUsScreen : AppScreens("about_us_screen")
-
 }

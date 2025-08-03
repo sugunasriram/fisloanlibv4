@@ -5,19 +5,25 @@ import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
@@ -25,6 +31,7 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -34,8 +41,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
@@ -53,26 +64,30 @@ import coil.compose.rememberAsyncImagePainter
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
 import com.github.sugunasriram.fisloanlibv4.R
+import com.github.sugunasriram.fisloanlibv4.fiscode.components.CenterProgress
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.ClickableText
+import com.github.sugunasriram.fisloanlibv4.fiscode.components.CurvedPrimaryButton
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.CustomModalBottomSheet
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.DisplayCard
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.DownPaymentCard
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.FixedTopBottomScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.components.HorizontalDivider
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.OnlyReadAbleText
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.ProcessingAnimation
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.RegisterText
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.TextInputLayout
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToBureauOffersScreen
-import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToLoanProcessScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFormSubmissionWebScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.Profile
-import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.VerifySessionData
-import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.VerifySessionDetails
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.VerifySessionResponse
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.LenderStatusResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appBlack
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appGray
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appWhite
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.backgroundOrange
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.bold20Text100
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.errorRed
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal12Text400
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal14Text400
@@ -82,65 +97,47 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal16Text700
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal20Text700
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.auth.RegisterViewModel
+import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan.WebViewModel
+import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.NoLoanOffersAvailableScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.CompanyConsentContent
+import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.ConsentDialogBox
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.EditLoanTenureSliderUI
+import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.HtmlText
+import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.applyMaxLimit
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.calculateFormattedCursorPosition
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.formatCurrency
+import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.loadWebScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.processRawInput
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.Json
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewDownPaymentScreen() {
-    DownPaymentScreen(rememberNavController(), verifySessionResponse = VerifySessionResponse(
-        statusCode = 200,
-        status = true,
-        message = "Success",
-        data = VerifySessionData(
-            refreshToken = "refreshToken",
-            sessionId = "sessionId",
-            accessToken = "accessToken",
-            sseId = "sseId",
-            securityKey = "securityKey",
-            sessionData = VerifySessionDetails(
-                downPayment = 20000,
-                productId = "productId",
-                merchantPAN = "merchantPAN",
-                merchantGST = "merchantGST",
-                productBrand = "Samsung",
-                merchantBankAccount = "merchantBankAccount",
-                merchantIfscCode = "merchantIfscCode",
-                merchantAccountHolderName = "merchantAccountHolderName",
-                productCategory = "Mobile",
-                productSKUID = "productSKUID",
-                productReturnWindow = "30 days",
-                productModel = "Galaxy S24 Ultra 5G",
-                productSellingPrice = "99000",
-                productMrpPrice = "110000",
-                productSymbol = "https://example.com/product_image.svg",
-                productQuantity = "1",
-                productCancellable = true,
-                productReturnable = true,
-                productName = "Galaxy S24 Ultra 5G"
-            ),
-            sessionType = "PF Flow"
-        )
-    ))
-}
+
 
 @SuppressLint("ResourceType")
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
+//fun DownPaymentScreen(navController: NavHostController, fromFlow: String) {
 fun DownPaymentScreen(navController: NavHostController,
                       verifySessionResponse: VerifySessionResponse
-) {
-    val registerViewModel: RegisterViewModel = viewModel()
+){
+val registerViewModel: RegisterViewModel = viewModel()
+    val webViewModel: WebViewModel = viewModel()
     val checkboxState: Boolean by registerViewModel.checkBoxDetail.observeAsState(false)
     val showInternetScreen by registerViewModel.showInternetScreen.observeAsState(false)
     val showTimeOutScreen by registerViewModel.showTimeOutScreen.observeAsState(false)
     val showServerIssueScreen by registerViewModel.showServerIssueScreen.observeAsState(false)
     val unexpectedErrorScreen by registerViewModel.unexpectedError.observeAsState(false)
     val unAuthorizedUser by registerViewModel.unAuthorizedUser.observeAsState(false)
+    val showNoLenderResponse by webViewModel.showNoLenderResponse.collectAsState()
+    val lenderStatusProgress by webViewModel.lenderStatusProgress.collectAsState()
 
     val inProgress by registerViewModel.inProgress.collectAsState()
     val isCompleted by registerViewModel.isCompleted.collectAsState()
@@ -149,40 +146,62 @@ fun DownPaymentScreen(navController: NavHostController,
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val bottomSheetState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
     )
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val showDialog : MutableState<Boolean> =  remember {  mutableStateOf(false) }
     var showError by remember { mutableStateOf(false) }
     var errorMsg by remember { mutableStateOf<String>("") }
     var showInValidAmountError by remember { mutableStateOf(false) }
-    val amount = remember { mutableStateOf(20000L) }
     val maxAmount = 99000L
+    val amount = remember { androidx.compose.runtime.mutableLongStateOf(20000) }
+    val productName : String = "Samsung Galaxy S24 Ultra 5G"
+    val productPrice : Long = 99000L
+    val mrpPrice : Long = 110000L
+
+    val fromFlow = "Purchase Finance"
 
     BackHandler {
         navigateApplyByCategoryScreen(navController)
     }
+    var showNoLoanOffersScreen by remember { mutableStateOf(false) }
+
+//    if (showNoLoanOffersScreen || showNoLenderResponse) {
+//        NoLoanOffersAvailableScreen(navController, titleText = stringResource(R.string.no_lenders_available))
+//        return
+//    }
     when {
         showInternetScreen -> CommonMethods().ShowInternetErrorScreen(navController)
         showTimeOutScreen -> CommonMethods().ShowTimeOutErrorScreen(navController)
         showServerIssueScreen -> CommonMethods().ShowServerIssueErrorScreen(navController)
         unexpectedErrorScreen -> CommonMethods().ShowUnexpectedErrorScreen(navController)
         unAuthorizedUser -> CommonMethods().ShowUnAuthorizedErrorScreen(navController)
+        showNoLenderResponse -> NoLoanOffersAvailableScreen(navController)
+//        lenderStatusProgress -> CenterProgress()
         else -> {
             if (inProgress) {
-                ProcessingAnimation(text = "", image = R.raw.we_are_currently_processing_hour_glass)
+                ProcessingAnimation(text = "Processing Please Wait...", image = R.raw.we_are_currently_processing_hour_glass)
             } else {
                 if (!isCompleted) {
                     registerViewModel.getUserDetail(context, navController)
                 } else {
                     CustomModalBottomSheet(
                         bottomSheetState = bottomSheetState,
+                        sheetBackgroundColor = Color.Transparent,
                         sheetContent = {
                             CompanyConsentContent(
                                 bottomSheetState = bottomSheetState,
                                 coroutineScope = coroutineScope,
                                 registerViewModel = registerViewModel,
-                                onAcceptConsent = { showError = false }
+                                onAcceptConsent = { showError = false },
+                                startTimer = bottomSheetState.isVisible,
+                                showDialog = showDialog,
+                                timer = 5
                             )
-                        }) {
+                        }
+                    ) {
                         FixedTopBottomScreen(
                             navController = navController,
                             backgroundColor = appWhite,
@@ -197,7 +216,11 @@ fun DownPaymentScreen(navController: NavHostController,
                             checkboxState = checkboxState,
                             onCheckBoxChange = { isChecked ->
                                 if (isChecked) {
-                                    coroutineScope.launch { bottomSheetState.show() }
+                                    coroutineScope.launch {
+                                        focusManager.clearFocus()
+                                        keyboardController?.hide()
+                                        bottomSheetState.show()
+                                    }
                                 } else {
                                     registerViewModel.onCheckBoxDetailChanged(false)
                                     showError = !checkboxState
@@ -207,27 +230,75 @@ fun DownPaymentScreen(navController: NavHostController,
                             checkBoxText = stringResource(R.string.i_understand_and_agree_to_buyer_app_terms_and_conditions),
                             showErrorMsg = showError,
                             errorMsg = errorMsg,
-//                            errorMsg = stringResource(R.string.please_agree_terms),
                             showSingleButton = true,
                             primaryButtonText = stringResource(R.string.submit),
                             onPrimaryButtonClick = {
                                 if (!checkboxState) {
                                     showError = true
                                     errorMsg = context.getString(R.string.please_agree_buyer_App_terms)
-                                } else if(showInValidAmountError ){
-                                    showError=true
-                                    errorMsg =context.getString(R.string.please_enter_valid_downpayment_amount)
+                                } else if (showInValidAmountError) {
+                                    showError = true
+                                    errorMsg = context.getString(R.string.please_enter_valid_downpayment_amount)
                                 } else {
                                     showError = false
-                                    navigateToBureauOffersScreen(navController,"PF Flow",
-                                        "purchase_finance")
-                                }
-                            },
+                                    CoroutineScope(Dispatchers.Main).launch {
+                                        webViewModel.setWebInProgress(true)
 
+                                        try {
+                                            webViewModel.getLenderStatusApi(
+                                                context = context,
+                                                loanType = "PURCHASE_FINANCE",
+                                                step = "FORM_SUBMISSION_REQUEST"
+                                            )
+
+                                            val lenderStatusModel = webViewModel.getLenderStatusResponse
+                                                .filterNotNull().first()
+
+                                            val lenderStatus = lenderStatusModel?.data?.response
+
+                                            if (lenderStatus.isNullOrEmpty()) {
+                                                showNoLoanOffersScreen = true
+                                                return@launch
+                                            }
+
+                                            val json = Json {
+                                                prettyPrint = true
+                                                ignoreUnknownKeys = true
+                                            }
+
+                                            val lenderStatusJson = json.encodeToString(
+                                                LenderStatusResponse.serializer(),
+                                                LenderStatusResponse(response = lenderStatus)
+                                            )
+
+                                            navigateToFormSubmissionWebScreen(navController, fromFlow, lenderStatusJson)
+
+                                            loadWebScreen(
+                                                fromFlow = fromFlow,
+                                                webViewModel = webViewModel,
+                                                context = context,
+                                                endUse = "PF flow",
+                                                purpose = "PF flow",
+                                                downPaymentAmount = amount.value.toString(),
+                                                productPrice = productPrice.toString()
+                                            )
+                                        } catch (e: Exception) {
+                                            Log.e("LenderStatusError", "Error processing lender status", e)
+                                            showNoLoanOffersScreen = true
+                                        } finally {
+                                            webViewModel.setWebInProgress(false)
+                                        }
+                                    }
+                                }
+                            }
+
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(backgroundOrange)
                             ) {
-                            Column(modifier = Modifier
-                                .fillMaxSize()
-                                .background(backgroundOrange)) {
+//                                ProductDetailsCard(productName, productPrice, mrpPrice)
                                 ProductDetailsCard(verifySessionResponse)
                                 userDetails?.data?.let { PFPersonalDetailsCard(profile = it) }
                                 DownPaymentDetailsCard(
@@ -237,17 +308,110 @@ fun DownPaymentScreen(navController: NavHostController,
                                     onAmountChange = { amount.value = it },
                                     onValidationChanged = { showInValidAmountError = it } // <- sync state here
                                 )
-                                PreferredTenureCard()
+//                                PreferredTenureCard()
                             }
-
                         }
                     }
                 }
             }
         }
+    }
 
+    if(showDialog.value){
+        ConsentDialogBox(showDialog)
     }
 }
+
+//@Composable
+//fun ProductDetailsCard(productName: String, productPrice: Long, mrpPrice: Long) {
+//    DownPaymentCard(
+//        cardHeader = stringResource(R.string.product_details)
+//    ) {
+//        Row(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(bottom = 8.dp),
+//            horizontalArrangement = Arrangement.spacedBy(10.dp),
+//            verticalAlignment = Alignment.Top
+//        ) {
+//            Image(
+//                painter = painterResource(id = R.drawable.phone_image),
+//                contentDescription = "Product Image",
+//                modifier = Modifier
+//                    .weight(0.3f)
+//                    .height(150.dp)
+//            )
+//
+//            Column(
+//                modifier = Modifier
+//                    .weight(0.7f)
+//                    .padding(top = 10.dp),
+//                horizontalAlignment = Alignment.Start,
+//                verticalArrangement = Arrangement.spacedBy(10.dp)
+//            ) {
+//                RegisterText(
+//                    text = productName,
+//                    style = normal16Text400,
+//                    textAlign = TextAlign.Start,
+//                    boxAlign = Alignment.TopStart
+//                )
+//                RegisterText(
+//                    text = "QTY: 1",
+//                    style = normal14Text400,
+//                    textAlign = TextAlign.Start,
+//                    boxAlign = Alignment.TopStart
+//                )
+//                RegisterText(
+//                    text = "MRP: ₹${CommonMethods().formatWithCommas(mrpPrice.toInt())}",
+//                    style = normal14Text400,
+//                    textAlign = TextAlign.Start,
+//                    boxAlign = Alignment.TopStart
+//                )
+//                RegisterText(
+//                    text = "Product price: ₹${CommonMethods().formatWithCommas(productPrice.toInt())}",
+//                    style = normal14Text700,
+//                    textAlign = TextAlign.Start,
+//                    boxAlign = Alignment.TopStart
+//                )
+//                Row(
+//                    modifier = Modifier.fillMaxWidth(),
+//                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+//                ) {
+//                    ClickableText(
+//                        text = stringResource(id = R.string.cancellable),
+//                        top = 0.dp,
+//                        roundedCornerShape = 18.dp,
+//                        textColor = appBlack,
+//                        borderColor = appOrange,
+//                        backgroundColor = appWhite,
+//                        style = normal14Text400,
+//                        horizontalPadding = 26.dp,
+//                        verticalPadding = 5.dp
+//                    ) {
+//                        Log.d("DownPayment", "Cancellable")
+//                    }
+//                    ClickableText(
+//                        text = stringResource(id = R.string.returnable),
+//                        top = 0.dp,
+//                        roundedCornerShape = 18.dp,
+//                        textColor = appBlack,
+//                        borderColor = appOrange,
+//                        backgroundColor = appWhite,
+//                        style = normal14Text400,
+//                        horizontalPadding = 26.dp,
+//                        verticalPadding = 5.dp
+//                    ) { Log.d("DownPaymentScreen", "Returnable") }
+//                }
+////                RegisterText(
+////                    text = stringResource(R.string.more_details),
+////                    textColor = appOrange,
+////                    style = normal14Text700.copy(textDecoration = TextDecoration.Underline),
+////                    modifier = Modifier.clickable { Log.d("DownPaymentScreen", "more details") }
+////                )
+//            }
+//        }
+//    }
+//}
 
 @Composable
 fun ProductDetailsCard(verifySessionResponse: VerifySessionResponse) {
@@ -378,23 +542,23 @@ fun ProductDetailsCard(verifySessionResponse: VerifySessionResponse) {
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
 
-                        ClickableText(
-                            text = if (isCancellable == true)
-                                stringResource(id = R.string.cancellable)
-                            else
-                                stringResource(id = R.string.non_cancellable),
-                            top = 0.dp,
-                            roundedCornerShape = 18.dp,
-                            textColor = appBlack,
-                            borderColor = appOrange,
-                            backgroundColor = appWhite,
-                            style = normal14Text400,
-                            horizontalPadding = 26.dp,
-                            verticalPadding = 5.dp,
-                        ){}
+                    ClickableText(
+                        text = if (isCancellable == true)
+                            stringResource(id = R.string.cancellable)
+                        else
+                            stringResource(id = R.string.non_cancellable),
+                        top = 0.dp,
+                        roundedCornerShape = 18.dp,
+                        textColor = appBlack,
+                        borderColor = appOrange,
+                        backgroundColor = appWhite,
+                        style = normal14Text400,
+                        horizontalPadding = 26.dp,
+                        verticalPadding = 5.dp,
+                    ){}
 
 
-                        ClickableText(
+                    ClickableText(
                         text = if (isReturnable == true)
                             stringResource(id = R.string.returnable)
                         else
@@ -407,16 +571,16 @@ fun ProductDetailsCard(verifySessionResponse: VerifySessionResponse) {
                         style = normal14Text400,
                         horizontalPadding = 26.dp,
                         verticalPadding = 5.dp,
-                            ){}
+                    ){}
 
 
                 }
-                RegisterText(
-                    text = stringResource(R.string.more_details),
-                    textColor = appOrange,
-                    style = normal14Text700.copy(textDecoration = TextDecoration.Underline),
-                    modifier = Modifier.clickable { Log.d("DownPaymentScreen", "more details") }
-                )
+//                RegisterText(
+//                    text = stringResource(R.string.more_details),
+//                    textColor = appOrange,
+//                    style = normal14Text700.copy(textDecoration = TextDecoration.Underline),
+//                    modifier = Modifier.clickable { Log.d("DownPaymentScreen", "more details") }
+//                )
             }
         }
     }
@@ -430,7 +594,11 @@ fun PFPersonalDetailsCard(profile: Profile) {
     ) {
         RegisterText(
             text = stringResource(id = R.string.please_review_details),
-            start = 5.dp, end = 5.dp, bottom = 10.dp, top = 10.dp, style = normal16Text700,
+            start = 5.dp,
+            end = 5.dp,
+            bottom = 10.dp,
+            top = 10.dp,
+            style = normal16Text700,
             textColor = appOrange
         )
         DisplayCard(cardColor = backgroundOrange, start = 10.dp, end = 10.dp) {
@@ -457,24 +625,27 @@ fun PFPersonalDetailsCard(profile: Profile) {
                 )
             }
             profile.address1?.let { address1 ->
-                val address = address1.split(",").map { it.trim() }
-                val area = address.getOrNull(0) ?: ""
-                val town = address.getOrNull(1) ?: ""
+                val area = address1
+                val town = profile.address2 ?: ""
                 val city = profile.city1 ?: ""
                 val state = profile.state1 ?: ""
-                val pincode = profile.pincode1
+                val pincode = profile.pincode1 ?: ""
                 OnlyReadAbleText(
                     textHeader = stringResource(id = R.string.address),
                     textValue = "$area\n$town\n$city\n$state\n$pincode",
                     start = 10.dp,
-                    showImage = true, image = painterResource(R.drawable.location_icon)
+                    showImage = true,
+                    image = painterResource(R.drawable.location_icon)
                 )
             }
             profile.panNumber?.let { panNumber ->
                 OnlyReadAbleText(
-                    textHeader = stringResource(id = R.string.pan_number), textValue = "",
-                    bottom = 0.dp, start = 10.dp,
-                    showImage = true, image = painterResource(R.drawable.pan_number)
+                    textHeader = stringResource(id = R.string.pan_number),
+                    textValue = "",
+                    bottom = 0.dp,
+                    start = 10.dp,
+                    showImage = true,
+                    image = painterResource(R.drawable.pan_number)
                 )
                 TextInputLayout(
                     textFieldVal = TextFieldValue(text = panNumber),
@@ -501,7 +672,7 @@ fun PFPersonalDetailsCard(profile: Profile) {
 fun DownPaymentDetailsCard(
     amount: Long,
     maxAmount: Long,
-    showInValidAmountError:Boolean,
+    showInValidAmountError: Boolean,
     onAmountChange: (Long) -> Unit,
     onValidationChanged: (Boolean) -> Unit
 ) {
@@ -509,7 +680,6 @@ fun DownPaymentDetailsCard(
         mutableStateOf(TextFieldValue(CommonMethods().formatIndianCurrency(amount.toInt())))
     }
     var isError by remember { mutableStateOf(showInValidAmountError) }
-    val focusManager = LocalFocusManager.current
 
     LaunchedEffect(amount) {
         val formatted = CommonMethods().formatIndianCurrency(amount.toInt())
@@ -526,7 +696,11 @@ fun DownPaymentDetailsCard(
     ) {
         RegisterText(
             text = stringResource(id = R.string.enter_amount_you_are_willing_to_pay_as_downpayment),
-            start = 5.dp, end = 5.dp, bottom = 10.dp, top = 10.dp, style = normal16Text400,
+            start = 5.dp,
+            end = 5.dp,
+            bottom = 10.dp,
+            top = 10.dp,
+            style = normal16Text400
         )
         OutlinedTextField(
             value = inputText,
@@ -537,24 +711,26 @@ fun DownPaymentDetailsCard(
                 val parsedValue = cleanInput.toLongOrNull()
 
                 if (parsedValue != null) {
-//                    val limitedValue = applyMaxLimit(cleanInput).toLongOrNull() ?: 0L
-                    val formatted = formatCurrency(cleanInput.toString())
+                    val limitedValue = applyMaxLimit(cleanInput,maxAmount).toLongOrNull() ?: 0L
+                    val formatted = formatCurrency(limitedValue.toString())
 
-                    inputText = TextFieldValue(
-                        text = formatted,
-                        selection = TextRange(
-                            calculateFormattedCursorPosition(
-                                cleanInput = cleanInput,
-                                originalCursor = newCursor,
-                                formattedValue = formatted
+
+                    if (limitedValue in 0..maxAmount) {
+                        isError = false
+                        onAmountChange(limitedValue)
+                        onValidationChanged(false)
+
+                        inputText = TextFieldValue(
+                            text = formatted,
+                            selection = TextRange(
+                                calculateFormattedCursorPosition(
+                                    cleanInput = cleanInput,
+                                    originalCursor = newCursor,
+                                    formattedValue = formatted
+                                )
                             )
                         )
-                    )
 
-                    if (parsedValue in 1000..maxAmount) {
-                        isError = false
-                        onAmountChange(parsedValue)
-                        onValidationChanged(false)
                     } else {
                         isError = true
                         onValidationChanged(true)
@@ -580,9 +756,10 @@ fun DownPaymentDetailsCard(
         )
         if (isError) {
             RegisterText(
-                text =stringResource(R.string.please_enter_valid_downpayment_amount),
+                text = stringResource(R.string.please_enter_valid_downpayment_amount),
                 style = normal12Text400,
-                textColor = errorRed,)
+                textColor = errorRed
+            )
         }
         Spacer(modifier = Modifier.height(15.dp))
     }
@@ -596,7 +773,11 @@ fun PreferredTenureCard() {
     ) {
         RegisterText(
             text = stringResource(id = R.string.please_provide_your_preferred_tenure),
-            start = 5.dp, end = 5.dp, bottom = 5.dp, top = 10.dp, style = normal16Text400,
+            start = 5.dp,
+            end = 5.dp,
+            bottom = 5.dp,
+            top = 10.dp,
+            style = normal16Text400
         )
         EditLoanTenureSliderUI(
             tenure = 12,
@@ -610,16 +791,15 @@ fun PreferredTenureCard() {
     }
 }
 
-
-//@Composable
-//fun DownPaymentScreen(navController: NavHostController, fromFlow: String) {
+// @Composable
+// fun DownPaymentScreen(navController: NavHostController, fromFlow: String) {
 //    val amount = remember { mutableStateOf(TextFieldValue("20000")) }
 //    var maxAmount = "99000"
 //
 //    FixedTopBottomScreen(
 //        navController,
 //        showHyperText = false,
-////        backGroudColorChange = amount.value.text != "",
+// //        backGroudColorChange = amount.value.text != "",
 //        primaryButtonText = stringResource(id = R.string.submit),
 //        onBackClick = { navController.popBackStack()},
 //        onPrimaryButtonClick = {
@@ -647,10 +827,10 @@ fun PreferredTenureCard() {
 //            DownpaymentField(amount.value, maxAmount) { amount.value = it }
 //        }
 //    }
-//}
+// }
 //
-//@Composable
-//fun ProductDetails(maxAmount: String) {
+// @Composable
+// fun ProductDetails(maxAmount: String) {
 //    Card(
 //        modifier = Modifier
 //            .fillMaxWidth()
@@ -699,13 +879,13 @@ fun PreferredTenureCard() {
 //            Text(text = "Sold by : Tradeline", fontWeight = FontWeight.Light, fontSize = 14.sp)
 //        }
 //    }
-//}
+// }
 //
-//@Composable
-//fun DownpaymentField(
+// @Composable
+// fun DownpaymentField(
 //    amount: TextFieldValue, maxAmount: String,
 //    onAmountChange: (TextFieldValue) -> Unit
-//) {
+// ) {
 //    val context = LocalContext.current
 //
 //    Column(
@@ -776,9 +956,132 @@ fun PreferredTenureCard() {
 //            )
 //        }
 //    }
-//}
+// }
 
 
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun CompanyConsentContent(
+    bottomSheetState: ModalBottomSheetState,
+    coroutineScope: CoroutineScope,
+    registerViewModel: RegisterViewModel,
+    onAcceptConsent: () -> Unit,
+    showDialog: MutableState<Boolean>,
+    startTimer: Boolean = false,
+    timer: Int = 3
+) {
+    var secondsLeft by remember { mutableStateOf(timer) }
+    var isButtonEnabled by remember { mutableStateOf(false) }
 
+    LaunchedEffect(startTimer) {
+        if (startTimer) {
+            secondsLeft = timer
+            isButtonEnabled = false
+            while (secondsLeft > 0) {
+                delay(1000L)
+                secondsLeft--
+            }
+            isButtonEnabled = true
+        }
+    }
 
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                start = 16.dp,
+                end = 16.dp,
+                top = 30.dp,
+                bottom = 0.dp
+            )
+            .background(Color.Transparent)
+    ) {
+        // Bottom Sheet Content
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 24.dp, bottom = 0.dp)
+                .background(
+                    shape = RoundedCornerShape(
+                        topStart = 40.dp,
+                        topEnd = 40.dp,
+                        bottomStart = 0.dp,
+                        bottomEnd = 0.dp
+                    ),
+                    color = Color.White
+                )
+        ) {
+//            Text(
+//                text = stringResource(id = R.string.bottom_sheet_header),
+//                style = bold20Text100,
+//                color = appBlack,
+//                textAlign = TextAlign.Center,
+//                modifier = Modifier.padding(top = 40.dp, bottom = 12.dp)
+//            )
+//
+//            Divider(
+//                color = backgroundOrange,
+//                modifier = Modifier.padding(top = 5.dp)
+//            )
+            Row( modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 15.dp, end = 15.dp, top = 25.dp),horizontalArrangement = Arrangement
+                .SpaceBetween) {
+                Text(
+                    text = stringResource(id = R.string.bottom_sheet_header),
+                    style = bold20Text100,
+                    color = appBlack,
+                    textAlign = TextAlign.Center,
+                )
 
+                Icon(
+                    painter = painterResource(id = R.drawable.info_icon),
+                    contentDescription = stringResource(id = R.string.bottom_sheet_close),
+                    modifier = Modifier
+//                    .padding(end = 20.dp, top = 10.dp, bottom = 10.dp)
+                        .clickable {
+//                        coroutineScope.launch { bottomSheetState.hide() }
+                            showDialog.value = true
+                            registerViewModel.onCheckBoxDetailReset()
+                        }
+                )
+
+            }
+            HorizontalDivider(top = 5.dp, color = backgroundOrange, thickness=2.dp)
+
+            HtmlText(stringResource(id = R.string.bottom_sheet_body))
+
+            CurvedPrimaryButton(
+                text = if (isButtonEnabled) stringResource(id = R.string.accept) else "Accept (${secondsLeft}s)",
+                enabled = isButtonEnabled
+            ) {
+                coroutineScope.launch { bottomSheetState.hide() }
+                registerViewModel.onCheckBoxDetailChanged(true)
+                onAcceptConsent()
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        // Floating Close Icon - Overlapping the top-right
+        Icon(
+            painter = painterResource(id = R.drawable.ic_close), // Replace with your actual icon
+            contentDescription = "Close",
+            modifier = Modifier
+                .size(36.dp)
+                .absoluteOffset(x = 12.dp, y = (-18).dp) // Move slightly outside top right
+                .align(Alignment.TopEnd)
+                .background(Color.White, shape = CircleShape)
+                .border(1.dp, Color.LightGray, CircleShape)
+                .clickable {
+                    coroutineScope.launch {
+                        coroutineScope.launch { bottomSheetState.hide() }
+                        registerViewModel.onCheckBoxDetailReset()
+                    }
+
+                }
+                .padding(6.dp),
+            tint = appOrange
+        )
+    }
+}

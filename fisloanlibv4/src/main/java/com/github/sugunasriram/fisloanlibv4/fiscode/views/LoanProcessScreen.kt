@@ -23,8 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.github.sugunasriram.fisloanlibv4.R
-import com.github.sugunasriram.fisloanlibv4.fiscode.components.FixedTopBottomScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.BorderCardWithElevation
+import com.github.sugunasriram.fisloanlibv4.fiscode.components.FixedTopBottomScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.StartingText
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateTOUnexpectedErrorScreen
@@ -53,11 +53,14 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal14Text500
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal16Text400
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal32Text700
 
-
 @Composable
 fun LoanProcessScreen(
-    navController: NavHostController, statusId: String, responseItem: String, transactionId: String,
-    offerId: String, fromFlow: String
+    navController: NavHostController,
+    statusId: String,
+    responseItem: String,
+    transactionId: String,
+    offerId: String,
+    fromFlow: String
 ) {
     BackHandler {
         navigateApplyByCategoryScreen(navController)
@@ -68,38 +71,49 @@ fun LoanProcessScreen(
     when (statusId.toIntOrNull()) {
         1 -> {
             FixedTopBottomScreen(
-                navController = navController, showBackButton = false, isSelfScrollable = false,
+                navController = navController,
+                showBackButton = false,
+                isSelfScrollable = false,
                 primaryButtonText = stringResource(id = R.string.next),
                 onPrimaryButtonClick = {
 //                    navigateToAnnualIncomeScreen(navController, fromFlow)
                 }
             ) {
                 StartingText(
-                    text = stringResource(id = R.string.loan_process), textColor = appBlueTitle,
-                    start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp,
+                    text = stringResource(id = R.string.loan_process),
+                    textColor = appBlueTitle,
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 10.dp,
+                    bottom = 5.dp,
                     style = normal32Text700
                 )
 
                 StartingText(
                     text = stringResource(id = R.string.one_time_register),
-                    start = 30.dp, end = 30.dp, bottom = 5.dp, style = normal14Text400,
-                    textAlign = TextAlign.Start,
+                    start = 30.dp,
+                    end = 30.dp,
+                    bottom = 5.dp,
+                    style = normal14Text400,
+                    textAlign = TextAlign.Start
                 )
 
                 StatusCard(
                     cardText = stringResource(id = R.string.request_a_loan),
                     image = if (!loanProcess) R.drawable.one_image_black else R.drawable.one_image_blue,
-                    processDone = true, consentData = true,
+                    processDone = true,
+                    consentData = true
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.select_loan),
                     image = if (loanProcess) R.drawable.two_image_black else R.drawable.two_image_blue,
-                    processDone = false,
+                    processDone = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.complete_kyc),
                     image = if (loanProcess) R.drawable.three_image_black else R.drawable.three_image_blue,
-                    processDone = false, showSubText = false
+                    processDone = false,
+                    showSubText = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.add_bank_details),
@@ -126,32 +140,46 @@ fun LoanProcessScreen(
 
         2 -> {
             FixedTopBottomScreen(
-                navController = navController, showBackButton = false, isSelfScrollable = false,
+                navController = navController,
+                showBackButton = false,
+                isSelfScrollable = false,
                 primaryButtonText = stringResource(id = R.string.next),
                 onPrimaryButtonClick = {
                     navigateToLoanOffersListScreen(navController, responseItem, fromFlow)
                 }
             ) {
                 StartingText(
-                    text = stringResource(id = R.string.loan_process), textColor = appBlueTitle,
-                    start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp, style = normal32Text700
+                    text = stringResource(id = R.string.loan_process),
+                    textColor = appBlueTitle,
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 10.dp,
+                    bottom = 5.dp,
+                    style = normal32Text700
                 )
 
                 StartingText(
                     text = stringResource(id = R.string.one_time_register),
-                    start = 30.dp, end = 30.dp, bottom = 5.dp, style = normal14Text400,
-                    textAlign = TextAlign.Start,
+                    start = 30.dp,
+                    end = 30.dp,
+                    bottom = 5.dp,
+                    style = normal14Text400,
+                    textAlign = TextAlign.Start
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.request_a_loan),
                     image = if (!loanProcess) R.drawable.one_image_black else R.drawable.completed_green_tick,
-                    processDone = true, consentData = false, showSubText = false,
+                    processDone = true,
+                    consentData = false,
+                    showSubText = false,
                     textcolorChange = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.select_loan),
                     image = if (!loanProcess) R.drawable.two_image_black else R.drawable.two_image_blue,
-                    processDone = true, showSubText = false, textcolorChange = true
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = true
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.complete_kyc),
@@ -183,21 +211,31 @@ fun LoanProcessScreen(
 
         3 -> {
             FixedTopBottomScreen(
-                navController = navController, showBackButton = false, isSelfScrollable = false,
+                navController = navController,
+                showBackButton = false,
+                isSelfScrollable = false,
                 primaryButtonText = stringResource(id = R.string.next),
                 onPrimaryButtonClick = {
-                    navigateToKycAnimation(navController, transactionId, offerId, responseItem,fromFlow = fromFlow)
+                    navigateToKycAnimation(navController, transactionId, offerId, responseItem, fromFlow = fromFlow)
                 }
             ) {
                 StartingText(
-                    text = stringResource(id = R.string.loan_process), textColor = appBlueTitle,
-                    start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp, style = normal32Text700
+                    text = stringResource(id = R.string.loan_process),
+                    textColor = appBlueTitle,
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 10.dp,
+                    bottom = 5.dp,
+                    style = normal32Text700
                 )
 
                 StartingText(
                     text = stringResource(id = R.string.one_time_register),
-                    start = 30.dp, end = 30.dp, bottom = 5.dp, style = normal14Text400,
-                    textAlign = TextAlign.Start,
+                    start = 30.dp,
+                    end = 30.dp,
+                    bottom = 5.dp,
+                    style = normal14Text400,
+                    textAlign = TextAlign.Start
                 )
 
                 StatusCard(
@@ -211,113 +249,75 @@ fun LoanProcessScreen(
                 StatusCard(
                     cardText = stringResource(id = R.string.select_loan),
                     image = if (!loanProcess) R.drawable.two_image_black else R.drawable.completed_green_tick,
-                    processDone = true, showSubText = false, textcolorChange = false
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.complete_kyc),
                     image = if (!loanProcess) R.drawable.three_image_black else R.drawable.three_image_blue,
-                    processDone = true, showSubText = false
+                    processDone = true,
+                    showSubText = false
                 )
                 StatusCard(
-                    cardText = stringResource(id = R.string.add_bank_details), processDone = false,
-                    image = if (loanProcess) R.drawable.four_image_black else R.drawable.four_image_blue,
+                    cardText = stringResource(id = R.string.add_bank_details),
+                    processDone = false,
+                    image = if (loanProcess) R.drawable.four_image_black else R.drawable.four_image_blue
 
-                    )
-                StatusCard(
-                    cardText = stringResource(id = R.string.set_up_repayment), processDone = false,
-                    image = if (loanProcess) R.drawable.five_image_black else R.drawable.five_image_blue,
                 )
                 StatusCard(
-                    cardText = stringResource(id = R.string.loan_agreement), processDone = false,
-                    image = if (loanProcess) R.drawable.six_image_black else R.drawable.six_image_blue,
+                    cardText = stringResource(id = R.string.set_up_repayment),
+                    processDone = false,
+                    image = if (loanProcess) R.drawable.five_image_black else R.drawable.five_image_blue
                 )
                 StatusCard(
-                    cardText = stringResource(id = R.string.loan_disbursed), processDone = false,
-                    image = if (loanProcess) R.drawable.seven_image_black else R.drawable.seven_image_blue,
+                    cardText = stringResource(id = R.string.loan_agreement),
+                    processDone = false,
+                    image = if (loanProcess) R.drawable.six_image_black else R.drawable.six_image_blue
+                )
+                StatusCard(
+                    cardText = stringResource(id = R.string.loan_disbursed),
+                    processDone = false,
+                    image = if (loanProcess) R.drawable.seven_image_black else R.drawable.seven_image_blue
                 )
             }
         }
 
         4 -> {
             FixedTopBottomScreen(
-                navController = navController, showBackButton = false, isSelfScrollable = false,
+                navController = navController,
+                showBackButton = false,
+                isSelfScrollable = false,
                 primaryButtonText = stringResource(id = R.string.next),
                 onPrimaryButtonClick = {
                     navigateToBankDetailsScreen(
-                        navController = navController, id = offerId, fromFlow = fromFlow,
+                        navController = navController,
+                        id = offerId,
+                        fromFlow = fromFlow,
                         closeCurrent = false
                     )
                 }
             ) {
                 StartingText(
-                    text = stringResource(id = R.string.loan_process), textColor = appBlueTitle,
-                    start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp, style = normal32Text700
+                    text = stringResource(id = R.string.loan_process),
+                    textColor = appBlueTitle,
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 10.dp,
+                    bottom = 5.dp,
+                    style = normal32Text700
                 )
 
                 StartingText(
                     text = stringResource(id = R.string.one_time_register),
-                    start = 30.dp, end = 30.dp, bottom = 5.dp, style = normal14Text400,
-                    textAlign = TextAlign.Start,
+                    start = 30.dp,
+                    end = 30.dp,
+                    bottom = 5.dp,
+                    style = normal14Text400,
+                    textAlign = TextAlign.Start
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.request_a_loan),
-                    image = if (!loanProcess) R.drawable.one_image_black else R.drawable.completed_green_tick,
-                    processDone = true, consentData = false, showSubText = false,
-                    textcolorChange = false
-                )
-                StatusCard(
-                    cardText = stringResource(id = R.string.select_loan),
-                    image = if (!loanProcess) R.drawable.two_image_black else R.drawable.completed_green_tick,
-                    processDone = true, showSubText = false, textcolorChange = false
-                )
-                StatusCard(
-                    cardText = stringResource(id = R.string.complete_kyc),
-                    image = if (!loanProcess) R.drawable.three_image_black else R.drawable.completed_green_tick,
-                    processDone = true, showSubText = false, textcolorChange = false
-                )
-                StatusCard(
-                    cardText = stringResource(id = R.string.add_bank_details),
-                    showSubText = false,
-                    image = if (!loanProcess) R.drawable.four_image_black else R.drawable.four_image_blue,
-                    processDone = true
-                )
-                StatusCard(
-                    cardText = stringResource(id = R.string.set_up_repayment), processDone = false,
-                    image = if (loanProcess) R.drawable.five_image_black else R.drawable.five_image_blue,
-                )
-                StatusCard(
-                    cardText = stringResource(id = R.string.loan_agreement), processDone = false,
-                    image = if (loanProcess) R.drawable.six_image_black else R.drawable.six_image_blue,
-                )
-                StatusCard(
-                    cardText = stringResource(id = R.string.loan_disbursed), processDone = false,
-                    image = if (loanProcess) R.drawable.seven_image_black else R.drawable.seven_image_blue,
-                )
-            }
-        }
-
-        5 -> {
-            FixedTopBottomScreen(
-                navController = navController, showBackButton = false, isSelfScrollable = false,
-                primaryButtonText = stringResource(id = R.string.next),
-                onPrimaryButtonClick = {
-                    navigateToRepaymentScreen(navController, transactionId, responseItem, offerId,
-                        fromFlow)
-                }
-            ) {
-                StartingText(
-                    text = stringResource(id = R.string.loan_process), textColor = appBlueTitle,
-                    start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp, style = normal32Text700
-                )
-
-                StartingText(
-                    text = stringResource(id = R.string.one_time_register),
-                    start = 30.dp, end = 30.dp, bottom = 5.dp,
-                    style = normal14Text400,
-                    textAlign = TextAlign.Start,
-                )
-                StatusCard(
-                    cardText = stringResource(id = if(fromFlow == "Purchase Finance") R.string.purchase_finance else  R.string.request_a_loan),
                     image = if (!loanProcess) R.drawable.one_image_black else R.drawable.completed_green_tick,
                     processDone = true,
                     consentData = false,
@@ -327,24 +327,111 @@ fun LoanProcessScreen(
                 StatusCard(
                     cardText = stringResource(id = R.string.select_loan),
                     image = if (!loanProcess) R.drawable.two_image_black else R.drawable.completed_green_tick,
-                    processDone = true, showSubText = false, textcolorChange = false
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.complete_kyc),
                     image = if (!loanProcess) R.drawable.three_image_black else R.drawable.completed_green_tick,
-                    processDone = true, showSubText = false, textcolorChange = false
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = false
                 )
-                if(fromFlow != "Purchase Finance"){
+                StatusCard(
+                    cardText = stringResource(id = R.string.add_bank_details),
+                    showSubText = false,
+                    image = if (!loanProcess) R.drawable.four_image_black else R.drawable.four_image_blue,
+                    processDone = true
+                )
+                StatusCard(
+                    cardText = stringResource(id = R.string.set_up_repayment),
+                    processDone = false,
+                    image = if (loanProcess) R.drawable.five_image_black else R.drawable.five_image_blue
+                )
+                StatusCard(
+                    cardText = stringResource(id = R.string.loan_agreement),
+                    processDone = false,
+                    image = if (loanProcess) R.drawable.six_image_black else R.drawable.six_image_blue
+                )
+                StatusCard(
+                    cardText = stringResource(id = R.string.loan_disbursed),
+                    processDone = false,
+                    image = if (loanProcess) R.drawable.seven_image_black else R.drawable.seven_image_blue
+                )
+            }
+        }
+
+        5 -> {
+            FixedTopBottomScreen(
+                navController = navController,
+                showBackButton = false,
+                isSelfScrollable = false,
+                primaryButtonText = stringResource(id = R.string.next),
+                onPrimaryButtonClick = {
+                    navigateToRepaymentScreen(
+                        navController,
+                        transactionId,
+                        responseItem,
+                        offerId,
+                        fromFlow
+                    )
+                }
+            ) {
+                StartingText(
+                    text = stringResource(id = R.string.loan_process),
+                    textColor = appBlueTitle,
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 10.dp,
+                    bottom = 5.dp,
+                    style = normal32Text700
+                )
+
+                StartingText(
+                    text = stringResource(id = R.string.one_time_register),
+                    start = 30.dp,
+                    end = 30.dp,
+                    bottom = 5.dp,
+                    style = normal14Text400,
+                    textAlign = TextAlign.Start
+                )
+                StatusCard(
+                    cardText = stringResource(id = if (fromFlow == "Purchase Finance") R.string.purchase_finance else R.string.request_a_loan),
+                    image = if (!loanProcess) R.drawable.one_image_black else R.drawable.completed_green_tick,
+                    processDone = true,
+                    consentData = false,
+                    showSubText = false,
+                    textcolorChange = false
+                )
+                StatusCard(
+                    cardText = stringResource(id = R.string.select_loan),
+                    image = if (!loanProcess) R.drawable.two_image_black else R.drawable.completed_green_tick,
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = false
+                )
+                StatusCard(
+                    cardText = stringResource(id = R.string.complete_kyc),
+                    image = if (!loanProcess) R.drawable.three_image_black else R.drawable.completed_green_tick,
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = false
+                )
+                if (fromFlow != "Purchase Finance") {
                     StatusCard(
                         cardText = stringResource(id = R.string.add_bank_details),
                         image = if (!loanProcess) R.drawable.four_image_black else R.drawable.completed_green_tick,
-                        processDone = true, showSubText = false, textcolorChange = false
+                        processDone = true,
+                        showSubText = false,
+                        textcolorChange = false
                     )
                 }
                 StatusCard(
                     cardText = stringResource(id = R.string.set_up_repayment),
                     image = if (!loanProcess) R.drawable.five_image_black else R.drawable.five_image_blue,
-                    processDone = true, showSubText = false
+                    processDone = true,
+                    showSubText = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.loan_agreement),
@@ -377,8 +464,9 @@ fun LoanProcessScreen(
                             navController,
                             transactionId,
                             offerId,
+                            fromFlow = fromFlow,
                             responseItem,
-                            fromFlow = fromFlow
+
                         )
                     }
                 }
@@ -386,15 +474,20 @@ fun LoanProcessScreen(
                 StartingText(
                     text = stringResource(id = R.string.loan_process),
                     textColor = appBlueTitle,
-                    start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 10.dp,
+                    bottom = 5.dp,
                     style = normal32Text700
                 )
 
                 StartingText(
                     text = stringResource(id = R.string.one_time_register),
-                    start = 30.dp, end = 30.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    bottom = 5.dp,
                     style = normal14Text400,
-                    textAlign = TextAlign.Start,
+                    textAlign = TextAlign.Start
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.request_a_loan),
@@ -407,27 +500,36 @@ fun LoanProcessScreen(
                 StatusCard(
                     cardText = stringResource(id = R.string.select_loan),
                     image = if (!loanProcess) R.drawable.two_image_black else R.drawable.completed_green_tick,
-                    processDone = true, showSubText = false, textcolorChange = false
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.complete_kyc),
                     image = if (!loanProcess) R.drawable.three_image_black else R.drawable.completed_green_tick,
-                    processDone = true, showSubText = false, textcolorChange = false
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.add_bank_details),
                     image = if (!loanProcess) R.drawable.four_image_black else R.drawable.completed_green_tick,
-                    processDone = true, showSubText = false, textcolorChange = false
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.set_up_repayment),
                     image = if (!loanProcess) R.drawable.five_image_black else R.drawable.completed_green_tick,
-                    processDone = true, showSubText = false, textcolorChange = false
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.loan_agreement),
                     image = if (!loanProcess) R.drawable.six_image_black else R.drawable.six_image_blue,
-                    processDone = true, showSubText = false
+                    processDone = true,
+                    showSubText = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.loan_disbursed),
@@ -450,15 +552,20 @@ fun LoanProcessScreen(
                 StartingText(
                     text = stringResource(id = R.string.loan_process),
                     textColor = appBlueTitle,
-                    start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 10.dp,
+                    bottom = 5.dp,
                     style = normal32Text700
                 )
 
                 StartingText(
                     text = stringResource(id = R.string.one_time_register),
-                    start = 30.dp, end = 30.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    bottom = 5.dp,
                     style = normal14Text400,
-                    textAlign = TextAlign.Start,
+                    textAlign = TextAlign.Start
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.request_a_loan),
@@ -471,32 +578,43 @@ fun LoanProcessScreen(
                 StatusCard(
                     cardText = stringResource(id = R.string.select_loan),
                     image = if (!loanProcess) R.drawable.two_image_black else R.drawable.completed_green_tick,
-                    processDone = true, showSubText = false, textcolorChange = false
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.complete_kyc),
                     image = if (!loanProcess) R.drawable.three_image_black else R.drawable.completed_green_tick,
-                    processDone = true, showSubText = false, textcolorChange = false
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.add_bank_details),
                     image = if (!loanProcess) R.drawable.four_image_black else R.drawable.completed_green_tick,
-                    processDone = true, showSubText = false, textcolorChange = false
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.set_up_repayment),
                     image = if (!loanProcess) R.drawable.five_image_black else R.drawable.completed_green_tick,
-                    processDone = true, showSubText = false, textcolorChange = false
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.loan_agreement),
                     image = if (!loanProcess) R.drawable.six_image_black else R.drawable.completed_green_tick,
-                    processDone = true, showSubText = false, textcolorChange = false
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.loan_disbursed),
                     image = if (!loanProcess) R.drawable.seven_image_black else R.drawable.seven_image_blue,
-                    processDone = true, showSubText = false
+                    processDone = true,
+                    showSubText = false
                 )
             }
         }
@@ -514,30 +632,37 @@ fun LoanProcessScreen(
                 StartingText(
                     text = stringResource(id = R.string.loan_process),
                     textColor = appBlueTitle,
-                    start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 10.dp,
+                    bottom = 5.dp,
                     style = normal32Text700
                 )
 
                 StartingText(
                     text = stringResource(id = R.string.one_time_register),
-                    start = 30.dp, end = 30.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    bottom = 5.dp,
                     style = normal14Text400,
-                    textAlign = TextAlign.Start,
+                    textAlign = TextAlign.Start
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.request_a_loan),
                     image = if (!loanProcess) R.drawable.one_image_black else R.drawable.one_image_blue,
-                    processDone = true, consentData = false
+                    processDone = true,
+                    consentData = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.select_loan),
                     image = if (loanProcess) R.drawable.two_image_black else R.drawable.two_image_blue,
-                    processDone = false,
+                    processDone = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.complete_kyc),
                     image = if (loanProcess) R.drawable.three_image_black else R.drawable.three_image_blue,
-                    processDone = false, showSubText = false
+                    processDone = false,
+                    showSubText = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.add_bank_details),
@@ -570,40 +695,48 @@ fun LoanProcessScreen(
                 primaryButtonText = stringResource(id = R.string.next),
                 onPrimaryButtonClick = {
                     navigateToGstInvoiceLoanScreen(
-                        navController = navController, fromFlow = fromFlow
+                        navController = navController,
+                        fromFlow = fromFlow
                     )
                 }
-            )
-            {
+            ) {
                 StartingText(
                     text = stringResource(id = R.string.loan_process),
                     textColor = appBlueTitle,
-                    start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 10.dp,
+                    bottom = 5.dp,
                     style = normal32Text700
                 )
 
                 StartingText(
                     text = stringResource(id = R.string.one_time_register),
-                    start = 30.dp, end = 30.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    bottom = 5.dp,
                     style = normal14Text400,
-                    textAlign = TextAlign.Start,
+                    textAlign = TextAlign.Start
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.request_a_loan),
                     image = if (!loanProcess) R.drawable.one_image_black else R.drawable.one_image_blue,
-                    processDone = true, consentData = true, showGstData = true,
+                    processDone = true,
+                    consentData = true,
+                    showGstData = true,
                     subHeadText = stringResource(id = R.string.gst_details),
-                    subHeadText2 = stringResource(id = R.string.give_consent_for_gst_invoice),
+                    subHeadText2 = stringResource(id = R.string.give_consent_for_gst_invoice)
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.select_loan),
                     image = if (loanProcess) R.drawable.two_image_black else R.drawable.two_image_blue,
-                    processDone = false,
+                    processDone = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.complete_kyc),
                     image = if (loanProcess) R.drawable.three_image_black else R.drawable.three_image_blue,
-                    processDone = false, showSubText = false
+                    processDone = false,
+                    showSubText = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.add_bank_details),
@@ -636,40 +769,49 @@ fun LoanProcessScreen(
                 primaryButtonText = stringResource(id = R.string.next),
                 onPrimaryButtonClick = {
                     navigateToGstInvoiceDetailScreen(
-                        navController, fromFlow = fromFlow, invoiceId = offerId
+                        navController,
+                        fromFlow = fromFlow,
+                        invoiceId = offerId
                     )
                 }
-            )
-            {
+            ) {
                 StartingText(
                     text = stringResource(id = R.string.loan_process),
                     textColor = appBlueTitle,
-                    start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 10.dp,
+                    bottom = 5.dp,
                     style = normal32Text700
                 )
 
                 StartingText(
                     text = stringResource(id = R.string.one_time_register),
-                    start = 30.dp, end = 30.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    bottom = 5.dp,
                     style = normal14Text400,
-                    textAlign = TextAlign.Start,
+                    textAlign = TextAlign.Start
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.request_a_loan),
                     image = if (!loanProcess) R.drawable.one_image_black else R.drawable.one_image_blue,
-                    processDone = true, consentData = false, showGstData = true,
+                    processDone = true,
+                    consentData = false,
+                    showGstData = true,
                     subHeadText = stringResource(id = R.string.gst_details),
-                    subHeadText2 = stringResource(id = R.string.give_consent_for_gst_invoice),
+                    subHeadText2 = stringResource(id = R.string.give_consent_for_gst_invoice)
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.select_loan),
                     image = if (loanProcess) R.drawable.two_image_black else R.drawable.two_image_blue,
-                    processDone = false,
+                    processDone = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.complete_kyc),
                     image = if (loanProcess) R.drawable.three_image_black else R.drawable.three_image_blue,
-                    processDone = false, showSubText = false
+                    processDone = false,
+                    showSubText = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.add_bank_details),
@@ -706,37 +848,45 @@ fun LoanProcessScreen(
 //                        fromFlow = fromFlow, closeCurrent = true
 //                    )
                 }
-            )
-            {
+            ) {
                 StartingText(
                     text = stringResource(id = R.string.loan_process),
                     textColor = appBlueTitle,
-                    start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 10.dp,
+                    bottom = 5.dp,
                     style = normal32Text700
                 )
 
                 StartingText(
                     text = stringResource(id = R.string.one_time_register),
-                    start = 30.dp, end = 30.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    bottom = 5.dp,
                     style = normal14Text400,
-                    textAlign = TextAlign.Start,
+                    textAlign = TextAlign.Start
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.request_a_loan),
                     image = if (!loanProcess) R.drawable.one_image_black else R.drawable.one_image_blue,
-                    processDone = true, consentData = false, showGstData = true, showCorrect = true,
+                    processDone = true,
+                    consentData = false,
+                    showGstData = true,
+                    showCorrect = true,
                     subHeadText = stringResource(id = R.string.gst_details),
-                    subHeadText2 = stringResource(id = R.string.give_consent_for_gst_invoice),
+                    subHeadText2 = stringResource(id = R.string.give_consent_for_gst_invoice)
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.select_loan),
                     image = if (loanProcess) R.drawable.two_image_black else R.drawable.two_image_blue,
-                    processDone = false,
+                    processDone = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.complete_kyc),
                     image = if (loanProcess) R.drawable.three_image_black else R.drawable.three_image_blue,
-                    processDone = false, showSubText = false
+                    processDone = false,
+                    showSubText = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.add_bank_details),
@@ -778,15 +928,20 @@ fun LoanProcessScreen(
                 StartingText(
                     text = stringResource(id = R.string.loan_process),
                     textColor = appBlueTitle,
-                    start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 10.dp,
+                    bottom = 5.dp,
                     style = normal32Text700
                 )
 
                 StartingText(
                     text = stringResource(id = R.string.one_time_register),
-                    start = 30.dp, end = 30.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    bottom = 5.dp,
                     style = normal14Text400,
-                    textAlign = TextAlign.Start,
+                    textAlign = TextAlign.Start
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.request_a_loan),
@@ -799,7 +954,9 @@ fun LoanProcessScreen(
                 StatusCard(
                     cardText = stringResource(id = R.string.select_loan),
                     image = if (!loanProcess) R.drawable.two_image_black else R.drawable.two_image_blue,
-                    processDone = true, showSubText = false, textcolorChange = true
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = true
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.complete_kyc),
@@ -849,15 +1006,20 @@ fun LoanProcessScreen(
                 StartingText(
                     text = stringResource(id = R.string.loan_process),
                     textColor = appBlueTitle,
-                    start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 10.dp,
+                    bottom = 5.dp,
                     style = normal32Text700
                 )
 
                 StartingText(
                     text = stringResource(id = R.string.one_time_register),
-                    start = 30.dp, end = 30.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    bottom = 5.dp,
                     style = normal14Text400,
-                    textAlign = TextAlign.Start,
+                    textAlign = TextAlign.Start
                 )
 
                 StatusCard(
@@ -871,12 +1033,15 @@ fun LoanProcessScreen(
                 StatusCard(
                     cardText = stringResource(id = R.string.select_loan),
                     image = if (!loanProcess) R.drawable.two_image_black else R.drawable.completed_green_tick,
-                    processDone = true, showSubText = false, textcolorChange = false
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.complete_kyc),
                     image = if (!loanProcess) R.drawable.three_image_black else R.drawable.three_image_blue,
-                    processDone = true, showSubText = false
+                    processDone = true,
+                    showSubText = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.add_bank_details),
@@ -901,7 +1066,7 @@ fun LoanProcessScreen(
             }
         }
 
-        17 -> { //Sugu
+        17 -> { // Sugu
             FixedTopBottomScreen(
                 navController = navController,
                 showBackButton = false,
@@ -921,15 +1086,20 @@ fun LoanProcessScreen(
                 StartingText(
                     text = stringResource(id = R.string.loan_process),
                     textColor = appBlueTitle,
-                    start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 10.dp,
+                    bottom = 5.dp,
                     style = normal32Text700
                 )
 
                 StartingText(
                     text = stringResource(id = R.string.one_time_register),
-                    start = 30.dp, end = 30.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    bottom = 5.dp,
                     style = normal14Text400,
-                    textAlign = TextAlign.Start,
+                    textAlign = TextAlign.Start
                 )
 
                 StatusCard(
@@ -943,12 +1113,15 @@ fun LoanProcessScreen(
                 StatusCard(
                     cardText = stringResource(id = R.string.select_loan),
                     image = if (!loanProcess) R.drawable.two_image_black else R.drawable.completed_green_tick,
-                    processDone = true, showSubText = false, textcolorChange = false
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.complete_kyc),
                     image = if (!loanProcess) R.drawable.three_image_black else R.drawable.three_image_blue,
-                    processDone = true, showSubText = false
+                    processDone = true,
+                    showSubText = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.add_bank_details),
@@ -981,22 +1154,29 @@ fun LoanProcessScreen(
                 primaryButtonText = stringResource(id = R.string.next),
                 onPrimaryButtonClick = {
                     navigateToBankDetailsScreen(
-                        navController = navController, id = offerId, fromFlow = fromFlow
+                        navController = navController,
+                        id = offerId,
+                        fromFlow = fromFlow
                     )
                 }
             ) {
                 StartingText(
                     text = stringResource(id = R.string.loan_process),
                     textColor = appBlueTitle,
-                    start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 10.dp,
+                    bottom = 5.dp,
                     style = normal32Text700
                 )
 
                 StartingText(
                     text = stringResource(id = R.string.one_time_register),
-                    start = 30.dp, end = 30.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    bottom = 5.dp,
                     style = normal14Text400,
-                    textAlign = TextAlign.Start,
+                    textAlign = TextAlign.Start
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.request_a_loan),
@@ -1009,17 +1189,22 @@ fun LoanProcessScreen(
                 StatusCard(
                     cardText = stringResource(id = R.string.select_loan),
                     image = if (!loanProcess) R.drawable.two_image_black else R.drawable.completed_green_tick,
-                    processDone = true, showSubText = false, textcolorChange = false
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.complete_kyc),
                     image = if (!loanProcess) R.drawable.three_image_black else R.drawable.completed_green_tick,
-                    processDone = true, showSubText = false, textcolorChange = false
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.add_bank_details),
                     image = if (!loanProcess) R.drawable.four_image_black else R.drawable.four_image_blue,
-                    processDone = true, showSubText = false
+                    processDone = true,
+                    showSubText = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.emandate),
@@ -1047,24 +1232,31 @@ fun LoanProcessScreen(
                 primaryButtonText = stringResource(id = R.string.next),
                 onPrimaryButtonClick = {
                     navigateToRepaymentScreen(
-                        navController = navController, transactionId = transactionId,
+                        navController = navController,
+                        transactionId = transactionId,
                         url = responseItem,
-                        id = offerId, fromFlow = fromFlow
+                        id = offerId,
+                        fromFlow = fromFlow
                     )
                 }
             ) {
                 StartingText(
                     text = stringResource(id = R.string.loan_process),
                     textColor = appBlueTitle,
-                    start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 10.dp,
+                    bottom = 5.dp,
                     style = normal32Text700
                 )
 
                 StartingText(
                     text = stringResource(id = R.string.one_time_register),
-                    start = 30.dp, end = 30.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    bottom = 5.dp,
                     style = normal14Text400,
-                    textAlign = TextAlign.Start,
+                    textAlign = TextAlign.Start
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.request_a_loan),
@@ -1077,22 +1269,29 @@ fun LoanProcessScreen(
                 StatusCard(
                     cardText = stringResource(id = R.string.select_loan),
                     image = if (!loanProcess) R.drawable.two_image_black else R.drawable.completed_green_tick,
-                    processDone = true, showSubText = false, textcolorChange = false
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.complete_kyc),
                     image = if (!loanProcess) R.drawable.three_image_black else R.drawable.completed_green_tick,
-                    processDone = true, showSubText = false, textcolorChange = false
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.add_bank_details),
                     image = if (!loanProcess) R.drawable.four_image_black else R.drawable.completed_green_tick,
-                    processDone = true, showSubText = false, textcolorChange = false
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.emandate),
                     image = if (!loanProcess) R.drawable.five_image_black else R.drawable.five_image_blue,
-                    processDone = true, showSubText = false
+                    processDone = true,
+                    showSubText = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.loan_agreement),
@@ -1115,24 +1314,31 @@ fun LoanProcessScreen(
                 primaryButtonText = stringResource(id = R.string.next),
                 onPrimaryButtonClick = {
                     navigateToLoanAgreementScreen(
-                        navController = navController, loanAgreementFormUrl = responseItem,
+                        navController = navController,
+                        url = responseItem,
                         transactionId = transactionId,
-                        id = offerId, fromFlow = fromFlow
+                        id = offerId,
+                        fromFlow = fromFlow
                     )
                 }
             ) {
                 StartingText(
                     text = stringResource(id = R.string.loan_process),
                     textColor = appBlueTitle,
-                    start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 10.dp,
+                    bottom = 5.dp,
                     style = normal32Text700
                 )
 
                 StartingText(
                     text = stringResource(id = R.string.one_time_register),
-                    start = 30.dp, end = 30.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    bottom = 5.dp,
                     style = normal14Text400,
-                    textAlign = TextAlign.Start,
+                    textAlign = TextAlign.Start
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.request_a_loan),
@@ -1145,27 +1351,36 @@ fun LoanProcessScreen(
                 StatusCard(
                     cardText = stringResource(id = R.string.select_loan),
                     image = if (!loanProcess) R.drawable.two_image_black else R.drawable.completed_green_tick,
-                    processDone = true, showSubText = false, textcolorChange = false
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.complete_kyc),
                     image = if (!loanProcess) R.drawable.three_image_black else R.drawable.completed_green_tick,
-                    processDone = true, showSubText = false, textcolorChange = false
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.add_bank_details),
                     image = if (!loanProcess) R.drawable.four_image_black else R.drawable.completed_green_tick,
-                    processDone = true, showSubText = false, textcolorChange = false
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.emandate),
                     image = if (!loanProcess) R.drawable.five_image_black else R.drawable.completed_green_tick,
-                    processDone = true, showSubText = false, textcolorChange = false
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.loan_agreement),
                     image = if (!loanProcess) R.drawable.six_image_black else R.drawable.six_image_blue,
-                    processDone = true, showSubText = false
+                    processDone = true,
+                    showSubText = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.loan_disbursed),
@@ -1183,40 +1398,49 @@ fun LoanProcessScreen(
                 primaryButtonText = stringResource(id = R.string.next),
                 onPrimaryButtonClick = {
                     navigateToReviewDetailsScreen(
-                        navController = navController, fromFlow = fromFlow, loanPurpose = "No need",
+                        navController = navController,
+                        fromFlow = fromFlow,
+                        loanPurpose = "No need"
                     )
                 }
-            )
-            {
+            ) {
                 StartingText(
                     text = stringResource(id = R.string.loan_process),
                     textColor = appBlueTitle,
-                    start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 10.dp,
+                    bottom = 5.dp,
                     style = normal32Text700
                 )
 
                 StartingText(
                     text = stringResource(id = R.string.one_time_register),
-                    start = 30.dp, end = 30.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    bottom = 5.dp,
                     style = normal14Text400,
-                    textAlign = TextAlign.Start,
+                    textAlign = TextAlign.Start
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.purchase_finance),
                     image = if (!loanProcess) R.drawable.one_image_black else R.drawable.one_image_blue,
-                    processDone = true, consentData = true, showGstData = true,
+                    processDone = true,
+                    consentData = true,
+                    showGstData = true,
                     subHeadText = stringResource(id = R.string.basic_detail),
-                    subHeadText2 = stringResource(id = R.string.enter_down_payment),
+                    subHeadText2 = stringResource(id = R.string.enter_down_payment)
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.select_loan),
                     image = if (loanProcess) R.drawable.two_image_black else R.drawable.two_image_blue,
-                    processDone = false,
+                    processDone = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.complete_kyc),
                     image = if (loanProcess) R.drawable.three_image_black else R.drawable.three_image_blue,
-                    processDone = false, showSubText = false
+                    processDone = false,
+                    showSubText = false
                 )
 
                 StatusCard(
@@ -1247,37 +1471,44 @@ fun LoanProcessScreen(
                 onPrimaryButtonClick = {
                     navigateToDownPaymentScreen(navController = navController, fromFlow = fromFlow)
                 }
-            )
-            {
+            ) {
                 StartingText(
                     text = stringResource(id = R.string.loan_process),
                     textColor = appBlueTitle,
-                    start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 10.dp,
+                    bottom = 5.dp,
                     style = normal32Text700
                 )
 
                 StartingText(
                     text = stringResource(id = R.string.one_time_register),
-                    start = 30.dp, end = 30.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    bottom = 5.dp,
                     style = normal14Text400,
-                    textAlign = TextAlign.Start,
+                    textAlign = TextAlign.Start
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.purchase_finance),
                     image = if (!loanProcess) R.drawable.one_image_black else R.drawable.one_image_blue,
-                    processDone = true, consentData = false, showGstData = true,
+                    processDone = true,
+                    consentData = false,
+                    showGstData = true,
                     subHeadText = stringResource(id = R.string.basic_detail),
-                    subHeadText2 = stringResource(id = R.string.enter_down_payment_details),
+                    subHeadText2 = stringResource(id = R.string.enter_down_payment_details)
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.select_loan),
                     image = if (loanProcess) R.drawable.two_image_black else R.drawable.two_image_blue,
-                    processDone = false,
+                    processDone = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.complete_kyc),
                     image = if (loanProcess) R.drawable.three_image_black else R.drawable.three_image_blue,
-                    processDone = false, showSubText = false
+                    processDone = false,
+                    showSubText = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.set_up_repayment),
@@ -1308,37 +1539,45 @@ fun LoanProcessScreen(
 //                        navController = navController, loanPurpose = responseItem, fromFlow = fromFlow
 //                    )
                 }
-            )
-            {
+            ) {
                 StartingText(
                     text = stringResource(id = R.string.loan_process),
                     textColor = appBlueTitle,
-                    start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 10.dp,
+                    bottom = 5.dp,
                     style = normal32Text700
                 )
 
                 StartingText(
                     text = stringResource(id = R.string.one_time_register),
-                    start = 30.dp, end = 30.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    bottom = 5.dp,
                     style = normal14Text400,
-                    textAlign = TextAlign.Start,
+                    textAlign = TextAlign.Start
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.purchase_finance),
                     image = if (!loanProcess) R.drawable.one_image_black else R.drawable.one_image_blue,
-                    processDone = true, consentData = false, showGstData = true, showCorrect = true,
+                    processDone = true,
+                    consentData = false,
+                    showGstData = true,
+                    showCorrect = true,
                     subHeadText = stringResource(id = R.string.basic_detail),
-                    subHeadText2 = stringResource(id = R.string.enter_down_payment_details),
+                    subHeadText2 = stringResource(id = R.string.enter_down_payment_details)
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.select_loan),
                     image = if (loanProcess) R.drawable.two_image_black else R.drawable.two_image_blue,
-                    processDone = false,
+                    processDone = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.complete_kyc),
                     image = if (loanProcess) R.drawable.three_image_black else R.drawable.three_image_blue,
-                    processDone = false, showSubText = false
+                    processDone = false,
+                    showSubText = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.set_up_repayment),
@@ -1374,30 +1613,42 @@ fun LoanProcessScreen(
             ) {
                 StartingText(
                     text = stringResource(id = R.string.loan_process),
-                    start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp,
-                    textColor = appBlueTitle, style = normal32Text700
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 10.dp,
+                    bottom = 5.dp,
+                    textColor = appBlueTitle,
+                    style = normal32Text700
                 )
 
                 StartingText(
                     text = stringResource(id = R.string.one_time_register),
-                    start = 30.dp, end = 30.dp, bottom = 5.dp,
-                    style = normal14Text400, textAlign = TextAlign.Start,
+                    start = 30.dp,
+                    end = 30.dp,
+                    bottom = 5.dp,
+                    style = normal14Text400,
+                    textAlign = TextAlign.Start
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.purchase_finance),
                     image = if (!loanProcess) R.drawable.one_image_black else R.drawable.completed_green_tick,
-                    processDone = true, consentData = false, showSubText = false,
+                    processDone = true,
+                    consentData = false,
+                    showSubText = false,
                     textcolorChange = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.select_loan),
                     image = if (!loanProcess) R.drawable.two_image_black else R.drawable.two_image_blue,
-                    processDone = true, showSubText = false, textcolorChange = true
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = true
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.complete_kyc),
                     image = if (loanProcess) R.drawable.three_image_black else R.drawable.three_image_blue,
-                    processDone = false, showSubText = false
+                    processDone = false,
+                    showSubText = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.set_up_repayment),
@@ -1436,30 +1687,43 @@ fun LoanProcessScreen(
             ) {
                 StartingText(
                     text = stringResource(id = R.string.loan_process),
-                    start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp,
-                    textColor = appBlueTitle, style = normal32Text700
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 10.dp,
+                    bottom = 5.dp,
+                    textColor = appBlueTitle,
+                    style = normal32Text700
                 )
 
                 StartingText(
                     text = stringResource(id = R.string.one_time_register),
-                    start = 30.dp, end = 30.dp, bottom = 5.dp,
-                    style = normal14Text400, textAlign = TextAlign.Start,
+                    start = 30.dp,
+                    end = 30.dp,
+                    bottom = 5.dp,
+                    style = normal14Text400,
+                    textAlign = TextAlign.Start
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.purchase_finance),
                     image = if (!loanProcess) R.drawable.one_image_black else R.drawable.completed_green_tick,
-                    processDone = true, consentData = false, showSubText = false,
+                    processDone = true,
+                    consentData = false,
+                    showSubText = false,
                     textcolorChange = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.select_loan),
                     image = if (!loanProcess) R.drawable.two_image_black else R.drawable.completed_green_tick,
-                    processDone = true, showSubText = false, textcolorChange = false
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.complete_kyc),
                     image = if (loanProcess) R.drawable.three_image_blue else R.drawable.three_image_blue,
-                    processDone = true, showSubText = false, textcolorChange = true
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = true
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.set_up_repayment),
@@ -1489,45 +1753,61 @@ fun LoanProcessScreen(
                 primaryButtonText = stringResource(id = R.string.next),
                 onPrimaryButtonClick = {
                     navigateToLoanAgreementScreen(
-                        navController = navController, loanAgreementFormUrl = responseItem,
+                        navController = navController,
+                        url = responseItem,
                         transactionId = transactionId,
-                        id = offerId, fromFlow = fromFlow
+                        id = offerId,
+                        fromFlow = fromFlow
                     )
                 }
             ) {
                 StartingText(
                     text = stringResource(id = R.string.loan_process),
-                    start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp,
-                    textColor = appBlueTitle, style = normal32Text700
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 10.dp,
+                    bottom = 5.dp,
+                    textColor = appBlueTitle,
+                    style = normal32Text700
                 )
 
                 StatusCard(
                     cardText = stringResource(id = R.string.purchase_finance),
                     image = if (!loanProcess) R.drawable.one_image_black else R.drawable.completed_green_tick,
-                    processDone = true, consentData = false, showSubText = false,
+                    processDone = true,
+                    consentData = false,
+                    showSubText = false,
                     textcolorChange = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.select_loan),
                     image = if (!loanProcess) R.drawable.two_image_black else R.drawable.completed_green_tick,
-                    processDone = true, showSubText = false, textcolorChange = false
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.complete_kyc),
                     image = if (!loanProcess) R.drawable.three_image_black else R.drawable.completed_green_tick,
-                    processDone = true, showSubText = false, textcolorChange = false
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = false
                 )
 
                 StatusCard(
                     cardText = stringResource(id = R.string.set_up_repayment),
                     image = if (!loanProcess) R.drawable.four_image_black else R.drawable.completed_green_tick,
-                    processDone = true, showSubText = false, textcolorChange = false
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = false
                 )
 
                 StatusCard(
                     cardText = stringResource(id = R.string.loan_agreement),
                     image = if (!loanProcess) R.drawable.six_image_black else R.drawable.three_image_blue,
-                    processDone = true, showSubText = false, textcolorChange = false
+                    processDone = true,
+                    showSubText = false,
+                    textcolorChange = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.loan_disbursed),
@@ -1550,15 +1830,20 @@ fun LoanProcessScreen(
                 StartingText(
                     text = stringResource(id = R.string.loan_process),
                     textColor = appBlueTitle,
-                    start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 10.dp,
+                    bottom = 5.dp,
                     style = normal32Text700
                 )
 
                 StartingText(
                     text = stringResource(id = R.string.one_time_register),
-                    start = 30.dp, end = 30.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    bottom = 5.dp,
                     style = normal14Text400,
-                    textAlign = TextAlign.Start,
+                    textAlign = TextAlign.Start
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.request_a_loan),
@@ -1568,12 +1853,13 @@ fun LoanProcessScreen(
                 StatusCard(
                     cardText = stringResource(id = R.string.select_loan),
                     image = if (loanProcess) R.drawable.two_image_black else R.drawable.two_image_blue,
-                    processDone = false,
+                    processDone = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.complete_kyc),
                     image = if (loanProcess) R.drawable.three_image_black else R.drawable.three_image_blue,
-                    processDone = false, showSubText = false
+                    processDone = false,
+                    showSubText = false
                 )
                 StatusCard(
                     cardText = stringResource(id = R.string.add_bank_details),
@@ -1602,16 +1888,22 @@ fun LoanProcessScreen(
 
 @Composable
 fun StatusCard(
-    cardText: String, @DrawableRes image: Int, top: Dp = 15.dp, processDone: Boolean = false,
-    showSubText: Boolean = true, subProcess: Boolean = true, consentData: Boolean = true,
-    textcolorChange: Boolean = true, showGstData: Boolean = false, showCorrect: Boolean = false,
+    cardText: String,
+    @DrawableRes image: Int,
+    top: Dp = 15.dp,
+    processDone: Boolean = false,
+    showSubText: Boolean = true,
+    subProcess: Boolean = true,
+    consentData: Boolean = true,
+    textcolorChange: Boolean = true,
+    showGstData: Boolean = false,
+    showCorrect: Boolean = false,
     subHeadText: String = stringResource(id = R.string.personal_details),
     subHeadText2: String = stringResource(id = R.string.give_consent_for_bank_data),
     subHeadText3: String = stringResource(id = R.string.give_consent_for_bank_data)
 ) {
     Box(modifier = Modifier.padding(top = top)) {
         Box(contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxSize()) {
-
             BorderCardWithElevation(
                 borderColor = if (processDone) greenColour else lightGray,
                 contentColor = if (processDone) customGreenColor else appWhite,
@@ -1688,11 +1980,11 @@ fun SubHeading(@DrawableRes image: Int, text: String, subProcess: Boolean) {
 @Composable
 fun LoanProcessScreenPreview() {
     LoanProcessScreen(
-        navController = rememberNavController(), transactionId = "12232", statusId = "19",
+        navController = rememberNavController(),
+        transactionId = "12232",
+        statusId = "19",
         responseItem = "String",
-        offerId = "1234", fromFlow = "Personal Loan"
+        offerId = "1234",
+        fromFlow = "Personal Loan"
     )
-
 }
-
-

@@ -1,13 +1,10 @@
 package com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.igm
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavHostController
-import com.github.sugunasriram.fisloanlibv4.R
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.core.ApiRepository
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.core.ApiRepository.handleAuthGetAccessTokenApi
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.igm.CloseIssueBody
@@ -73,20 +70,23 @@ class CreateIssueViewModel : ViewModel() {
     }
     fun clearImageUploadError() {
         _showImageNotUploadedError.value = false
+        _imageUploadError.value=null
     }
 
     private val _shortDesc: MutableLiveData<String?> = MutableLiveData("")
     val shortDesc: LiveData<String?> = _shortDesc
 
     fun onShortDescChanged(shortDesc: String) {
-        if (shortDesc.length <= 30) {
-            _shortDesc.value = shortDesc
+        val sanitized = shortDesc
+            .replace(Regex("[^\\p{ASCII}₹]"), "") // Remove non-ASCII except ₹
+            .replace(Regex("\\s{2,}"), " ")
+        if (sanitized.length <= 30) {
+            _shortDesc.value = sanitized
             updateGeneralError(null)
         }
     }
 
-
-    fun clearShortDesc(){
+    fun clearShortDesc() {
         _shortDesc.value = ""
     }
 
@@ -108,7 +108,10 @@ class CreateIssueViewModel : ViewModel() {
     }
 
     fun onLongDescriptionChanged(value: String) {
-        _longDesc.value = value
+        val sanitized = value
+            .replace(Regex("[^\\p{ASCII}\\s₹]"), "")  // Remove non-ASCII except ₹
+            .replace(Regex(" {2,}"), " ")
+        _longDesc.value = sanitized
     }
 
     private val _category: MutableLiveData<String?> = MutableLiveData("")
@@ -126,11 +129,9 @@ class CreateIssueViewModel : ViewModel() {
     private val _navigationToSignIn = MutableStateFlow(false)
     val navigationToSignIn: StateFlow<Boolean> = _navigationToSignIn
 
-
     fun updateCategoryError(categoryError: String?) {
         _categoryError.value = categoryError
     }
-
 
     fun updateSubCategoryError(subCategoryError: String?) {
         _subCategoryError.value = subCategoryError
@@ -144,7 +145,9 @@ class CreateIssueViewModel : ViewModel() {
     }
 
     private suspend fun handleIssuesListForUser(
-        context: Context, issueListBody: IssueListBody, checkForAccessToken: Boolean = true
+        context: Context,
+        issueListBody: IssueListBody,
+        checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
             ApiRepository.getIssueListForUser(issueListBody)
@@ -164,7 +167,7 @@ class CreateIssueViewModel : ViewModel() {
                         _navigationToSignIn.value = true
                     }
                 } else {
-                    handleFailure(context = context, error =  error)
+                    handleFailure(context = context, error = error)
                 }
             }
         }
@@ -184,7 +187,7 @@ class CreateIssueViewModel : ViewModel() {
         _imageUploadError.value = error
     }
 
-    fun updateImageNotUploadedErrorMessage(errorMsg:String?){
+    fun updateImageNotUploadedErrorMessage(errorMsg: String?) {
         _showImageNotUploadedError.value = true
         _imageUploadError.value = errorMsg
     }
@@ -193,27 +196,39 @@ class CreateIssueViewModel : ViewModel() {
     val showImageNotUploadedError: StateFlow<Boolean> = _showImageNotUploadedError
 
     fun updateValidation(
-        shortDesc: String, longDesc: String, categorySelectedText: String, fromFlow: String,
-        subCategorySelectedText: String, image: List<String>, context: Context, orderId: String,
-        providerId: String, orderState: String,
+        shortDesc: String,
+        longDesc: String,
+        categorySelectedText: String,
+        fromFlow: String,
+        subCategorySelectedText: String,
+        image: List<String>,
+        context: Context,
+        orderId: String,
+        providerId: String,
+        orderState: String
     ) {
-            val loanType = if (fromFlow.equals("Personal Loan", ignoreCase = true
-                ) || fromFlow.equals("PERSONAL_LOAN", ignoreCase = true)
-            )
-                "PERSONAL_LOAN" else "INVOICE_BASED_LOAN"
-            createIssue(
-                createIssueBody = CreateIssueBody(
-                    loanType = loanType, orderID = orderId, orderState = orderState,
-                    providerID = providerId, issueCategory = categorySelectedText,
-                    issueSubCategory = subCategorySelectedText, issueShortDisc = shortDesc,
-                    issueLongDisc = longDesc, issueType = "ISSUE", status = "OPEN",
+        val loanType = if (fromFlow.equals(
+                "Personal Loan",
+                ignoreCase = true
+            ) || fromFlow.equals("PERSONAL_LOAN", ignoreCase = true)
+        ) {
+            "PERSONAL_LOAN"
+        } else {
+            "INVOICE_BASED_LOAN"
+        }
+        createIssue(
+            createIssueBody = CreateIssueBody(
+                loanType = loanType, orderID = orderId, orderState = orderState,
+                providerID = providerId, issueCategory = categorySelectedText,
+                issueSubCategory = subCategorySelectedText, issueShortDisc = shortDesc,
+                issueLongDisc = longDesc, issueType = "ISSUE", status = "OPEN",
 //                    discriptionContentType = "image/png",
-                    discriptionContentType = "text/html",
-                    discriptionURL = "https://abc.com",
-                    descriptionImages = image
-                ),
-                context = context
-            )
+                discriptionContentType = "text/plain",
+                discriptionURL = "https://abc.com",
+                descriptionImages = image
+            ),
+            context = context
+        )
     }
 
     private val _issueListLoading = MutableStateFlow(false)
@@ -233,7 +248,8 @@ class CreateIssueViewModel : ViewModel() {
     }
 
     private suspend fun handleIssuesCategories(
-        context: Context, checkForAccessToken: Boolean = true
+        context: Context,
+        checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
             ApiRepository.getIssueCategories()
@@ -250,7 +266,7 @@ class CreateIssueViewModel : ViewModel() {
                         _navigationToSignIn.value = true
                     }
                 } else {
-                    handleFailure(context = context, error =  error)
+                    handleFailure(context = context, error = error)
                 }
             }
         }
@@ -281,7 +297,9 @@ class CreateIssueViewModel : ViewModel() {
     }
 
     private suspend fun handleIssueWithSubCategories(
-        category: String, context: Context, checkForAccessToken: Boolean = true
+        category: String,
+        context: Context,
+        checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
             ApiRepository.getIssueWithSubCategories(category = category)
@@ -296,15 +314,16 @@ class CreateIssueViewModel : ViewModel() {
             ) {
                 if (handleAuthGetAccessTokenApi()) {
                     handleIssueWithSubCategories(
-                        category = category, context = context, checkForAccessToken = false
+                        category = category,
+                        context = context,
+                        checkForAccessToken = false
                     )
                 } else {
                     _navigationToSignIn.value = true
                 }
             } else {
-                handleFailure(context = context, error =  error)
+                handleFailure(context = context, error = error)
             }
-
         }
     }
 
@@ -332,14 +351,16 @@ class CreateIssueViewModel : ViewModel() {
         }
     }
 
-     fun removeImage(){
+    fun removeImage() {
         _imageUploading.value = false
         _imageUploaded.value = false
         _imageUploadResponse.value = null
     }
 
     private suspend fun handleImageUpload(
-        imageUploadBody: ImageUploadBody, context: Context, checkForAccessToken: Boolean = true
+        imageUploadBody: ImageUploadBody,
+        context: Context,
+        checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
             ApiRepository.imageUpload(imageUploadBody)
@@ -356,14 +377,15 @@ class CreateIssueViewModel : ViewModel() {
             ) {
                 if (handleAuthGetAccessTokenApi()) {
                     handleImageUpload(
-                        imageUploadBody = imageUploadBody, context = context,
+                        imageUploadBody = imageUploadBody,
+                        context = context,
                         checkForAccessToken = false
                     )
                 } else {
                     _navigationToSignIn.value = true
                 }
             } else {
-                handleFailure(context = context, error =  error)
+                handleFailure(context = context, error = error)
             }
         }
     }
@@ -377,7 +399,6 @@ class CreateIssueViewModel : ViewModel() {
     private val _createIssueResponse = MutableStateFlow<CreateIssueResponse?>(null)
     val createIssueResponse: StateFlow<CreateIssueResponse?> = _createIssueResponse
 
-
     private fun createIssue(createIssueBody: CreateIssueBody, context: Context) {
         _issueCreating.value = true
         viewModelScope.launch(Dispatchers.IO) {
@@ -386,7 +407,9 @@ class CreateIssueViewModel : ViewModel() {
     }
 
     private suspend fun handleCreateIssue(
-        createIssueBody: CreateIssueBody, context: Context, checkForAccessToken: Boolean = true
+        createIssueBody: CreateIssueBody,
+        context: Context,
+        checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
             ApiRepository.createIssue(createIssueBody)
@@ -403,14 +426,15 @@ class CreateIssueViewModel : ViewModel() {
             ) {
                 if (handleAuthGetAccessTokenApi()) {
                     handleCreateIssue(
-                        createIssueBody = createIssueBody, context = context,
+                        createIssueBody = createIssueBody,
+                        context = context,
                         checkForAccessToken = false
                     )
                 } else {
                     _navigationToSignIn.value = true
                 }
             } else {
-                handleFailure(context = context, error =  error)
+                handleFailure(context = context, error = error)
             }
         }
     }
@@ -432,7 +456,9 @@ class CreateIssueViewModel : ViewModel() {
     }
 
     private suspend fun handleCloseIssue(
-        closeIssueBody: CloseIssueBody, context: Context, checkForAccessToken: Boolean = true
+        closeIssueBody: CloseIssueBody,
+        context: Context,
+        checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
             ApiRepository.closeIssue(closeIssueBody)
@@ -449,7 +475,8 @@ class CreateIssueViewModel : ViewModel() {
             ) {
                 if (handleAuthGetAccessTokenApi()) {
                     handleCloseIssue(
-                        closeIssueBody = closeIssueBody, context = context,
+                        closeIssueBody = closeIssueBody,
+                        context = context,
                         checkForAccessToken = false
                     )
                 } else {
@@ -478,7 +505,9 @@ class CreateIssueViewModel : ViewModel() {
     }
 
     private suspend fun handleIssueStatus(
-        issueId: String, context: Context, checkForAccessToken: Boolean = true
+        issueId: String,
+        context: Context,
+        checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
             ApiRepository.issueStatus(issueId)
@@ -488,9 +517,9 @@ class CreateIssueViewModel : ViewModel() {
                 _checkedStatus.value = true
                 _issueStatusResponse.value = it
 
-                //Sugu - Start
+                // Sugu - Start
                 issueById(issueId, context)
-                //Sugu - End
+                // Sugu - End
 
                 it?.let {
                     it.data?.message?.let { it1 ->
@@ -505,7 +534,9 @@ class CreateIssueViewModel : ViewModel() {
             ) {
                 if (handleAuthGetAccessTokenApi()) {
                     handleIssueStatus(
-                        issueId = issueId, context = context, checkForAccessToken = false
+                        issueId = issueId,
+                        context = context,
+                        checkForAccessToken = false
                     )
                 } else {
                     _navigationToSignIn.value = true
@@ -565,8 +596,6 @@ class CreateIssueViewModel : ViewModel() {
         }
     }
 
-
-
     private val _orderIssuesLoading = MutableStateFlow(false)
     val orderIssuesLoading: StateFlow<Boolean> = _orderIssuesLoading
 
@@ -584,7 +613,9 @@ class CreateIssueViewModel : ViewModel() {
     }
 
     private suspend fun handleOrderIssues(
-        orderId: String, context: Context, checkForAccessToken: Boolean = true
+        orderId: String,
+        context: Context,
+        checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
             ApiRepository.orderIssues(orderId)
@@ -601,7 +632,9 @@ class CreateIssueViewModel : ViewModel() {
             ) {
                 if (handleAuthGetAccessTokenApi()) {
                     handleOrderIssues(
-                        orderId = orderId, context = context, checkForAccessToken = false
+                        orderId = orderId,
+                        context = context,
+                        checkForAccessToken = false
                     )
                 } else {
                     _navigationToSignIn.value = true
@@ -616,15 +649,21 @@ class CreateIssueViewModel : ViewModel() {
         withContext(Dispatchers.Main) {
             if (error is ResponseException) {
                 CommonMethods().handleResponseException(
-                    error = error, context = context, updateErrorMessage = ::updateErrorMessage,
-                    _showServerIssueScreen = _showServerIssueScreen, _middleLoan = _middleLoan,
-                    _unAuthorizedUser = _unAuthorizedUser, _unexpectedError = _unexpectedError,
+                    error = error,
+                    context = context,
+                    updateErrorMessage = ::updateErrorMessage,
+                    _showServerIssueScreen = _showServerIssueScreen,
+                    _middleLoan = _middleLoan,
+                    _unAuthorizedUser = _unAuthorizedUser,
+                    _unexpectedError = _unexpectedError,
                     _showLoader = _showLoader
                 )
             } else {
                 CommonMethods().handleGeneralException(
-                    error = error, _showInternetScreen = _showInternetScreen,
-                    _showTimeOutScreen = _showTimeOutScreen, _unexpectedError = _unexpectedError
+                    error = error,
+                    _showInternetScreen = _showInternetScreen,
+                    _showTimeOutScreen = _showTimeOutScreen,
+                    _unexpectedError = _unexpectedError
                 )
             }
             _subIssueLoading.value = false
@@ -636,5 +675,4 @@ class CreateIssueViewModel : ViewModel() {
             _issueListLoading.value = false
         }
     }
-
 }

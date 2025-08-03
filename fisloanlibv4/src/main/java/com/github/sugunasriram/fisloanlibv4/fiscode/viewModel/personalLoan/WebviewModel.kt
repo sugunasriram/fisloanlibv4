@@ -13,16 +13,24 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.gst.GstSearchB
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.gst.GstSearchResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.ConsentApprovalRequest
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.ConsentApprovalResponse
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.GetLenderStatusModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.SearchBodyModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.SearchModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.BaseViewModel
 import io.ktor.client.features.ResponseException
+import io.ktor.client.statement.readText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 class WebViewModel : BaseViewModel() {
 
@@ -53,6 +61,13 @@ class WebViewModel : BaseViewModel() {
     private val _showLoader = MutableLiveData(false)
     val showLoader: LiveData<Boolean> = _showLoader
 
+    private val _webInProgress = MutableStateFlow(false)
+    val webInProgress: StateFlow<Boolean> = _webInProgress
+
+    fun setWebInProgress(loading: Boolean) {
+        _webInProgress.value = loading
+    }
+
     private val _webProgress = MutableStateFlow(false)
     val webProgress: StateFlow<Boolean> = _webProgress
 
@@ -62,44 +77,104 @@ class WebViewModel : BaseViewModel() {
     private val _searchResponse = MutableStateFlow<SearchModel?>(null)
     val searchResponse: StateFlow<SearchModel?> = _searchResponse
 
+    private val _getLenderStatusResponse = MutableStateFlow<GetLenderStatusModel?>(null)
+    val getLenderStatusResponse: StateFlow<GetLenderStatusModel?> = _getLenderStatusResponse
+
+    private val _lenderStatusProgress = MutableStateFlow(false)
+    val lenderStatusProgress: StateFlow<Boolean> = _lenderStatusProgress
+
+    private val _lenderStatusLoaded = MutableStateFlow(false)
+    val lenderStatusLoaded: StateFlow<Boolean> = _lenderStatusLoaded
+
     private val _errorMessage = MutableStateFlow("")
     val errorMessage: StateFlow<String> = _errorMessage
 
     private val _navigationToSignIn = MutableStateFlow(false)
     val navigationToSignIn: StateFlow<Boolean> = _navigationToSignIn
+    private val _showNoLenderResponse = MutableStateFlow(false)
+    val showNoLenderResponse:  StateFlow<Boolean> = _showNoLenderResponse
 
     private fun updateErrorMessage(message: String) {
         _errorMessage.value = message
     }
 
-    fun searchApi(context: Context, searchBodyModel: SearchBodyModel) {
-        _webProgress.value = true
+    fun getLenderStatusApi(context: Context, loanType: String, step: String) {
+        _lenderStatusProgress.value = true
         viewModelScope.launch(Dispatchers.IO) {
-            handleSearchApi(context, searchBodyModel)
+            handleGetLenderStatusApi(context, loanType, step)
         }
     }
 
-    private suspend fun handleSearchApi(
-        context: Context, searchBodyModel: SearchBodyModel,
+    private suspend fun handleGetLenderStatusApi(
+        context: Context,
+        loanType: String, step: String,
         checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
-            ApiRepository.searchApi(searchBodyModel)
+            ApiRepository.getLenderStatusApi(loanType, step)
         }.onSuccess { response ->
-            Log.d("serachApi",response?.data.toString())
-            Log.d("serachApi",response?.data?.consentResponse.toString())
+            Log.d("serachApi", response.toString())
+            response?.let {
+                handleGetLenderApiSuccess(response)
+            }
+        }.onFailure { error ->
+                Log.d("serachApi", error.toString())
+
+                if(error is SerializationException ){
+                    _showNoLenderResponse.value = true
+                }
+                else if (checkForAccessToken &&
+                    error is ResponseException &&
+                    error.response.status.value == 401
+                ) {
+                    if (handleAuthGetAccessTokenApi()) {
+                        handleGetLenderStatusApi(context, loanType, step, false)
+                    } else {
+                        _navigationToSignIn.value = true
+                    }
+                } else {
+                    handleFailure(error, context, isFormSearch = true)
+                }
+            }
+    }
+
+    private suspend fun handleGetLenderApiSuccess(response: GetLenderStatusModel) {
+        withContext(Dispatchers.Main) {
+            _lenderStatusLoaded.value = true
+            _lenderStatusProgress.value = false
+            _getLenderStatusResponse.value = response
+        }
+    }
+
+    fun formSubmissionApi(context: Context, searchBodyModel: SearchBodyModel) {
+        _webProgress.value = true
+        viewModelScope.launch(Dispatchers.IO) {
+            handleFormSubmissionApi(context, searchBodyModel)
+        }
+    }
+
+    private suspend fun handleFormSubmissionApi(
+        context: Context,
+        searchBodyModel: SearchBodyModel,
+        checkForAccessToken: Boolean = true
+    ) {
+        kotlin.runCatching {
+            ApiRepository.formSubmissionApi(searchBodyModel)
+        }.onSuccess { response ->
+            Log.d("serachApi", response?.data.toString())
+            Log.d("serachApi", response?.data?.consentResponse.toString())
             response?.let {
                 handleSearchApiSuccess(response)
             }
         }.onFailure { error ->
-            Log.d("serachApi",error.toString())
+            Log.d("serachApi", error.toString())
             if (checkForAccessToken &&
                 error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                //Get Access Token using RefreshToken
+                // Get Access Token using RefreshToken
                 if (handleAuthGetAccessTokenApi()) {
-                    handleSearchApi(context, searchBodyModel, false)
+                    handleFormSubmissionApi(context, searchBodyModel, false)
                 } else {
                     _navigationToSignIn.value = true
                 }
@@ -117,7 +192,7 @@ class WebViewModel : BaseViewModel() {
         }
     }
 
-    fun updateSearchResponse(response: SearchModel){
+    fun updateSearchResponse(response: SearchModel) {
         _webViewLoaded.value = true
         _searchResponse.value = response
     }
@@ -139,7 +214,8 @@ class WebViewModel : BaseViewModel() {
     }
 
     private suspend fun handleAAConsentApprovalApi(
-        context: Context, consentBodyModel: ConsentApprovalRequest,
+        context: Context,
+        consentBodyModel: ConsentApprovalRequest,
         checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
@@ -153,7 +229,7 @@ class WebViewModel : BaseViewModel() {
                 error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                //Get Access Token using RefreshToken
+                // Get Access Token using RefreshToken
                 if (handleAuthGetAccessTokenApi()) {
                     handleAAConsentApprovalApi(context, consentBodyModel, false)
                 } else {
@@ -179,7 +255,11 @@ class WebViewModel : BaseViewModel() {
 
     private val apiCalled = false
 
-    fun searchGst(gstSearchBody: GstSearchBody, context: Context, checkForAccessToken: Boolean = true) {
+    fun searchGst(
+        gstSearchBody: GstSearchBody,
+        context: Context,
+        checkForAccessToken: Boolean = true
+    ) {
         if (apiCalled) return
         _webProgress.value = true
         viewModelScope.launch(Dispatchers.IO) {
@@ -194,7 +274,7 @@ class WebViewModel : BaseViewModel() {
                     error is ResponseException &&
                     error.response.status.value == 401
                 ) {
-                    //Get Access Token using RefreshToken
+                    // Get Access Token using RefreshToken
                     if (handleAuthGetAccessTokenApi()) {
                         searchGst(gstSearchBody, context, false)
                     } else {
@@ -221,8 +301,11 @@ class WebViewModel : BaseViewModel() {
     private val _gstConsentApprovalResponse = MutableStateFlow<GstConsentResponse?>(null)
     val gstConsentApprovalResponse: StateFlow<GstConsentResponse?> = _gstConsentApprovalResponse
 
-    fun gstConsentApproval(consentApproval: ConsentApprovalRequest, context: Context,
-                           checkForAccessToken: Boolean = true) {
+    fun gstConsentApproval(
+        consentApproval: ConsentApprovalRequest,
+        context: Context,
+        checkForAccessToken: Boolean = true
+    ) {
         _isLoading.value = true
         viewModelScope.launch(Dispatchers.IO) {
             kotlin.runCatching {
@@ -238,7 +321,9 @@ class WebViewModel : BaseViewModel() {
                 ) {
                     if (handleAuthGetAccessTokenApi()) {
                         gstConsentApproval(
-                            consentApproval, context = context, checkForAccessToken =
+                            consentApproval,
+                            context = context,
+                            checkForAccessToken =
                             false
                         )
                     } else {
@@ -259,43 +344,54 @@ class WebViewModel : BaseViewModel() {
         }
     }
 
-    private suspend fun handleFailure(error: Throwable, context: Context , isFormSearch : Boolean = false) {
+    private suspend fun handleFailure(
+        error: Throwable,
+        context: Context,
+        isFormSearch: Boolean = false
+    ) {
         withContext(Dispatchers.Main) {
-            if (error is ResponseException) {
-                CommonMethods().handleResponseException(
-                    error = error, context = context, updateErrorMessage = ::updateErrorMessage,
-                    _showServerIssueScreen = _showServerIssueScreen, _middleLoan = _middleLoan,
-                    _unAuthorizedUser = _unAuthorizedUser, _unexpectedError = _unexpectedError,
-                    _showLoader = _showLoader, isFormSearch = isFormSearch ,
-                    searchError = { _searchFailed.value = true }
-                )
-            } else {
-                CommonMethods().handleGeneralException(
-                    error = error, _showInternetScreen = _showInternetScreen,
-                    _showTimeOutScreen = _showTimeOutScreen, _unexpectedError = _unexpectedError
-                )
+            when (error) {
+                is ResponseException -> {
+                    CommonMethods().handleResponseException(
+                        error = error, context = context, updateErrorMessage = ::updateErrorMessage,
+                        _showServerIssueScreen = _showServerIssueScreen, _middleLoan = _middleLoan,
+                        _unAuthorizedUser = _unAuthorizedUser, _unexpectedError = _unexpectedError,
+                        _showLoader = _showLoader, isFormSearch = isFormSearch,
+                        searchError = { _searchFailed.value = true }
+                    )
+                }
+
+                else -> {
+                    CommonMethods().handleGeneralException(
+                        error = error,
+                        _showInternetScreen = _showInternetScreen,
+                        _showTimeOutScreen = _showTimeOutScreen,
+                        _unexpectedError = _unexpectedError
+                    )
+                }
             }
             _isLoading.value = false
             _webProgress.value = false
         }
     }
 
-
-    fun financeSearch(context: Context, financeSearchModel: FinanceSearchModel) {
+    fun pFFormSubmissionApi(context: Context, financeSearchModel: FinanceSearchModel) {
         _webProgress.value = true
         viewModelScope.launch(Dispatchers.IO) {
-            handleFinanceSearch(
-                context = context, financeSearchModel =  financeSearchModel
+            handlePFFormSubmission(
+                context = context,
+                financeSearchModel = financeSearchModel
             )
         }
     }
 
-    private suspend fun handleFinanceSearch(
-        financeSearchModel: FinanceSearchModel, checkForAccessToken: Boolean = true,
+    private suspend fun handlePFFormSubmission(
+        financeSearchModel: FinanceSearchModel,
+        checkForAccessToken: Boolean = true,
         context: Context
     ) {
         kotlin.runCatching {
-            ApiRepository.financeSearch(financeSearchModel)
+            ApiRepository.pFFormSubmissionApi(financeSearchModel)
         }.onSuccess { response ->
             response?.let {
                 handleSearchApiSuccess(response = response)
@@ -304,10 +400,11 @@ class WebViewModel : BaseViewModel() {
             if (checkForAccessToken &&
                 error is ResponseException && error.response.status.value == 401
             ) {
-                //Get Access Token using RefreshToken
+                // Get Access Token using RefreshToken
                 if (handleAuthGetAccessTokenApi()) {
-                    handleFinanceSearch(
-                        context = context, financeSearchModel = financeSearchModel,
+                    handlePFFormSubmission(
+                        context = context,
+                        financeSearchModel = financeSearchModel,
                         checkForAccessToken = false
                     )
                 } else {
@@ -319,7 +416,11 @@ class WebViewModel : BaseViewModel() {
         }
     }
 
-    fun financeConsentApproval(consentApproval: ConsentApprovalRequest, context: Context, checkForAccessToken: Boolean = true) {
+    fun financeConsentApproval(
+        consentApproval: ConsentApprovalRequest,
+        context: Context,
+        checkForAccessToken: Boolean = true
+    ) {
         _isLoading.value = true
         viewModelScope.launch(Dispatchers.IO) {
             kotlin.runCatching {
@@ -330,12 +431,13 @@ class WebViewModel : BaseViewModel() {
                 }
             }.onFailure { error ->
                 if (checkForAccessToken &&
-                        error is ResponseException && error.response.status.value == 401
+                    error is ResponseException && error.response.status.value == 401
                 ) {
-                    //Get Access Token using RefreshToken
+                    // Get Access Token using RefreshToken
                     if (handleAuthGetAccessTokenApi()) {
                         financeConsentApproval(
-                            consentApproval, context = context,
+                            consentApproval,
+                            context = context,
                             checkForAccessToken = false
                         )
                     } else {

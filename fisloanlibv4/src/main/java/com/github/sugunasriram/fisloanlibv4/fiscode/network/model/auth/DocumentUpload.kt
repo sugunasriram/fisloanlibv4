@@ -13,5 +13,5 @@ data class DocumentUpload(
 data class Document(
     val mimetype: String? = null,
     val base64: String? = null,
-    val url : String? = null
+    val url: String? = null
 )

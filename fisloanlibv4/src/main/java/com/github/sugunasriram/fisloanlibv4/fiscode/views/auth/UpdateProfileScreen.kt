@@ -7,6 +7,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.Environment
 import android.util.Base64
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -61,19 +62,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
@@ -88,7 +90,6 @@ import androidx.navigation.compose.rememberNavController
 import com.github.sugunasriram.fisloanlibv4.R
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.CenterProgress
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.ClickableDropDownField
-import com.github.sugunasriram.fisloanlibv4.fiscode.components.ClickableText
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.CurvedPrimaryButton
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.CustomImage
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.CustomModalBottomSheet
@@ -132,7 +133,7 @@ import java.util.Locale
 @Composable
 fun PreviewUpdateProfileScreen() {
     val navController = rememberNavController()
-    UpdateProfileScreen(navController = navController, "Side Bar ")
+    UpdateProfileScreen(navController = navController , "Side Bar ")
 }
 
 @SuppressLint("SuspiciousIndentation")
@@ -191,34 +192,14 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
     val area1 by registerViewModel.area1.observeAsState("")
     val area1Error by registerViewModel.area1Error.observeAsState(null)
 
-    val town1 by registerViewModel.town1.observeAsState("")
-    val town1Error by registerViewModel.town1Error.observeAsState(null)
+    val district1 by registerViewModel.district1.observeAsState("")
+    val district1Error by registerViewModel.district1Error.observeAsState(null)
 
     val state1 by registerViewModel.state1.observeAsState("")
     val state1Error by registerViewModel.state1Error.observeAsState(null)
 
-    val officialAddress by registerViewModel.officialAddress.observeAsState("")
     val officialAddressField by registerViewModel.officialAddressField.observeAsState()
     val officialAddressError by registerViewModel.officialAddressError.observeAsState(null)
-
-    val pinCode2 by registerViewModel.pinCode2.observeAsState("")
-    val pinCode2Error by registerViewModel.pinCode2Error.observeAsState(null)
-
-    val city2 by registerViewModel.city2.observeAsState("")
-    val city2Error by registerViewModel.city2Error.observeAsState(null)
-
-    val area2 by registerViewModel.area2.observeAsState("")
-    val area2Error by registerViewModel.area2Error.observeAsState(null)
-
-    val town2 by registerViewModel.town2.observeAsState("")
-    val town2Error by registerViewModel.town2Error.observeAsState(null)
-
-    val state2 by registerViewModel.state2.observeAsState("")
-    val state2Error by registerViewModel.state2Error.observeAsState(null)
-
-    val permanentAddress: String? by registerViewModel.permanentAddress.observeAsState("")
-    val permanentAddressField by registerViewModel.permanentAddressField.observeAsState()
-    val permanentAddressError by registerViewModel.permanentAddressError.observeAsState(null)
 
     val showImageNotUploadedError by registerViewModel.showDocumentNotUploadedError.collectAsState()
     val imageUploading by registerViewModel.documentUploading.collectAsState()
@@ -226,7 +207,6 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
     var documentData by remember { mutableStateOf(List<Document?>(2) { null }) }
     var showButton by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
-
 
     val firstNameFocusRequester = remember { FocusRequester() }
     val lastNameFocusRequester = remember { FocusRequester() }
@@ -244,19 +224,11 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
     val pinCode1FocusRequester = remember { FocusRequester() }
     val city1FocusRequester = remember { FocusRequester() }
     val area1FocusRequester = remember { FocusRequester() }
-    val town1FocusRequester = remember { FocusRequester() }
+    val district1FocusRequester = remember { FocusRequester() }
     val state1FocusRequester = remember { FocusRequester() }
-    val officialAddressFocusRequester = remember { FocusRequester() }
-    val pinCode2FocusRequester = remember { FocusRequester() }
-    val city2FocusRequester = remember { FocusRequester() }
-    val area2FocusRequester = remember { FocusRequester() }
-    val town2FocusRequester = remember { FocusRequester() }
-    val state2FocusRequester = remember { FocusRequester() }
-    val permanentAddressFocusRequester = remember { FocusRequester() }
 
     val checkboxValue: Boolean by registerViewModel.checkBox.observeAsState(false)
     val pinCode1Response by registerViewModel.pinCode1Response.collectAsState()
-    val pinCode2Response by registerViewModel.pinCode2Response.collectAsState()
 
     val showInternetScreen by registerViewModel.showInternetScreen.observeAsState(false)
     val showTimeOutScreen by registerViewModel.showTimeOutScreen.observeAsState(false)
@@ -282,12 +254,8 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
 
     var selectedCity1 by remember { mutableStateOf(city1 ?: "") }
     val onCity1Selected: (String) -> Unit = { selectedText ->
+        registerViewModel.onCity1Changed(selectedText,context)
         selectedCity1 = selectedText
-    }
-
-    var selectedCity2 by remember { mutableStateOf(city2 ?: "") }
-    val onCity2Selected: (String) -> Unit = { selectedText ->
-        selectedCity2 = selectedText
     }
 
     val formattedGender = gender?.replaceFirstChar {
@@ -319,6 +287,19 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
     val bottomSheet2Value = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true
     )
+    val focusState = remember { mutableStateOf(false) }
+    val fieldOffsetY = remember { mutableStateOf(0f) }
+    val density = LocalDensity.current
+
+    LaunchedEffect(focusState.value) {
+        if (focusState.value) {
+            val topTargetInPx = with(density) { 80.dp.toPx() }
+            val scrollAmount = (scrollState.value + fieldOffsetY.value - topTargetInPx).toInt()
+            scrollState.animateScrollTo(scrollAmount.coerceAtLeast(0))
+            delay(100)
+            bringFocusRequester.bringIntoView()
+        }
+    }
 
 
     if (!showInternetScreen && !showTimeOutScreen && !showServerIssueScreen && !unexpectedErrorScreen) {
@@ -349,9 +330,9 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
                             state = state1,
                             stateFocus = state1FocusRequester,
                             stateError = state1Error ?: "",
-                            town = town1,
-                            townFocus = town1FocusRequester,
-                            townError = town1Error,
+                            district = district1,
+                            districtFocus = district1FocusRequester,
+                            districtError = district1Error,
                             city = city1,
                             cityFocus = city1FocusRequester,
                             cityError = city1Error,
@@ -359,34 +340,11 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
                             pinCodeResponse = pinCode1Response,
                             registerViewModel = registerViewModel,
                             context = context,
-                            onItemSelected = onCity1Selected
+                            onItemSelected = onCity1Selected,
+                            scrollState = scrollState
                         )
                     }
                 ) {
-                    CustomModalBottomSheet(
-                        bottomSheetState = bottomSheet2Value,
-                        sheetContent = {
-                            FullAddress(
-                                id = "2",
-                                pinCode = pinCode2, pinCodeFocus = pinCode2FocusRequester,
-                                pinCodeError = pinCode2Error,
-                                area = area2, areaFocus = area2FocusRequester,
-                                areaError = area2Error,
-                                bottomSheetValue = bottomSheet2Value, scope = scope,
-                                state = state2, stateFocus = state2FocusRequester,
-                                stateError = state2Error ?: "",
-                                town = town2, townFocus = town2FocusRequester,
-                                townError = town2Error,
-                                city = city2, cityFocus = city2FocusRequester,
-                                cityError = city2Error,
-                                selectedCity = selectedCity2.ifEmpty { city2 ?: "" },
-                                pinCodeResponse = pinCode2Response,
-                                registerViewModel = registerViewModel, context = context,
-                                onItemSelected = onCity2Selected,
-                                headerText = stringResource(R.string.permanent_address)
-                            )
-                        }
-                    ) {
                         FixedTopBottomScreen(
                             navController = navController,
                             contentStart = 0.dp, contentEnd = 0.dp,
@@ -409,6 +367,7 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
                                     "others" -> "transgender"
                                     else -> genderSelectedText.lowercase(Locale.ROOT).ifEmpty { gender ?: "" }
                                 }
+
                                 officialAddressField?.let { officialAddress ->
                                     registerViewModel.onClickUpdateProfile(
                                         navController = navController,
@@ -431,19 +390,20 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
                                             firstName = firstName?.trim(),
                                             lastName = lastName?.trim(),
                                             email = personalEmailId?.trim(),
-//                                            officialEmail = officialEmailId?.trim(),
-                                            officialEmail =  officialEmailId?.trim()?.takeIf { it.isNotEmpty() },
+                                            officialEmail = if(employmentTypeSmallCase.equals("salaried")) officialEmailId?.trim()
+                                            else null,
                                             dob = dob?.trim(),
                                             gender = genderFormat,
                                             panNumber = panNumber?.trim(),
                                             employmentType = if (employmentTypeSmallCase.equals("selfEmployed", true))
                                                 "selfEmployed"
                                             else employmentTypeSmallCase,
-                                            companyName = companyName?.trim()?.takeIf { it.isNotEmpty() },
+                                            companyName = if(employmentTypeSmallCase.equals("salaried")) companyName?.trim()
+                                            else null,
                                             income = income?.trim().toString(),
                                             udyamNumber = udyamNumber,
                                             address1 = officialAddress.area?.trim()?.takeIf { it.isNotEmpty() },
-                                            address2 = officialAddress.town?.trim()?.takeIf { it.isNotEmpty() },
+                                            address2 = officialAddress.district?.trim()?.takeIf { it.isNotEmpty() },
                                             pincode1 = officialAddress.pincode?.trim(),
                                             city1 = officialAddress.city?.trim(),
                                             state1 = officialAddress.state?.trim(),
@@ -463,7 +423,7 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
                                 SideMenuProfileCard(
                                     userName = "", contact = "", displayUserInfo = false,
                                     navController = navController,
-                                    onBackClick = { navController.popBackStack() }
+                                    onBackClick = { navigateApplyByCategoryScreen(navController) }
                                 )
                             }
 
@@ -493,7 +453,8 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
                                     keyboardType = KeyboardType.Text
                                 ),
                                 regexPattern = "[^a-zA-Z0-9]",
-                                inputLimit = 10
+                                inputLimit = 10,
+                                scrollState = scrollState
                             )
 
                             BasicDetailsInputField(
@@ -503,10 +464,7 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
                                 readOnly = false,
                                 showTrailingIcon = true,
                                 onValueChange = {
-                                    registerViewModel.onFirstNameChanged(
-                                        it,
-                                        context
-                                    )
+                                    registerViewModel.onFirstNameChanged(it, context)
                                 },
                                 error = firstNameError,
                                 focusRequester =firstNameFocusRequester,
@@ -521,7 +479,8 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
                                 ),
                                 regexPattern = "[^a-zA-Z ]",
                                 inputLimit = 30,
-//                                showEditableOption = panApiThrewError
+//                                showEditableOption = panApiThrewError,
+                                scrollState = scrollState
                             )
                             BasicDetailsInputField(
                                 label = stringResource(id = R.string.last_name),
@@ -543,7 +502,8 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
                                 ),
                                 regexPattern ="[^a-zA-Z ]",
                                 inputLimit = 30,
-//                                showEditableOption = panApiThrewError
+//                                showEditableOption = panApiThrewError,
+                                scrollState = scrollState
                             )
                             InputField(
                                 inputText = TextFieldValue(""),
@@ -554,8 +514,16 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
                                 start = 5.dp,
                                 end = 10.dp,
                                 showOnlyTextField = false,
-                                modifier = Modifier.focusRequester(employeeTypeFocusRequester)
-                                    .bringIntoViewRequester(bringFocusRequester),
+                                modifier = Modifier
+                                    .focusRequester(employeeTypeFocusRequester)
+                                    .bringIntoViewRequester(bringFocusRequester)
+                                    .onFocusChanged { focusState.value = it.isFocused }
+                                    .onGloballyPositioned {
+                                        fieldOffsetY.value = it.localToRoot(Offset.Zero).y
+                                    },
+//                                modifier = Modifier
+//                                    .focusRequester(employeeTypeFocusRequester)
+//                                    .bringIntoViewRequester(bringFocusRequester),
                                 error = employeeTypeError,
                                 showBox = true,
                                 boxHeight = 55.dp,
@@ -593,14 +561,18 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
                                 focusRequester = personalEmailIdFocusRequester,
                                 leadingImage = painterResource(R.drawable.email_icon),
                                 keyboardActions = KeyboardActions(onNext ={
-                                    officialEmailIdFocusRequester.requestFocus()}),
+                                    if(employmentSelectedText != "Salaried") dobFocusRequester.requestFocus()
+                                    else officialEmailIdFocusRequester.requestFocus()
+                                    }),
                                 keyboardOptions = KeyboardOptions(
                                     imeAction = ImeAction.Next,
                                     keyboardType = KeyboardType.Email
-                                )
+                                ),
+                                scrollState = scrollState,
+                                regexPattern = "[^a-zA-Z0-9 .,!?@#\$%&*()_\\-':;/\"]",
                             )
 
-//                            if(employmentSelectedText == "Salaried") {
+                            if(employmentSelectedText == "Salaried") {
                                 BasicDetailsInputField(
                                     label = stringResource(id = R.string.official_email_id),
                                     value = officialEmailId ?: "",
@@ -618,9 +590,11 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
                                     keyboardOptions = KeyboardOptions(
                                         imeAction = ImeAction.Next,
                                         keyboardType = KeyboardType.Email
-                                    )
+                                    ),
+                                    scrollState = scrollState,
+                                    regexPattern = "[^a-zA-Z0-9 .,!?@#\$%&*()_\\-':;/\"]",
                                 )
-//                            }
+                            }
 
                                 BasicDetailsInputField(
                                     label = stringResource(id = R.string.phone_number),
@@ -634,14 +608,16 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
                                     keyboardOptions = KeyboardOptions(
                                         imeAction = ImeAction.Next,
                                         keyboardType = KeyboardType.Phone
-                                    )
+                                    ),
+                                    scrollState = scrollState
                                 )
 
                             DatePickerField(
                                 dob = dob ?: " ", dobFocus = dobFocusRequester,
                                 registerViewModel = registerViewModel, dobError = dobError ?: "",
                                 context = context, genderFocusRequester = genderFocusRequester,
-                                keyboardController = keyboardController
+                                keyboardController = keyboardController,
+                                scrollState = scrollState
                             )
                             InputField(
                                 inputText = TextFieldValue(""),
@@ -652,44 +628,58 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
                                 start = 5.dp,
                                 end = 10.dp,
                                 showOnlyTextField = false,
-                                modifier = Modifier.focusRequester(genderFocusRequester)
-                                    .bringIntoViewRequester(bringFocusRequester),
+                                modifier = Modifier
+                                    .focusRequester(genderFocusRequester)
+                                    .bringIntoViewRequester(bringFocusRequester)
+                                    .onFocusChanged { focusState.value = it.isFocused }
+                                    .onGloballyPositioned {
+                                        fieldOffsetY.value = it.localToRoot(Offset.Zero).y
+                                    },
+//                                modifier = Modifier
+//                                    .focusRequester(genderFocusRequester)
+//                                    .bringIntoViewRequester(bringFocusRequester),
                                 error = genderError,
                                 showBox = true,
                                 boxHeight = 55.dp,
                                 onValueChange = { },
                                 leadingImage = painterResource(R.drawable.gender_icon),
                                 keyboardActions = KeyboardActions(onNext ={
-                                    companyNameFocusRequester.requestFocus() }),
+                                    if(employmentSelectedText != "Salaried") udyamNumberFocusRequester.requestFocus()
+                                    else companyNameFocusRequester.requestFocus()
+                                    }),
                                 radioList = genderList,
                                 selectedRadio = genderSelectedText,
                                 onRadioSelected = { selectedText ->
                                     genderSelectedText = selectedText
                                     registerViewModel.onGenderChanged(selectedText, context)
-                                    companyNameFocusRequester.requestFocus()
+                                    if(employmentSelectedText != "Salaried") udyamNumberFocusRequester.requestFocus()
+                                    else companyNameFocusRequester.requestFocus()
                                 },
                             )
-
-                            BasicDetailsInputField(
-                                label = stringResource(id = R.string.company_name),
-                                value = companyName?:"",
-                                readOnly = false,
-                                showStar = if(employmentSelectedText == "Salaried")true else false,
-                                showTrailingIcon=true,
-                                onValueChange = { registerViewModel.onCompanyNameChanged(it) },
-                                error = companyNameError,
-                                focusRequester = companyNameFocusRequester,
-                                leadingImage = painterResource(R.drawable.company_icon),
-                                keyboardActions = KeyboardActions(onNext ={
-                                    udyamNumberFocusRequester.requestFocus() }),
-                                keyboardOptions = KeyboardOptions(
-                                    capitalization = KeyboardCapitalization.Sentences,
-                                    imeAction = ImeAction.Next,
-                                    keyboardType = KeyboardType.Text
-                                ),
-                                regexPattern = "[^a-zA-Z0-9 ./&(),]",
-                                inputLimit = 50
-                            )
+                            if(employmentSelectedText == "Salaried") {
+                                BasicDetailsInputField(
+                                    label = stringResource(id = R.string.company_name),
+                                    value = companyName ?: "",
+                                    readOnly = false,
+                                    showStar = if (employmentSelectedText == "Salaried") true else false,
+                                    showTrailingIcon = true,
+                                    onValueChange = { registerViewModel.onCompanyNameChanged(it) },
+                                    error = companyNameError,
+                                    focusRequester = companyNameFocusRequester,
+                                    leadingImage = painterResource(R.drawable.company_icon),
+                                    keyboardActions = KeyboardActions(onNext = {
+                                        udyamNumberFocusRequester.requestFocus()
+                                    }),
+                                    keyboardOptions = KeyboardOptions(
+                                        capitalization = KeyboardCapitalization.Sentences,
+                                        imeAction = ImeAction.Next,
+                                        keyboardType = KeyboardType.Text
+                                    ),
+                                    regexPattern = "[^a-zA-Z0-9 ./&(),]",
+                                    inputLimit = 50,
+                                    scrollState = scrollState
+                                )
+                            }
                             BasicDetailsInputField(
                                 label = stringResource(id = R.string.udyam_number),
                                 value = udyamNumber?:"",
@@ -702,17 +692,18 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
                                 leadingImage = painterResource(R.drawable.udyam_number_icon),
                                 keyboardOptions = KeyboardOptions(
                                     capitalization = KeyboardCapitalization.Characters,
-                                    imeAction = ImeAction.Next,
+                                    imeAction = ImeAction.Done,
                                     keyboardType = KeyboardType.Text
                                 ),
                                 regexPattern = "[^a-zA-Z0-9-]",
-                                inputLimit = 19
+                                inputLimit = 19,
+                                scrollState = scrollState
                             )
                             val address1 = if (officialAddressField != null) {
                                 listOfNotNull(
                                     listOfNotNull(
                                         officialAddressField!!.area?.takeIf { it.isNotBlank() },
-                                        officialAddressField!!.town?.takeIf { it.isNotBlank() }
+                                        officialAddressField!!.district?.takeIf { it.isNotBlank() }
                                     ).takeIf { it.isNotEmpty() }?.joinToString(", "),
 
                                     listOfNotNull(
@@ -726,36 +717,11 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
                                 ""
                             }
 
-                            val address2 = if (permanentAddressField != null) {
-                                listOfNotNull(
-                                    listOfNotNull(
-                                        permanentAddressField!!.area?.takeIf { it.isNotBlank() },
-                                        permanentAddressField!!.town?.takeIf { it.isNotBlank() }
-                                    ).takeIf { it.isNotEmpty() }?.joinToString(", "),
-
-                                    listOfNotNull(
-                                        permanentAddressField!!.city?.takeIf { it.isNotBlank() },
-                                        permanentAddressField!!.state?.takeIf { it.isNotBlank() }
-                                    ).takeIf { it.isNotEmpty() }?.joinToString(", "),
-
-                                    permanentAddressField!!.pincode?.takeIf { it.isNotBlank() }
-                                ).joinToString("\n")
-                            } else {
-                                ""
-                            }
-
                             AddressFields(
                                 bottomSheet1Value = bottomSheet1Value,
                                 address1 = address1,
-//                                address1 ="${officialAddressField?.area},${officialAddressField?.town} \n ${officialAddressField?.city},${officialAddressField?.state}\n ${officialAddressField?.pincode}",
-                                bottomSheet2Value = bottomSheet2Value,
                                 scope = scope,
-                                address1Focus = officialAddressFocusRequester,
                                 address1Error = officialAddressError,
-//                                address2 ="${permanentAddressField?.area},${permanentAddressField?.town} \n ${permanentAddressField?.city},${permanentAddressField?.state}\n ${permanentAddressField?.pincode}",
-                                address2 = address2,
-                                address2Focus = permanentAddressFocusRequester,
-                                address2Error = permanentAddressError
                             )
 
                             UploadDocumentCard(
@@ -772,7 +738,7 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
                                 setShowButton = { showButton = it },
                             )
                         }
-                    }
+
                 }
             }
 
@@ -791,48 +757,46 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AddressFields(
-    bottomSheet1Value: ModalBottomSheetState, bottomSheet2Value: ModalBottomSheetState,
-    address1: String?, address1Focus: FocusRequester, address1Error: String?,
-    address2: String?, address2Focus: FocusRequester, address2Error: String?,
-    scope: CoroutineScope,readOnly: Boolean=false
+    bottomSheet1Value: ModalBottomSheetState,
+    address1: String?, address1Error: String?,
+    scope: CoroutineScope, readOnly: Boolean = false
 ) {
-    InputField(
-        inputText = TextFieldValue(address1.toString()), topText = stringResource(id = R.string.address),
-        boxText = address1.toString(), onValueChange = {},
-        top = 0.dp, start = 5.dp, end = 10.dp, showOnlyTextField = false,
-        showBox = true, showStar = false,
-        error = address1Error,
-        readOnly = readOnly,
-        leadingImage = painterResource(R.drawable.location_icon),
-        boxClick = { scope.launch { bottomSheet1Value.show() } }
-    )
+    Box(modifier = Modifier.clickable {
+        readOnly.takeIf { !it }?.let {
+            scope.launch { bottomSheet1Value.show() }
+        }
+    }) {
 
-//    InputField(
-//        inputText = TextFieldValue(address2.toString()), topText = stringResource(id = R.string.permanent_address),
-//        top = 0.dp, start = 5.dp, end = 10.dp, showOnlyTextField = false, error = address2Error,
-//        showOptional = true, showBox = true, boxText = address2.toString(), onValueChange = {},
-//        leadingImage = painterResource(R.drawable.location_icon),
-//        readOnly = readOnly,
-//        boxClick = {
-//            scope.launch {
-//                bottomSheet1Value.hide()
-//                bottomSheet2Value.show()
-//            }
-//        }
-//    )
+        InputField(
+            inputText = TextFieldValue(address1.toString()),
+            topText = stringResource(id = R.string.address),
+            boxText = address1.toString(),
+            onValueChange = {},
+            top = 0.dp,
+            start = 5.dp,
+            end = 10.dp,
+            showOnlyTextField = false,
+            showBox = true,
+            showStar = false,
+            error = address1Error,
+            readOnly = readOnly,
+            leadingImage = painterResource(R.drawable.location_icon),
+            boxClick = { scope.launch { bottomSheet1Value.show() } }
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun FullAddress(
-    id: String = "1",
-    pinCodeError: String?, areaError: String?, townError: String?, cityError: String?,
+    pinCodeError: String?, areaError: String?, districtError: String?, cityError: String?,
     bottomSheetValue: ModalBottomSheetState, pinCode: String?, scope: CoroutineScope,
-    state: String?, area: String?, town: String?, city: String?, pinCodeFocus: FocusRequester,
-    areaFocus: FocusRequester, townFocus: FocusRequester, cityFocus: FocusRequester,
+    state: String?, area: String?, district: String?, city: String?, pinCodeFocus: FocusRequester,
+    areaFocus: FocusRequester, districtFocus: FocusRequester, cityFocus: FocusRequester,
     context: Context, registerViewModel: RegisterViewModel, pinCodeResponse: PincodeModel?,
     selectedCity: String?, stateFocus: FocusRequester, stateError: String,
-    headerText: String = stringResource(R.string.address), onItemSelected: (String) -> Unit
+    headerText: String = stringResource(R.string.address), onItemSelected: (String) -> Unit,
+    scrollState:ScrollState
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -855,20 +819,18 @@ fun FullAddress(
             textColor = appBlack
         )
         AreaField(
-            id = id,
             area = area, areaError = areaError, areaFocus = areaFocus,
-            registerViewModel = registerViewModel, context = context
+            registerViewModel = registerViewModel, context = context, scrollState = scrollState
         )
         PinCodeAndTownFields(
-            id = id,
             pinCode = pinCode, pinCodeFocus = pinCodeFocus, registerViewModel = registerViewModel,
             pinCodeResponse = pinCodeResponse, areaFocus = areaFocus, pinCodeError = pinCodeError,
             context = context,
             state = state, stateFocus = stateFocus, stateError = stateError,
-            selectedCity = selectedCity,
+            selectedCity = selectedCity,city=city,
             cityFocus = cityFocus, cityError = cityError ?: "",
-            town = town, townError = townError, townFocus = townFocus,
-            onItemSelected = onItemSelected
+            district = district, districtError = districtError, districtFocus = districtFocus,
+            onItemSelected = onItemSelected, scrollState = scrollState
         )
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             CurvedPrimaryButton(text = "Clear", start = 30.dp, end = 30.dp) {
@@ -876,56 +838,43 @@ fun FullAddress(
                 onItemSelected("")
             }
             CurvedPrimaryButton(text = stringResource(R.string.update), start = 30.dp, end = 30.dp) {
-                if (id == "1")
                     registerViewModel.address1Validation(
                         scope = scope, bottomSheetStateValue = bottomSheetValue,
-                        pinCode = pinCode ?: "", area = area ?: "", town = town ?: "",
+                        pinCode = pinCode ?: "", area = area ?: "", district = district ?: "",
                         city = selectedCity.takeUnless { it.isNullOrEmpty() } ?: city.orEmpty(),
                         context = context, state = state ?: "",
-                        areaFocus=areaFocus, townFocus = townFocus, pincodeFocus = pinCodeFocus
-                    )
-                else
-                    registerViewModel.address2Validation(
-                        scope = scope, bottomSheetStateValue = bottomSheetValue,
-                        pinCode = pinCode ?: "", area = area ?: "", town = town ?: "",
-                        city = selectedCity.takeUnless { it.isNullOrEmpty() } ?: city.orEmpty(),
-                        context = context, state = state ?: ""
+                        areaFocus=areaFocus, districtFocus = districtFocus, pincodeFocus = pinCodeFocus
                     )
             }
         }
-
-
     }
 }
 
 @SuppressLint("SuspiciousIndentation")
 @Composable
 fun PinCodeAndTownFields(
-    id: String = "1",
     pinCode: String?,
     pinCodeFocus: FocusRequester,
     registerViewModel: RegisterViewModel,
     pinCodeResponse: PincodeModel?,
     state: String?, stateFocus: FocusRequester, stateError: String?,
-    town: String?, townError: String?, townFocus: FocusRequester,
+    district: String?, districtError: String?, districtFocus: FocusRequester,
     areaFocus: FocusRequester,
     pinCodeError: String?,
-    selectedCity: String?, cityFocus: FocusRequester, cityError: String,
+    selectedCity: String?, city: String?,cityFocus: FocusRequester, cityError: String,
     onItemSelected: (String) -> Unit,
-    context: Context
+    context: Context, scrollState:ScrollState
 ) {
     var expand by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
-    val nearCityResponse by if (id == "1")
-        registerViewModel.pinCode1Response.collectAsState()
-    else
-        registerViewModel.pinCode2Response.collectAsState()
+    val nearCityResponse by registerViewModel.pinCode1Response.collectAsState()
+
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 12.dp, end = 12.dp, bottom = 5.dp),
+                .padding(start = 12.dp, end = 12.dp, bottom = 10.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -944,8 +893,7 @@ fun PinCodeAndTownFields(
                     value = pinCode ?: "", singleLine = true,
                     onValueChange = { input ->
                         if (input.length <= 6 && input.all { it.isDigit() }) {
-                            if (id == "1") registerViewModel.onPinCode1Changed(input, context)
-                            else registerViewModel.onPinCode2Changed(input, context)
+                           registerViewModel.onPinCode1Changed(input, context)
                             if (input.length == 6) {
                                 keyboardController?.hide()
                             }
@@ -964,7 +912,7 @@ fun PinCodeAndTownFields(
                         cursorColor = cursorColor, errorBorderColor = errorRed
                     ),
                     keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Done,
+                        imeAction = ImeAction.Next,
                         keyboardType = KeyboardType.Number
                     ),
                 )
@@ -985,10 +933,7 @@ fun PinCodeAndTownFields(
                 OutlinedTextField(
                     value = state ?: "", readOnly = true,
                     textStyle = normal16Text500.copy(textAlign = TextAlign.Center),
-                    onValueChange = {
-                        if (id == "1") registerViewModel.onState1Changed(it, context)
-                        else registerViewModel.onState2Changed(it, context)
-                    },
+                    onValueChange = { registerViewModel.onState1Changed(it, context) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp)
@@ -1008,23 +953,6 @@ fun PinCodeAndTownFields(
                 style = normal12Text400, start = 16.dp)
 
     }
-    BasicDetailsInputField(
-        label = stringResource(id = R.string.locality),
-        value = town?:"",
-        onValueChange = {
-            if (id == "1") registerViewModel.onTown1Changed(it, context)
-            else registerViewModel.onTown2Changed(it, context)
-        },
-        error = townError,
-        focusRequester = townFocus,
-        showLeadingImage = false,
-        topTextStart = 15.dp,
-        keyboardOptions = KeyboardOptions(
-            capitalization = KeyboardCapitalization.Sentences,
-            imeAction = ImeAction.Next,
-            keyboardType = KeyboardType.Text
-        )
-    )
     Column {
         OutLineTextFieldHeader(
             topTextStart = 15.dp,
@@ -1038,42 +966,50 @@ fun PinCodeAndTownFields(
 
         ClickableDropDownField(
             bottom = 10.dp,
-            selectedText = selectedCity.toString(),
+//            selectedText = selectedCity.toString(),
+            selectedText =city?:"",
             focus = cityFocus,
             expand = expand,
             setExpand = {
                 expand = it
                 if (nearCityResponse?.cities.isNullOrEmpty() && pinCode != null) {
-                    if (id == "1") {
-                        registerViewModel.onPinCode1Changed(pinCode, context)
-                    } else {
-                        registerViewModel.onPinCode2Changed(pinCode, context)
-                    }
+                    registerViewModel.onPinCode1Changed(pinCode, context)
                 }
             },
-
             itemList = nearCityResponse?.cities ?: emptyList(),
             onDismiss = { expand = false },
             modifier = Modifier.focusRequester(cityFocus),
             onItemSelected = onItemSelected
         )
     }
+    BasicDetailsInputField(
+        label = stringResource(id = R.string.district),
+        value = district?:"",
+        onValueChange = { registerViewModel.onDistrict1Changed(it, context) },
+        error = districtError,
+        focusRequester = districtFocus,
+        showLeadingImage = false,
+        topTextStart = 15.dp,
+        keyboardOptions = KeyboardOptions(
+            capitalization = KeyboardCapitalization.Sentences,
+            imeAction = ImeAction.Next,
+            keyboardType = KeyboardType.Text
+        ),
+        scrollState = scrollState
+    )
+
 }
 
 @Composable
 fun AreaField(
-    id: String = "1",
     area: String?, areaError: String?,
     registerViewModel: RegisterViewModel = RegisterViewModel(), context: Context,
-    areaFocus: FocusRequester
+    areaFocus: FocusRequester, scrollState:ScrollState
 ) {
     BasicDetailsInputField(
         label = stringResource(id = R.string.house_number),
         value = area?:"",
-        onValueChange = {
-            if (id == "1") registerViewModel.onArea1Changed(it, context)
-            else registerViewModel.onArea2Changed(it, context)
-        },
+        onValueChange = { registerViewModel.onArea1Changed(it, context) },
         error = areaError,
         focusRequester = areaFocus,
         showLeadingImage = false,
@@ -1082,7 +1018,8 @@ fun AreaField(
             capitalization = KeyboardCapitalization.Sentences,
             imeAction = ImeAction.Next,
             keyboardType = KeyboardType.Text
-        )
+        ),
+        scrollState = scrollState
     )
 }
 
@@ -1107,20 +1044,20 @@ fun BasicDetailsInputField(
     showTrailingIcon:Boolean=false,
     regexPattern:String = "",
     inputLimit:Int=100,
-    showEditableOption : Boolean = true
+    showEditableOption : Boolean = true,
+    scrollState : ScrollState,
 
 ) {
-
-    val context = LocalContext.current
     var isEditable by remember { mutableStateOf(!readOnly) }
-
-    val bringFocusRequester = remember { BringIntoViewRequester() }
-    val keyboardController = LocalSoftwareKeyboardController.current
-
+    val focusState = remember { mutableStateOf(false) }
     var textFieldValue by remember { mutableStateOf(TextFieldValue(text = value, selection = TextRange(value.length))) }
+    val bringIntoViewRequester = remember { BringIntoViewRequester() }
     var firstLaunch by remember { mutableStateOf(true) }
+    val fieldOffsetY = remember { mutableStateOf(0f) }
 
-    // Only set cursor at end when value changes from outside AND first time
+    val density = LocalDensity.current
+    val context = LocalContext.current
+
     LaunchedEffect(value) {
         if (value != textFieldValue.text) {
             val selection = if (firstLaunch) TextRange(value.length) else textFieldValue.selection
@@ -1128,7 +1065,16 @@ fun BasicDetailsInputField(
             firstLaunch = false
         }
     }
+    LaunchedEffect(focusState.value) {
+        if (focusState.value) {
+            val topTargetInPx = with(density) { 80.dp.toPx() }
+            val scrollAmount = (scrollState.value + fieldOffsetY.value - topTargetInPx).toInt()
 
+            scrollState.animateScrollTo(scrollAmount.coerceAtLeast(0))
+            delay(100)
+            bringIntoViewRequester.bringIntoView()
+        }
+    }
     InputField(
         inputText = textFieldValue,
         topText = label,
@@ -1143,8 +1089,13 @@ fun BasicDetailsInputField(
         showOnlyTextField = false,
         showLeadingImage = showLeadingImage,
         readOnly =  !isEditable,
-        modifier = modifier.focusRequester(focusRequester)
-            .bringIntoViewRequester(bringFocusRequester),
+        modifier = modifier
+            .focusRequester(focusRequester)
+            .bringIntoViewRequester(bringIntoViewRequester)
+            .onFocusChanged { focusState.value = it.isFocused }
+            .onGloballyPositioned { layoutCoordinates ->
+                fieldOffsetY.value = layoutCoordinates.localToRoot(Offset.Zero).y
+            },
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
         onValueChange = { newValue ->
@@ -1219,57 +1170,49 @@ fun BasicDetailsInputField(
 fun UploadDocumentCard(
     isError: Boolean,
     imageUploading: Boolean,
-    documentUploadResponse : DocumentUpload?,
+    documentUploadResponse: DocumentUpload?,
     context: Context,
     navController: NavHostController,
-    viewmodel : RegisterViewModel,
+    viewmodel: RegisterViewModel,
     cardDataColor: Color,
-    scrollState : ScrollState,
-    updateList : (List<Document?>) -> Unit,
+    scrollState: ScrollState,
+    updateList: (List<Document?>) -> Unit,
     showButton: Boolean,
     setShowButton: (Boolean) -> Unit,
 ) {
     var selectedDocumentUris by remember { mutableStateOf(List<Uri?>(2) { null }) }
     var documentData by remember { mutableStateOf(List<Document?>(2) { null }) }
     var currentIndex by remember { mutableStateOf(-1) }
-//    var showButton by remember { mutableStateOf(false) }
     var ScroolSecondTime by remember { mutableStateOf(0) }
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(documentUploadResponse) {
-        if (documentUploadResponse?.data?.isNotEmpty() == true) {
-            if (documentUploadResponse.data.size == (2)) {
-                documentUploadResponse.data.forEachIndexed { index, s ->
-                    documentData[index]?.let {
-                        documentData = documentData.toMutableList()
-                            .also { it[index] = documentData[index]?.copy(url = s) }
-                    } ?: kotlin.run {
-                        documentData =
-                            documentData.toMutableList().also { it[index] = Document(url = s) }
+        documentUploadResponse?.data?.let { data ->
+            if (data.size == 2) {
+                data.forEachIndexed { index, url ->
+                    documentData = documentData.toMutableList().also {
+                        it[index] = documentData[index]?.copy(url = url) ?: Document(url = url)
                     }
                 }
-            } else {
-                documentData = documentData.toMutableList()
-                    .also {
-                        it[currentIndex] =
-                            it[currentIndex]?.copy(url = documentUploadResponse.data[0])
-                    }
+            } else if (currentIndex in documentData.indices && data.isNotEmpty()) {
+                documentData = documentData.toMutableList().also {
+                    it[currentIndex] = it[currentIndex]?.copy(url = data[0])
+                }
             }
-        }
-//        showButton = false
-        setShowButton(false)
-        delay(100)
-        updateList(documentData)
-        if (ScroolSecondTime > 2) {
-            scrollState.scrollTo(scrollState.maxValue)
-        } else {
-            ScroolSecondTime += 1
+
+            setShowButton(false)
+            delay(100)
+            updateList(documentData)
+            if (ScroolSecondTime > 2) {
+                scrollState.scrollTo(scrollState.maxValue)
+            } else {
+                ScroolSecondTime += 1
+            }
         }
     }
 
     LaunchedEffect(documentData) {
-        if(documentData.isEmpty() || documentData.size == 2 && documentData[0] == null && documentData[1] == null){
-//            showButton = false
+        if (documentData.all { it == null }) {
             setShowButton(false)
         }
     }
@@ -1277,38 +1220,59 @@ fun UploadDocumentCard(
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
-        if (uri != null && currentIndex in 0..2) {
-
+        if (uri != null && currentIndex in documentData.indices) {
             val sizeInBytes = getFileSize(context, uri)
             if (sizeInBytes != null && sizeInBytes <= 2 * 1024 * 1024) {
-                selectedDocumentUris = selectedDocumentUris.toMutableList().also { it[currentIndex] = uri }
-
-                val inputStream = context.contentResolver.openInputStream(uri)
-                val bytes = inputStream?.readBytes()
-                inputStream?.close()
-
-                bytes?.let { byteArray ->
-                    val base64String = Base64.encodeToString(byteArray, Base64.NO_WRAP)
-                    val mimeType = context.contentResolver.getType(uri)
-                    val docData = Document(mimetype = mimeType, base64 = base64String)
-                    documentData = documentData.toMutableList().also { it[currentIndex] = docData }
-//                    showButton = true
-                    setShowButton(true)
-                    coroutineScope.launch {
-                        delay(100)
-                        scrollState.animateScrollTo(scrollState.maxValue)
-                    }
+                selectedDocumentUris = selectedDocumentUris.toMutableList().also {
+                    it[currentIndex] = uri
                 }
 
+                try {
+                    val inputStream = context.contentResolver.openInputStream(uri)
+                    val bytes = inputStream?.readBytes()
+                    inputStream?.close()
+
+                    bytes?.let { byteArray ->
+                        val base64String = Base64.encodeToString(byteArray, Base64.NO_WRAP)
+                        val mimeType = context.contentResolver.getType(uri)
+                        val docData = Document(mimetype = mimeType, base64 = base64String)
+                        documentData = documentData.toMutableList().also {
+                            it[currentIndex] = docData
+                        }
+
+                        setShowButton(false)
+                        coroutineScope.launch {
+                            delay(100)
+                            scrollState.animateScrollTo(scrollState.maxValue)
+                        }
+                        updateList(documentData)
+
+                        val validImages = documentData.filterNotNull()
+                            .filter { !it.base64.isNullOrEmpty() }
+                            .map { image -> Images(image.mimetype, image.base64) }
+
+                        if (validImages.isNotEmpty()) {
+                            viewmodel.clearDocumentUploadError()
+                            viewmodel.documentUpload(
+                                documentUploadBody = ImageUploadBody(images = validImages),
+                                navController = navController,
+                                context = context
+                            )
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e("UploadDocumentCard", "PDF read error: ${e.localizedMessage}", e)
+                    Toast.makeText(context, "Failed to read selected PDF", Toast.LENGTH_SHORT).show()
+                }
             } else {
                 CommonMethods().toastMessage(
-                    context = context,
-                    toastMsg = context.getString(R.string.please_select_images_with_in_2mb)
+                    context,
+                    context.getString(R.string.please_select_images_with_in_2mb)
                 )
-
             }
         }
     }
+
     Column(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -1317,21 +1281,18 @@ fun UploadDocumentCard(
             CenterProgress()
         } else {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround,
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceAround
             ) {
+                Text("Bank Statements", style = normal14Text500, color = appOrange)
                 Text(
-                    text = "Bank Statements",
-                    fontFamily = FontFamily(Font(R.font.robotocondensed_regular)),
-                    fontWeight = FontWeight(400)
-                )
-                Text(
-                    "Invoices", modifier = Modifier.padding(end = 30.dp),
-                    fontFamily = FontFamily(Font(R.font.robotocondensed_regular)),
-                    fontWeight = FontWeight(400)
+                    "Invoices",
+                    style = normal14Text500,
+                    color = appOrange,
+                    modifier = Modifier.padding(end = 30.dp)
                 )
             }
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -1339,22 +1300,28 @@ fun UploadDocumentCard(
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
                 documentData.forEachIndexed { index, data ->
-                    if(!data?.url.isNullOrEmpty() || !data?.base64.isNullOrEmpty()){
+                    if (!data?.url.isNullOrEmpty() || !data?.base64.isNullOrEmpty()) {
                         Box(
                             modifier = Modifier
                                 .size(100.dp)
                                 .clickable {
-                                    if (documentData[index]?.url?.isNotEmpty() == true) {
-                                        documentData[index]?.url?.let {
-                                            downloadFile(
-                                                context,
-                                                it,
-                                                "FIS Document ${index + 1}.pdf"
-                                            )
+                                    if (index in documentData.indices) {
+                                        try {
+                                            if (!documentData[index]?.url.isNullOrEmpty()) {
+                                                documentData[index]?.url?.let {
+                                                    downloadFile(
+                                                        context,
+                                                        it,
+                                                        "FIS Document ${index + 1}.pdf"
+                                                    )
+                                                }
+                                            } else {
+                                                currentIndex = index
+                                                launcher.launch("application/pdf")
+                                            }
+                                        } catch (e: Exception) {
+                                            Log.e("UploadDoc", "PDF open failed: ${e.message}", e)
                                         }
-                                    } else {
-                                        currentIndex = index
-                                        launcher.launch("application/pdf")
                                     }
                                 }
                         ) {
@@ -1363,9 +1330,8 @@ fun UploadDocumentCard(
                                 border = BorderStroke(1.dp, Color.LightGray),
                                 modifier = Modifier.fillMaxSize()
                             ) {
-
                                 Image(
-                                    painter = painterResource(id = R.drawable.pdf_icon) ,
+                                    painter = painterResource(id = R.drawable.pdf_icon),
                                     contentDescription = "pdf image",
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier.fillMaxSize()
@@ -1381,27 +1347,31 @@ fun UploadDocumentCard(
                                     .padding(4.dp)
                                     .background(Color.Black.copy(alpha = 0.6f), CircleShape)
                                     .clickable {
-                                        selectedDocumentUris =
-                                            selectedDocumentUris.toMutableList().also {
+                                        if (index in documentData.indices) {
+                                            selectedDocumentUris =
+                                                selectedDocumentUris.toMutableList().also {
+                                                    it[index] = null
+                                                }
+                                            documentData = documentData.toMutableList().also {
                                                 it[index] = null
                                             }
-                                        documentData = documentData.toMutableList().also {
-                                            it[index] = null
+                                            updateList(documentData)
                                         }
-                                        updateList(documentData)
                                     }
                                     .size(20.dp)
                             )
                         }
                     } else {
-
                         DashedBorderCard(
                             onClick = {
-                                if (documentData[index]?.url.isNullOrEmpty()) {
+                                if (index in documentData.indices && documentData[index]?.url.isNullOrEmpty()) {
                                     currentIndex = index
-                                    launcher.launch("application/pdf")
+                                    try {
+                                        launcher.launch("application/pdf")
+                                    } catch (e: Exception) {
+                                        Log.e("UploadDoc", "Launcher failed: ${e.message}", e)
+                                    }
                                 }
-
                             },
                             label = "Document ${index + 1}",
                             tintColor = if (isError) MaterialTheme.colors.error else cardDataColor,
@@ -1410,38 +1380,10 @@ fun UploadDocumentCard(
                     }
                 }
             }
-
-            if(showButton){
-                ClickableText(
-                    text = stringResource(id = R.string.upload_documents),
-                    borderColor = if (isError) MaterialTheme.colors.error else appTheme,
-                    backgroundColor = if (isError) MaterialTheme.colors.error else appTheme,
-                    style = normal16Text500,textColor = Color.White
-                ) {
-                    val validDocument = documentData.filterNotNull()
-                    if (validDocument.isNotEmpty()) {
-                        viewmodel.clearDocumentUploadError()
-
-                        val validImages = validDocument
-                            .filter { !it.base64.isNullOrEmpty() }
-                            .map { image -> Images(image.mimetype, image.base64) }
-
-                        viewmodel.documentUpload(
-                            documentUploadBody = ImageUploadBody(images = validImages),
-                            navController = navController,
-                            context = context
-                        )
-                    } else {
-                        CommonMethods().toastMessage(
-                            context = context,
-                            toastMsg = context.getString(R.string.please_select_documents_to_upload)
-                        )
-                    }
-                }
-            }
         }
     }
 }
+
 
 fun getFileSize(context: Context, uri: Uri): Long? {
     return try {
@@ -1476,9 +1418,13 @@ fun downloadFile(context: Context, url: String, fileName: String) {
 fun DatePickerField(
     dob: String, dobFocus: FocusRequester, dobError: String, genderFocusRequester:FocusRequester=FocusRequester(),
     registerViewModel: RegisterViewModel, context: Context, readOnly: Boolean=false,
-    keyboardController:SoftwareKeyboardController?
+    keyboardController:SoftwareKeyboardController?,
+    scrollState: ScrollState
 ) {
     val bringFocusRequester = remember { BringIntoViewRequester() }
+    val focusState = remember { mutableStateOf(false) }
+    val density = LocalDensity.current
+    val fieldOffsetY = remember { mutableStateOf(0f) }
     val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
     val (selectedDate, setSelectedDate) = remember { mutableStateOf(dob) }
     var textFieldValue by remember {
@@ -1490,6 +1436,16 @@ fun DatePickerField(
     LaunchedEffect(dob) {
         if (dob != textFieldValue.text) {
             textFieldValue = TextFieldValue(dob, TextRange(dob.length))
+        }
+    }
+    LaunchedEffect(focusState.value) {
+        if (focusState.value) {
+            val topTargetInPx = with(density) { 80.dp.toPx() }
+            val scrollAmount = (scrollState.value + fieldOffsetY.value - topTargetInPx).toInt()
+
+            scrollState.animateScrollTo(scrollAmount.coerceAtLeast(0))
+            delay(100)
+            bringFocusRequester.bringIntoView()
         }
     }
 
@@ -1526,9 +1482,17 @@ fun DatePickerField(
         modifier = Modifier
             .clickable { datePickerDialog.show() }
             .focusRequester(dobFocus)
-            .bringIntoViewRequester(bringFocusRequester),
+            .bringIntoViewRequester(bringFocusRequester)
+            .onFocusChanged { focusState.value = it.isFocused }
+            .onGloballyPositioned { coordinates ->
+                fieldOffsetY.value = coordinates.localToRoot(Offset.Zero).y
+            },
+//        modifier = Modifier
+//            .clickable { datePickerDialog.show() }
+//            .focusRequester(dobFocus)
+//            .bringIntoViewRequester(bringFocusRequester),
         keyboardOptions = KeyboardOptions(
-            imeAction = ImeAction.Next, keyboardType = KeyboardType.Number
+            imeAction = ImeAction.Next, keyboardType = KeyboardType.NumberPassword
         ),
         showStar = true,
         topText = stringResource(id = R.string.dob),
@@ -1537,17 +1501,52 @@ fun DatePickerField(
         end = 0.dp,
         showTopText = true,
         showOnlyTextField = false,
-        onValueChange = {
-            if (it.text.length <= 10) {
-                textFieldValue = it
-                registerViewModel.onDobChanged(it.text, context)
+//        onValueChange = {
+//            val filtered = it.text.filter { char -> char.isDigit() || char == '-' }
+//            val trimmed = filtered.take(10)
+//
+//            textFieldValue = it.copy(text = trimmed)
+//
+//            registerViewModel.onDobChanged(trimmed, context)
+//
+//            if (trimmed.length == 10) {
+//                keyboardController?.hide()
+//            }
+//        },
+        onValueChange = { newValue ->
+            val previousText = textFieldValue.text
+            val newTextRaw = newValue.text
+            val isDeleting = newTextRaw.length < previousText.length
 
-                if (it.text.length == 10) {
-                    keyboardController?.hide()
+            // Remove all non-digit characters
+            val digitsOnly = newTextRaw.filter { it.isDigit() }
+
+            val builder = StringBuilder()
+            var dashCount = 0
+
+            for (i in digitsOnly.indices) {
+                builder.append(digitsOnly[i])
+                if (i == 1 || i == 3) {
+                    builder.append('-')
+                    dashCount++
                 }
             }
-        },
-        leadingImage = painterResource(R.drawable.dob_icon),
+
+            val formatted = builder.toString().take(10)
+
+            // Adjust cursor position
+            val originalCursor = newValue.selection.end
+            val cursorOffset = if (isDeleting && previousText.getOrNull(originalCursor) == '-') -1 else 0
+            val finalSelection = (digitsOnly.length + dashCount + cursorOffset).coerceIn(0, formatted.length)
+
+            textFieldValue = TextFieldValue(
+                text = formatted,
+                selection = TextRange(finalSelection)
+            )
+
+            registerViewModel.onDobChanged(formatted, context)
+                        },
+                leadingImage = painterResource(R.drawable.dob_icon),
         keyboardActions = KeyboardActions(onNext ={
             genderFocusRequester.requestFocus() }),
         trailingIcon = {

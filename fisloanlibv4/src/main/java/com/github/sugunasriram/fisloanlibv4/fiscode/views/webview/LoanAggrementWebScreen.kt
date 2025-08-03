@@ -13,8 +13,6 @@ import android.net.Uri
 import android.net.http.SslError
 import android.os.Build
 import android.os.Environment
-import android.os.Handler
-import android.os.Looper
 import android.os.Message
 import android.util.Log
 import android.view.View
@@ -43,7 +41,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -65,8 +62,6 @@ import com.github.sugunasriram.fisloanlibv4.R
 import com.github.sugunasriram.fisloanlibv4.fiscode.app.MainActivity
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.TopBar
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
-import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToBankDetailsScreen
-import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToEMandateESignFailedScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFormRejectedScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToLoanDisbursementScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.core.ApiPaths
@@ -77,7 +72,6 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import kotlinx.coroutines.delay
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-
 
 private val json1 = Json {
     prettyPrint = true
@@ -92,110 +86,94 @@ var mGeoLocationCallback: GeolocationPermissions.Callback? = null
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun LoanAgreementWebScreen(
-    navController: NavHostController, transactionId: String,
-    id: String, url:
-    String, fromFlow: String
+    navController: NavHostController,
+    transactionId: String,
+    id: String,
+    fromFlow: String,
+    url: String
 ) {
-
-//    var lateNavigate = false
     var lateNavigate by remember { mutableStateOf(false) }
     val sseViewModel: SSEViewModel = viewModel()
     val sseEvents by sseViewModel.events.collectAsState(initial = "")
     var errorMsg by remember { mutableStateOf<String?>(null) }
     val errorTitle = stringResource(id = R.string.loan_agreement_failed)
-//    val errorMessage = stringResource(id = R.string.esign_failed)
-    val errorMessage = "LoanAgreement \nSession timed out due to inactivity"
-
-    val loadedUrl = remember { mutableStateOf<String?>(null) }
-
-    sseViewModel.startListening(ApiPaths().sse)
-    Log.d("WebScreen_transactionId: ", transactionId)
-    Log.d("WebScreen_transactionId: ", url)
-
     val context = LocalContext.current
     val activity = context as Activity
 
-//    LaunchedEffect(Unit) {
-//        delay(5 * 60 * 1000L)
-//        if (sseEvents.isEmpty() && !lateNavigate) {
-//            navigateApplyByCategoryScreen(navController)
-//        }
-//    }
+    val loadedUrl = remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) { sseViewModel.startListening(ApiPaths().sse) }
+    Log.d("WebScreen_transactionId: ", transactionId)
+    Log.d("WebScreen_transactionId: ", url)
+
     LaunchedEffect(Unit) {
         delay(3 * 60 * 1000L)
         if (sseEvents.isEmpty() && !lateNavigate) {
             Toast.makeText(
                 context,
                 "Waiting for lender response, please wait...",
-                Toast
-                    .LENGTH_SHORT
+                Toast.LENGTH_SHORT
             ).show()
         }
     }
 
+    if (sseEvents.isNotEmpty()) {
+        Log.d("LoanAgreement", "SSE entered: ")
+        val sseData: SSEData? = try {
+            json1.decodeFromString<SSEData>(sseEvents)
+        } catch (e: Exception) {
+            Log.e("LoanAgreement", "Error parsing SSE data", e)
+            null
+        }
 
-    LaunchedEffect(sseEvents) {
-        if (sseEvents.isNotEmpty()) {
-            Log.d("WebScreen_LoanAgreementScreen", "SSE data Error: ")
+        if (sseData != null) {
+            val sseTransactionId =
+                sseData.data?.data?.txnId ?: sseData.data?.data?.catalog?.txn_id
+            Log.d(
+                "LoanAgreement:",
+                "transactionId :[" + transactionId + "] " +
+                    "sseTransactionId:[" + sseTransactionId
+            )
 
-            val sseData: SSEData? = try {
-                json1.decodeFromString<SSEData>(sseEvents)
-            } catch (e: Exception) {
-                Log.e("WebScreen_SSEParsingError", "Error parsing SSE data", e)
-                null
-            }
-
-            if (sseData != null) {
-                val sseTransactionId =
-                    sseData.data?.data?.txnId ?: sseData.data?.data?.catalog?.txn_id
-                Log.d(
-                    "WebScreen_LoanAgreement:", "transactionId :[" + transactionId + "] " +
-                            "sseTransactionId:[" + sseTransactionId
-                )
-
-                sseData.data?.data?.type.let { type ->
-
-                    if (fromFlow == "Purchase Finance") {
-                        if (transactionId == sseTransactionId && type == "ACTION") {
-                            sseData.data?.data?.id?.let { id ->
-                                navigateToLoanDisbursementScreen(
-                                    navController = navController, transactionId = transactionId,
-                                    id = id, fromFlow = fromFlow
-                                )
-                            }
+            sseData.data?.data?.type.let { type ->
+                if (fromFlow == "Purchase Finance") {
+                    if (transactionId == sseTransactionId && type == "ACTION") {
+                        sseData.data?.data?.id?.let { id ->
+                            navigateToLoanDisbursementScreen(
+                                navController = navController,
+                                transactionId = transactionId,
+                                id = id,
+                                fromFlow = fromFlow
+                            )
                         }
-                    } else if (transactionId == sseTransactionId && type == "INFO") {
-                            lateNavigate = true
+                    }
+                } else if (transactionId == sseTransactionId && type == "INFO") {
+                    lateNavigate = true
 
-                            //Check if Form Rejected or Pending
-                            if (sseData.data?.data?.data?.error != null) {
-                                Log.d("WebScreen_LoanAgree", "Error :" + sseData.data?.data?.data?.error?.message)
-                                errorMsg = sseData.data?.data?.data?.error?.message
-                                sseViewModel.stopListening()
-                                navigateToFormRejectedScreen(
-                                    navController = navController,
-                                    errorTitle = errorTitle,
-                                    fromFlow = fromFlow, errorMsg = errorMsg
-                                )
-                            } else {
-//                                lateNavigate = false
-                                navigateToLoanDisbursementScreen(
-                                    navController = navController, transactionId = transactionId,
-                                    id = id, fromFlow = fromFlow
-                                )
-                            }
-                        }
+                    // Check if Form Rejected or Pending
+                    if (sseData.data?.data?.data?.error != null) {
+                        Log.d("LoanAgreement", "Error :" + sseData.data?.data?.data?.error?.message)
+                        errorMsg = sseData.data?.data?.data?.error?.message
+                        sseViewModel.stopListening()
+                        navigateToFormRejectedScreen(
+                            navController = navController,
+                            errorTitle = errorTitle,
+                            fromFlow = fromFlow,
+                            errorMsg = errorMsg
+                        )
+                    } else {
+                        sseViewModel.stopListening()
+                        navigateToLoanDisbursementScreen(
+                            navController = navController,
+                            transactionId = transactionId,
+                            id = id,
+                            fromFlow = fromFlow
+                        )
                     }
                 }
             }
+        }
     }
-
-//    DisposableEffect(Unit) {
-//        onDispose {
-//            sseViewModel.stopListening()
-//        }
-//    }
-
 
     BackHandler { navigateApplyByCategoryScreen(navController) }
     Column(modifier = Modifier.fillMaxSize()) {
@@ -204,14 +182,13 @@ fun LoanAgreementWebScreen(
             onBackClick = { navigateApplyByCategoryScreen(navController) },
             topBarText = stringResource(R.string.loan_agreement)
         )
-//        WebViewTopBar(navController, title = "Loan Agreement")
 
         Box(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
                 .padding(top = 0.dp)
-        ){
+        ) {
             val fileChooserLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.GetContent()
             ) { uri: Uri? ->
@@ -228,7 +205,7 @@ fun LoanAgreementWebScreen(
                 factory = { ctx ->
                     WebView(ctx).apply {
                         settings.setGeolocationEnabled(true)
-                        //Sugu - need to test with other lender, commented for Lint
+                        // Sugu - need to test with other lender, commented for Lint
                         settings.javaScriptEnabled = true
                         settings.loadsImagesAutomatically = true
                         settings.domStorageEnabled = true
@@ -248,7 +225,7 @@ fun LoanAgreementWebScreen(
                         settings.javaScriptCanOpenWindowsAutomatically = true
                         settings.mediaPlaybackRequiresUserGesture = false
                         settings.safeBrowsingEnabled = true
-    //                            WebView.setWebContentsDebuggingEnabled(true);
+                        //                            WebView.setWebContentsDebuggingEnabled(true);
                         settings.cacheMode = WebSettings.LOAD_DEFAULT
 
                         // Enable hardware acceleration for better performance
@@ -268,20 +245,8 @@ fun LoanAgreementWebScreen(
                                 view: WebView?,
                                 url: String?
                             ): Boolean {
-                                url?.let {
-                                    when {
-                                        it.contains("ekycdone") || it.contains("https://pramaan.ondc.org/beta/staging/mock/seller/toENach") -> {
-                                            view?.loadUrl(it)
-                                            return false
-                                        }
 
-                                        else -> {
-                                            view?.loadUrl(it)
-                                            return false
-                                        }
-                                    }
-                                }
-                                return true
+                                return false
                             }
 
                             override fun onPageFinished(view: WebView?, url: String?) {
@@ -305,17 +270,22 @@ fun LoanAgreementWebScreen(
                             }
 
                             override fun onReceivedSslError(
-                                view: WebView?, handler: SslErrorHandler?, error: SslError?
+                                view: WebView?,
+                                handler: SslErrorHandler?,
+                                error: SslError?
                             ) {
                                 super.onReceivedSslError(view, handler, error)
                             }
 
                             override fun onPageStarted(
-                                view: WebView?, url: String?, favicon: Bitmap?
+                                view: WebView?,
+                                url: String?,
+                                favicon: Bitmap?
                             ) {
                                 super.onPageStarted(view, url, favicon)
 
-                                evaluateJavascript("""
+                                evaluateJavascript(
+                                    """
     if (!window._blobUrlMap) {
         window._blobUrlMap = {};
         const originalCreateObjectURL = URL.createObjectURL;
@@ -325,7 +295,9 @@ fun LoanAgreementWebScreen(
             return url;
         };
     }
-""".trimIndent(), null)
+                                    """.trimIndent(),
+                                    null
+                                )
                             }
 
                             // For Android 4.1+
@@ -350,18 +322,17 @@ fun LoanAgreementWebScreen(
                             fun openFileChooser(uploadMsg: ValueCallback<Uri>) {
                                 openFileChooser(uploadMsg, "*/*")
                             }
-
                         }
 
                         addJavascriptInterface(BlobDownloader(context), "BlobDownloader")
 
-
                         setDownloadListener { url, userAgent, contentDisposition, mimeType,
-                                              _ ->
+                            _ ->
                             if (url.startsWith("blob:")) {
                                 val fileName = URLUtil.guessFileName(url, contentDisposition, mimeType)
 
-                                evaluateJavascript("""
+                                evaluateJavascript(
+                                    """
     (async function() {
         try {
             const xhr = new XMLHttpRequest();
@@ -384,7 +355,9 @@ fun LoanAgreementWebScreen(
             console.error("Blob download error:", error);
         }
     })();
-""".trimIndent(), null)
+                                    """.trimIndent(),
+                                    null
+                                )
                             } else {
                                 val request = DownloadManager.Request(Uri.parse(url))
                                 request.setMimeType(mimeType)
@@ -408,7 +381,9 @@ fun LoanAgreementWebScreen(
                                     context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
                                 downloadManager.enqueue(request)
                                 Toast.makeText(
-                                    context, context.getString(R.string.downloading_file), Toast
+                                    context,
+                                    context.getString(R.string.downloading_file),
+                                    Toast
                                         .LENGTH_LONG
                                 ).show()
                             }
@@ -434,10 +409,9 @@ fun LoanAgreementWebScreen(
                 },
                 update = { webView ->
 
-
                     webView.settings.setGeolocationEnabled(true)
                     webView.settings.setJavaScriptEnabled(true)
-                    //Sugu - need to test with other lender, commented for Lint
+                    // Sugu - need to test with other lender, commented for Lint
                     webView.settings.loadsImagesAutomatically = true
                     webView.settings.domStorageEnabled = true
                     webView.settings.allowFileAccess = true
@@ -475,15 +449,15 @@ fun LoanAgreementWebScreen(
 
                                     request.resources.contains(PermissionRequest.RESOURCE_PROTECTED_MEDIA_ID) -> {
                                         MainActivity.webPermissionRequest = request
-    //                                            ActivityCompat.requestPermissions(
-    //                                                activity,
-    //                                                arrayOf(
-    //                                                    Manifest.permission.ACCESS_FINE_LOCATION,
-    //                                                    Manifest.permission.ACCESS_COARSE_LOCATION,
-    //                                                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
-    //                                                ),
-    //                                                1001
-    //                                            )
+                                        //                                            ActivityCompat.requestPermissions(
+                                        //                                                activity,
+                                        //                                                arrayOf(
+                                        //                                                    Manifest.permission.ACCESS_FINE_LOCATION,
+                                        //                                                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                                        //                                                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                                        //                                                ),
+                                        //                                                1001
+                                        //                                            )
 
                                         val permissions = mutableListOf(
                                             Manifest.permission.ACCESS_FINE_LOCATION,
@@ -513,14 +487,12 @@ fun LoanAgreementWebScreen(
                             origin: String?,
                             callback: GeolocationPermissions.Callback?
                         ) {
-
                             if (ContextCompat.checkSelfPermission(
                                     activity,
                                     Manifest.permission.ACCESS_FINE_LOCATION
                                 )
                                 != PackageManager.PERMISSION_GRANTED
                             ) {
-
                                 if (ActivityCompat.shouldShowRequestPermissionRationale(
                                         activity,
                                         Manifest.permission.ACCESS_FINE_LOCATION
@@ -538,23 +510,23 @@ fun LoanAgreementWebScreen(
                                                     arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                                                     1001
                                                 )
-                                            })
+                                            }
+                                        )
                                         .show()
-
                                 } else {
-                                    //no explanation need we can request the location
+                                    // no explanation need we can request the location
                                     mGeoLocationCallback = callback
                                     mGeoLocationRequestOrigin = origin
                                     ActivityCompat.requestPermissions(
                                         activity,
-                                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1002
+                                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                                        1002
                                     )
                                 }
                             } else {
-                                //tell the webview that permission has granted
+                                // tell the webview that permission has granted
                                 callback!!.invoke(origin, true, true)
                             }
-
                         }
 
                         private fun showPermissionDialog(request: PermissionRequest) {
@@ -563,8 +535,9 @@ fun LoanAgreementWebScreen(
                                 .setMessage("This site wants to access your camera. Do you allow it?")
                                 .setPositiveButton("Allow") { _, _ ->
                                     ActivityCompat.requestPermissions(
-                                        context, arrayOf
-                                            (Manifest.permission.CAMERA),
+                                        context,
+                                        arrayOf
+                                        (Manifest.permission.CAMERA),
                                         CommonMethods().CAMERA_PERMISSION_REQUEST_CODE
                                     )
                                 }
@@ -575,14 +548,12 @@ fun LoanAgreementWebScreen(
                                 .show()
                         }
 
-
                         override fun onConsoleMessage(consoleMessage: ConsoleMessage): Boolean {
                             if (consoleMessage.messageLevel() == ConsoleMessage.MessageLevel.ERROR) {
                                 Log.e("WebView JS Error", consoleMessage.message())
                             }
                             return super.onConsoleMessage(consoleMessage)
                         }
-
 
                         // For Android 5.0+
                         override fun onShowFileChooser(
@@ -623,35 +594,24 @@ fun LoanAgreementWebScreen(
                         ): Boolean {
                             val newWebView = view?.context?.let { WebView(it) }
                             if (newWebView != null) {
-
                                 newWebView.webViewClient = object : WebViewClient() {
                                     override fun shouldOverrideUrlLoading(
                                         view: WebView,
                                         request: WebResourceRequest
                                     ): Boolean {
-                                        val url = request.url.toString()
-                                        if (view != null && url != null) {
-                                            view.loadUrl(url)
-                                            return false
-                                        } else {
-                                            return super.shouldOverrideUrlLoading(view, request)
-                                        }
+                                        return super.shouldOverrideUrlLoading(view, request)
+
                                     }
 
                                     override fun shouldOverrideUrlLoading(
                                         view: WebView?,
                                         url: String?
                                     ): Boolean {
-                                        if (view != null && url != null) {
-                                            view.loadUrl(url)
-                                            return false
-                                        }
-                                        return true
-                                    }
 
+                                        return false
+                                    }
                                 }
                             }
-
 
                             val webSettings = newWebView?.settings
                             if (webSettings != null) {
@@ -690,7 +650,7 @@ fun LoanAgreementWebScreen(
                                 webViewSettings.javaScriptCanOpenWindowsAutomatically = true
                                 webViewSettings.cacheMode = WebSettings.LOAD_DEFAULT
                             }
-    //                                WebView.setWebContentsDebuggingEnabled(true)
+                            //                                WebView.setWebContentsDebuggingEnabled(true)
 
                             // Apply layout parameters to the WebView
                             newWebView?.layoutParams = ViewGroup.MarginLayoutParams(
@@ -710,7 +670,7 @@ fun LoanAgreementWebScreen(
                             // Pass the WebView instance directly
                             cookieManager.setAcceptThirdPartyCookies(newWebView, true)
                             cookieManager.setAcceptThirdPartyCookies(view, true)
-                            newWebView?.setWebChromeClient(this);
+                            newWebView?.setWebChromeClient(this)
                             view?.addView(newWebView)
                             val transport = resultMsg?.obj as? WebView.WebViewTransport
                             transport?.webView = newWebView
@@ -718,7 +678,6 @@ fun LoanAgreementWebScreen(
 
                             return true
                         }
-
 
                         override fun onCloseWindow(window: WebView?) {
                             super.onCloseWindow(window)
@@ -731,11 +690,12 @@ fun LoanAgreementWebScreen(
                     webView.addJavascriptInterface(BlobDownloader(context), "BlobDownloader")
 
                     webView.setDownloadListener { url, userAgent, contentDisposition, mimeType,
-                                                  _ ->
+                        _ ->
                         if (url.startsWith("blob:")) {
                             val fileName = URLUtil.guessFileName(url, contentDisposition, mimeType)
 
-                            webView.evaluateJavascript("""
+                            webView.evaluateJavascript(
+                                """
     (function() {
         try {
             const blob = window._blobUrlMap["$url"];
@@ -752,8 +712,9 @@ fun LoanAgreementWebScreen(
             console.error("Blob download error:", error);
         }
     })();
-""".trimIndent(), null)
-
+                                """.trimIndent(),
+                                null
+                            )
                         } else {
                             val request = DownloadManager.Request(Uri.parse(url))
                             request.setMimeType(mimeType)
@@ -777,7 +738,9 @@ fun LoanAgreementWebScreen(
                                 context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
                             downloadManager.enqueue(request)
                             Toast.makeText(
-                                context, context.getString(R.string.downloading_file), Toast
+                                context,
+                                context.getString(R.string.downloading_file),
+                                Toast
                                     .LENGTH_LONG
                             ).show()
                         }
@@ -800,7 +763,6 @@ fun LoanAgreementWebScreen(
                     } else {
                         Log.d("LoanAgreementWebScreen", "1 Loading new URL, skipping: $url")
                     }
-
                 }
             )
         }
@@ -815,10 +777,10 @@ fun PreviewLoanAgreementWebScreen() {
         transactionId = "123",
         id = "123",
 //        url = "https://bfl.lenderbridge.uat.ignosis.ai/lender-bridge/ui/app/bfl-preprod/public/agreement/cb4xpf8c72h3gngb0x4p",
-        //url = "https://docuexec.com/deGuest?mview",
-        //url = "https://if-p2p.com/lms/ondc/loanagreementhtmlform?transactionId=75deeb9b-c901-5dd0-b005-08ed3651c28c&loanaccountnumber=L0000000130",
+        // url = "https://docuexec.com/deGuest?mview",
+        // url = "https://if-p2p.com/lms/ondc/loanagreementhtmlform?transactionId=75deeb9b-c901-5dd0-b005-08ed3651c28c&loanaccountnumber=L0000000130",
         url = "https://p2pintrhel.finfotech.co" +
-                ".in/lms/ondc/loanagreementhtmlform?transactionId=da4ab354-c96f-4045-9967-dbe5bcc5c174&loanaccountnumber=L0000001606",
+            ".in/lms/ondc/loanagreementhtmlform?transactionId=da4ab354-c96f-4045-9967-dbe5bcc5c174&loanaccountnumber=L0000001606",
         fromFlow = "LoanAgreement"
     )
 }

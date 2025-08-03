@@ -26,7 +26,9 @@ import kotlinx.coroutines.launch
 fun CustomSnackBar(
     @DrawableRes drawableRes: Int = R.drawable.error_icon,
     message: String,
-    containerColor: Color = Color.Black, bottom: Dp = 0.dp,top:Dp = 0.dp,
+    containerColor: Color = Color.Black,
+    bottom: Dp = 0.dp,
+    top: Dp = 0.dp
 ) {
     Box(
         modifier = Modifier

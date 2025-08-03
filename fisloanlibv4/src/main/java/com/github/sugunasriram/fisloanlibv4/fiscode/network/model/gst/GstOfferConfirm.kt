@@ -10,23 +10,22 @@ data class GstOfferConfirm(
     val loanType: String? = null
 )
 
-
 @Serializable
-data class GstOfferConfirmResponse (
+data class GstOfferConfirmResponse(
     val status: Boolean? = null,
     val data: GstOfferConfirmData? = null,
     val statusCode: Long? = null
 )
 
 @Serializable
-data class GstOfferConfirmData (
+data class GstOfferConfirmData(
     val catalog: GstCatalog? = null,
     val offerResponse: GstCatalog? = null,
-    val eNACHUrlObject: GstCatalog?= null
+    val eNACHUrlObject: GstCatalog? = null
 )
 
 @Serializable
-data class GstCatalog (
+data class GstCatalog(
     @SerialName("_id")
     val id: String? = null,
 
@@ -89,26 +88,26 @@ data class GstCatalog (
 )
 
 @Serializable
-data class ItemDescriptor (
+data class ItemDescriptor(
     val code: String? = null,
     val name: String? = null
 )
 
 @Serializable
-data class Price (
+data class Price(
     val currency: String? = null,
     val value: String? = null
 )
 
 @Serializable
-data class GstItemTag (
+data class GstItemTag(
     val name: String? = null,
     val display: Boolean? = null,
     val tags: GstItemTagTags? = null
 )
 
 @Serializable
-data class GstItemTagTags (
+data class GstItemTagTags(
     @SerialName("INTEREST_RATE")
     val interestRate: String? = null,
 
@@ -171,7 +170,7 @@ data class GstItemTagTags (
 )
 
 @Serializable
-data class GstProviderDescriptor (
+data class GstProviderDescriptor(
     val images: List<GstImage>? = null,
 
     @SerialName("long_desc")
@@ -184,7 +183,7 @@ data class GstProviderDescriptor (
 )
 
 @Serializable
-data class GstImage (
+data class GstImage(
     @SerialName("size_type")
     val sizeType: String? = null,
 
@@ -192,13 +191,13 @@ data class GstImage (
 )
 
 @Serializable
-data class GstProviderTag (
+data class GstProviderTag(
     val name: String? = null,
     val tags: GstProviderTagTags? = null
 )
 
 @Serializable
-data class GstProviderTagTags (
+data class GstProviderTagTags(
     @SerialName("GRO_NAME")
     val groName: String? = null,
 
@@ -237,7 +236,7 @@ data class GstProviderTagTags (
 )
 
 @Serializable
-data class QuoteBreakup (
+data class QuoteBreakup(
     val title: String? = null,
     val value: String? = null,
     val currency: String? = null

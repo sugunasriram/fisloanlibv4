@@ -22,8 +22,12 @@ import com.github.sugunasriram.fisloanlibv4.R
 
 @Composable
 fun OtpSuccessImage(
-    modifier: Modifier = Modifier, imageSize: Dp = 60.dp, top: Dp = 0.dp, bottom: Dp = 0.dp,
-    start: Dp = 0.dp, end: Dp = 0.dp
+    modifier: Modifier = Modifier,
+    imageSize: Dp = 60.dp,
+    top: Dp = 0.dp,
+    bottom: Dp = 0.dp,
+    start: Dp = 0.dp,
+    end: Dp = 0.dp
 ) {
     Box(
         contentAlignment = Alignment.Center,
@@ -37,14 +41,18 @@ fun OtpSuccessImage(
             modifier.size(imageSize)
         )
     }
-
 }
 
 @Composable
 fun CenteredMoneyImage(
-    imageSize: Dp = 0.dp, @DrawableRes image: Int = R.drawable.sign_in_screen_image,
-    bottom: Dp = 0.dp, start: Dp = 0.dp, end: Dp = 0.dp, top: Dp = 0.dp,
-    modifier: Modifier = Modifier, contentScale: ContentScale = ContentScale.Crop
+    imageSize: Dp = 0.dp,
+    @DrawableRes image: Int = R.drawable.sign_in_screen_image,
+    bottom: Dp = 0.dp,
+    start: Dp = 0.dp,
+    end: Dp = 0.dp,
+    top: Dp = 0.dp,
+    modifier: Modifier = Modifier,
+    contentScale: ContentScale = ContentScale.Crop
 ) {
     Box(
         contentAlignment = Alignment.Center,
@@ -65,9 +73,14 @@ fun CenteredMoneyImage(
 
 @Composable
 fun CenteredManAtGstImage(
-    imageSize: Dp = 0.dp, @DrawableRes image: Int = R.drawable.man_at_gst,
-    bottom: Dp = 0.dp, start: Dp = 0.dp, end: Dp = 0.dp, top: Dp = 0.dp,
-    modifier: Modifier = Modifier, contentScale: ContentScale = ContentScale.Crop
+    imageSize: Dp = 0.dp,
+    @DrawableRes image: Int = R.drawable.man_at_gst,
+    bottom: Dp = 0.dp,
+    start: Dp = 0.dp,
+    end: Dp = 0.dp,
+    top: Dp = 0.dp,
+    modifier: Modifier = Modifier,
+    contentScale: ContentScale = ContentScale.Crop
 ) {
     Box(
         contentAlignment = Alignment.Center,
@@ -88,10 +101,18 @@ fun CenteredManAtGstImage(
 
 @Composable
 fun CustomImage(
-    imageWidth: Dp = 0.dp, @DrawableRes image: Int = R.drawable.close_icon,
-    bottom: Dp = 0.dp, start: Dp = 0.dp, end: Dp = 0.dp, top: Dp = 0.dp,imageShape:Dp=0.dp,
-    modifier: Modifier = Modifier, contentScale: ContentScale = ContentScale.Crop,
-    boxAlignment: Alignment = Alignment.Center, imageHeight: Dp = 0.dp,clickImage:Boolean=false,
+    imageWidth: Dp = 0.dp,
+    @DrawableRes image: Int = R.drawable.close_icon,
+    bottom: Dp = 0.dp,
+    start: Dp = 0.dp,
+    end: Dp = 0.dp,
+    top: Dp = 0.dp,
+    imageShape: Dp = 0.dp,
+    modifier: Modifier = Modifier,
+    contentScale: ContentScale = ContentScale.Crop,
+    boxAlignment: Alignment = Alignment.Center,
+    imageHeight: Dp = 0.dp,
+    clickImage: Boolean = false,
     onImageClick: (() -> Unit)? = null
 ) {
     Box(
@@ -100,9 +121,9 @@ fun CustomImage(
             .fillMaxWidth()
             .padding(start = start, end = end, top = top, bottom = bottom)
     ) {
-
         Image(
-            contentDescription = null, contentScale = contentScale,
+            contentDescription = null,
+            contentScale = contentScale,
             painter = painterResource(image),
             modifier = Modifier
                 .clip(shape = RoundedCornerShape(imageShape))

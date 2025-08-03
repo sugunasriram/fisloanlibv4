@@ -23,21 +23,22 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appWhite
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.robotoSerifNormal24Text500
 
 @Composable
-fun EMandateESignFailedScreen(navController : NavHostController,title : String) {
+fun EMandateESignFailedScreen(navController: NavHostController, title: String) {
     BackHandler {
         navigateApplyByCategoryScreen(navController)
     }
     FixedTopBottomScreen(
         navController = navController,
-        backgroundColor= appWhite,
+        backgroundColor = appWhite,
         showBackButton = true,
-        onBackClick = { navController.popBackStack()},
+        onBackClick = { navController.popBackStack() },
         topBarBackgroundColor = appWhite
     ) {
         Image(
 //            painter = painterResource(id = R.drawable.form_submission_failed_image),
             painter = painterResource(id = R.drawable.error_session_time_out),
-            contentDescription = "", contentScale = ContentScale.Fit,
+            contentDescription = "",
+            contentScale = ContentScale.Fit,
             modifier = Modifier.padding(top = 100.dp).size(300.dp)
         )
 
@@ -46,17 +47,19 @@ fun EMandateESignFailedScreen(navController : NavHostController,title : String) 
         RegisterText(
             text = title,
             textColor = appBlack,
-            start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp,
-            style = robotoSerifNormal24Text500,
+            start = 30.dp,
+            end = 30.dp,
+            top = 10.dp,
+            bottom = 5.dp,
+            style = robotoSerifNormal24Text500
         )
     }
-
 }
 
 @Preview
 @Composable
 private fun KYCFailedPReviewScreen() {
-    Surface  {
-        EMandateESignFailedScreen(rememberNavController(),"LoanAgreement \nSession timed out due to inactivity")
+    Surface {
+        EMandateESignFailedScreen(rememberNavController(), "LoanAgreement \nSession timed out due to inactivity")
     }
 }

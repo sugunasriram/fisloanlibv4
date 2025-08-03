@@ -36,7 +36,6 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.MiddleOfTheLoa
 
 @Composable
 fun PrivacyPolicyScreen(navController: NavHostController) {
-
     val context = LocalContext.current
     val documentViewModel: DocumentViewModel = viewModel()
 
@@ -60,7 +59,7 @@ fun PrivacyPolicyScreen(navController: NavHostController) {
         unexpectedErrorScreen -> CommonMethods().ShowUnexpectedErrorScreen(navController)
         unAuthorizedUser -> CommonMethods().ShowUnAuthorizedErrorScreen(navController)
 //        middleLoan -> CommonMethods().ShowMiddleLoanErrorScreen(navController)
-        middleLoan ->  MiddleOfTheLoanScreen(navController,errorMessage,)
+        middleLoan -> MiddleOfTheLoanScreen(navController, errorMessage)
         else -> {
             PrivacyPolicyView(
                 navController = navController,
@@ -76,8 +75,11 @@ fun PrivacyPolicyScreen(navController: NavHostController) {
 
 @Composable
 fun PrivacyPolicyView(
-    navController: NavHostController, isLoaded: Boolean, isLoading: Boolean,
-    privacyPolicyResponse: PrivacyPolicyResponse?, documentViewModel: DocumentViewModel,
+    navController: NavHostController,
+    isLoaded: Boolean,
+    isLoading: Boolean,
+    privacyPolicyResponse: PrivacyPolicyResponse?,
+    documentViewModel: DocumentViewModel,
     context: Context
 ) {
     if (isLoading) {
@@ -120,8 +122,6 @@ fun PrivacyPolicyView(
                         SubHeading10(privacyData = privacyData)
                     }
                 }
-
-
             }
         } else {
             documentViewModel.privacyPolicy(context = context)
@@ -133,51 +133,85 @@ fun PrivacyPolicyView(
 fun PrivacyHeaderSection(privacyData: DocumentItem?) {
     privacyData?.subheading1?.let { subheading1 ->
         RegisterText(
-            text = "A.$subheading1", start = 15.dp, top = 20.dp,
-            style = bold14Text500, boxAlign = Alignment.TopStart,
-            textColor = Color.Black, end = 5.dp
+            text = "A.$subheading1",
+            start = 15.dp,
+            top = 20.dp,
+            style = bold14Text500,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
+            end = 5.dp
         )
     }
     privacyData?.paragraph1?.let { paragraph1 ->
         RegisterText(
-            text = paragraph1, start = 15.dp, top = 12.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph1,
+            start = 15.dp,
+            top = 12.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph2?.let { paragraph2 ->
         RegisterText(
-            text = paragraph2, start = 15.dp, top = 12.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph2,
+            start = 15.dp,
+            top = 12.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
 
     privacyData?.paragraph3?.let { paragraph3 ->
         RegisterText(
-            text = paragraph3, start = 15.dp, top = 12.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph3,
+            start = 15.dp,
+            top = 12.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph4?.let { paragraph4 ->
         RegisterText(
-            text = paragraph4, start = 15.dp, top = 12.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph4,
+            start = 15.dp,
+            top = 12.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph5?.let { paragraph5 ->
         RegisterText(
-            text = paragraph5, start = 15.dp, top = 12.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph5,
+            start = 15.dp,
+            top = 12.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph6?.let { paragraph6 ->
         RegisterText(
-            text = paragraph6, start = 15.dp, top = 12.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph6,
+            start = 15.dp,
+            top = 12.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
@@ -187,9 +221,13 @@ fun PrivacyHeaderSection(privacyData: DocumentItem?) {
 fun SubHeading2(privacyData: DocumentItem?) {
     privacyData?.subheading2?.let { subheading2 ->
         RegisterText(
-            text = "B.$subheading2", start = 15.dp, top = 20.dp,
-            style = bold14Text500, boxAlign = Alignment.TopStart,
-            textColor = Color.Black, end = 5.dp
+            text = "B.$subheading2",
+            start = 15.dp,
+            top = 20.dp,
+            style = bold14Text500,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
+            end = 5.dp
         )
     }
 
@@ -206,114 +244,184 @@ fun SubHeading2(privacyData: DocumentItem?) {
     privacyData?.paragraph10?.let { paragraph10 ->
         TextBoldWithNormal(paragraph10, version = "4")
     }
-
 }
 
 @Composable
 fun SubHeading3(privacyData: DocumentItem?) {
     privacyData?.subheading3?.let { subheading2 ->
         RegisterText(
-            text = "C.$subheading2", start = 15.dp, top = 20.dp,
-            style = bold14Text500, boxAlign = Alignment.TopStart,
-            textColor = Color.Black, end = 5.dp
+            text = "C.$subheading2",
+            start = 15.dp,
+            top = 20.dp,
+            style = bold14Text500,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
+            end = 5.dp
         )
     }
     privacyData?.subheading3a?.let { subheading3a ->
         RegisterText(
-            text = "1.$subheading3a", start = 20.dp, top = 20.dp,
-            style = bold12Text400, boxAlign = Alignment.TopStart,
-            textColor = Color.Black, end = 5.dp
+            text = "1.$subheading3a",
+            start = 20.dp,
+            top = 20.dp,
+            style = bold12Text400,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
+            end = 5.dp
         )
     }
     privacyData?.paragraph11?.let { paragraph11 ->
         RegisterText(
-            text = "1.1.$paragraph11", start = 30.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = "1.1.$paragraph11",
+            start = 30.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph12?.let { paragraph12 ->
         RegisterText(
-            text = "1.2.$paragraph12", start = 30.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = "1.2.$paragraph12",
+            start = 30.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph13?.let { paragraph13 ->
         RegisterText(
-            text = "1.3.$paragraph13", start = 30.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = "1.3.$paragraph13",
+            start = 30.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.subheading3b?.let { subheading3b ->
         RegisterText(
-            text = "2.$subheading3b", start = 20.dp, top = 20.dp,
-            style = bold12Text400, boxAlign = Alignment.TopStart,
-            textColor = Color.Black, end = 5.dp
+            text = "2.$subheading3b",
+            start = 20.dp,
+            top = 20.dp,
+            style = bold12Text400,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
+            end = 5.dp
         )
     }
 
     privacyData?.paragraph14?.let { paragraph14 ->
         RegisterText(
-            text = "1.$paragraph14", start = 30.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = "1.$paragraph14",
+            start = 30.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph15?.let { paragraph15 ->
         RegisterText(
-            text = "2.$paragraph15", start = 30.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = "2.$paragraph15",
+            start = 30.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph16?.let { paragraph16 ->
         RegisterText(
-            text = "3.$paragraph16", start = 30.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = "3.$paragraph16",
+            start = 30.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph17?.let { paragraph17 ->
         RegisterText(
-            text = "4.$paragraph17", start = 30.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = "4.$paragraph17",
+            start = 30.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph18?.let { paragraph18 ->
         RegisterText(
-            text = "C.$paragraph18", start = 20.dp, top = 20.dp,
-            style = bold12Text400, boxAlign = Alignment.TopStart,
-            textColor = Color.Black, end = 5.dp
+            text = "C.$paragraph18",
+            start = 20.dp,
+            top = 20.dp,
+            style = bold12Text400,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
+            end = 5.dp
         )
     }
     privacyData?.paragraph19?.let { paragraph19 ->
         RegisterText(
-            text = "1.$paragraph19", start = 30.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = "1.$paragraph19",
+            start = 30.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph20?.let { paragraph20 ->
         RegisterText(
-            text = "2.$paragraph20", start = 30.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = "2.$paragraph20",
+            start = 30.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph21?.let { paragraph21 ->
         RegisterText(
-            text = "3.$paragraph21", start = 30.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = "3.$paragraph21",
+            start = 30.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph22?.let { paragraph22 ->
         RegisterText(
-            text = "4.$paragraph22", start = 30.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = "4.$paragraph22",
+            start = 30.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
@@ -323,146 +431,243 @@ fun SubHeading3(privacyData: DocumentItem?) {
 fun SubHeading4(privacyData: DocumentItem?) {
     privacyData?.subheading4?.let { subheading4 ->
         RegisterText(
-            text = "D.$subheading4", start = 15.dp, top = 20.dp,
-            style = bold14Text500, boxAlign = Alignment.TopStart,
-            textColor = Color.Black, end = 5.dp
+            text = "D.$subheading4",
+            start = 15.dp,
+            top = 20.dp,
+            style = bold14Text500,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
+            end = 5.dp
         )
     }
     privacyData?.paragraph23?.let { paragraph23 ->
         RegisterText(
-            text = paragraph23, start = 30.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph23,
+            start = 30.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph24?.let { paragraph24 ->
         RegisterText(
-            text = paragraph24, start = 30.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph24,
+            start = 30.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph25?.let { paragraph25 ->
         RegisterText(
-            text = paragraph25, start = 30.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph25,
+            start = 30.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph26?.let { paragraph26 ->
         RegisterText(
-            text = paragraph26, start = 30.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph26,
+            start = 30.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph27?.let { paragraph27 ->
         RegisterText(
-            text = paragraph27, start = 30.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph27,
+            start = 30.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph28?.let { paragraph28 ->
         RegisterText(
-            text = paragraph28, start = 30.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph28,
+            start = 30.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
-
 }
 
 @Composable
 fun SubHeading5(privacyData: DocumentItem?) {
     privacyData?.subheading5?.let { subheading5 ->
         RegisterText(
-            text = "E.$subheading5", start = 15.dp, top = 20.dp,
-            style = bold14Text500, boxAlign = Alignment.TopStart,
-            textColor = Color.Black, end = 5.dp
+            text = "E.$subheading5",
+            start = 15.dp,
+            top = 20.dp,
+            style = bold14Text500,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
+            end = 5.dp
         )
     }
     privacyData?.paragraph29?.let { paragraph29 ->
         RegisterText(
-            text = paragraph29, start = 30.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph29,
+            start = 30.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph30?.let { paragraph30 ->
         RegisterText(
-            text = paragraph30, start = 30.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph30,
+            start = 30.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph31?.let { paragraph31 ->
         RegisterText(
-            text = paragraph31, start = 30.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph31,
+            start = 30.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph32?.let { paragraph32 ->
         RegisterText(
-            text = paragraph32, start = 30.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph32,
+            start = 30.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph33?.let { paragraph33 ->
         RegisterText(
-            text = paragraph33, start = 30.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph33,
+            start = 30.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph34?.let { paragraph34 ->
         RegisterText(
-            text = paragraph34, start = 30.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph34,
+            start = 30.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph35?.let { paragraph35 ->
         RegisterText(
-            text = paragraph35, start = 30.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph35,
+            start = 30.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph36?.let { paragraph36 ->
         RegisterText(
-            text = paragraph36, start = 30.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph36,
+            start = 30.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph37?.let { paragraph37 ->
         RegisterText(
-            text = paragraph37, start = 30.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph37,
+            start = 30.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph38?.let { paragraph38 ->
         RegisterText(
-            text = paragraph38, start = 30.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph38,
+            start = 30.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph39?.let { paragraph39 ->
         RegisterText(
-            text = paragraph39, start = 30.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph39,
+            start = 30.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph40?.let { paragraph40 ->
         RegisterText(
-            text = paragraph40, start = 30.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph40,
+            start = 30.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
@@ -472,64 +677,108 @@ fun SubHeading5(privacyData: DocumentItem?) {
 fun SubHeading6(privacyData: DocumentItem?) {
     privacyData?.subheading6?.let { subheading6 ->
         RegisterText(
-            text = "F.$subheading6", start = 15.dp, top = 20.dp,
-            style = bold14Text500, boxAlign = Alignment.TopStart,
-            textColor = Color.Black, end = 5.dp
+            text = "F.$subheading6",
+            start = 15.dp,
+            top = 20.dp,
+            style = bold14Text500,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
+            end = 5.dp
         )
     }
     privacyData?.paragraph41?.let { paragraph41 ->
         RegisterText(
-            text = paragraph41, start = 15.dp, top = 12.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph41,
+            start = 15.dp,
+            top = 12.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph42?.let { paragraph42 ->
         RegisterText(
-            text = paragraph42, start = 15.dp, top = 12.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph42,
+            start = 15.dp,
+            top = 12.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph43?.let { paragraph43 ->
         RegisterText(
-            text = paragraph43, start = 15.dp, top = 12.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph43,
+            start = 15.dp,
+            top = 12.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph44?.let { paragraph44 ->
         RegisterText(
-            text = paragraph44, start = 15.dp, top = 12.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph44,
+            start = 15.dp,
+            top = 12.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph45?.let { paragraph45 ->
         RegisterText(
-            text = paragraph45, start = 15.dp, top = 12.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph45,
+            start = 15.dp,
+            top = 12.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph46?.let { paragraph46 ->
         RegisterText(
-            text = paragraph46, start = 15.dp, top = 12.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph46,
+            start = 15.dp,
+            top = 12.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph47?.let { paragraph47 ->
         RegisterText(
-            text = paragraph47, start = 15.dp, top = 12.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph47,
+            start = 15.dp,
+            top = 12.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph48?.let { paragraph48 ->
         RegisterText(
-            text = paragraph48, start = 15.dp, top = 12.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph48,
+            start = 15.dp,
+            top = 12.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
@@ -539,15 +788,24 @@ fun SubHeading6(privacyData: DocumentItem?) {
 fun SubHeading7(privacyData: DocumentItem?) {
     privacyData?.subheading7?.let { subheading7 ->
         RegisterText(
-            text = "G.$subheading7", start = 15.dp, top = 20.dp,
-            style = bold14Text500, boxAlign = Alignment.TopStart,
-            textColor = Color.Black, end = 5.dp
+            text = "G.$subheading7",
+            start = 15.dp,
+            top = 20.dp,
+            style = bold14Text500,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
+            end = 5.dp
         )
     }
     privacyData?.paragraph49?.let { paragraph49 ->
         RegisterText(
-            text = paragraph49, start = 15.dp, top = 12.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph49,
+            start = 15.dp,
+            top = 12.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
@@ -557,22 +815,36 @@ fun SubHeading7(privacyData: DocumentItem?) {
 fun SubHeading8(privacyData: DocumentItem?) {
     privacyData?.subheading8?.let { subheading7 ->
         RegisterText(
-            text = "H.$subheading7", start = 15.dp, top = 20.dp,
-            style = bold14Text500, boxAlign = Alignment.TopStart,
-            textColor = Color.Black, end = 5.dp
+            text = "H.$subheading7",
+            start = 15.dp,
+            top = 20.dp,
+            style = bold14Text500,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
+            end = 5.dp
         )
     }
     privacyData?.paragraph50?.let { paragraph50 ->
         RegisterText(
-            text = paragraph50, start = 15.dp, top = 12.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph50,
+            start = 15.dp,
+            top = 12.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph51?.let { paragraph51 ->
         RegisterText(
-            text = paragraph51, start = 15.dp, top = 12.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph51,
+            start = 15.dp,
+            top = 12.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
@@ -582,22 +854,36 @@ fun SubHeading8(privacyData: DocumentItem?) {
 fun SubHeading9(privacyData: DocumentItem?) {
     privacyData?.subheading9?.let { subheading9 ->
         RegisterText(
-            text = "I.$subheading9", start = 15.dp, top = 20.dp,
-            style = bold14Text500, boxAlign = Alignment.TopStart,
-            textColor = Color.Black, end = 5.dp
+            text = "I.$subheading9",
+            start = 15.dp,
+            top = 20.dp,
+            style = bold14Text500,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
+            end = 5.dp
         )
     }
     privacyData?.paragraph52?.let { paragraph50 ->
         RegisterText(
-            text = paragraph50, start = 15.dp, top = 12.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph50,
+            start = 15.dp,
+            top = 12.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.paragraph53?.let { paragraph51 ->
         RegisterText(
-            text = paragraph51, start = 15.dp, top = 12.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph51,
+            start = 15.dp,
+            top = 12.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
@@ -607,23 +893,36 @@ fun SubHeading9(privacyData: DocumentItem?) {
 fun SubHeading10(privacyData: DocumentItem?) {
     privacyData?.subheading10?.let { subheading10 ->
         RegisterText(
-            text = "J.$subheading10", start = 15.dp, top = 20.dp,
-            style = bold14Text500, boxAlign = Alignment.TopStart,
-            textColor = Color.Black, end = 5.dp
+            text = "J.$subheading10",
+            start = 15.dp,
+            top = 20.dp,
+            style = bold14Text500,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
+            end = 5.dp
         )
     }
     privacyData?.paragraph54?.let { paragraph50 ->
         RegisterText(
-            text = paragraph50, start = 15.dp, top = 12.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph50,
+            start = 15.dp,
+            top = 12.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     privacyData?.subheading11?.let { subheading11 ->
         RegisterText(
-            text = "K.$subheading11", start = 15.dp, top = 20.dp,
-            style = bold14Text500, boxAlign = Alignment.TopStart,
-            textColor = Color.Black, end = 5.dp
+            text = "K.$subheading11",
+            start = 15.dp,
+            top = 20.dp,
+            style = bold14Text500,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
+            end = 5.dp
         )
     }
     privacyData?.paragraph55?.let { paragraph55 ->
@@ -635,21 +934,30 @@ fun SubHeading10(privacyData: DocumentItem?) {
     }
 }
 
-
 @Composable
 fun TextBoldWithNormal(text: String, version: String) {
     val header = text.substringAfter("\"").substringBefore("\"")
     val cleanedText = text.replace("\"", "")
     Column {
         RegisterText(
-            text = "$version. $header", start = 25.dp, top = 20.dp,
-            style = bold12Text400, boxAlign = Alignment.TopStart,
-            textColor = Color.Black, end = 5.dp, textAlign = TextAlign.Start
+            text = "$version. $header",
+            start = 25.dp,
+            top = 20.dp,
+            style = bold12Text400,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
+            end = 5.dp,
+            textAlign = TextAlign.Start
         )
         RegisterText(
-            text = cleanedText, start = 40.dp, top = 5.dp, style = normal12Text400,
-            textAlign = TextAlign.Justify, end = 10.dp, boxAlign = Alignment.TopStart,
-            textColor = Color.Black,
+            text = cleanedText,
+            start = 40.dp,
+            top = 5.dp,
+            style = normal12Text400,
+            textAlign = TextAlign.Justify,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black
         )
     }
 }

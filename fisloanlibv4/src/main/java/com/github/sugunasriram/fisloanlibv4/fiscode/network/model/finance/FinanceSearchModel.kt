@@ -3,6 +3,12 @@ package com.github.sugunasriram.fisloanlibv4.fiscode.network.model.finance
 import kotlinx.serialization.Serializable
 
 @Serializable
+data class PFSearchBodyModel(
+    val loanType: String? = null,
+    val bureauConsent: String? = null
+)
+
+@Serializable
 data class FinanceSearchModel(
     val isFinancing: String? = null,
 
@@ -34,4 +40,3 @@ data class FinanceSearchModel(
 
     val productPrice: String? = null
 )
-

@@ -7,7 +7,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
-import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.github.sugunasriram.fisloanlibv4.R
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.core.ApiRepository
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.GenerateAuthOtp
@@ -41,15 +40,15 @@ class SignInViewModel : BaseViewModel() {
     private val _checkBoxChecked = MutableLiveData<Boolean>(false)
     val checkBoxChecked: LiveData<Boolean> = _checkBoxChecked
 
-    fun onCheckBoxChanges(value:Boolean){
-        _checkBoxChecked.value=value
+    fun onCheckBoxChanges(value: Boolean) {
+        _checkBoxChecked.value = value
     }
 
     private val _isAgreeTermsAndConditions = MutableLiveData<Boolean>(true)
     val isAgreeTermsAndConditions: LiveData<Boolean> = _isAgreeTermsAndConditions
 
-    fun onAgreeTermsAndConditions(value:Boolean){
-        _isAgreeTermsAndConditions.value=value
+    fun onAgreeTermsAndConditions(value: Boolean) {
+        _isAgreeTermsAndConditions.value = value
     }
 
     private val _mobileNumber: MutableLiveData<String?> = MutableLiveData("")
@@ -83,39 +82,40 @@ class SignInViewModel : BaseViewModel() {
         updateGeneralError(newData)
     }
 
-    fun signInValidation(navController: NavHostController,
-                         mobileNumber: String,
-                         mobileNumberFocus: FocusRequester,
-                         checkBoxState:Boolean,
-                         context: Context
-    ){
+    fun signInValidation(
+        navController: NavHostController,
+        mobileNumber: String,
+        mobileNumberFocus: FocusRequester,
+        checkBoxState: Boolean,
+        context: Context
+    ) {
         clearMessage()
-        var isValid=true
+        var isValid = true
         if (mobileNumber.trim().isEmpty()) {
             updateMobileNumberError(context.getString(R.string.please_enter_phone_number))
             mobileNumberFocus.requestFocus()
             requestKeyboard()
-            isValid=false
+            isValid = false
         } else if (!Pattern.compile("^[0-9]*\$").matcher(mobileNumber).find()) {
             updateMobileNumberError(context.getString(R.string.should_not_contain_characters_alphabets))
             mobileNumberFocus.requestFocus()
             requestKeyboard()
-            isValid=false
+            isValid = false
         } else if (mobileNumber.trim().length < 10) {
             updateMobileNumberError(context.getString(R.string.please_enter_valid_mobile_number))
             mobileNumberFocus.requestFocus()
             requestKeyboard()
-            isValid=false
-        }else if (!verifyPhoneNumber(mobileNumber,context)) {
+            isValid = false
+        } else if (!verifyPhoneNumber(mobileNumber, context)) {
             updateMobileNumberError(context.getString(R.string.please_enter_valid_mobile_number))
             mobileNumberFocus.requestFocus()
-            isValid=false
+            isValid = false
         }
-        if(!checkBoxState) {
+        if (!checkBoxState) {
             _isAgreeTermsAndConditions.value = false
-            isValid=false
+            isValid = false
         }
-        if(isValid){
+        if (isValid) {
             getUserRole(mobileNumber, context.getString(R.string.country_code), context)
         }
     }
@@ -162,19 +162,23 @@ class SignInViewModel : BaseViewModel() {
         kotlin.runCatching {
             ApiRepository.userRole()
         }.onSuccess { response ->
-            handleGetUserRoleSuccess(response,mobileNumber,countryCode,context)
+            handleGetUserRoleSuccess(response, mobileNumber, countryCode, context)
         }.onFailure { error ->
             handleGenerateLoginOtpFailure(error, context)
         }
     }
-    private suspend fun handleGetUserRoleSuccess(response: UserRole?, mobileNumber: String,
-                                                 countryCode: String,context: Context) {
+    private suspend fun handleGetUserRoleSuccess(
+        response: UserRole?,
+        mobileNumber: String,
+        countryCode: String,
+        context: Context
+    ) {
         withContext(Dispatchers.Main) {
             if (response != null) {
                 response.data?.find { it.role == "USER" }?.let { userRole ->
                     val userId = userRole._id
                     _userRoleSuccessData.value = response
-                    generateLoginOtp(mobileNumber,countryCode,userId,context)
+                    generateLoginOtp(mobileNumber, countryCode, userId, context)
                 }
             }
         }
@@ -182,26 +186,28 @@ class SignInViewModel : BaseViewModel() {
 
     private fun generateLoginOtp(
         mobileNumber: String,
-        countryCode: String,userRole:String,
+        countryCode: String,
+        userRole: String,
         context: Context
     ) {
         _isLoginInProgress.value = true
         viewModelScope.launch(Dispatchers.IO) {
-            handleGenerateLoginOtp(mobileNumber, countryCode,userRole, context)
+            handleGenerateLoginOtp(mobileNumber, countryCode, userRole, context)
         }
     }
 
     private suspend fun handleGenerateLoginOtp(
         mobileNumber: String,
-        countryCode: String, userRole:String,
+        countryCode: String,
+        userRole: String,
         context: Context
     ) {
         kotlin.runCatching {
-            ApiRepository.generateAuthOtp(mobileNumber, countryCode,userRole)
+            ApiRepository.generateAuthOtp(mobileNumber, countryCode, userRole)
         }.onSuccess { response ->
             handleGenerateLoginOtpSuccess(response)
         }.onFailure { error ->
-            Log.d("Sugu : ",error.message.toString())
+            Log.d("Sugu : ", error.message.toString())
             handleGenerateLoginOtpFailure(error, context)
         }
     }
@@ -238,6 +244,9 @@ class SignInViewModel : BaseViewModel() {
             500 -> {
                 _showServerIssueScreen.value = true
             }
+            502 -> {
+                _showServerIssueScreen.value = true
+            }
 
             else -> {
                 _unexpectedError.value = true
@@ -262,5 +271,4 @@ class SignInViewModel : BaseViewModel() {
     fun resetKeyboardRequest() {
         _shouldShowKeyboard.value = false
     }
-
 }

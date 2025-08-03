@@ -26,35 +26,45 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal32Text700
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import kotlinx.serialization.json.Json
 
+private val json = Json { prettyPrint = true }
 
-private  val json = Json { prettyPrint = true }
 @Composable
 fun InvoiceDetailScreen(navController: NavHostController, fromFlow: String, invoiceId: String) {
-
     val invoiceDetails = json.decodeFromString(GstInvoice.serializer(), invoiceId)
     BackHandler {
         invoiceDetails.data?.id?.let { id ->
             navigateToGstInvoiceLoansScreen(
-                navController = navController, fromFlow = fromFlow
+                navController = navController,
+                fromFlow = fromFlow
             )
         }
     }
     FixedTopBottomScreen(
-        navController = navController, primaryButtonText = stringResource(id = R.string.next),
-        modifier = Modifier.background(Color.White), onBackClick = { navController.popBackStack() },
+        navController = navController,
+        primaryButtonText = stringResource(id = R.string.next),
+        modifier = Modifier.background(Color.White),
+        onBackClick = { navController.popBackStack() },
         onPrimaryButtonClick = {
             invoiceDetails.data?.id?.let { id ->
                 navigateToLoanProcessScreen(
-                    navController = navController, transactionId="Sugu",statusId = 11, responseItem = "No Need",
-                    offerId = id, fromFlow = fromFlow
+                    navController = navController,
+                    transactionId = "Sugu",
+                    statusId = 11,
+                    responseItem = "No Need",
+                    offerId = id,
+                    fromFlow = fromFlow
                 )
             }
         }
     ) {
         CenteredMoneyImage(imageSize = 65.dp, top = 15.dp)
         RegisterText(
-            text = stringResource(id = R.string.invoice_detail), textColor = appBlueTitle,
-            top = 15.dp, start = 0.dp, end = 15.dp, style = normal32Text700,
+            text = stringResource(id = R.string.invoice_detail),
+            textColor = appBlueTitle,
+            top = 15.dp,
+            start = 0.dp,
+            end = 15.dp,
+            style = normal32Text700,
             textAlign = TextAlign.Start
         )
 
@@ -102,11 +112,10 @@ fun InvoiceDetailScreen(navController: NavHostController, fromFlow: String, invo
                         start = 25.dp, textHeader = stringResource(id = R.string.date), top = 30.dp,
                         textValue = actualDate, textColorHeader = hintGray,
                         headerStyle = normal14Text400, valueStyle = normal14Text400,
-                        valueTextAlign = TextAlign.Start, textColorValue = appBlack,
+                        valueTextAlign = TextAlign.Start, textColorValue = appBlack
                     )
                     HorizontalDivider(top = 10.dp)
                 }
-
             }
             gstProfile?.adadr?.forEach { address ->
                 address?.addr?.stcd?.let { state ->
@@ -114,12 +123,11 @@ fun InvoiceDetailScreen(navController: NavHostController, fromFlow: String, invo
                         start = 25.dp, textHeader = stringResource(id = R.string.state), top = 30.dp,
                         textValue = state, textColorHeader = hintGray,
                         headerStyle = normal14Text400, valueStyle = normal14Text400,
-                        valueTextAlign = TextAlign.Start, textColorValue = appBlack,
+                        valueTextAlign = TextAlign.Start, textColorValue = appBlack
                     )
                     HorizontalDivider(top = 10.dp)
                 }
             }
         }
-
     }
 }

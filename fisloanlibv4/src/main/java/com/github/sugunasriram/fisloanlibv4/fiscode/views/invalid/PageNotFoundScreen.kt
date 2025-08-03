@@ -1,6 +1,5 @@
 package com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid
 
-import android.util.Log
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.Image
@@ -9,7 +8,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -42,6 +40,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.components.TopBar
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.TopBottomBarForNegativeScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.WrapBorderButton
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToBureauOffersScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appBlueTitle
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appWhite
@@ -52,6 +51,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.negativeGray
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal12Text400
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal14Text500
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal14Text700
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal16Text500
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal18Text500
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal20Text400
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal20Text500
@@ -62,28 +62,41 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun NegativeCommonScreen(
-    navController: NavHostController, showRefreshButton: Boolean = true, showBottom: Boolean = true,
-    errorText: String = stringResource(id = R.string.page_notfound), onClick: () -> Unit,
+    navController: NavHostController,
+    showRefreshButton: Boolean = true,
+    showBottom: Boolean = true,
+    errorText: String = stringResource(id = R.string.page_notfound),
+    onClick: () -> Unit,
     solutionText: String = stringResource(id = R.string.please_try_again_after_sometime),
     errorImage: Painter = painterResource(id = R.drawable.error_404_image),
-    buttonText: String = stringResource(id = R.string.retry), errorTextTop: Dp = 50.dp,
+    buttonText: String = stringResource(id = R.string.retry),
+    errorTextTop: Dp = 50.dp
 
-    ) {
+) {
     TopBottomBarForNegativeScreen(showTop = false, showBottom = showBottom, navController = navController) {
         Image(
-            painter = errorImage, contentDescription = "", contentScale = ContentScale.Crop,
+            painter = errorImage,
+            contentDescription = "",
+            contentScale = ContentScale.Crop,
             modifier = Modifier
                 .size(250.dp)
-                .fillMaxSize(),
+                .fillMaxSize()
         )
 
         StartingText(
-            text = errorText, alignment = Alignment.TopCenter, style = normal24Text700,
-            textColor = errorRed, top = errorTextTop
+            text = errorText,
+            alignment = Alignment.TopCenter,
+            style = normal24Text700,
+            textColor = errorRed,
+            top = errorTextTop
         )
         StartingText(
-            text = solutionText, alignment = Alignment.TopCenter, style = normal20Text400,
-            textColor = negativeGray, top = 5.dp, bottom = if (showRefreshButton) 80.dp else 5.dp,
+            text = solutionText,
+            alignment = Alignment.TopCenter,
+            style = normal20Text400,
+            textColor = negativeGray,
+            top = 5.dp,
+            bottom = if (showRefreshButton) 80.dp else 5.dp
         )
         if (!showRefreshButton) {
             StartingText(
@@ -120,44 +133,57 @@ fun PagesNotFoundPreview() {
     }
 }
 
-
-
-
 @Composable
 fun UnexpectedErrorScreen(
     navController: NavHostController,
-    errorMsgShow: Boolean = true, onClick: () -> Unit = { navigateApplyByCategoryScreen(navController = navController) },
-    errorText: String = stringResource(id = R.string.please_try_again_after_sometime),
-    errorMsg: String = stringResource(id = R.string.something_went_wrong),
+    errorMsgShow: Boolean = true,
+    onClick: () -> Unit = { navigateApplyByCategoryScreen(navController = navController) },
+    errorText: String = stringResource(id = R.string.we_are_working_on_it_please_try_again),
+    errorMsg: String = stringResource(id = R.string.something_went_wrong)
 ) {
     FixedTopBottomScreen(
         navController = navController,
-        backgroundColor= appWhite,
+        backgroundColor = appWhite,
         showBackButton = true,
-        onBackClick = {navController.popBackStack()},
+        onBackClick = { navController.popBackStack() },
         topBarBackgroundColor = appWhite
     ) {
         Image(
             painter = painterResource(id = R.drawable.error_unexpected_image),
-            contentDescription = "", contentScale = ContentScale.Crop,
+            contentDescription = "",
+            contentScale = ContentScale.Crop,
             modifier = Modifier.size(300.dp)
         )
         StartingText(
-            text = stringResource(id = R.string.oops), textColor = errorGray,
-            start = 30.dp, end = 30.dp, bottom = 5.dp, style = normal30Text700,
+            text = stringResource(id = R.string.oops),
+            textColor = errorGray,
+            start = 30.dp,
+            end = 30.dp,
+            bottom = 5.dp,
+            style = normal30Text700,
             alignment = Alignment.TopCenter
         )
-        StartingText(
-            text = errorMsg, textColor = errorGray,
-            start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp, style = normal30Text700,
-            alignment = Alignment.TopCenter
+        RegisterText(
+            text = errorMsg,
+            textColor = errorGray,
+            start = 30.dp,
+            end = 30.dp,
+            top = 10.dp,
+            bottom = 5.dp,
+            style = normal30Text700,
+            boxAlign = Alignment.TopCenter
         )
-        StartingText(
-            text = errorText, alignment = Alignment.TopCenter, style = normal20Text400,
-            textColor = negativeGray, top = 5.dp, bottom = 80.dp
+        RegisterText(
+            text = errorText,
+            boxAlign = Alignment.TopCenter,
+            style = normal20Text400,
+            textColor = negativeGray,
+            top = 5.dp,
+            bottom = 80.dp
         )
         ClickableTextWithIcon(
-            text = stringResource(id = R.string.retry), image = R.drawable.refresh_orange_icon,
+            text = stringResource(id = R.string.retry),
+            image = R.drawable.refresh_orange_icon,
             color = appOrange
         ) { onClick() }
     }
@@ -180,13 +206,19 @@ fun RequestTimeOutScreen(navController: NavHostController, onClick: () -> Unit) 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Image(
                     painter = painterResource(id = R.drawable.error_request_time_out_image),
-                    contentDescription = "", contentScale = ContentScale.Crop,
+                    contentDescription = "",
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier.size(300.dp)
                 )
 
                 StartingText(
-                    text = stringResource(id = R.string.request_timed_out), textColor = errorGray,
-                    start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp, style = normal30Text700,
+                    text = stringResource(id = R.string.request_timed_out),
+                    textColor = errorGray,
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 10.dp,
+                    bottom = 5.dp,
+                    style = normal30Text700,
                     alignment = Alignment.TopCenter
                 )
                 StartingText(
@@ -203,18 +235,21 @@ fun RequestTimeOutScreen(navController: NavHostController, onClick: () -> Unit) 
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     ClickableText(
-                        text = stringResource(id = R.string.go_back), style = normal20Text500
+                        text = stringResource(id = R.string.go_back),
+                        style = normal20Text500
                     ) { navController.popBackStack() }
                     ClickableTextWithIcon(
-                        backgroundColor = appOrange, borderColor = appOrange,
-                        color = appWhite, style = normal20Text500,
-                        imageStart = 25.dp, imageEnd = 25.dp,
-                        text = stringResource(id = R.string.retry), image = R.drawable.refresh_icon
+                        backgroundColor = appOrange,
+                        borderColor = appOrange,
+                        color = appWhite,
+                        style = normal20Text500,
+                        imageStart = 25.dp,
+                        imageEnd = 25.dp,
+                        text = stringResource(id = R.string.retry),
+                        image = R.drawable.refresh_icon
                     ) { onClick() }
                 }
-
             }
-
         }
     }
 }
@@ -224,94 +259,122 @@ fun UnAuthorizedScreen(navController: NavHostController, onClick: () -> Unit) {
     FixedTopBottomScreen(
         navController = navController,
         showBackButton = true,
-        onBackClick = {navController.popBackStack()},
-        backgroundColor= appWhite,
+        onBackClick = { navController.popBackStack() },
+        backgroundColor = appWhite,
         topBarBackgroundColor = appWhite
     ) {
         Image(
             painter = painterResource(id = R.drawable.error_un_authorized_image),
-            contentDescription = "", contentScale = ContentScale.Fit,
+            contentDescription = "",
+            contentScale = ContentScale.Fit,
             modifier = Modifier
                 .size(300.dp)
                 .padding(top = 100.dp)
         )
 
         StartingText(
-            text = stringResource(id = R.string.un_authorized_access), textColor = errorGray,
-            start = 30.dp, end = 30.dp, top = 30.dp, bottom = 5.dp, style = normal30Text700,
+            text = stringResource(id = R.string.un_authorized_access),
+            textColor = errorGray,
+            start = 30.dp,
+            end = 30.dp,
+            top = 30.dp,
+            bottom = 5.dp,
+            style = normal30Text700,
             alignment = Alignment.TopCenter
         )
         StartingText(
             text = stringResource(id = R.string.please_try_again_after_sometime),
-            alignment = Alignment.TopCenter, style = normal20Text400,
-            textColor = negativeGray, top = 5.dp, bottom = 80.dp
+            alignment = Alignment.TopCenter,
+            style = normal20Text400,
+            textColor = negativeGray,
+            top = 5.dp,
+            bottom = 80.dp
         )
         ClickableText(
-            text = stringResource(id = R.string.retry_login), style = normal20Text500
+            text = stringResource(id = R.string.retry_login),
+            style = normal20Text500
         ) { onClick() }
-
     }
 }
-
 
 @Composable
 fun EmptyLoanStatus(navController: NavHostController) {
     TopBottomBarForNegativeScreen(navController = navController) {
         StartingText(
-            text = stringResource(id = R.string.loan_status), textColor = appBlueTitle,
-            start = 30.dp, end = 30.dp, top = 30.dp, bottom = 5.dp, style = normal30Text700,
+            text = stringResource(id = R.string.loan_status),
+            textColor = appBlueTitle,
+            start = 30.dp,
+            end = 30.dp,
+            top = 30.dp,
+            bottom = 5.dp,
+            style = normal30Text700,
             alignment = Alignment.TopCenter
         )
         Image(
             painter = painterResource(id = R.drawable.loan_not_found),
-            contentDescription = "", contentScale = ContentScale.Crop,
+            contentDescription = "",
+            contentScale = ContentScale.Crop,
             modifier = Modifier.padding(top = 50.dp)
         )
         StartingText(
-            text = stringResource(id = R.string.no_existing_loans), textColor = errorGray,
-            start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp, style = normal14Text500,
+            text = stringResource(id = R.string.no_existing_loans),
+            textColor = errorGray,
+            start = 30.dp,
+            end = 30.dp,
+            top = 10.dp,
+            bottom = 5.dp,
+            style = normal14Text500,
             alignment = Alignment.TopCenter
         )
     }
 }
 
 @Composable
-fun SessionTimeOutScreen(navController: NavHostController,onClick: () -> Unit) {
+fun SessionTimeOutScreen(navController: NavHostController, onClick: () -> Unit) {
     FixedTopBottomScreen(
         navController = navController,
         showBackButton = false,
-        backgroundColor= appWhite,
+        backgroundColor = appWhite,
         topBarBackgroundColor = appWhite
     ) {
         Image(
             painter = painterResource(id = R.drawable.error_session_time_out),
-            contentDescription = "", contentScale = ContentScale.Fit,
+            contentDescription = "",
+            contentScale = ContentScale.Fit,
             modifier = Modifier
                 .size(330.dp)
                 .padding(top = 130.dp)
         )
 
         StartingText(
-            text = stringResource(id = R.string.session_timed_out), textColor = errorGray,
-            start = 30.dp, end = 30.dp, top = 30.dp, bottom = 5.dp, style = normal30Text700,
+            text = stringResource(id = R.string.session_timed_out),
+            textColor = errorGray,
+            start = 30.dp,
+            end = 30.dp,
+            top = 30.dp,
+            bottom = 5.dp,
+            style = normal30Text700,
             alignment = Alignment.TopCenter
         )
         StartingText(
             text = stringResource(id = R.string.please_try_again_after_sometime),
-            alignment = Alignment.TopCenter, style = normal20Text400,
-            textColor = negativeGray, top = 5.dp, bottom = 50.dp
+            alignment = Alignment.TopCenter,
+            style = normal20Text400,
+            textColor = negativeGray,
+            top = 5.dp,
+            bottom = 50.dp
         )
         ClickableText(
-            text = stringResource(id = R.string.re_login), style = normal20Text500
+            text = stringResource(id = R.string.re_login),
+            style = normal20Text500
         ) { onClick() }
-
     }
 }
 
 @Composable
 fun LoanNotApprovedScreen(
     navController: NavHostController,
-    text: String = stringResource(id = R.string.loan_not_approved),
+    text: String = stringResource(id = R.string.loan_not_approved)
 ) {
     LaunchedEffect(Unit) {
         delay(5000)
@@ -331,27 +394,29 @@ fun LoanNotApprovedScreen(
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 StartingText(
-                    text = text, textColor = errorRed, style = normal32Text700,
+                    text = text,
+                    textColor = errorRed,
+                    style = normal32Text700,
                     alignment = Alignment.TopCenter
                 )
                 Image(
                     painter = painterResource(id = R.drawable.error_loan_not_approved_image),
-                    contentDescription = "", contentScale = ContentScale.Fit,
+                    contentDescription = "",
+                    contentScale = ContentScale.Fit,
                     modifier = Modifier.size(300.dp)
                 )
 
                 RegisterText(
                     text = stringResource(id = R.string.we_regret_loan_not_approved),
                     style = normal14Text700,
-                    textColor = errorRed, top = 5.dp, bottom = 80.dp
+                    textColor = errorRed,
+                    top = 5.dp,
+                    bottom = 80.dp
                 )
-
             }
-
         }
     }
 }
-
 
 @Composable
 fun FormRejectionScreen(
@@ -375,13 +440,16 @@ fun FormRejectionScreen(
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             StartingText(
-                text = errorTitle, textColor = errorRed, style = normal32Text700,
+                text = errorTitle,
+                textColor = errorRed,
+                style = normal32Text700,
                 alignment = Alignment.TopCenter
             )
 
             Image(
                 painter = painterResource(id = R.drawable.error_loan_not_approved_image),
-                contentDescription = "", contentScale = ContentScale.Crop,
+                contentDescription = "",
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .padding(top = 50.dp, start = 20.dp, end = 20.dp)
             )
@@ -389,10 +457,15 @@ fun FormRejectionScreen(
             val displayedSubText = errorMsg?.takeIf { it.isNotEmpty() }
                 ?: stringResource(id = R.string.form_submission_rejected_or_pending)
 
-            StartingText(
+            RegisterText(
                 text = displayedSubText,
-                textColor = errorGray, start = 30.dp, end = 30.dp, top = 30.dp, bottom = 5.dp,
-                style = normal14Text500, alignment = Alignment.TopCenter
+                textColor = errorGray,
+                start = 30.dp,
+                end = 30.dp,
+                top = 30.dp,
+                bottom = 5.dp,
+                style = normal16Text500,
+                boxAlign = Alignment.TopCenter
             )
 
             ClickableTextWithIcon(
@@ -401,7 +474,6 @@ fun FormRejectionScreen(
             ) {
                 onClick()
             }
-
         }
     }
 
@@ -420,29 +492,37 @@ fun FormRejectionScreen(
 }
 
 @Composable
-fun MiddleOfTheLoanScreen(navController: NavHostController,message: String,displayOffer:Boolean=true,
-                          onGoBack: () -> Unit = { navigateApplyByCategoryScreen(navController =
-                          navController)},
-                             onClick: () -> Unit = { navigateApplyByCategoryScreen(navController = navController) }
-                             ) {
+fun MiddleOfTheLoanScreen(
+    navController: NavHostController,
+    message: String,
+    displayOffer: Boolean = true,
+    onGoBack: () -> Unit = {
+        navigateApplyByCategoryScreen(
+            navController =
+            navController
+        )
+    },
+    onClick: () -> Unit = { navigateApplyByCategoryScreen(navController = navController) }
+) {
     TopBar(navController = navController, showBackButton = true)
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            if(displayOffer){
+            if (displayOffer) {
                 Image(
-                    painter = painterResource(id =R.drawable.error_no_loan_offers_available ),
+                    painter = painterResource(id = R.drawable.error_no_loan_offers_available),
                     contentDescription = "417",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxWidth().size(250.dp)
-                        .padding(top = 30.dp, start = 20.dp, end = 20.dp),
+                        .padding(top = 30.dp, start = 20.dp, end = 20.dp)
                 )
-            }else{
+            } else {
                 Image(
                     painter = painterResource(id = R.drawable.middle0ftheloan),
-                    contentDescription = "417", contentScale = ContentScale.Crop,
+                    contentDescription = "417",
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .padding(top = 30.dp, start = 20.dp, end = 20.dp),
+                        .padding(top = 30.dp, start = 20.dp, end = 20.dp)
                 )
             }
             Column(Modifier.padding(10.dp)) {
@@ -465,7 +545,7 @@ fun MiddleOfTheLoanScreen(navController: NavHostController,message: String,displ
                             style = normal12Text400,
                             shape = RoundedCornerShape(10.dp),
                             backgroundColor = appWhite,
-                            textColor = appOrange,
+                            textColor = appOrange
                         ) {
                             onGoBack()
                         }
@@ -498,7 +578,6 @@ fun MiddleOfTheLoanScreen(navController: NavHostController,message: String,displ
             }
         }
     }
-
 }
 
 @Preview
@@ -514,7 +593,6 @@ fun NoResponseScreenPreview() {
 private fun MiddleOfTheLoanScreenPreview() {
     Surface {
 //        MiddleOfTheLoanScreen(rememberNavController(),"Failed to add bank account details Failed to add bank account details Failed to add bank account details",false)
-        MiddleOfTheLoanScreen(rememberNavController(),"Failed to add bank account details Failed to add bank account details Failed to add bank account details",)
+        MiddleOfTheLoanScreen(rememberNavController(), "Failed to add bank account details Failed to add bank account details Failed to add bank account details")
     }
 }
-

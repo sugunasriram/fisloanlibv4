@@ -30,7 +30,6 @@ import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.github.sugunasriram.fisloanlibv4.R
-import com.github.sugunasriram.fisloanlibv4.fiscode.components.CenterProgress
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateSignInPage
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appBlack
@@ -44,12 +43,11 @@ private const val SPLASH_SCREEN_DELAY = 3000L
 
 @Composable
 fun SpalashScreen(navController: NavHostController) {
-//    SplashScreenUi()
-    CenterProgress()
+    SplashScreenUi()
     LaunchedEffect(key1 = true) {
         delay(SPLASH_SCREEN_DELAY)
-        //Get AccessToken and RefreshToken is null - Login Screen
-        //else ApplyBycategoryScreen
+        // Get AccessToken and RefreshToken is null - Login Screen
+        // else ApplyBycategoryScreen
 
         val accessToken = TokenManager.read("accessToken")
         if (accessToken.isNullOrEmpty()) {
@@ -84,11 +82,12 @@ fun SplashScreenUi() {
             Column {
                 Text(
                     text = stringResource(id = R.string.welcome_text),
-                    style = serif28Text700, textAlign = TextAlign.Start,
+                    style = serif28Text700,
+                    textAlign = TextAlign.Start,
                     color = appBlack,
                     modifier = Modifier
                         .padding(top = 40.dp, start = 25.dp, end = 10.dp)
-                        .align(Alignment.Start),
+                        .align(Alignment.Start)
                 )
 
                 Image(
@@ -106,18 +105,19 @@ fun SplashScreenUi() {
                     contentDescription = stringResource(id = R.string.splash_screen_image),
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
-                        .background(Color.Transparent)
-                        .size(200.dp)
+                        .background(Color.Transparent).size(200.dp)
                         .padding(bottom = 50.dp, start = 40.dp, end = 40.dp),
                     contentScale = ContentScale.Fit
                 )
 
                 Text(
                     text = stringResource(id = R.string.hassle_free_and_quick_loan),
-                    style = normal24Text500, color = appWhite, textAlign = TextAlign.Center,
+                    style = normal24Text500,
+                    color = appWhite,
+                    textAlign = TextAlign.Center,
                     modifier = Modifier
                         .padding(5.dp)
-                        .align(Alignment.CenterHorizontally),
+                        .align(Alignment.CenterHorizontally)
                 )
             }
         }
@@ -134,7 +134,7 @@ fun SplashScreenPreview() {
 fun InAppUpdateScreen(context: Context, onUpdateCheckComplete: () -> Unit) {
     val appUpdateManager = remember { AppUpdateManagerFactory.create(context) }
     val updateInfo = remember { mutableStateOf<AppUpdateInfo?>(null) }
-    val isUpdateChecked = remember { mutableStateOf(false) }  // Track when check is complete
+    val isUpdateChecked = remember { mutableStateOf(false) } // Track when check is complete
 
     // Launch effect to check for updates
     LaunchedEffect(Unit) {
@@ -173,6 +173,5 @@ fun InAppUpdateScreen(context: Context, onUpdateCheckComplete: () -> Unit) {
 //        Text("Checking for updates...", fontSize = 20.sp)
 //    }
 }
-
 
 const val REQUEST_CODE_UPDATE = 2001

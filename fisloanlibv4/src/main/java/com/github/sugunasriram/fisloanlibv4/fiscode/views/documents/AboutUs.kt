@@ -36,7 +36,6 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.MiddleOfTheLoa
 
 @Composable
 fun AboutUsScreen(navController: NavHostController) {
-
     val context = LocalContext.current
     val documentViewModel: DocumentViewModel = viewModel()
 
@@ -59,11 +58,14 @@ fun AboutUsScreen(navController: NavHostController) {
         unexpectedErrorScreen -> CommonMethods().ShowUnexpectedErrorScreen(navController)
         unAuthorizedUser -> CommonMethods().ShowUnAuthorizedErrorScreen(navController)
 //        middleLoan -> CommonMethods().ShowMiddleLoanErrorScreen(navController)
-        middleLoan ->  MiddleOfTheLoanScreen(navController,errorMessage,)
+        middleLoan -> MiddleOfTheLoanScreen(navController, errorMessage)
         else -> {
             AboutUsView(
-                navController = navController, isLoaded = isLoaded, isLoading = isLoading,
-                aboutUsResponse = aboutUsResponse, documentViewModel = documentViewModel,
+                navController = navController,
+                isLoaded = isLoaded,
+                isLoading = isLoading,
+                aboutUsResponse = aboutUsResponse,
+                documentViewModel = documentViewModel,
                 context = context
             )
         }
@@ -72,8 +74,11 @@ fun AboutUsScreen(navController: NavHostController) {
 
 @Composable
 fun AboutUsView(
-    navController: NavHostController, isLoaded: Boolean, isLoading: Boolean,
-    aboutUsResponse: AboutUsResponse?, documentViewModel: DocumentViewModel,
+    navController: NavHostController,
+    isLoaded: Boolean,
+    isLoading: Boolean,
+    aboutUsResponse: AboutUsResponse?,
+    documentViewModel: DocumentViewModel,
     context: Context
 ) {
     if (isLoading) {
@@ -109,41 +114,68 @@ fun AboutUsView(
 fun ParaGraphSection1(aboutData: DocumentItem?) {
     aboutData?.paragraph1?.let { paragraph1 ->
         RegisterText(
-            text = "welcome to nearshop".uppercase(), start = 5.dp, top = 20.dp,
-            style = bold14Text500, boxAlign = Alignment.TopStart,
-            textColor = Color.Black, end = 5.dp
+            text = "welcome to nearshop".uppercase(),
+            start = 5.dp,
+            top = 20.dp,
+            style = bold14Text500,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
+            end = 5.dp
         )
         RegisterText(
-            text = paragraph1, start = 20.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph1,
+            start = 20.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     aboutData?.subheading1?.let { subheading1 ->
         RegisterText(
-            text = "1.$subheading1", start = 15.dp, top = 20.dp,
-            style = bold12Text400, boxAlign = Alignment.TopStart,
-            textColor = Color.Black, end = 5.dp
+            text = "1.$subheading1",
+            start = 15.dp,
+            top = 20.dp,
+            style = bold12Text400,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
+            end = 5.dp
         )
     }
     aboutData?.paragraph2?.let { paragraph2 ->
         RegisterText(
-            text = paragraph2, start = 20.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph2,
+            start = 20.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
     aboutData?.subheading2?.let { subheading2 ->
         RegisterText(
-            text = "2.$subheading2", start = 15.dp, top = 20.dp,
-            style = bold12Text400, boxAlign = Alignment.TopStart,
-            textColor = Color.Black, end = 5.dp
+            text = "2.$subheading2",
+            start = 15.dp,
+            top = 20.dp,
+            style = bold12Text400,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
+            end = 5.dp
         )
     }
     aboutData?.paragraph3?.let { paragraph3 ->
         RegisterText(
-            text = paragraph3, start = 20.dp, top = 20.dp, style = normal12Text400,
-            end = 10.dp, boxAlign = Alignment.TopStart, textColor = Color.Black,
+            text = paragraph3,
+            start = 20.dp,
+            top = 20.dp,
+            style = normal12Text400,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
             textAlign = TextAlign.Justify
         )
     }
@@ -162,9 +194,13 @@ fun ParaGraphSection2(aboutData: DocumentItem?) {
     }
     aboutData?.subheading3?.let { subheading3 ->
         RegisterText(
-            text = "3.$subheading3", start = 15.dp, top = 20.dp,
-            style = bold12Text400, boxAlign = Alignment.TopStart,
-            textColor = Color.Black, end = 5.dp
+            text = "3.$subheading3",
+            start = 15.dp,
+            top = 20.dp,
+            style = bold12Text400,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
+            end = 5.dp
         )
     }
     aboutData?.paragraph7?.let { paragraph7 ->
@@ -181,9 +217,13 @@ fun ParaGraphSection2(aboutData: DocumentItem?) {
     }
     aboutData?.subheading4?.let { subheading4 ->
         RegisterText(
-            text = "4.$subheading4", start = 15.dp, top = 20.dp,
-            style = bold12Text400, boxAlign = Alignment.TopStart,
-            textColor = Color.Black, end = 5.dp
+            text = "4.$subheading4",
+            start = 15.dp,
+            top = 20.dp,
+            style = bold12Text400,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
+            end = 5.dp
         )
     }
     aboutData?.paragraph11?.let { paragraph11 ->
@@ -201,16 +241,24 @@ fun BoldWithNormalText(text: String, version: String) {
     val primaryHeader = text.substringAfter(":")
     Column {
         RegisterText(
-            text = "$version. $header", start = 25.dp, top = 20.dp,
-            style = bold12Text400, boxAlign = Alignment.TopStart,
-            textColor = Color.Black, end = 5.dp, textAlign = TextAlign.Start
+            text = "$version. $header",
+            start = 25.dp,
+            top = 20.dp,
+            style = bold12Text400,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black,
+            end = 5.dp,
+            textAlign = TextAlign.Start
         )
         RegisterText(
-            text = primaryHeader, start = 40.dp, top = 5.dp, style = normal12Text400,
-            textAlign = TextAlign.Start, end = 10.dp, boxAlign = Alignment.TopStart,
-            textColor = Color.Black,
+            text = primaryHeader,
+            start = 40.dp,
+            top = 5.dp,
+            style = normal12Text400,
+            textAlign = TextAlign.Start,
+            end = 10.dp,
+            boxAlign = Alignment.TopStart,
+            textColor = Color.Black
         )
     }
 }
-
-

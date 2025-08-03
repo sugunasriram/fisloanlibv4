@@ -23,10 +23,8 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan.LoanAgreementViewModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.sidemenu.ShowLoans
 
-
 @Composable
 fun PrePaymentScreen(navController: NavHostController) {
-
     val context = LocalContext.current
     val loanAgreementViewModel: LoanAgreementViewModel = viewModel()
     val loanListLoading by loanAgreementViewModel.loanListLoading.collectAsState()
@@ -60,10 +58,12 @@ fun PrePaymentScreen(navController: NavHostController) {
                 showBackButton = true,
                 onBackClick = { navigateApplyByCategoryScreen(navController) },
                 backgroundColor = appWhite,
-                contentStart = 0.dp, contentEnd = 0.dp
+                contentStart = 0.dp,
+                contentEnd = 0.dp
             ) {
                 SearchBar(
-                    searchValue = searchQuery, placeHolderText = "Search By Lender",
+                    searchValue = searchQuery,
+                    placeHolderText = "Search By Lender",
                     isFilterNeeded = false,
                     onSearchQueryChanged = { searchQuery = it }
                 )
@@ -75,7 +75,8 @@ fun PrePaymentScreen(navController: NavHostController) {
 //                        StartingText(text =stringResource(R.string.loan_list), style = normal16Text700,
 //                            textColor = appBlack, alignment = Alignment.Center, top = 15.dp, bottom = 10.dp)
                         ShowLoans(
-                            loanList = loanList, navController = navController,
+                            loanList = loanList,
+                            navController = navController,
                             showActiveLoanScreen = true,
                             searchQuery = searchQuery,
                             fromScreen = "PrePayment"
@@ -86,5 +87,5 @@ fun PrePaymentScreen(navController: NavHostController) {
                 }
             }
         }
-        }
+    }
 }

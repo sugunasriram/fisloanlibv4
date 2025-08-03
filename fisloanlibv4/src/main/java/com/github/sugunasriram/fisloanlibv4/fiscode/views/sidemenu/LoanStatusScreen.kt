@@ -92,114 +92,124 @@ fun LoanStatusScreen(navController: NavHostController) {
     BackHandler {
         navigateApplyByCategoryScreen(navController)
     }
-    FixedTopBottomScreen(
-        navController = navController,
-        topBarBackgroundColor = appOrange,
-        topBarText = stringResource(R.string.loan_status),
-        showBackButton = true,
-        onBackClick = { navigateApplyByCategoryScreen(navController) },
-        backgroundColor = appWhite,
-        contentStart = 0.dp, contentEnd = 0.dp
-    ) {
-        Column {
-            TabRow(
-                selectedTabIndex = selectedTabIndex,
-                modifier = Modifier
-                    .fillMaxWidth(),
-                backgroundColor = appWhite,
-                indicator = { tabPositions ->
-                    TabRowDefaults.Indicator(
-                        Modifier
-                            .tabIndicatorOffset(tabPositions[selectedTabIndex])
-                            .height(3.dp),
-                        color = appOrange
-                    )
-                }
-            ) {
-                tabs.forEachIndexed { index, title ->
-                    val isSelected = selectedTabIndex == index
-                    Tab(
-                        selected = isSelected,
-                        onClick = { selectedTabIndex = index },
-                        modifier = Modifier
-                            .background(color = appWhite, shape = RoundedCornerShape(5.dp))
-                            .padding(8.dp)
-                    ) {
-                        Text(
-                            text = title,
-                            color = if (isSelected) appOrange else checkBoxGray,
-                            modifier = Modifier.padding(8.dp)
-                        )
-                    }
-                }
-            }
-            SearchBar(
-                searchValue = searchQuery, placeHolderText = "Search By Lender",
-                isFilterNeeded = false,
-                onSearchQueryChanged = { searchQuery = it }
-            )
-            when (selectedTabIndex) {
-                0 -> ActiveLoanScreen(
-                    navController = navController, showInternetScreen = showInternetScreen,
-                    showTimeOutScreen = showTimeOutScreen, middleLoan = middleLoan,
-                    showServerIssueScreen = showServerIssueScreen, context = context,
-                    unexpectedErrorScreen = unexpectedErrorScreen, loanList = loanList,
-                    unAuthorizedUser = unAuthorizedUser, loanListLoading = loanListLoading,
-                    loanListLoaded = loanListLoaded, errorMessage = errorMessage,
-                    loanAgreementViewModel = loanAgreementViewModel, showActiveLoanScreen = true,
-                    searchQuery = searchQuery
-                )
-
-                1 -> ActiveLoanScreen(
-                    navController = navController, showInternetScreen = showInternetScreen,
-                    showTimeOutScreen = showTimeOutScreen, middleLoan = middleLoan,
-                    showServerIssueScreen = showServerIssueScreen, context = context,
-                    unexpectedErrorScreen = unexpectedErrorScreen, loanList = loanList,
-                    unAuthorizedUser = unAuthorizedUser, loanListLoading = loanListLoading,
-                    loanListLoaded = loanListLoaded, errorMessage = errorMessage,
-                    loanAgreementViewModel = loanAgreementViewModel, showActiveLoanScreen = false,
-                    searchQuery = searchQuery
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun ActiveLoanScreen(
-    navController: NavHostController, showInternetScreen: Boolean, showTimeOutScreen: Boolean,
-    middleLoan: Boolean, showServerIssueScreen: Boolean, unexpectedErrorScreen: Boolean,
-    unAuthorizedUser: Boolean, loanListLoading: Boolean, loanListLoaded: Boolean,
-    errorMessage: String, loanAgreementViewModel: LoanAgreementViewModel, context: Context,
-    loanList: CustomerLoanList?, showActiveLoanScreen: Boolean,
-    searchQuery: String
-) {
-
     when {
         showInternetScreen -> CommonMethods().ShowInternetErrorScreen(navController)
         showTimeOutScreen -> CommonMethods().ShowTimeOutErrorScreen(navController)
         showServerIssueScreen -> CommonMethods().ShowServerIssueErrorScreen(navController)
         unexpectedErrorScreen -> CommonMethods().ShowUnexpectedErrorScreen(navController)
         unAuthorizedUser -> CommonMethods().ShowUnAuthorizedErrorScreen(navController)
-        middleLoan ->  MiddleOfTheLoanScreen(navController,errorMessage)
+        middleLoan -> MiddleOfTheLoanScreen(navController, errorMessage)
 //        middleLoan -> CommonMethods().ShowMiddleLoanErrorScreen(navController, errorMessage)
         else -> {
-            ActiveLoanScreenView(
-                loanListLoading = loanListLoading, loanListLoaded = loanListLoaded,
-                loanAgreementViewModel = loanAgreementViewModel, context = context,
-                loanList = loanList, navController = navController,
-                showActiveLoanScreen = showActiveLoanScreen,
-                searchQuery = searchQuery
-            )
+            FixedTopBottomScreen(
+                navController = navController,
+                topBarBackgroundColor = appOrange,
+                topBarText = stringResource(R.string.loan_status),
+                showBackButton = true,
+                onBackClick = { navigateApplyByCategoryScreen(navController) },
+                backgroundColor = appWhite,
+                contentStart = 0.dp,
+                contentEnd = 0.dp
+            ) {
+                Column {
+                    TabRow(
+                        selectedTabIndex = selectedTabIndex,
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        backgroundColor = appWhite,
+                        indicator = { tabPositions ->
+                            TabRowDefaults.Indicator(
+                                Modifier
+                                    .tabIndicatorOffset(tabPositions[selectedTabIndex])
+                                    .height(3.dp),
+                                color = appOrange
+                            )
+                        }
+                    ) {
+                        tabs.forEachIndexed { index, title ->
+                            val isSelected = selectedTabIndex == index
+                            Tab(
+                                selected = isSelected,
+                                onClick = { selectedTabIndex = index },
+                                modifier = Modifier
+                                    .background(color = appWhite, shape = RoundedCornerShape(5.dp))
+                                    .padding(8.dp)
+                            ) {
+                                Text(
+                                    text = title,
+                                    color = if (isSelected) appOrange else checkBoxGray,
+                                    modifier = Modifier.padding(8.dp)
+                                )
+                            }
+                        }
+                    }
+                    SearchBar(
+                        searchValue = searchQuery,
+                        placeHolderText = "Search By Lender",
+                        isFilterNeeded = false,
+                        onSearchQueryChanged = { searchQuery = it }
+                    )
+                    when (selectedTabIndex) {
+                        0 -> ActiveLoanScreen(
+                            navController = navController,
+                            context = context,
+                            loanList = loanList,
+                            loanListLoading = loanListLoading,
+                            loanListLoaded = loanListLoaded,
+                            loanAgreementViewModel = loanAgreementViewModel,
+                            showActiveLoanScreen = true,
+                            searchQuery = searchQuery
+                        )
+
+                        1 -> ActiveLoanScreen(
+                            navController = navController,
+                            context = context,
+                            loanList = loanList,
+                            loanListLoading = loanListLoading,
+                            loanListLoaded = loanListLoaded,
+                            loanAgreementViewModel = loanAgreementViewModel,
+                            showActiveLoanScreen = false,
+                            searchQuery = searchQuery
+                        )
+                    }
+                }
+            }
         }
-    }
+        }
+}
+
+@Composable
+fun ActiveLoanScreen(
+    navController: NavHostController,
+    loanListLoading: Boolean,
+    loanListLoaded: Boolean,
+    loanAgreementViewModel: LoanAgreementViewModel,
+    context: Context,
+    loanList: CustomerLoanList?,
+    showActiveLoanScreen: Boolean,
+    searchQuery: String
+) {
+    ActiveLoanScreenView(
+        loanListLoading = loanListLoading,
+        loanListLoaded = loanListLoaded,
+        loanAgreementViewModel = loanAgreementViewModel,
+        context = context,
+        loanList = loanList,
+        navController = navController,
+        showActiveLoanScreen = showActiveLoanScreen,
+        searchQuery = searchQuery
+    )
 }
 
 @Composable
 fun ActiveLoanScreenView(
-    loanListLoading: Boolean, loanListLoaded: Boolean,
-    loanAgreementViewModel: LoanAgreementViewModel, context: Context,
-    loanList: CustomerLoanList?, navController: NavHostController, showActiveLoanScreen: Boolean,
+    loanListLoading: Boolean,
+    loanListLoaded: Boolean,
+    loanAgreementViewModel: LoanAgreementViewModel,
+    context: Context,
+    loanList: CustomerLoanList?,
+    navController: NavHostController,
+    showActiveLoanScreen: Boolean,
     searchQuery: String
 ) {
     if (loanListLoading) {
@@ -207,10 +217,13 @@ fun ActiveLoanScreenView(
     } else {
         if (loanListLoaded) {
             ShowLoans(
-                loanList = loanList, navController = navController,
+                loanList = loanList,
+                navController = navController,
                 showActiveLoanScreen = showActiveLoanScreen,
-                searchQuery = searchQuery, fromScreen = "Loan Status"
+                searchQuery = searchQuery,
+                fromScreen = "Loan Status"
             )
+            Spacer(modifier = Modifier.height(8.dp))
         } else {
             loanAgreementViewModel.completeLoanList(context)
         }
@@ -219,8 +232,11 @@ fun ActiveLoanScreenView(
 
 @Composable
 fun ShowLoans(
-    loanList: CustomerLoanList?, navController: NavHostController, showActiveLoanScreen: Boolean,
-    searchQuery: String, fromScreen: String
+    loanList: CustomerLoanList?,
+    navController: NavHostController,
+    showActiveLoanScreen: Boolean,
+    searchQuery: String,
+    fromScreen: String
 ) {
     val filteredBySearch = loanList?.data?.filter { item ->
         val lenderName = item.providerDescriptor?.name.orEmpty().lowercase()
@@ -237,9 +253,9 @@ fun ShowLoans(
         item.fulfillments?.any { fulfilment ->
             fulfilment?.state?.descriptor?.code?.let { status ->
                 val isInactive = status.contains("closed", ignoreCase = true) ||
-                        status.contains("completed", ignoreCase = true) ||
-                        status.contains("cancelled", ignoreCase = true) ||
-                        status.contains("rejected", ignoreCase = true)
+                    status.contains("completed", ignoreCase = true) ||
+                    status.contains("cancelled", ignoreCase = true) ||
+                    status.contains("rejected", ignoreCase = true)
                 return@let if (showActiveLoanScreen) !isInactive else isInactive
             } ?: false
         } ?: false
@@ -249,7 +265,7 @@ fun ShowLoans(
         Spacer(modifier = Modifier.height(120.dp))
         NoExistingLoanScreen()
     } else {
-        if(fromScreen == "PrePayment") {
+        if (fromScreen == "PrePayment") {
             StartingText(
                 text = stringResource(R.string.loan_list),
                 style = normal16Text700,
@@ -275,7 +291,6 @@ fun ShowLoans(
                         else -> appOrange
                     }
 
-
                     LoanStatusCard(
                         data = data,
                         navController = navController,
@@ -292,25 +307,33 @@ fun ShowLoans(
 
 @Composable
 fun LoanStatusCard(
-    data: OfferResponseItem, navController: NavHostController, cardColor: Color, statusColor: Color,
-    loanStatus: String, fromScreen:String
+    data: OfferResponseItem,
+    navController: NavHostController,
+    cardColor: Color,
+    statusColor: Color,
+    loanStatus: String,
+    fromScreen: String
 ) {
     val applicationId = data.itemId
 //    val applicationId = data.id
     data.itemDescriptor?.let { itemDescriptor ->
         itemDescriptor.name?.let { loanType ->
             Spacer(modifier = Modifier.height(10.dp))
-            DisplayCard(cardColor = cardColor, borderColor = Color.Transparent,
+            DisplayCard(
+                cardColor = cardColor,
+                borderColor = Color.Transparent,
                 modifier = Modifier.clickable {
                     data.id?.let { orderId ->
                         navigateToRepaymentScheduleScreen(
-                            navController = navController, orderId = orderId, fromFlow = loanType,
+                            navController = navController,
+                            orderId = orderId,
+                            fromFlow = loanType,
                             fromScreen = fromScreen
 //                            fromScreen = "Loan Status"
                         )
                     }
-                }) {
-
+                }
+            ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
@@ -324,30 +347,35 @@ fun LoanStatusCard(
                     ) {
                         StartingText(
                             text = "Loan ID",
-                            bottom = 5.dp, top = 5.dp,
-                            style = normal16Text500, textColor = gray4E,
+                            bottom = 5.dp,
+                            top = 5.dp,
+                            style = normal16Text500,
+                            textColor = gray4E
                         )
                         if (applicationId != null) {
                             StartingText(
                                 text = applicationId,
-                                bottom = 20.dp, textOverflow = TextOverflow.Ellipsis,
-                                style = normal16Text700, textColor = appBlack,
+                                bottom = 20.dp,
+                                textOverflow = TextOverflow.Ellipsis,
+                                style = normal16Text700,
+                                textColor = appBlack
                             )
                         }
 
                         StartingText(
                             text = "Lender",
                             bottom = 5.dp,
-                            style = normal16Text500, textColor = gray4E,
+                            style = normal16Text500,
+                            textColor = gray4E
                         )
                         data.providerDescriptor?.name?.let { lenderName ->
                             StartingText(
                                 text = lenderName,
                                 bottom = 10.dp,
-                                style = normal16Text700, textColor = appBlack,
+                                style = normal16Text700,
+                                textColor = appBlack
                             )
                         }
-
                     }
                     Column(
                         modifier = Modifier.weight(1f),
@@ -401,17 +429,13 @@ fun LoanStatusCard(
                                         }
                                     }
                                 }
-
                             }
                         }
                     }
-
                 }
-
             }
         }
     }
-
 }
 
 @Preview
@@ -419,5 +443,3 @@ fun LoanStatusCard(
 private fun LoanStatusPreview() {
     LoanStatusScreen(rememberNavController())
 }
-
-

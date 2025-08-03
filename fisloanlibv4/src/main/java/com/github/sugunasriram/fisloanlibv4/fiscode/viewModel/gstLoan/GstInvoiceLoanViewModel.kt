@@ -5,7 +5,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavHostController
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.core.ApiRepository
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.core.ApiRepository.handleAuthGetAccessTokenApi
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.gst.GstInvoice
@@ -87,12 +86,14 @@ class GstInvoiceLoanViewModel : ViewModel() {
     fun invoiceData(context: Context, gstin: String) {
         _loading.value = true
         viewModelScope.launch(Dispatchers.IO) {
-            handleInvoiceData(context,gstin)
+            handleInvoiceData(context, gstin)
         }
     }
 
     private suspend fun handleInvoiceData(
-        context: Context, gstin: String,checkForAccessToken: Boolean = true
+        context: Context,
+        gstin: String,
+        checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
             ApiRepository.gstInvoices(gstIn = gstin)
@@ -105,7 +106,9 @@ class GstInvoiceLoanViewModel : ViewModel() {
             ) {
                 if (handleAuthGetAccessTokenApi()) {
                     handleInvoiceData(
-                        context = context, gstin = gstin,checkForAccessToken = false
+                        context = context,
+                        gstin = gstin,
+                        checkForAccessToken = false
                     )
                 } else {
                     _navigationToSignIn.value = true
@@ -128,15 +131,21 @@ class GstInvoiceLoanViewModel : ViewModel() {
         withContext(Dispatchers.Main) {
             if (error is ResponseException) {
                 CommonMethods().handleResponseException(
-                    error = error, context = context, updateErrorMessage = ::updateErrorMessage,
-                    _showServerIssueScreen = _showServerIssueScreen, _middleLoan = _middleLoan,
-                    _unAuthorizedUser = _unAuthorizedUser, _unexpectedError = _unexpectedError,
+                    error = error,
+                    context = context,
+                    updateErrorMessage = ::updateErrorMessage,
+                    _showServerIssueScreen = _showServerIssueScreen,
+                    _middleLoan = _middleLoan,
+                    _unAuthorizedUser = _unAuthorizedUser,
+                    _unexpectedError = _unexpectedError,
                     _showLoader = _showLoader
                 )
             } else {
                 CommonMethods().handleGeneralException(
-                    error = error, _showInternetScreen = _showInternetScreen,
-                    _showTimeOutScreen = _showTimeOutScreen, _unexpectedError = _unexpectedError
+                    error = error,
+                    _showInternetScreen = _showInternetScreen,
+                    _showTimeOutScreen = _showTimeOutScreen,
+                    _unexpectedError = _unexpectedError
                 )
             }
             _loading.value = false

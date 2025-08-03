@@ -32,4 +32,3 @@ data class IssueSubCategoryTypesItem(
     val illustration: String? = null,
     val jsonMemberEnum: String? = null
 )
-

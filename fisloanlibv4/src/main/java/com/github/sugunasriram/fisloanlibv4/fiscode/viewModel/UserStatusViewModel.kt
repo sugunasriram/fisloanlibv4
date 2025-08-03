@@ -55,7 +55,6 @@ class UserStatusViewModel : BaseViewModel() {
     private val _checked = MutableStateFlow(false)
     val checked: StateFlow<Boolean> = _checked
 
-
     private val _navigationToSignup = MutableStateFlow(false)
     val navigationToSignIn: StateFlow<Boolean> = _navigationToSignup
 
@@ -66,8 +65,11 @@ class UserStatusViewModel : BaseViewModel() {
         }
     }
 
-    private suspend fun handleGstUserStatus(loanType: String, context: Context,
-                                            checkForAccessToken: Boolean = true) {
+    private suspend fun handleGstUserStatus(
+        loanType: String,
+        context: Context,
+        checkForAccessToken: Boolean = true
+    ) {
         kotlin.runCatching {
             ApiRepository.getUserStatus(loanType = loanType)
         }.onSuccess { response ->
@@ -79,7 +81,9 @@ class UserStatusViewModel : BaseViewModel() {
             ) {
                 if (handleAuthGetAccessTokenApi()) {
                     handleGstUserStatus(
-                        loanType = loanType, context = context, checkForAccessToken =
+                        loanType = loanType,
+                        context = context,
+                        checkForAccessToken =
                         false
                     )
                 } else {
@@ -87,7 +91,6 @@ class UserStatusViewModel : BaseViewModel() {
                 }
             } else {
                 handleGstUserStatusFailure(error = error, context = context)
-
             }
         }
     }
@@ -104,15 +107,21 @@ class UserStatusViewModel : BaseViewModel() {
         withContext(Dispatchers.Main) {
             if (error is ResponseException) {
                 CommonMethods().handleResponseException(
-                    error = error, context = context, updateErrorMessage = ::updateErrorMessage,
-                    _showServerIssueScreen = _showServerIssueScreen, _middleLoan = _middleLoan,
-                    _unAuthorizedUser = _unAuthorizedUser, _unexpectedError = _unexpectedError,
+                    error = error,
+                    context = context,
+                    updateErrorMessage = ::updateErrorMessage,
+                    _showServerIssueScreen = _showServerIssueScreen,
+                    _middleLoan = _middleLoan,
+                    _unAuthorizedUser = _unAuthorizedUser,
+                    _unexpectedError = _unexpectedError,
                     _showLoader = _showLoader
                 )
             } else {
                 CommonMethods().handleGeneralException(
-                    error = error, _showInternetScreen = _showInternetScreen,
-                    _showTimeOutScreen = _showTimeOutScreen, _unexpectedError = _unexpectedError
+                    error = error,
+                    _showInternetScreen = _showInternetScreen,
+                    _showTimeOutScreen = _showTimeOutScreen,
+                    _unexpectedError = _unexpectedError
                 )
             }
             _checkingStatus.value = false
@@ -122,17 +131,21 @@ class UserStatusViewModel : BaseViewModel() {
     private val _status = MutableStateFlow<StatusResponse?>(null)
     val status: StateFlow<StatusResponse?> = _status
 
-    fun status(loanType: String,orderId:String, context: Context) {
+    fun status(loanType: String, orderId: String, context: Context) {
         _checkingStatus.value = true
         viewModelScope.launch(Dispatchers.IO) {
-            handleStatus(loanType = loanType, context = context,orderId = orderId)
+            handleStatus(loanType = loanType, context = context, orderId = orderId)
         }
     }
 
-    private suspend fun handleStatus(loanType: String, context: Context,orderId: String,
-                                     checkForAccessToken: Boolean = true) {
+    private suspend fun handleStatus(
+        loanType: String,
+        context: Context,
+        orderId: String,
+        checkForAccessToken: Boolean = true
+    ) {
         kotlin.runCatching {
-            ApiRepository.status(loanType = loanType,orderId = orderId)
+            ApiRepository.status(loanType = loanType, orderId = orderId)
         }.onSuccess { response ->
             handleStatusSuccess(response)
         }.onFailure { error ->
@@ -142,7 +155,9 @@ class UserStatusViewModel : BaseViewModel() {
             ) {
                 if (handleAuthGetAccessTokenApi()) {
                     handleStatus(
-                        loanType = loanType, context = context, orderId=orderId,
+                        loanType = loanType,
+                        context = context,
+                        orderId = orderId,
                         checkForAccessToken = false
                     )
                 } else {

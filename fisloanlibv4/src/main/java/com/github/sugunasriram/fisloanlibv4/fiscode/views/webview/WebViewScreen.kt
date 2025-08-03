@@ -14,6 +14,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,6 +25,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -34,11 +36,13 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.github.sugunasriram.fisloanlibv4.R
+import com.github.sugunasriram.fisloanlibv4.fiscode.components.CenterProgress
+import com.github.sugunasriram.fisloanlibv4.fiscode.components.LoaderAnimation
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.TopBar
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateSignInPage
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToAAConsentApprovalScreen
-import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToAnimationLoader
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToConsentSubmissionWebScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFormRejectedScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToLoanOffersListScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToWebViewFlowOneScreen
@@ -46,15 +50,27 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.network.core.ApiPaths
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.finance.FinanceSearchModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.gst.GstSearchBody
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.gst.GstSearchResponse
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.LenderStatusResponse
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.Offer
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.OffersWithRejections
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.RejectedLenders
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.SearchBodyModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.SearchModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.sse.SSEData
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.sse.SSEViewModel
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.backgroundOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan.WebViewModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.MiddleOfTheLoanScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.NoLoanOffersAvailableScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.OfferLoaderScreen
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 @SuppressLint("ResourceType")
@@ -65,13 +81,10 @@ fun SearchWebViewScreen(
     fromFlow: String,
     id: String,
     transactionId: String,
-    url: String
+    url: String,
+    lenderStatusData:String
 ) {
-    BackHandler {
-        navigateApplyByCategoryScreen(navController)
-    }
     val webViewModel: WebViewModel = viewModel()
-
     val gstSearchResponse by webViewModel.gstSearchResponse.collectAsState()
     val navigationToSignIn by webViewModel.navigationToSignIn.collectAsState()
 
@@ -84,6 +97,27 @@ fun SearchWebViewScreen(
     val errorMessage by webViewModel.errorMessage.collectAsState()
 
     val loadedUrl = remember { mutableStateOf<String?>(null) }
+    var backPressedTime by remember { mutableLongStateOf(0L) }
+    var isBackPressLocked by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    BackHandler {
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - backPressedTime < 3000) {
+            navigateApplyByCategoryScreen(navController)
+        } else {
+            CommonMethods().toastMessage(
+                context = context,
+                toastMsg ="Hold on! Finvu consent is in progress"
+            )
+            backPressedTime = currentTime
+            isBackPressLocked = true
+
+            CoroutineScope(Dispatchers.Main).launch {
+                delay(3000)
+                isBackPressLocked = false
+            }
+        }
+    }
 
     when {
         navigationToSignIn -> navigateSignInPage(navController)
@@ -93,109 +127,107 @@ fun SearchWebViewScreen(
         unexpectedErrorScreen -> CommonMethods().ShowUnexpectedErrorScreen(navController)
         unAuthorizedUser -> CommonMethods().ShowUnAuthorizedErrorScreen(navController)
 //        middleLoan -> CommonMethods().ShowMiddleLoanErrorScreen(navController)
-        middleLoan ->  MiddleOfTheLoanScreen(navController,errorMessage)
+        middleLoan -> MiddleOfTheLoanScreen(navController, errorMessage)
         else -> {
             AAWebScreen(
-                    navController = navController, transactionId = transactionId, urlToOpen =
-                    url,
-                    searchId = id, fromFlow = fromFlow,
+                navController = navController,
+                transactionId = transactionId,
+                urlToOpen =
+                url,
+                searchId = id,
+                fromFlow = fromFlow,
                 loadedUrl = loadedUrl,
-                pageContent = {}
-                )
-
-//            if (webScreenLoading.value) {
-//                LoaderAnimation(
-//                    image = R.raw.we_are_currently_processing,
-//                    updatedImage = R.raw.verify_monitoring_consent_success,
-//                    showTimer = true
-//                )
-//            } else {
-//                val endUse = if (purpose.equals("Other Consumption Purpose", ignoreCase = true))
-//                    "other"
-//                else if (purpose.equals("Consumer Durable Purchase", ignoreCase = true))
-//                    "consumerDurablePurchase"
-//                else purpose.lowercase()
-//
-//                if (!webScreenLoaded.value) {
-//                    loadWebScreen(
-//                        fromFlow = fromFlow, webViewModel = webViewModel, context = context,
-//                        endUse = endUse, purpose = purpose
-//                    )
-//                } else {
-////                    NavigateToWebView(
-////                        searchResponse = searchResponse, gstSearchResponse = gstSearchResponse,
-////                        fromFlow = fromFlow, navController = navController
-////                    )
-////                    searchResponse?.let { search ->
-////                        if(search.data?.offers == true){
-////                            search.data.transactionId?.let { transactionId ->
-////                                navigateToLoanProcessScreen(
-////                                    navController, transactionId = transactionId,
-////                                    statusId = 2, responseItem = "No Need Response Item", offerId = "1234",
-////                                    fromFlow = fromFlow
-////                                )
-////                            }
-////                        }
-////                        else{
-////                            NavigateToWebView(
-////                                searchResponse = searchResponse, gstSearchResponse = gstSearchResponse,
-////                                fromFlow = fromFlow, navController = navController
-////                            )
-////                        }
-////                    }
-//
-//                    searchResponse?.let { search ->
-//                        if(!search.data?.url.isNullOrEmpty()){
-//                            NavigateToWebView(
-//                                searchResponse = search, gstSearchResponse = gstSearchResponse,
-//                                fromFlow = fromFlow, navController = navController
-//                            )
-//                        }
-//                        else {
-//                            if (search.data?.offers == true) {
-//                                search.data.transactionId?.let { transactionId ->
-//                                    navigateToLoanProcessScreen(
-//                                        navController,
-//                                        transactionId = transactionId,
-//                                        statusId = 2,
-//                                        responseItem = "No Need Response Item",
-//                                        offerId = "1234",
-//                                        fromFlow = fromFlow
-//                                    )
-//                                }
-//                            }
-//                        }
-//                    }
-//
-//                }
-//            }
+                pageContent = {},lenderStatusData=lenderStatusData
+            )
         }
     }
 }
 
 @Composable
 fun NavigateToWebView(
-    searchModel: SearchModel?,fromFlow: String, navController: NavHostController,
-    gstSearchResponse: GstSearchResponse?, searchResponse: SearchModel?
+    context: Context,
+    searchModel: SearchModel?,
+    fromFlow: String,
+    navController: NavHostController,
+    gstSearchResponse: GstSearchResponse?,
+    searchResponse: SearchModel?
 ) {
-    if (fromFlow.equals("Personal Loan", ignoreCase = true)) {
-        searchModel.let { search ->
-            search?.data?.transactionId?.let { transactionId ->
-                search?.data?.id?.let { id ->
-                    search.data.url?.let { url ->
-                        navigateToWebViewFlowOneScreen(
-                            navController = navController,
-                            purpose = stringResource(R.string.getUerFlow),
-                            fromFlow = fromFlow,
-                            id = id,
-                            transactionId = transactionId,
-                            url = url
-                        )
-                    }
-                }
-            }
-        }
-    }else if (fromFlow.equals("Invoice Loan", ignoreCase = true)) {
+    val webViewModel: WebViewModel = viewModel()
+    val lenderStatusProgress by webViewModel.lenderStatusProgress.collectAsState()
+    val lenderStatusLoaded by webViewModel.lenderStatusLoaded.collectAsState()
+    val lenderStatusResponse by webViewModel.getLenderStatusResponse.collectAsState()
+    val showInternetScreen by webViewModel.showInternetScreen.observeAsState(false)
+    val showTimeOutScreen by webViewModel.showTimeOutScreen.observeAsState(false)
+    val showServerIssueScreen by webViewModel.showServerIssueScreen.observeAsState(false)
+    val unexpectedErrorScreen by webViewModel.unexpectedError.observeAsState(false)
+    val unAuthorizedUser by webViewModel.unAuthorizedUser.observeAsState(false)
+    val middleLoan by webViewModel.middleLoan.observeAsState(false)
+    val errorMessage by webViewModel.errorMessage.collectAsState()
+    val navigationToSignIn by webViewModel.navigationToSignIn.collectAsState()
+
+//    if (fromFlow.equals("Personal Loan", ignoreCase = true)) {
+//        LaunchedEffect(Unit) {
+//            webViewModel.getLenderStatusApi(
+//                context = context,
+//                loanType = "PERSONAL_LOAN",
+//                step = "CONSENT_SELECT"
+//            )
+//        }
+//
+//        when{
+//            navigationToSignIn -> navigateSignInPage(navController)
+//            showInternetScreen -> CommonMethods().ShowInternetErrorScreen(navController)
+//            showTimeOutScreen -> CommonMethods().ShowTimeOutErrorScreen(navController)
+//            showServerIssueScreen -> CommonMethods().ShowServerIssueErrorScreen(navController)
+//            unexpectedErrorScreen -> CommonMethods().ShowUnexpectedErrorScreen(navController)
+//            unAuthorizedUser -> CommonMethods().ShowUnAuthorizedErrorScreen(navController)
+//            middleLoan -> MiddleOfTheLoanScreen(navController, errorMessage)
+//            lenderStatusProgress -> CenterProgress()
+//            lenderStatusLoaded -> {
+//                val lenderStatus = lenderStatusResponse?.data?.response
+//                if (lenderStatus.isNullOrEmpty()) {
+//                    NoLoanOffersAvailableScreen(navController, titleText = stringResource(R.string.no_lenders_available))
+//                } else {
+//                    LaunchedEffect(lenderStatus) {
+//                        try {
+//                            val json = Json {
+//                                prettyPrint = true
+//                                ignoreUnknownKeys = true
+//                            }
+//
+//                            val lenderStatusJson = json.encodeToString(
+//                                LenderStatusResponse.serializer(),
+//                                LenderStatusResponse(response = lenderStatus)
+//                            )
+//                            val transactionId = searchResponse?.data?.transactionId
+//                            val searchId = searchResponse?.data?.id
+//                            val webUrl = searchResponse?.data?.url
+//
+//                            if (searchId != null) {
+//                                if (transactionId != null) {
+//                                    if (webUrl != null) {
+//                                        navigateToWebViewFlowOneScreen(
+//                                            navController = navController,
+//                                            purpose = context.getString(R.string.getUerFlow),
+//                                            fromFlow = fromFlow,
+//                                            id = searchId,
+//                                            transactionId = transactionId,
+//                                            url = webUrl,
+//                                            lenderStatusData = lenderStatusJson
+//                                        )
+//                                    }
+//                                }
+//                            }
+//
+//                        } catch (e: Exception) {
+//                            Log.e("JsonError", "Failed to serialize lender status", e)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+     if (fromFlow.equals("Invoice Loan", ignoreCase = true)) {
         gstSearchResponse.let { search ->
             search?.data?.transactionId?.let { transactionId ->
                 search?.data?.id?.let { id ->
@@ -206,87 +238,109 @@ fun NavigateToWebView(
                             fromFlow = fromFlow,
                             id = id,
                             transactionId = transactionId,
-                            url = url
-                        )
-                    }
-                }
-            }
-        }
-    } else if (fromFlow.equals("Purchase Finance", ignoreCase = true)) {
-        searchResponse?.let { search ->
-            search.data?.transactionId?.let { transactionId ->
-                search.data?.id?.let { id ->
-                    search.data.url?.let { url ->
-                        navigateToWebViewFlowOneScreen(
-                            navController = navController,
-                            purpose = stringResource(R.string.getUerFlow),
-                            fromFlow = fromFlow,
-                            id = id,
-                            transactionId = transactionId,
-                            url = url
+                            url = url, lenderStatusData = ""
                         )
                     }
                 }
             }
         }
     }
-}
-
-fun loadWebScreen(
-    fromFlow: String, webViewModel: WebViewModel, context: Context, endUse: String, purpose: String,
-) {
-    if (fromFlow.equals("Personal Loan", ignoreCase = true)) {
-        webViewModel.searchApi(
-            context = context, searchBodyModel = SearchBodyModel(
-                loanType = "PERSONAL_LOAN", endUse = endUse, bureauConsent = "on"
+     else  {
+//        if(fromFlow.equals("Purchase Finance", ignoreCase = true))
+        LaunchedEffect(Unit) {
+            webViewModel.getLenderStatusApi(
+                context = context,
+                loanType =if(fromFlow.equals("Personal Loan", ignoreCase = true)) "PERSONAL_LOAN"
+                else "PURCHASE_FINANCE",
+                step = "CONSENT_SELECT"
             )
-        )
-    } else if (fromFlow.equals("Invoice Loan", ignoreCase = true)) {
-        // Here when it in the Gst Invoice Loan purpose equals to Invoice ID
-        webViewModel.searchGst(
-            gstSearchBody = GstSearchBody(
-                loanType = "INVOICE_BASED_LOAN", bureauConsent = "on", tnc = "on",
-                id = purpose
-            ),
-            context = context
-        )
-    } else if (fromFlow.equals("Purchase Finance", ignoreCase = true)) {
-        webViewModel.financeSearch(
-            financeSearchModel = FinanceSearchModel(
-                loanType = "PURCHASE_FINANCE", bureauConsent = "on", tnc = "on", endUse = "travel",
-                downpayment = purpose, merchantGst = "24AAHFC3011G1Z4", merchantPan = "EGBQA2212D",
-                isFinancing = "on", merchantBankAccountNumber = "639695357641006",
-                merchantIfscCode = "XRSY0YPV5SW", merchantBankAccountHolderName = "mohan",
-                productCategory = "fashion", productBrand = "style", productSKUID = "12345678",
-                productPrice = "1000"
-            ),
-            context = context,
-        )
+        }
+
+        when{
+            navigationToSignIn -> navigateSignInPage(navController)
+            showInternetScreen -> CommonMethods().ShowInternetErrorScreen(navController)
+            showTimeOutScreen -> CommonMethods().ShowTimeOutErrorScreen(navController)
+            showServerIssueScreen -> CommonMethods().ShowServerIssueErrorScreen(navController)
+            unexpectedErrorScreen -> CommonMethods().ShowUnexpectedErrorScreen(navController)
+            unAuthorizedUser -> CommonMethods().ShowUnAuthorizedErrorScreen(navController)
+            middleLoan -> MiddleOfTheLoanScreen(navController, errorMessage)
+            lenderStatusProgress -> CenterProgress()
+            lenderStatusLoaded -> {
+                val lenderStatus = lenderStatusResponse?.data?.response
+                if (lenderStatus.isNullOrEmpty()) {
+                    NoLoanOffersAvailableScreen(navController, titleText = stringResource(R.string.no_lenders_available))
+                } else {
+                    LaunchedEffect(lenderStatus) {
+                        try {
+                            val json = Json {
+                                prettyPrint = true
+                                ignoreUnknownKeys = true
+                            }
+
+                            val lenderStatusJson = json.encodeToString(
+                                LenderStatusResponse.serializer(),
+                                LenderStatusResponse(response = lenderStatus)
+                            )
+                            val transactionId = searchResponse?.data?.transactionId
+                            val searchId = searchResponse?.data?.id
+                            val webUrl = searchResponse?.data?.url
+
+                            if (searchId != null) {
+                                if (transactionId != null) {
+                                    if (webUrl != null) {
+                                        navigateToWebViewFlowOneScreen(
+                                            navController = navController,
+                                            purpose = context.getString(R.string.getUerFlow),
+                                            fromFlow = fromFlow,
+                                            id = searchId,
+                                            transactionId = transactionId,
+                                            url = webUrl,
+                                            lenderStatusData = lenderStatusJson
+                                        )
+                                    }
+                                }
+                            }
+
+                        } catch (e: Exception) {
+                            Log.e("JsonError", "Failed to serialize lender status", e)
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 private val json1 = Json {
     prettyPrint = true
     ignoreUnknownKeys = true
 }
-@SuppressLint("SetJavaScriptEnabled")
+private val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
+
+@SuppressLint("SetJavaScriptEnabled", "ResourceType")
 @Composable
 fun AAWebScreen(
-    isSelfScrollable: Boolean = false, transactionId: String, navController: NavHostController,
-    urlToOpen: String, searchId: String, fromFlow: String,
+    isSelfScrollable: Boolean = false,
+    transactionId: String,
+    navController: NavHostController,
+    urlToOpen: String,
+    searchId: String,
+    fromFlow: String,
     loadedUrl: MutableState<String?>,
+    lenderStatusData:String,
     pageContent: () -> Unit,
-) {
+
+    ) {
+    var backPressedTime by remember { mutableLongStateOf(0L) }
+    var isBackPressLocked by remember { mutableStateOf(false) }
     var lateNavigate by remember { mutableStateOf(false) }
     val sseViewModel: SSEViewModel = viewModel()
     val sseEvents by sseViewModel.events.collectAsState(initial = "")
     var errorMsg by remember { mutableStateOf<String?>(null) }
     val errorTitle = stringResource(id = R.string.consent_failed)
-
-//    val loadedUrl = remember { mutableStateOf<String?>(null) }
-
-    sseViewModel.startListening(ApiPaths().sse)
-
+    var showLoader by remember { mutableStateOf(false) }
     val context = LocalContext.current
+
+    LaunchedEffect(Unit) { sseViewModel.startListening(ApiPaths().sse) }
 
     LaunchedEffect(Unit) {
         delay(3 * 60 * 1000L)
@@ -300,42 +354,91 @@ fun AAWebScreen(
     }
 
     if (sseEvents.isNotEmpty()) {
-        Log.d("AAConsent", "SSE entered ")
-        val sseData: SSEData? = try {json1.decodeFromString<SSEData>(sseEvents)
+        Log.d("AAConsent", "SSE entered")
+        val sseData: SSEData? = try {
+            json1.decodeFromString<SSEData>(sseEvents)
         } catch (e: Exception) {
-            Log.e("AAConsent--", "Error parsing SSE data", e)
+            Log.e("AAConsent", "Error parsing SSE data", e)
             null
         }
-        Log.d("AAConsent_SSEData", sseData.toString())
-        if (sseData != null) {
-            val sseTransactionId = sseData.data?.data?.txnId;//tested
-            Log.d("AAConsent_id", "transactionId :[" + transactionId + "] " +
-                        "sseTransactionId:[" + sseTransactionId
-            )
-            //navigateToLoanOffersListScreen(navController,  "No Need Response Item", fromFlow)
-            sseData.data?.data?.type.let { type ->
-                if (transactionId == sseTransactionId /*&&  type == "ACTION" */) {
-                    Log.d("AAConsent_info", "At SSE not empty - Sugu")
-                    lateNavigate = true
+        Log.d("AAConsent", "SSEData: $sseData")
 
-                    //Check if Form Rejected or Pending
-                    if (sseData.data.data.data?.error != null) {
-                        Log.d("AAConsent_error", "Error :" + sseData.data?.data?.data?.error?.message)
-                        errorMsg = sseData.data.data.data.error.message
-                        sseViewModel.stopListening()
-                        navigateToFormRejectedScreen(
-                            navController = navController,
-                            errorTitle = errorTitle,
-                            fromFlow = fromFlow, errorMsg = errorMsg
-                        )
-                    } else {
-                        Log.d("AAConsent_offers","navigating LoanOffers Screen")
-                        sseViewModel.stopListening()
-                        navigateToLoanOffersListScreen(navController,  "No Need Response Item", fromFlow)
-//                        navigateToAnimationLoader(
-//                            navController = navController, transactionId = transactionId, id = id,
-//                            fromFlow = fromFlow
-//                        )
+        if (sseData != null) {
+            val sseTransactionId = sseData.data?.data?.txnId
+            val type = sseData.data?.data?.type
+            Log.d(
+                "AAConsent",
+                "transactionId :[$transactionId] " +
+                        "sseTransactionId:[$sseTransactionId], type=[$type]"
+            )
+
+            if (transactionId == sseTransactionId) {
+                // match transaction
+                lateNavigate = true
+
+                val errorObj = sseData.data.data.error
+                if (errorObj != null) {
+                    Log.d("AAConsent", "Error: ${errorObj.message}")
+                    errorMsg = errorObj.message
+                    sseViewModel.stopListening()
+                    errorMsg?.let { CommonMethods().toastMessage(context = context, toastMsg = it) }
+//                    sseViewModel.clearEvent()
+                    navigateToFormRejectedScreen(
+                        navController = navController,
+                        errorTitle = errorTitle,
+                        fromFlow = fromFlow,
+                        errorMsg = errorMsg
+                    )
+                } else {
+                    when (sseData.data.data.type) {
+                        "INFO" -> {
+                            Log.d("AAConsent", "Showing loader for info type")
+                            showLoader = true
+                        }
+
+                        "ACTION" -> {
+                            Log.d("AAConsent", "Navigating LoanOffers for action type")
+                            val offers = sseData.data.data.offers
+                            Log.d("AAConsent", "Offers : $offers")
+
+                            val rejectedLenders = sseData.data.data.rejectedLenders
+                            Log.d("AAConsent", "rejectedLenders : $rejectedLenders")
+
+                            if (!offers.isNullOrEmpty()) {
+                                val offerList = offers.map { offerCatalog ->
+                                    Offer(
+                                        offer = offerCatalog.offer,
+                                        id = offerCatalog.id,
+                                        bureauConsent = offerCatalog.bureauConsent,
+                                    )
+                                }
+                                val rejectedList = rejectedLenders?.map {
+                                    RejectedLenders(
+                                        name = it.name,
+                                        image = it.image,
+                                        reason = it.reason,
+                                        minLoanAmount = it.minLoanAmount,
+                                        maxLoanAmount = it.maxLoanAmount,
+                                        maxInterestRate = it.maxInterestRate,
+                                        minInterestRate = it.minInterestRate
+                                    )
+                                }
+                                val combined = OffersWithRejections(
+                                    offers = offerList,
+                                    rejectedLenders = rejectedList
+                                )
+
+                                val json = Json { ignoreUnknownKeys = true; prettyPrint = true }
+                                val jsonString = json.encodeToString(combined)
+
+                                showLoader = false
+                                sseViewModel.stopListening()
+                                navigateToLoanOffersListScreen(navController, jsonString, fromFlow)
+                            }
+                        }
+                        else -> {
+                            Log.d("AAConsent", "Unknown type: $type, ignoring")
+                        }
                     }
                 }
             }
@@ -343,18 +446,39 @@ fun AAWebScreen(
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        TopBar(navController = navController,
-            onBackClick = {navigateApplyByCategoryScreen(navController) },
+        TopBar(
+            navController = navController,
+            onBackClick = {
+                val currentTime = System.currentTimeMillis()
+                if (currentTime - backPressedTime < 3000) {
+                    navigateApplyByCategoryScreen(navController)
+                } else {
+                    CommonMethods().toastMessage(
+                        context = context,
+                        toastMsg ="Hold on! Finvu consent is in progress"
+                    )
+                    backPressedTime = currentTime
+                    isBackPressLocked = true
+
+                    // Unlock back press after 3 seconds
+                    CoroutineScope(Dispatchers.Main).launch {
+                        delay(3000)
+                        isBackPressLocked = false
+                    }
+                }
+            },
             topBarText = stringResource(R.string.account_aggregator_consent)
         )
         if (isSelfScrollable) {
             Column(modifier = Modifier.weight(1f)) { pageContent() }
+        } else if (showLoader) {
+            OfferLoaderScreen(navController=navController, lenderStatusData=lenderStatusData, isBureauOffers = false)
         } else {
             Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
                 AndroidView(
                     factory = { context ->
                         WebView(context).apply {
-                            //Sugu - need to test with other lender, commented for Lint
+                            // Sugu - need to test with other lender, commented for Lint
                             settings.javaScriptEnabled = true
                             settings.setSupportMultipleWindows(true)
 
@@ -396,13 +520,9 @@ fun AAWebScreen(
                                     url: String?
                                 ): Boolean {
                                     url?.let {
-
-                                        if (it.startsWith("CONSENT_CALLBACK_REDIRECT_URL")) {
-//                                            navigateToLoanOffersListScreen(navController,  "No Need Response Item", fromFlow)
-                                            navigateToAAConsentApprovalScreen(
-                                                navController = navController, searchId = searchId,
-                                                url = url, fromFlow = fromFlow
-                                            )
+//                                        if (it == BuildConfig.CONSENT_CALLBACK_REDIRECT_URL) {
+                                        if (it == "https://stagingondcfs.jtechnoparks.in/jt-bap/api/v1/finvu/consent-callback") {
+                                            navigateApplyByCategoryScreen(navController)
                                             return true
                                         }
                                         Log.d("SearchWebViewScreen", "urlToOpen: $it")
@@ -445,6 +565,7 @@ fun AAWebScreen(
                         webView.isFocusable = true
                         webView.isFocusableInTouchMode = true
 
+
                         webView.webChromeClient = object : WebChromeClient() {
                             override fun onCreateWindow(
                                 view: WebView?,
@@ -458,27 +579,13 @@ fun AAWebScreen(
                                         innerView: WebView,
                                         request: WebResourceRequest
                                     ): Boolean {
-                                        val url = request.url.toString()
-                                        if (view != null && url != null) {
-                                            Log.d("SearchWebViewScreen", "1 urlToOpen: $url")
-
-                                            view.loadUrl(url)
-                                            return false
-                                        } else {
-                                            Log.d("SearchWebViewScreen", "2 urlToOpen: $url")
-
-                                            return super.shouldOverrideUrlLoading(innerView, request)
-                                        }
+                                        return super.shouldOverrideUrlLoading(innerView, request)
                                     }
                                     override fun shouldOverrideUrlLoading(
                                         innerView: WebView?,
                                         url: String?
                                     ): Boolean {
-                                        if (view != null && url != null) {
-                                            view.loadUrl(url)
-                                            return false
-                                        }
-                                        return true
+                                        return false
                                     }
                                 }
                                 newWebView?.settings?.apply {
@@ -556,6 +663,3 @@ fun AAWebScreen(
         }
     }
 }
-
-
-

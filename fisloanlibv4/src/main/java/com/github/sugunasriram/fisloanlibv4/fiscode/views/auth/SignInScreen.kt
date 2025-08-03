@@ -70,7 +70,6 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.auth.SignInViewMod
 
 @Composable
 fun SignInScreen(navController: NavHostController) {
-
     val context = LocalContext.current
     val activity = context as Activity
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -104,7 +103,6 @@ fun SignInScreen(navController: NavHostController) {
         }
     }
 
-
     BackHandler {
         if (navController.currentBackStackEntry?.destination?.route == "sign_in_screen") {
             showExitDialog = true
@@ -122,80 +120,85 @@ fun SignInScreen(navController: NavHostController) {
                     navigateToOtpScreen(
                         navController,
                         it,
-                        generatedOtpData.value?.data?.orderId.toString(),
+                        generatedOtpData.value?.data?.orderId.toString()
                     )
                 }
-
             } else {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .fillMaxSize().verticalScroll(rememberScrollState())
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .fillMaxSize().verticalScroll(rememberScrollState())
+                ) {
+                    CenteredMoneyImage(
+                        image = R.drawable.sign_in_screen_image,
+                        imageSize = 200.dp,
+                        top = 100.dp
+                    )
+
+                    MultiStyleText("Sign", appBlack, "in", appOrange)
+                    PhoneNumberField(
+                        mobileNumber = mobileNumber ?: "",
+                        focusPhNumber = focusPhNumber,
+                        mobileNumberError = mobileNumberError,
+                        signInViewModel = signInViewModel,
+                        context = context
+                    )
+                    CheckBoxText(
+                        textColor = appOrange,
+                        style = normal16Text400,
+                        boxState = checkboxState,
+                        text = stringResource(id = R.string.i_agree_to_buyer_app_terms_and_conditions),
+                        bottom = 0.dp,
+                        start = 0.dp,
+                        end = 0.dp,
+                        top = 50.dp
                     ) {
-                            CenteredMoneyImage(
-                                image = R.drawable.sign_in_screen_image,
-                                imageSize = 200.dp,
-                                top = 100.dp
-                            )
+                            isChecked ->
+                        signInViewModel.onCheckBoxChanges(isChecked)
+                        signInViewModel.onAgreeTermsAndConditions(isChecked)
+                    }
 
-                        MultiStyleText("Sign", appBlack, "in", appOrange)
-                        PhoneNumberField(
-                            mobileNumber = mobileNumber ?: "",
-                            focusPhNumber = focusPhNumber,
-                            mobileNumberError = mobileNumberError,
-                            signInViewModel = signInViewModel,
-                            context = context,
+                    // Show Terms and Conditions as clickable text
+                    Text(
+                        text = stringResource(R.string.terms_and_conditions),
+                        color = appOrange,
+                        style = normal16Text700.copy(textDecoration = TextDecoration.Underline),
+                        modifier = Modifier
+                            .padding(top = 5.dp, bottom = 8.dp)
+                            .clickable {
+                                navigateToTermsConditionsScreen(navController)
+                            }
+                    )
+
+                    if (!isAgreeTermsAndConditions) {
+                        RegisterText(
+                            text = stringResource(R.string.please_agree_buyer_App_terms),
+                            textColor = errorRed,
+                            boxAlign = Alignment.Center,
+                            style = normal12Text400
                         )
-                        CheckBoxText(textColor = appOrange,
-                            style = normal16Text400,
-                            boxState = checkboxState,
-                            text = stringResource(id = R.string.i_agree_to_buyer_app_terms_and_conditions),
-                            bottom = 0.dp, start = 0.dp, end = 0.dp,top=50.dp) {
-                                isChecked -> signInViewModel.onCheckBoxChanges(isChecked)
-                          signInViewModel.onAgreeTermsAndConditions(isChecked)
-                        }
-
-                        //Show Terms and Conditions as clickable text
-                        Text(
-                            text = stringResource(R.string.terms_and_conditions),
-                            color = appOrange,
-                            style = normal16Text700.copy(textDecoration = TextDecoration.Underline),
-                            modifier = Modifier
-                                .padding(top = 5.dp, bottom = 8.dp)
-                                .clickable {
-                                    navigateToTermsConditionsScreen(navController)
-                                }
-                        )
-
-                        if (!isAgreeTermsAndConditions) {
-                            RegisterText(
-                                text = stringResource(R.string.please_agree_buyer_App_terms),
-                                textColor = errorRed, boxAlign = Alignment.Center,
-                                style = normal12Text400,
-                            )
-                        }
-                        CurvedPrimaryButton(
-                            text = stringResource(id = R.string.get_otp),
-                            modifier = Modifier.padding(top = 30.dp)
-                        ) {
+                    }
+                    CurvedPrimaryButton(
+                        text = stringResource(id = R.string.get_otp),
+                        modifier = Modifier.padding(top = 30.dp)
+                    ) {
 //                            if(checkboxState){
 //                                isAgreeTermsAndConditions=true
-                                mobileNumber?.let {
-                                    signInViewModel.signInValidation(
-                                        navController=navController,
-                                        mobileNumber = it, mobileNumberFocus = focusPhNumber,
-                                        checkBoxState = checkboxState,
-                                        context = context,
-                                    )
-                                }
+                        mobileNumber?.let {
+                            signInViewModel.signInValidation(
+                                navController = navController,
+                                mobileNumber = it,
+                                mobileNumberFocus = focusPhNumber,
+                                checkBoxState = checkboxState,
+                                context = context
+                            )
+                        }
 //                            }else{
 //                                isAgreeTermsAndConditions=false
 //                            }
-
-                        }
-
                     }
                 }
+            }
 
             if (showExitDialog) {
                 AlertDialog(
@@ -222,8 +225,10 @@ fun SignInScreen(navController: NavHostController) {
                     },
                     title = {
                         Text(
-                            text = stringResource(id = R.string.exit_app), style = normal32Text500,
-                            modifier = Modifier, color = textBlack
+                            text = stringResource(id = R.string.exit_app),
+                            style = normal32Text500,
+                            modifier = Modifier,
+                            color = textBlack
                         )
                     },
                     text = { Text(stringResource(id = R.string.are_you_sure_you_want_to_exit)) },
@@ -235,8 +240,10 @@ fun SignInScreen(navController: NavHostController) {
         }
     } else {
         CommonMethods().HandleErrorScreens(
-            navController = navController, showInternetScreen = showInternetScreen,
-            showTimeOutScreen = showTimeOutScreen, showServerIssueScreen = showServerIssueScreen,
+            navController = navController,
+            showInternetScreen = showInternetScreen,
+            showTimeOutScreen = showTimeOutScreen,
+            showServerIssueScreen = showServerIssueScreen,
             unexpectedErrorScreen = unexpectedErrorScreen
         )
     }
@@ -247,7 +254,8 @@ fun PhoneNumberField(
     mobileNumber: String,
     focusPhNumber: FocusRequester,
     mobileNumberError: String?,
-    signInViewModel: SignInViewModel, context: Context
+    signInViewModel: SignInViewModel,
+    context: Context
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     Column(
@@ -295,7 +303,7 @@ fun PhoneNumberField(
                 cursorColor = appOrange,
                 errorBorderColor = appRed,
                 focusedBorderColor = if (mobileNumberError.isNullOrEmpty()) appOrange else errorRed,
-                unfocusedBorderColor = if (mobileNumberError.isNullOrEmpty()) appOrange else errorRed,
+                unfocusedBorderColor = if (mobileNumberError.isNullOrEmpty()) appOrange else errorRed
             )
         )
         if (!mobileNumberError.isNullOrEmpty()) {
@@ -308,15 +316,8 @@ fun PhoneNumberField(
     }
 }
 
-
-
-
 @Preview
 @Composable
 fun SignInScreenPreview() {
     SignInScreen(navController = NavHostController(LocalContext.current))
 }
-
-
-
-

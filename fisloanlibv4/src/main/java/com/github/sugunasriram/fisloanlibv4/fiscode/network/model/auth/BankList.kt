@@ -12,11 +12,10 @@ data class BankList(
 
 @Serializable
 data class BankItem(
-	@SerialName("bank_name")
-	val bankName: String? = null,
-	@SerialName("image_bank")
-	val imageBank: String? = null,
-	@SerialName("_id")
-	val id: String? = null
+    @SerialName("bank_name")
+    val bankName: String? = null,
+    @SerialName("image_bank")
+    val imageBank: String? = null,
+    @SerialName("_id")
+    val id: String? = null
 )
-

@@ -2,6 +2,7 @@ package com.github.sugunasriram.fisloanlibv4.fiscode.views.auth
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Surface
@@ -18,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -52,11 +54,12 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.auth.OtpViewModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.auth.SignInViewModel
 import kotlinx.coroutines.delay
 
-
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun OtpScreen(
-    navController: NavHostController, number: String?, orderId: String?
+    navController: NavHostController,
+    number: String?,
+    orderId: String?
 ) {
     val textList =
         List(4) { remember { mutableStateOf(TextFieldValue(text = "", selection = TextRange(0))) } }
@@ -85,9 +88,56 @@ fun OtpScreen(
     var reSendTriggered by remember { mutableStateOf(false) }
     var reloadTimer by remember { mutableStateOf(false) }
 
-    val deviceInfo = otpViewModel.getDeviceInfo(context,configuration)
-    LaunchedEffect (Unit){
+    val deviceInfo = otpViewModel.getDeviceInfo(context, configuration)
+    LaunchedEffect(Unit) {
         requesterList[0].requestFocus()
+    }
+
+    val isOtpComplete = textList.all { it.value.text.length == 1 }
+    val otp = textList.joinToString("") { it.value.text }
+
+    var hasAutoSubmitted by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isOtpInvalid) {
+        Log.d("OtpScreen", "isOtpInvalid: ${isOtpInvalid}")
+
+        if (isOtpInvalid) {
+            Log.d("OtpScreen is set to ", "isOtpInvalid: ${isOtpInvalid}")
+
+            requesterList[0].requestFocus()
+        }
+    }
+
+
+    LaunchedEffect(isOtpComplete, expired, reSendTriggered, otp) {
+        if (isOtpComplete && !expired && !hasAutoSubmitted) {
+            hasAutoSubmitted = true
+            if (reSendTriggered) {
+                orderId?.let { otpId ->
+                    otpViewModel.loginOtpValidation(
+                        enteredOtp = otp,
+                        orderId = otpId,
+                        context = context,
+                        navController = navController,
+                        deviceInfo = deviceInfo
+                    )
+                }
+            } else {
+                orderId?.let { otpId ->
+                    otpViewModel.loginOtpValidation(
+                        enteredOtp = otp,
+                        orderId = otpId,
+                        context = context,
+                        navController = navController,
+                        deviceInfo = deviceInfo
+                    )
+                }
+            }
+            textList.forEach { it.value = TextFieldValue("") }
+
+        } else if (!isOtpComplete) {
+            hasAutoSubmitted = false // reset if user edits again
+        }
     }
 
     LaunchedEffect(reSendTriggered, reloadTimer) {
@@ -110,36 +160,37 @@ fun OtpScreen(
         navigateSignInPage(navController)
     }
     if (!showInternetScreen && !showTimeOutScreen && !showServerIssueScreen && !unexpectedErrorScreen) {
-        if (isLoginOtpLoading) {
-            CenterProgress()
-        } else {
             if (isLoginOtpLoadingSuccess) {
-               navigateApplyByCategoryScreen(navController)
-            } else {
+                navigateApplyByCategoryScreen(navController)
+            }
+            else if (isLoginOtpLoading) {CenterProgress()}
+            else {
                 FixedTopBottomScreen(
                     navController = navController,
                     showBackButton = true,
                     onBackClick = { navigateSignInPage(navController) },
                     topBarBackgroundColor = appWhite,
                     topBarText = stringResource(R.string.otp_verification),
-                    backgroundColor= appWhite
+                    backgroundColor = appWhite
                 ) {
                     RegisterText(
                         text = stringResource(id = R.string.please_enter_otp_sent_to),
                         textColor = appBlack,
                         style = normal18Text500,
-                        top = 100.dp,
+                        top = 150.dp,
                         bottom = 10.dp
                     )
                     number?.let {
                         val textToShow = "******" + it.takeLast(4)
                         RegisterText(
-                            text = textToShow,textColor = appBlack,
+                            text = textToShow,
+                            textColor = appBlack,
                             style = normal18Text500
                         )
                     }
 
-                    OtpView(textList = textList, requestList = requesterList, pastedEvent =  {
+                    OtpView(textList = textList, requestList = requesterList,
+                        pastedEvent = {
                         val annotatedString = clipboardManager.getText()
                         annotatedString?.let {
                             extractOtp(it.text)?.let {
@@ -162,11 +213,12 @@ fun OtpScreen(
                     MultipleColorText(
                         text = stringResource(id = R.string.resend_otp),
                         textColor = if (count > 0) appGray else appBlack,
-                        resendOtpColor = if (count > 0) appGray else appOrange,
+                        resendOtpColor = if (count > 0) appGray else appOrange
                     ) {
                         if (expired) {
                             signInViewModel.getUserRole(
-                                number.toString(), context.getString(R.string.country_code),
+                                number.toString(),
+                                context.getString(R.string.country_code),
                                 context
                             )
                             reSendTriggered = true
@@ -175,7 +227,8 @@ fun OtpScreen(
                         } else {
                             if (count > 0) {
                                 CommonMethods().toastMessage(
-                                    context = context, toastMsg = "Wait For $count Seconds"
+                                    context = context,
+                                    toastMsg = "Wait For $count Seconds"
                                 )
                             }
                         }
@@ -183,62 +236,66 @@ fun OtpScreen(
                     if (isOtpInvalid) {
                         StartingText(
                             text = stringResource(R.string.please_enter_valid_otp),
-                            textColor = errorRed, alignment = Alignment.Center
+                            textColor = errorRed,
+                            alignment = Alignment.Center
                         )
                     }
 
                     RegisterText(
                         text = if (expired) stringResource(id = R.string.time_expired) else "$count seconds",
-                       style = normal20Text700, textColor = appBlack,
-                        top = 80.dp
+                        style = normal20Text700,
+                        textColor = appBlack,
+                        top = 60.dp
                     )
-
 
                     val isOtpComplete = textList.all { it.value.text.length == 1 }
 
-                    CurvedPrimaryButton(
-                        text = stringResource(id = R.string.verify),
-                        modifier = Modifier.padding(top = 20.dp),
-                        enabled = isOtpComplete
-                    ) {
-                        val otp = textList.joinToString("") { it.value.text }
-                        if (expired) {
-                            CommonMethods().toastMessage(
-                                context = context,
-                                toastMsg = context.getString(R.string.time_expired_click_on_resend_otp)
-                            )
-                        } else {
-                            if (reSendTriggered) {
-                                orderId?.let { otpId ->
-                                    otpViewModel.loginOtpValidation(
-                                        enteredOtp = otp,
-                                        orderId = otpId,
-                                        context = context,
-                                        navController = navController,
-                                        deviceInfo=deviceInfo
-                                    )
-                                }
-                                expired = false
-
-                            } else {
-                                orderId?.let { id ->
-                                    otpViewModel.loginOtpValidation(
-                                        enteredOtp = otp, orderId = id, context = context,
-                                        navController = navController,deviceInfo=deviceInfo
-                                    )
-                                }
-                            }
-                            textList.forEach { it.value = TextFieldValue("") }
-
-                        }
-                    }
+//                    CurvedPrimaryButton(
+//                        text = stringResource(id = R.string.verify),
+//                        modifier = Modifier.padding(top = 20.dp),
+//                        enabled = isOtpComplete
+//                    ) {
+//                        val otp = textList.joinToString("") { it.value.text }
+//                        if (expired) {
+//                            CommonMethods().toastMessage(
+//                                context = context,
+//                                toastMsg = context.getString(R.string.time_expired_click_on_resend_otp)
+//                            )
+//                        } else {
+//                            if (reSendTriggered) {
+//                                orderId?.let { otpId ->
+//                                    otpViewModel.loginOtpValidation(
+//                                        enteredOtp = otp,
+//                                        orderId = otpId,
+//                                        context = context,
+//                                        navController = navController,
+//                                        deviceInfo = deviceInfo
+//                                    )
+//                                }
+//                                expired = false
+//                            } else {
+//                                orderId?.let { id ->
+//                                    otpViewModel.loginOtpValidation(
+//                                        enteredOtp = otp,
+//                                        orderId = id,
+//                                        context = context,
+//                                        navController = navController,
+//                                        deviceInfo = deviceInfo
+//                                    )
+//                                }
+//                            }
+//                            textList.forEach { it.value = TextFieldValue("") }
+//                        }
+//                    }
                 }
             }
-        }
+
     } else {
         CommonMethods().HandleErrorScreens(
-            navController = navController, showInternetScreen = showInternetScreen,
-            showTimeOutScreen = showTimeOutScreen, showServerIssueScreen = showServerIssueScreen,
+            navController = navController,
+            showInternetScreen = showInternetScreen,
+            showTimeOutScreen = showTimeOutScreen,
+            showServerIssueScreen = showServerIssueScreen,
             unexpectedErrorScreen = unexpectedErrorScreen
         )
     }
@@ -255,7 +312,9 @@ private fun submitOTP(
     orderId?.let { id ->
         val otp = textList.joinToString("") { it.value.text }
         otpViewModel.loginOtpValidation(
-            enteredOtp = otp, orderId = id, context = context,
+            enteredOtp = otp,
+            orderId = id,
+            context = context,
             navController = navController,
             deviceInfo = deviceInfo
         )
@@ -272,8 +331,9 @@ fun extractOtp(input: String): String? {
 fun OtpScreenPreview() {
     Surface {
         OtpScreen(
-            navController = rememberNavController(), orderId = "1111", number = "11111"
+            navController = rememberNavController(),
+            orderId = "1111",
+            number = "11111"
         )
     }
-
 }

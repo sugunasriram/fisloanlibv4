@@ -73,7 +73,6 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal28Text700
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-
 @Preview(showBackground = true)
 @Composable
 fun PreviewPFLoanStatusScreen() {
@@ -87,7 +86,8 @@ fun PFLoanStatusScreen(navController: NavHostController, fromFlow: String) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val viewEmiBottomSheetState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
     )
 
     BackHandler {
@@ -106,10 +106,10 @@ fun PFLoanStatusScreen(navController: NavHostController, fromFlow: String) {
                     EmiScheduleModalContent(
                         bottomSheetState = viewEmiBottomSheetState,
                         coroutineScope = coroutineScope,
-                        context = context,
+                        context = context
                     )
-
-                }) {
+                }
+            ) {
                 FixedTopBottomScreen(
                     navController = navController,
                     backgroundColor = appWhite,
@@ -119,7 +119,7 @@ fun PFLoanStatusScreen(navController: NavHostController, fromFlow: String) {
                     showBottom = true,
                     showSingleButton = true,
                     primaryButtonText = stringResource(R.string.proceed_with_down_payment),
-                    onPrimaryButtonClick = {},
+                    onPrimaryButtonClick = {}
                 ) {
 //                val loanStatus="Requested"
                     val loanStatus = "Approved"
@@ -132,15 +132,18 @@ fun PFLoanStatusScreen(navController: NavHostController, fromFlow: String) {
                     PFLoanHeaderCard(loanStatus = loanStatus)
                     PFLoanViewEMICard(
                         loanStatus = loanStatus,
-                        onClickCard = { coroutineScope.launch { viewEmiBottomSheetState.show() } })
+                        onClickCard = { coroutineScope.launch { viewEmiBottomSheetState.show() } }
+                    )
                     HorizontalDivider(
                         modifier = Modifier.padding(vertical = 8.dp),
-                        thickness = 6.dp, color = backgroundOrange
+                        thickness = 6.dp,
+                        color = backgroundOrange
                     )
                     PFLoanProductDetailsCard()
                     HorizontalDivider(
                         modifier = Modifier.padding(vertical = 8.dp),
-                        thickness = 6.dp, color = backgroundOrange
+                        thickness = 6.dp,
+                        color = backgroundOrange
                     )
                     PFLoanStepTracker(
                         isLoanRequested = true,
@@ -148,10 +151,8 @@ fun PFLoanStatusScreen(navController: NavHostController, fromFlow: String) {
                         loanStatus = loanStatus,
                         downPaymentAmount = "40,000"
                     )
-
                 }
             }
-
         }
     }
 }
@@ -177,7 +178,7 @@ fun PFLoanHeaderCard(loanStatus: String = "Requested", loanAmount: String = "₹
         style = normal14Text500,
         textColor = hintGray
     )
-    if (loanStatus != "Requested")
+    if (loanStatus != "Requested") {
         Box(
             contentAlignment = Alignment.TopCenter,
             modifier = Modifier
@@ -194,7 +195,7 @@ fun PFLoanHeaderCard(loanStatus: String = "Requested", loanAmount: String = "₹
                 start = 0.dp, top = 8.dp, bottom = 8.dp
             )
         }
-
+    }
 }
 
 @Composable
@@ -207,13 +208,13 @@ fun PFLoanViewEMICard(loanStatus: String, onClickCard: (() -> Unit)) {
             .padding(horizontal = 30.dp, vertical = if (loanStatus == "Requested") 20.dp else 5.dp)
             .background(loanIssueCardGray, shape = RoundedCornerShape(8.dp))
     ) {
-
         RegisterText(
             text = stringResource(R.string.view_emi_schedule),
             style = normal16Text500,
             textColor = appBlack,
             modifier = Modifier.weight(0.7f),
-            top = 12.dp, bottom = 12.dp
+            top = 12.dp,
+            bottom = 12.dp
         )
         Image(
             painter = painterResource(id = R.drawable.arrow_forward_orange),
@@ -222,7 +223,6 @@ fun PFLoanViewEMICard(loanStatus: String, onClickCard: (() -> Unit)) {
                 .size(18.dp)
                 .weight(0.3f)
         )
-
     }
 }
 
@@ -236,7 +236,6 @@ fun PFLoanProductDetailsCard() {
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.Top
     ) {
-
         Column(
             modifier = Modifier
                 .weight(0.7f)
@@ -245,31 +244,42 @@ fun PFLoanProductDetailsCard() {
             verticalArrangement = Arrangement.spacedBy(3.dp)
         ) {
             RegisterText(
-                text = stringResource(R.string.product_details), bottom = 5.dp,
-                style = normal14Text700, textAlign = TextAlign.Start, boxAlign = Alignment.TopStart
+                text = stringResource(R.string.product_details),
+                bottom = 5.dp,
+                style = normal14Text700,
+                textAlign = TextAlign.Start,
+                boxAlign = Alignment.TopStart
             )
             RegisterText(
                 text = "ProductName: Samsung Galaxy S24 Ultra 5G",
-                style = normal14Text400, textAlign = TextAlign.Start, boxAlign = Alignment.TopStart
+                style = normal14Text400,
+                textAlign = TextAlign.Start,
+                boxAlign = Alignment.TopStart
             )
             RegisterText(
                 text = "QTY: 1",
-                style = normal14Text400, textAlign = TextAlign.Start, boxAlign = Alignment.TopStart
+                style = normal14Text400,
+                textAlign = TextAlign.Start,
+                boxAlign = Alignment.TopStart
             )
             RegisterText(
                 text = "Product price: ₹99,000",
-                style = normal14Text700, textAlign = TextAlign.Start, boxAlign = Alignment.TopStart
+                style = normal14Text700,
+                textAlign = TextAlign.Start,
+                boxAlign = Alignment.TopStart
             )
             RegisterText(
                 text = "Sold by : Sanitha Mobiles",
-                style = normal14Text400, textAlign = TextAlign.Start, boxAlign = Alignment.TopStart
+                style = normal14Text400,
+                textAlign = TextAlign.Start,
+                boxAlign = Alignment.TopStart
             )
             RegisterText(
                 text = "Finance : DMI",
-                style = normal14Text700, textAlign = TextAlign.Start, boxAlign = Alignment.TopStart
+                style = normal14Text700,
+                textAlign = TextAlign.Start,
+                boxAlign = Alignment.TopStart
             )
-
-
         }
         Image(
             painter = painterResource(id = R.drawable.phone_image),
@@ -279,7 +289,6 @@ fun PFLoanProductDetailsCard() {
                 .height(120.dp)
         )
     }
-
 }
 
 @Composable
@@ -300,10 +309,14 @@ fun PFLoanStepTracker(
             )
             Spacer(modifier = Modifier.width(8.dp))
             MultiStyleText(
-                text1 = "Loan $loanStatus - ", color1 = appBlack,
-                text2 = loanRequestedDate, color2 = appBlack,
-                style1 = normal16Text700, style2 = normal16Text400,
-                start = 0.dp, top = 0.dp
+                text1 = "Loan $loanStatus - ",
+                color1 = appBlack,
+                text2 = loanRequestedDate,
+                color2 = appBlack,
+                style1 = normal16Text700,
+                style2 = normal16Text400,
+                start = 0.dp,
+                top = 0.dp
             )
         }
 
@@ -331,7 +344,6 @@ fun PFLoanStepTracker(
             )
         }
     }
-
 }
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -339,8 +351,8 @@ fun PFLoanStepTracker(
 fun EmiScheduleModalContent(
     bottomSheetState: ModalBottomSheetState,
     coroutineScope: CoroutineScope,
-    context: Context,
-    ) {
+    context: Context
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -378,7 +390,8 @@ fun EmiScheduleModalContent(
             end = 3.dp
         )
 
-        Column(modifier = Modifier.padding(8.dp).fillMaxWidth(),
+        Column(
+            modifier = Modifier.padding(8.dp).fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             PFTableRow(
@@ -391,31 +404,32 @@ fun EmiScheduleModalContent(
             PFTableRow(
                 emiNumber = "1",
                 dueDate = "05/02/2024",
-                amount = "2753.33",
+                amount = "2753.33"
             )
             PFTableRow(
                 emiNumber = "2",
                 dueDate = "05/03/2024",
-                amount = "2753.33",
+                amount = "2753.33"
             )
             PFTableRow(
                 emiNumber = "3",
                 dueDate = "05/04/2024",
-                amount = "2753.33",
+                amount = "2753.33"
             )
             PFTableRow(
                 emiNumber = "4",
                 dueDate = "05/05/2024",
-                amount = "2753.33",
+                amount = "2753.33"
             )
         }
-
     }
 }
 
 @Composable
 fun PFTableRow(
-    emiNumber: String, dueDate: String, amount: String,
+    emiNumber: String,
+    dueDate: String,
+    amount: String,
     isTitleRow: Boolean = false
 ) {
     Row(
@@ -443,6 +457,5 @@ fun PFTableRow(
             modifier = Modifier.weight(1f),
             textAlign = TextAlign.Center
         )
-
     }
 }

@@ -1,7 +1,6 @@
 package com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.ui.focus.FocusRequester
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -68,7 +67,7 @@ class AccountDetailViewModel : BaseViewModel() {
     private val _navigationToSignIn = MutableStateFlow(false)
     val navigationToSignIn: StateFlow<Boolean> = _navigationToSignIn
 
-    fun setAccountHolder(accountHolder: String){
+    fun setAccountHolder(accountHolder: String) {
         _accountHolder.value = accountHolder
     }
 
@@ -83,7 +82,7 @@ class AccountDetailViewModel : BaseViewModel() {
     private val _accountNumber: MutableLiveData<String> = MutableLiveData("")
     val accountNumber: LiveData<String> = _accountNumber
 
-    fun setAccountNumber(accountNumber: String){
+    fun setAccountNumber(accountNumber: String) {
         _accountNumber.value = accountNumber
     }
     fun onAccountNumberChanged(accountNumber: String) {
@@ -97,7 +96,7 @@ class AccountDetailViewModel : BaseViewModel() {
     private val _ifscCode: MutableLiveData<String> = MutableLiveData("")
     val ifscCode: LiveData<String> = _ifscCode
 
-    fun setIFSCCode(ifscCode: String){
+    fun setIFSCCode(ifscCode: String) {
         _ifscCode.value = ifscCode
     }
 
@@ -112,7 +111,7 @@ class AccountDetailViewModel : BaseViewModel() {
     private val _accountType: MutableLiveData<String> = MutableLiveData("")
     val accountType: LiveData<String> = _accountType
 
-    fun setAccountType(accountType: String){
+    fun setAccountType(accountType: String) {
         _accountType.value = accountType
     }
 
@@ -196,8 +195,10 @@ class AccountDetailViewModel : BaseViewModel() {
         }
     }
     private suspend fun handleAddBankDetail(
-        context: Context, bankDetail: BankDetail,
-        navController: NavHostController, checkForAccessToken: Boolean = true
+        context: Context,
+        bankDetail: BankDetail,
+        navController: NavHostController,
+        checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
             ApiRepository.addAccountDetail(bankDetail)
@@ -209,7 +210,7 @@ class AccountDetailViewModel : BaseViewModel() {
             if (error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                //Get Access Token using RefreshToken
+                // Get Access Token using RefreshToken
                 if (checkForAccessToken && handleAuthGetAccessTokenApi()) {
                     handleAddBankDetail(context, bankDetail, navController, false)
                 } else {
@@ -248,8 +249,10 @@ class AccountDetailViewModel : BaseViewModel() {
         }
     }
     private suspend fun handleUpdateBankDetail(
-        context: Context, bankDetail: UpdateBankDetail,
-        navController: NavHostController, checkForAccessToken: Boolean = true
+        context: Context,
+        bankDetail: UpdateBankDetail,
+        navController: NavHostController,
+        checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
             ApiRepository.updateBank(bankDetail)
@@ -261,7 +264,7 @@ class AccountDetailViewModel : BaseViewModel() {
             if (error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                //Get Access Token using RefreshToken
+                // Get Access Token using RefreshToken
                 if (checkForAccessToken && handleAuthGetAccessTokenApi()) {
                     handleUpdateBankDetail(context, bankDetail, navController, false)
                 } else {
@@ -295,9 +298,6 @@ class AccountDetailViewModel : BaseViewModel() {
         }
     }
 
-
-
-
     fun deleteBankDetail(context: Context, id: String, navController: NavHostController) {
         _bankDetailDeleting.value = true
         viewModelScope.launch(Dispatchers.IO) {
@@ -306,8 +306,10 @@ class AccountDetailViewModel : BaseViewModel() {
     }
 
     private suspend fun handleDeleteBankDetail(
-        context: Context,  id: String,
-        navController: NavHostController, checkForAccessToken: Boolean = true
+        context: Context,
+        id: String,
+        navController: NavHostController,
+        checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
             ApiRepository.deleteAccountDetail(id)
@@ -319,9 +321,9 @@ class AccountDetailViewModel : BaseViewModel() {
             if (error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                //Get Access Token using RefreshToken
+                // Get Access Token using RefreshToken
                 if (checkForAccessToken && handleAuthGetAccessTokenApi()) {
-                    handleDeleteBankDetail(context, id, navController,false)
+                    handleDeleteBankDetail(context, id, navController, false)
                 } else {
                     _navigationToSignIn.value = true
                 }
@@ -354,14 +356,19 @@ class AccountDetailViewModel : BaseViewModel() {
     }
 
     fun bankAccountDetailValidation(
-        context: Context, accountNumber: String, accountHolder: String, ifscCode: String,
-         accountSelectedText: String,id:String,
+        context: Context,
+        accountNumber: String,
+        accountHolder: String,
+        ifscCode: String,
+        accountSelectedText: String,
+        id: String,
         focusAccountHolder: FocusRequester,
-        focusAccountType:FocusRequester,
+        focusAccountType: FocusRequester,
         focusAccountNumber: FocusRequester,
         focusIfscCode: FocusRequester,
 //        bankDetail: AddBankDetail, navController: NavHostController
-        bankDetail: BankDetail, navController: NavHostController
+        bankDetail: BankDetail,
+        navController: NavHostController
     ) {
         var isValid = true
         clearMessage()
@@ -370,7 +377,7 @@ class AccountDetailViewModel : BaseViewModel() {
             updateIfscCodeError(context.getString(R.string.enter_ifsc_code))
             focusIfscCode.requestFocus()
             isValid = false
-        }else if (CommonMethods().isValidIfscCode(ifscCode) != true) {
+        } else if (CommonMethods().isValidIfscCode(ifscCode) != true) {
             updateIfscCodeError(context.getString(R.string.enter_valid_ifsc_code))
             focusIfscCode.requestFocus()
             isValid = false
@@ -380,11 +387,11 @@ class AccountDetailViewModel : BaseViewModel() {
             updateAccountNumberError(context.getString(R.string.enter_account_number))
             focusAccountNumber.requestFocus()
             isValid = false
-        }else if (accountNumber.trim().length < 9) {
+        } else if (accountNumber.trim().length < 9) {
             updateAccountNumberError(context.getString(R.string.minimum_account_number))
             focusAccountNumber.requestFocus()
             isValid = false
-        }else if (!Pattern.compile("^\\d+$").matcher(accountNumber).find()) {
+        } else if (!Pattern.compile("^\\d+$").matcher(accountNumber).find()) {
             updateAccountNumberError(context.getString(R.string.special_characters_not_allowed))
             focusAccountNumber.requestFocus()
             isValid = false
@@ -400,7 +407,7 @@ class AccountDetailViewModel : BaseViewModel() {
             updateAccountHolderError(context.getString(R.string.enter_account_holder))
             focusAccountHolder.requestFocus()
             isValid = false
-        }else if (accountHolder.trim().length < 4) {
+        } else if (accountHolder.trim().length < 4) {
             updateAccountHolderError(context.getString(R.string.name_should_contain_minimum_4_letters))
             focusAccountHolder.requestFocus()
             isValid = false
@@ -416,10 +423,13 @@ class AccountDetailViewModel : BaseViewModel() {
     }
 
     fun editAccountDetailValidation(
-        context: Context, accountNumber: String, accountHolder: String, ifscCode: String,
+        context: Context,
+        accountNumber: String,
+        accountHolder: String,
+        ifscCode: String,
         accountSelectedText: String,
         focusAccountHolder: FocusRequester,
-        focusAccountType:FocusRequester,
+        focusAccountType: FocusRequester,
         focusAccountNumber: FocusRequester,
         focusIfscCode: FocusRequester,
         bankDetail: UpdateBankDetail,
@@ -431,7 +441,7 @@ class AccountDetailViewModel : BaseViewModel() {
             updateIfscCodeError(context.getString(R.string.enter_ifsc_code))
             focusIfscCode.requestFocus()
             isValid = false
-        }else if (CommonMethods().isValidIfscCode(ifscCode) != true) {
+        } else if (CommonMethods().isValidIfscCode(ifscCode) != true) {
             updateIfscCodeError(context.getString(R.string.enter_valid_ifsc_code))
             focusIfscCode.requestFocus()
             isValid = false
@@ -441,11 +451,11 @@ class AccountDetailViewModel : BaseViewModel() {
             updateAccountNumberError(context.getString(R.string.enter_account_number))
             focusAccountNumber.requestFocus()
             isValid = false
-        }else if (accountNumber.trim().length < 9) {
+        } else if (accountNumber.trim().length < 9) {
             updateAccountNumberError(context.getString(R.string.minimum_account_number))
             focusAccountNumber.requestFocus()
             isValid = false
-        }else if (!Pattern.compile("^\\d+$").matcher(accountNumber).find()) {
+        } else if (!Pattern.compile("^\\d+$").matcher(accountNumber).find()) {
             updateAccountNumberError(context.getString(R.string.special_characters_not_allowed))
             focusAccountNumber.requestFocus()
             isValid = false
@@ -461,7 +471,7 @@ class AccountDetailViewModel : BaseViewModel() {
             updateAccountHolderError(context.getString(R.string.enter_account_holder))
             focusAccountHolder.requestFocus()
             isValid = false
-        }else if (accountHolder.trim().length < 4) {
+        } else if (accountHolder.trim().length < 4) {
             updateAccountHolderError(context.getString(R.string.name_should_contain_minimum_4_letters))
             focusAccountHolder.requestFocus()
             isValid = false
@@ -474,7 +484,6 @@ class AccountDetailViewModel : BaseViewModel() {
             updateBankAccountDetail(context, bankDetail, navController)
         }
     }
-
 
     private val _inProgress = MutableStateFlow(false)
     val inProgress: StateFlow<Boolean> = _inProgress
@@ -496,7 +505,8 @@ class AccountDetailViewModel : BaseViewModel() {
     }
 
     private suspend fun handleGetBankList(
-        context: Context, navController: NavHostController,
+        context: Context,
+        navController: NavHostController,
         checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
@@ -509,7 +519,7 @@ class AccountDetailViewModel : BaseViewModel() {
             if (error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                //Get Access Token using RefreshToken
+                // Get Access Token using RefreshToken
                 if (checkForAccessToken && handleAuthGetAccessTokenApi()) {
                     handleGetBankList(context, navController, false)
                 } else {
@@ -563,7 +573,7 @@ class AccountDetailViewModel : BaseViewModel() {
                 error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                //Get Access Token using RefreshToken
+                // Get Access Token using RefreshToken
                 if (handleAuthGetAccessTokenApi()) {
                     handleGetBankAccount(context, false)
                 } else {
@@ -603,8 +613,8 @@ class AccountDetailViewModel : BaseViewModel() {
     }
 
 //    private fun addBank(bankDetail: AddBankDetail, context: Context,navController: NavHostController,id:String) {
-private fun addBank(bankDetail: AddBankDetail, context: Context) {
-    _bankDetailCollecting.value = true
+    private fun addBank(bankDetail: AddBankDetail, context: Context) {
+        _bankDetailCollecting.value = true
         viewModelScope.launch(Dispatchers.IO) {
             handleAddBank(context, bankDetail)
 //            handleAddBank(context, bankDetail,id,navController)
@@ -612,7 +622,9 @@ private fun addBank(bankDetail: AddBankDetail, context: Context) {
     }
 
     private suspend fun handleAddBank(
-        context: Context, bankDetail: AddBankDetail, checkForAccessToken: Boolean = true
+        context: Context,
+        bankDetail: AddBankDetail,
+        checkForAccessToken: Boolean = true
 //        context: Context, bankDetail: AddBankDetail, id:String,
 //         navController: NavHostController,checkForAccessToken: Boolean = true
     ) {
@@ -628,7 +640,7 @@ private fun addBank(bankDetail: AddBankDetail, context: Context) {
                 error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                //Get Access Token using RefreshToken
+                // Get Access Token using RefreshToken
                 if (handleAuthGetAccessTokenApi()) {
                     handleAddBank(context, bankDetail, false)
 //                    handleAddBank(context, bankDetail, id,navController,false)
@@ -642,7 +654,7 @@ private fun addBank(bankDetail: AddBankDetail, context: Context) {
     }
 
 //    private suspend fun handleAddBankSuccess(response: AddBankDetailResponse,id:String,context: Context,navController: NavHostController) {
-private suspend fun handleAddBankSuccess(response: AddBankDetailResponse) {
+    private suspend fun handleAddBankSuccess(response: AddBankDetailResponse) {
         withContext(Dispatchers.Main) {
             _bankDetailCollecting.value = false
             _bankDetailCollected.value = true
@@ -667,9 +679,14 @@ private suspend fun handleAddBankSuccess(response: AddBankDetailResponse) {
     }
 
     fun accountDetailValidation(
-        context: Context, accountNumber: String, accountHolder: String, ifscCode: String,
-        focusAccountHolder: FocusRequester, focusAccountNumber: FocusRequester,
-        focusIfscCode: FocusRequester, id: String,
+        context: Context,
+        accountNumber: String,
+        accountHolder: String,
+        ifscCode: String,
+        focusAccountHolder: FocusRequester,
+        focusAccountNumber: FocusRequester,
+        focusIfscCode: FocusRequester,
+        id: String
     ) {
         clearMessage()
         if (accountHolder.trim().isEmpty()) {
@@ -703,9 +720,13 @@ private suspend fun handleAddBankSuccess(response: AddBankDetailResponse) {
         } else {
             gstLoanEntityApproval(
                 bankDetail = GstBankDetail(
-                    accountNumber = accountNumber, ifscCode = ifscCode,
-                    accountHolderName = accountHolder, id = id, loanType = "INVOICE_BASED_LOAN"
-                ), context = context
+                    accountNumber = accountNumber,
+                    ifscCode = ifscCode,
+                    accountHolderName = accountHolder,
+                    id = id,
+                    loanType = "INVOICE_BASED_LOAN"
+                ),
+                context = context
             )
         }
     }
@@ -721,7 +742,8 @@ private suspend fun handleAddBankSuccess(response: AddBankDetailResponse) {
     }
 
     private suspend fun handleGstLoanEntityApproval(
-        bankDetail: GstBankDetail, context: Context,
+        bankDetail: GstBankDetail,
+        context: Context,
         checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
@@ -735,7 +757,7 @@ private suspend fun handleAddBankSuccess(response: AddBankDetailResponse) {
                 error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                //Get Access Token using RefreshToken
+                // Get Access Token using RefreshToken
                 if (handleAuthGetAccessTokenApi()) {
                     handleGstLoanEntityApproval(bankDetail, context, false)
                 } else {
@@ -748,7 +770,8 @@ private suspend fun handleAddBankSuccess(response: AddBankDetailResponse) {
     }
 
     private suspend fun handleGstLoanEntityApprovalSuccess(
-        response: GstOfferConfirmResponse, context: Context
+        response: GstOfferConfirmResponse,
+        context: Context
     ) {
         withContext(Dispatchers.Main) {
             _bankDetailCollecting.value = false
@@ -784,7 +807,7 @@ private suspend fun handleAddBankSuccess(response: AddBankDetailResponse) {
                 error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                //Get Access Token using RefreshToken
+                // Get Access Token using RefreshToken
                 if (handleAuthGetAccessTokenApi()) {
                     handleGstLoanApproved(id, loanType, context, false)
                 } else {
@@ -812,15 +835,21 @@ private suspend fun handleAddBankSuccess(response: AddBankDetailResponse) {
         withContext(Dispatchers.Main) {
             if (error is ResponseException) {
                 CommonMethods().handleResponseException(
-                    error = error, context = context, updateErrorMessage = ::updateErrorMessage,
-                    _showServerIssueScreen = _showServerIssueScreen, _middleLoan = _middleLoan,
-                    _unAuthorizedUser = _unAuthorizedUser, _unexpectedError = _unexpectedError,
+                    error = error,
+                    context = context,
+                    updateErrorMessage = ::updateErrorMessage,
+                    _showServerIssueScreen = _showServerIssueScreen,
+                    _middleLoan = _middleLoan,
+                    _unAuthorizedUser = _unAuthorizedUser,
+                    _unexpectedError = _unexpectedError,
                     _showLoader = _showLoader
                 )
             } else {
                 CommonMethods().handleGeneralException(
-                    error = error, _showInternetScreen = _showInternetScreen,
-                    _showTimeOutScreen = _showTimeOutScreen, _unexpectedError = _unexpectedError
+                    error = error,
+                    _showInternetScreen = _showInternetScreen,
+                    _showTimeOutScreen = _showTimeOutScreen,
+                    _unexpectedError = _unexpectedError
                 )
             }
             _bankDetailCollecting.value = false
@@ -829,9 +858,7 @@ private suspend fun handleAddBankSuccess(response: AddBankDetailResponse) {
         }
     }
 
-
-    //Purchase Finance
-
+    // Purchase Finance
 
     private val _pfBankDetailResponse = MutableStateFlow<PfOfferConfirmResponse?>(null)
     val pfBankDetailResponse: StateFlow<PfOfferConfirmResponse?> = _pfBankDetailResponse
@@ -844,7 +871,8 @@ private suspend fun handleAddBankSuccess(response: AddBankDetailResponse) {
     }
 
     private suspend fun handlePfLoanEntityApproval(
-        bankDetail: PfBankDetail, context: Context,
+        bankDetail: PfBankDetail,
+        context: Context,
         checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
@@ -858,7 +886,7 @@ private suspend fun handleAddBankSuccess(response: AddBankDetailResponse) {
                 error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                //Get Access Token using RefreshToken
+                // Get Access Token using RefreshToken
                 if (handleAuthGetAccessTokenApi()) {
                     handlePfLoanEntityApproval(bankDetail, context, false)
                 } else {
@@ -871,7 +899,8 @@ private suspend fun handleAddBankSuccess(response: AddBankDetailResponse) {
     }
 
     private suspend fun handlePfLoanEntityApprovalSuccess(
-        response: PfOfferConfirmResponse, context: Context
+        response: PfOfferConfirmResponse,
+        context: Context
     ) {
         withContext(Dispatchers.Main) {
             _bankDetailCollecting.value = false
@@ -879,7 +908,4 @@ private suspend fun handleAddBankSuccess(response: AddBankDetailResponse) {
             _pfBankDetailResponse.value = response
         }
     }
-
-
 }
-

@@ -1,11 +1,8 @@
 package com.github.sugunasriram.fisloanlibv4.fiscode.network.core
 
-
 import android.util.Log
-
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods.Companion.BASE_URL
 import com.github.sugunasriram.fisloanlibv4.fiscode.FsApp
-import com.github.sugunasriram.fisloanlibv4.fiscode.utils.FileLogger
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
 import io.ktor.client.features.HttpTimeout
@@ -24,9 +21,8 @@ import io.ktor.http.Url
 import io.ktor.http.contentType
 import io.ktor.http.takeFrom
 
-
 open class KtorClient {
-   private val baseUrl = Url("${BASE_URL}${ApiPaths().baseUrl}")
+    private val baseUrl = Url("${BASE_URL}${ApiPaths().baseUrl}")
 
     companion object {
         private lateinit var instance: KtorClient
@@ -73,12 +69,14 @@ open class KtorClient {
             }
 
             install(JsonFeature) {
-                serializer = KotlinxSerializer(kotlinx.serialization.json.Json {
-                    prettyPrint = true
-                    isLenient = true
-                    encodeDefaults = true
-                    ignoreUnknownKeys = true
-                })
+                serializer = KotlinxSerializer(
+                    kotlinx.serialization.json.Json {
+                        prettyPrint = true
+                        isLenient = true
+                        encodeDefaults = true
+                        ignoreUnknownKeys = true
+                    }
+                )
             }
 
             install(HttpTimeout) {
@@ -98,11 +96,13 @@ open class KtorClient {
                 accept(ContentType.Application.Json)
 
                 if (isBaseUrl) {
-                    url.takeFrom(URLBuilder().takeFrom(baseUrl).apply {
-                        encodedPath += url.encodedPath
-                    })
+                    url.takeFrom(
+                        URLBuilder().takeFrom(baseUrl).apply {
+                            encodedPath += url.encodedPath
+                        }
+                    )
                 }
-                FsApp.getInstance().token?.let {token ->
+                FsApp.getInstance().token?.let { token ->
                     header("Authorization", getUserToken(token))
                 }
             }

@@ -4,8 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ForgotPasswordOtpVerify(
-	val data: String? = null,
-	val status: Boolean? = null,
-	val statusCode: Int? = null
+    val data: String? = null,
+    val status: Boolean? = null,
+    val statusCode: Int? = null
 )
-

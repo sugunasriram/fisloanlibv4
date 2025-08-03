@@ -1,7 +1,6 @@
 package com.github.sugunasriram.fisloanlibv4.fiscode.network.core
 
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods.Companion.BASE_URL
-import io.ktor.http.Url
 
 class ApiPaths {
 
@@ -49,7 +48,7 @@ class ApiPaths {
 
     val resendOTP = "auth/resendOTP"
 
-    //Bank Related Api Paths
+    // Bank Related Api Paths
     val getBankAccounts = "Bank/getBankAccounts"
 
     val addBank = "Bank/addBank"
@@ -61,20 +60,24 @@ class ApiPaths {
     val getBanksList = "static/getBanksList"
 
     // Server side Events Api Paths
-    val sse = "$BASE_URL" + "/api/v1/sse"
-    //Prod
+    val sse = "${BASE_URL}" + "/api/v1/sse"
+    // Prod
 //    val sse = "https://ondcfs.jtechnoparks.in/jt-bap/api/v1/sse"
-    //Preprod
+    // Preprod
 //    val sse = "https://stagingondcfs.jtechnoparks.in/jt-bap/api/v1/sse"
 
-    //PreProd - with and Without AA
+    // PreProd - with and Without AA
 //    val sse = "https://stagingondcfs.jtechnoparks.in/jt-bap-test/api/v1/sse"
 
-    //Staging
+    // Staging
 //    val sse = "https://stagingondcfs.jtechnoparks.in/staging-jt-bap/api/v1/sse"
 
     // ONDC Flow Api paths
     val search = "lender/search"
+
+    val formSubmission = "lender/formSubmissionRequest"
+
+    val getLenderStatus = "lender/in-progress"
 
     val aaConsentApproval = "lender/customer_aa_consent_approval"
 
@@ -91,7 +94,6 @@ class ApiPaths {
     val loanApproved = "lender/loanApproved"
 
     val addAccountDetails = "lender/add_account_details"
-
 
     val getCustomerLoanList = "loans/getCustomerLoanList"
 
@@ -118,7 +120,7 @@ class ApiPaths {
 
     val orderIssues = "issues/orderIssues"
 
-    //Cygnet Related Api Paths
+    // Cygnet Related Api Paths
 
     val cygnetGenerateOtp = "cygnet/cygnetGenerateOtp"
 
@@ -127,11 +129,17 @@ class ApiPaths {
     val gstInDetails = "cygnet/gstinDetails"
 
     // Document
-    val aboutUs ="static/about-us"
+    val aboutUs = "static/about-us"
 
     val termsOfUse = "static/terms-of-use"
 
     val privacyPolicy = "static/privacy-policy"
 
     val contactUs = "static/contact-us"
+
+
+    //User Reported App issues
+    val userReportedIssueCreate = "user-reported-issue/create"
+
+    val userReportedIssueFindUserId = "user-reported-issue/findByUserId"
 }

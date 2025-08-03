@@ -1,10 +1,12 @@
 package com.github.sugunasriram.fisloanlibv4.fiscode.views.igm
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.MediaStore
 import android.util.Base64
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -61,11 +63,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.github.sugunasriram.fisloanlibv4.R
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.CenterProgress
-import com.github.sugunasriram.fisloanlibv4.fiscode.components.ClickableText
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.CustomDropDownField
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.DashedBorderCard
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.FixedTopBottomScreen
-import com.github.sugunasriram.fisloanlibv4.fiscode.components.RegisterText
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.StartingText
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateSignInPage
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToIssueListScreen
@@ -74,13 +74,14 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.igm.ImageUploa
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.igm.Images
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appBlack
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appOrange
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appRed
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appTheme
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appWhite
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.cursorColor
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.errorRed
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.hintGray
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal12Text400
-import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal16Text500
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal14Text400
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal16Text700
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal18Text500
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
@@ -90,12 +91,15 @@ import java.io.ByteArrayOutputStream
 @Preview(showBackground = true)
 @Composable
 fun PreviewCreateIssueScreen() {
-    CreateIssueScreen(rememberNavController(),"","","","Personal Loan")
+    CreateIssueScreen(rememberNavController(), "", "", "", "Personal Loan")
 }
 
 @Composable
 fun CreateIssueScreen(
-    navController: NavHostController, orderId: String, providerId: String, orderState: String,
+    navController: NavHostController,
+    orderId: String,
+    providerId: String,
+    orderState: String,
     fromFlow: String
 ) {
     val context = LocalContext.current
@@ -135,32 +139,25 @@ fun CreateIssueScreen(
     val shortDescFocus = FocusRequester()
     val longDescFocus = FocusRequester()
 
-    val loanState = if (orderState.contains("SANCTIONED", ignoreCase = true)) "SANCTIONED"
-    else if (orderState.contains("CONSENT_REQUIRED", ignoreCase = true)) "CONSENT_REQUIRED"
-    else if (orderState.contains("Disbursed", ignoreCase = true)) "DISBURSED"
-    else "INITIATED"
-
+    val loanState = if (orderState.contains("SANCTIONED", ignoreCase = true)) {
+        "SANCTIONED"
+    } else if (orderState.contains("CONSENT_REQUIRED", ignoreCase = true)) {
+        "CONSENT_REQUIRED"
+    } else if (orderState.contains("Disbursed", ignoreCase = true)) {
+        "DISBURSED"
+    } else {
+        "INITIATED"
+    }
 
     var categorySelectedText by remember { mutableStateOf("") }
     var categoryExpand by remember { mutableStateOf(false) }
     val categoryList: List<String>
-    val onCategoryDismiss: () -> Unit = { categoryExpand = false }
-    val onCategorySelected: (String) -> Unit = { selectedText ->
-        categorySelectedText = selectedText
-        createIssuePLViewModel.getIssueWithSubCategories(context, selectedText)
-        createIssuePLViewModel.updateCategoryError(null)
-    }
-
     var subCategorySelectedText by remember { mutableStateOf("") }
     var subCategoryExpand by remember { mutableStateOf(false) }
     var subCategoryList by remember { mutableStateOf(listOf<String>()) }
-    val onSubCategoryDismiss: () -> Unit = { subCategoryExpand = false }
-    val onSubCategorySelected: (String) -> Unit =
-        { selectedText -> subCategorySelectedText = selectedText
-            createIssuePLViewModel.updateSubCategoryError(null)
-        }
-
-    LaunchedEffect(categorySelectedText) {
+    val onCategoryDismiss: () -> Unit = { categoryExpand = false }
+    val onCategorySelected: (String) -> Unit = { selectedText ->
+        categorySelectedText = selectedText
         if (categorySelectedText.isNotEmpty()) {
             createIssuePLViewModel.getIssueWithSubCategories(context, categorySelectedText)
             subCategorySelectedText = ""
@@ -168,7 +165,23 @@ fun CreateIssueScreen(
             createIssuePLViewModel.clearShortDesc()
             createIssuePLViewModel.onLongDescriptionChanged("")
         }
+        createIssuePLViewModel.getIssueWithSubCategories(context, selectedText)
+        createIssuePLViewModel.updateCategoryError(null)
+        createIssuePLViewModel.updateSubCategoryError(null)
+        createIssuePLViewModel.updateShortDescError(null)
+        createIssuePLViewModel.updateLongDescError(null)
+        createIssuePLViewModel.removeImage()
+        createIssuePLViewModel.clearImageUploadError()
     }
+
+
+    val onSubCategoryDismiss: () -> Unit = { subCategoryExpand = false }
+    val onSubCategorySelected: (String) -> Unit =
+        { selectedText ->
+            subCategorySelectedText = selectedText
+            createIssuePLViewModel.updateSubCategoryError(null)
+        }
+    val isSubmitEnabled = !imageUploading
 
     LaunchedEffect(subIssueCategoryList) {
         val updatedSubCategoryList =
@@ -179,11 +192,46 @@ fun CreateIssueScreen(
     var hasUploadedOnce by remember { mutableStateOf(false) }
     var imageUploadRequired by remember { mutableStateOf(false) }
     var hasSelectedFromGallery by remember { mutableStateOf(false) }
-    BackHandler { navController.popBackStack()
-        navController.popBackStack() }
+    BackHandler {
+        navController.popBackStack()
+    }
+
+    val handleSubmit: () -> Unit = if (isSubmitEnabled) {
+        {
+            shortDesc?.let {
+                longDesc?.let { it1 ->
+                    onCreateIssueButtonClick(
+                        categoryFocus = categoryFocus,
+                        subCategoryFocus = subCategoryFocus,
+                        imageUploadResponse = imageUploadResponse,
+                        imageUploadRequired = imageUploadRequired,
+                        context = context,
+                        shortDesc = it,
+                        longDescFocus = longDescFocus,
+                        longDesc = it1,
+                        orderId = orderId,
+                        categorySelectedText = categorySelectedText,
+                        createIssuePLViewModel = createIssuePLViewModel,
+                        subCategorySelectedText = subCategorySelectedText,
+                        providerId = providerId,
+                        loanState = loanState,
+                        shortDescFocus = shortDescFocus,
+                        fromFlow = fromFlow
+                    )
+                }
+            }
+        }
+    } else {
+        {
+            CommonMethods().toastMessage(
+                                context,
+                                context.getString(R.string.please_wait_while_the_image_is_uploading))
+
+        } // do nothing
+    }
 
     when {
-        navigationToSignIn -> navigateSignInPage (navController)
+        navigationToSignIn -> navigateSignInPage(navController)
         showInternetScreen -> CommonMethods().ShowInternetErrorScreen(navController)
         showTimeOutScreen -> CommonMethods().ShowTimeOutErrorScreen(navController)
         showServerIssueScreen -> CommonMethods().ShowServerIssueErrorScreen(navController)
@@ -195,11 +243,16 @@ fun CreateIssueScreen(
             } else {
                 if (issueCreated) {
                     navigateToIssueListScreen(
-                        navController = navController, orderId = "12345", fromFlow = fromFlow,
-                        providerId = "12345", loanState = "No Need", fromScreen = "Create Issue"
+                        navController = navController,
+                        orderId = orderId,
+                        fromFlow = fromFlow,
+                        providerId = providerId,
+                        loanState = loanState,
+                        fromScreen = "Loan Detail"
                     )
                 } else {
-                    if (issueListLoaded || subIssueLoaded) {
+//                    if (issueListLoaded || subIssueLoaded) {
+                    if (issueListLoaded ) {
                         val updatedCategoryList =
                             issueCategoriesList?.data?.mapNotNull { it?.name } ?: emptyList()
                         categoryList = updatedCategoryList
@@ -208,46 +261,35 @@ fun CreateIssueScreen(
                             topBarBackgroundColor = appOrange,
                             topBarText = stringResource(R.string.raise_issue),
                             showBackButton = true,
-                            onBackClick = { navController.popBackStack()
-                                navController.popBackStack()},
+                            onBackClick = {
+                                navController.popBackStack()
+                            },
                             showBottom = true,
                             showSingleButton = true,
-                            showErrorMsg = showImageNotUploadedError,
-                            errorMsg =errorMsg,
+                            showErrorMsg =  categoryError != null ||
+                                    subCategoryError != null ||
+                                    showImageNotUploadedError ||
+                                    !onShortDescError.isNullOrEmpty() ||
+                                    !longDescError.isNullOrEmpty(),
+                            errorMsg =stringResource(R.string.please_enter_all_mandatory_details_and_upload_photo),
                             primaryButtonText = stringResource(R.string.submit),
-                            onPrimaryButtonClick = {
-                                shortDesc?.let {
-                                    longDesc?.let { it1 ->
-                                        onCreateIssueButtonClick(
-                                            categoryFocus = categoryFocus,
-                                            subCategoryFocus = subCategoryFocus,
-                                            imageUploadResponse = imageUploadResponse,
-                                            imageUploadRequired=imageUploadRequired,
-                                            context = context,
-                                            shortDesc = it,
-                                            longDescFocus = longDescFocus,
-                                            longDesc = it1,
-                                            orderId = orderId,
-                                            categorySelectedText = categorySelectedText,
-                                            createIssuePLViewModel = createIssuePLViewModel,
-                                            subCategorySelectedText = subCategorySelectedText,
-                                            providerId = providerId,
-                                            loanState = loanState,
-                                            shortDescFocus = shortDescFocus,
-                                            fromFlow = fromFlow,
-                                        )
-                                    }
-                                }
-                            },
+                            onPrimaryButtonClick = handleSubmit,
                             backgroundColor = appWhite
                         ) {
-                            RegisterText(
-                                text = stringResource(id = R.string.select_the_appropriate_issue),
-                                textColor = appBlack, style = normal16Text700, bottom = 5.dp,
-                                textAlign = TextAlign.Start, boxAlign = Alignment.TopStart,
-                                start = 10.dp, top = 20.dp,
-                            )
-
+                            Row(
+                                modifier=Modifier.padding(start = 10.dp, top=20.dp).fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Start) {
+                                Text(
+                                    text =  stringResource(id = R.string.select_the_appropriate_issue),
+                                    color = appBlack,
+                                    style = normal16Text700,
+                                )
+                                Text(
+                                    text = " *",
+                                    color = appRed,
+                                    style = normal14Text400,
+                                )
+                            }
                             /* Category */
                             CustomDropDownField(
                                 selectedText = categorySelectedText,
@@ -260,7 +302,7 @@ fun CreateIssueScreen(
                                 modifier = Modifier.focusRequester(categoryFocus),
                                 focus = categoryFocus,
                                 error = categoryError,
-                                start = 10.dp, bottom = 8.dp,end = 10.dp
+                                start = 10.dp, end = 10.dp
                             )
 
                             /* Sub Category */
@@ -272,33 +314,57 @@ fun CreateIssueScreen(
                                 itemList = subCategoryList,
                                 onDismiss = onSubCategoryDismiss,
                                 onItemSelected = onSubCategorySelected,
-                                error = subCategoryError, start = 10.dp, end=10.dp
+                                error = subCategoryError, start = 10.dp, end = 10.dp,
+                                enabled = categorySelectedText.isNotEmpty()
                             )
                             StartingText(
                                 text = stringResource(id = R.string.tell_us_about_the_problem_you_are_facing),
-                                style = normal16Text700, textColor = appBlack,
-                                start = 10.dp,end=10.dp,top=15.dp,
+                                style = normal16Text700,
+                                textColor = appBlack,
+                                start = 10.dp,
+                                end = 10.dp,
+                                top = 15.dp
                             )
-                            RegisterText(
-                                text = stringResource(id = R.string.describe_the_issue),
-                                textColor = appBlack, style = normal16Text700, bottom = 5.dp,
-                                textAlign = TextAlign.Start, boxAlign = Alignment.TopStart,
-                                start = 10.dp, top = 15.dp,
-                            )
+                            Row(
+                                modifier=Modifier.padding(start = 10.dp, top=20.dp).fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Start) {
+                                Text(
+                                    text =  stringResource(id = R.string.describe_the_issue),
+                                    color = appBlack,
+                                    style = normal16Text700,
+                                )
+                                Text(
+                                    text = " *",
+                                    color = appRed,
+                                    style = normal14Text400,
+                                )
+                            }
+
                             IssueDescriptionFields(
-                                shortDesc = shortDesc, shortDescFocus = shortDescFocus,
-                                shortDescError = onShortDescError, longDescFocus = longDescFocus,
+                                shortDesc = shortDesc,
+                                shortDescFocus = shortDescFocus,
+                                shortDescError = onShortDescError,
+                                longDescFocus = longDescFocus,
                                 createIssuePLViewModel = createIssuePLViewModel,
-                                longDesc = longDesc, longDescError = longDescError,
+                                longDesc = longDesc,
+                                longDescError = longDescError,
                                 context = context
                             )
 //                            Spacer(modifier = Modifier.height(8.dp))
-                            RegisterText(
-                                text = stringResource(id = R.string.upload_the_issue_photo),
-                                textColor = appBlack, style = normal16Text700, bottom = 5.dp,
-                                textAlign = TextAlign.Start, boxAlign = Alignment.TopStart,
-                                start = 10.dp, top = 15.dp,
-                            )
+                            Row(
+                                modifier=Modifier.padding(start = 10.dp, top=20.dp).fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Start) {
+                                Text(
+                                    text =  stringResource(id = R.string.upload_the_issue_photo),
+                                    color = appBlack,
+                                    style = normal16Text700,
+                                )
+                                Text(
+                                    text = " *",
+                                    color = appRed,
+                                    style = normal14Text400,
+                                )
+                            }
 
                             UploadImageCard(
                                 isError = showImageNotUploadedError,
@@ -306,13 +372,14 @@ fun CreateIssueScreen(
                                 imageUploading = imageUploading,
                                 context = context,
                                 createIssueViewModel = createIssuePLViewModel,
-                                cardDataColor =  if(hasSelectedFromGallery)appOrange else if(showImageNotUploadedError) errorRed else appOrange,
+//                                cardDataColor = if (hasSelectedFromGallery)appOrange else if (showImageNotUploadedError) errorRed else appOrange,
+                                cardDataColor = if (showImageNotUploadedError) errorRed else appOrange,
                                 imageUploadRequired = imageUploadRequired,
                                 setImageUploadRequired = { imageUploadRequired = it },
                                 hasUploadedOnce = hasUploadedOnce,
                                 setHasUploadedOnce = { hasUploadedOnce = it },
                                 hasSelectedFromGalery = hasSelectedFromGallery,
-                                setHasSelectedFromGalery = { hasSelectedFromGallery = it },
+                                setHasSelectedFromGalery = { hasSelectedFromGallery = it }
                             )
                         }
                     } else {
@@ -328,7 +395,7 @@ fun onCreateIssueButtonClick(
     categoryFocus: FocusRequester,
     subCategoryFocus: FocusRequester,
     imageUploadResponse: ImageUpload?,
-    imageUploadRequired:Boolean,
+    imageUploadRequired: Boolean,
     shortDescFocus: FocusRequester,
     longDescFocus: FocusRequester,
     shortDesc: String,
@@ -340,56 +407,56 @@ fun onCreateIssueButtonClick(
     subCategorySelectedText: String,
     providerId: String,
     loanState: String,
-    fromFlow: String,
+    fromFlow: String
 ) {
     val images = imageUploadResponse?.data ?: emptyList()
-    var isValid=true
+    var isValid = true
 
-    if(images.isEmpty()){
+    if (images.isEmpty()) {
         createIssuePLViewModel.updateImageNotUploadedErrorMessage(context.getString(R.string.please_select_images_to_upload))
-        isValid=false
-    }
-    if (imageUploadRequired) {
-        createIssuePLViewModel.updateImageNotUploadedErrorMessage(context.getString(R.string.image_not_uploaded))
         isValid = false
     }
-    if (longDesc.isEmpty()){
+//    if (imageUploadRequired) {
+//        createIssuePLViewModel.updateImageNotUploadedErrorMessage(context.getString(R.string.image_not_uploaded))
+//        isValid = false
+//    }
+    if (longDesc.isEmpty()) {
         longDescFocus.requestFocus()
-        createIssuePLViewModel.updateLongDescError(context.getString(R.string.please_enter_short_description))
-        isValid=false
-    }else if(hasOnlyInteger(longDesc.trim())){
+        createIssuePLViewModel.updateLongDescError(context.getString(R.string.please_enter_description))
+        isValid = false
+    } else if (hasOnlyInteger(longDesc.trim())) {
         longDescFocus.requestFocus()
-        createIssuePLViewModel.updateLongDescError(context.getString(R.string.please_enter_proper_long_description))
-        isValid=false
-    }else if(!hasAtLeastOneAlphabet(longDesc.trim())){
+        createIssuePLViewModel.updateLongDescError(context.getString(R.string.please_enter_proper_description))
+        isValid = false
+    } else if (!hasAtLeastOneAlphabet(longDesc.trim())) {
         longDescFocus.requestFocus()
-        createIssuePLViewModel.updateLongDescError(context.getString(R.string.please_enter_proper_long_description))
-        isValid=false
+        createIssuePLViewModel.updateLongDescError(context.getString(R.string.please_enter_proper_description))
+        isValid = false
     }
-    if(shortDesc.isEmpty()){
-        createIssuePLViewModel.updateShortDescError(context.getString(R.string.please_enter_short_description))
+    if (shortDesc.isEmpty()) {
+        createIssuePLViewModel.updateShortDescError(context.getString(R.string.please_enter_subject))
         shortDescFocus.requestFocus()
-        isValid=false
-    }else if(hasOnlyInteger(shortDesc.trim())){
+        isValid = false
+    } else if (hasOnlyInteger(shortDesc.trim())) {
         shortDescFocus.requestFocus()
-        createIssuePLViewModel.updateShortDescError(context.getString(R.string.please_enter_proper_short_description))
-        isValid=false
-    }else if(!hasAtLeastOneAlphabet(shortDesc.trim())){
+        createIssuePLViewModel.updateShortDescError(context.getString(R.string.please_enter_proper_subject))
+        isValid = false
+    } else if (!hasAtLeastOneAlphabet(shortDesc.trim())) {
         shortDescFocus.requestFocus()
-        createIssuePLViewModel.updateShortDescError(context.getString(R.string.please_enter_proper_short_description))
-        isValid=false
+        createIssuePLViewModel.updateShortDescError(context.getString(R.string.please_enter_proper_subject))
+        isValid = false
     }
-    if(subCategorySelectedText.isEmpty()){
+    if (subCategorySelectedText.isEmpty()) {
         subCategoryFocus.requestFocus()
         createIssuePLViewModel.updateSubCategoryError(context.getString(R.string.please_select_sub_category))
-        isValid=false
+        isValid = false
     }
-    if(categorySelectedText.isEmpty()){
+    if (categorySelectedText.isEmpty()) {
         categoryFocus.requestFocus()
         createIssuePLViewModel.updateCategoryError(context.getString(R.string.please_select_category))
-        isValid=false
+        isValid = false
     }
-    if(isValid){
+    if (isValid) {
         createIssuePLViewModel.updateValidation(
             shortDesc = shortDesc, longDesc = longDesc,
             categorySelectedText = categorySelectedText,
@@ -398,9 +465,7 @@ fun onCreateIssueButtonClick(
             providerId = providerId, orderState = loanState,
             fromFlow = fromFlow
         )
-
     }
-
 }
 
 private fun hasOnlyInteger(input: String): Boolean {
@@ -413,57 +478,65 @@ fun hasAtLeastOneAlphabet(text: String): Boolean {
 
 @Composable
 fun IssueDescriptionFields(
-    shortDesc: String?, shortDescFocus: FocusRequester, shortDescError: String?,
-    longDescFocus: FocusRequester, createIssuePLViewModel: CreateIssueViewModel, longDesc: String?,
-    longDescError: String?,context: Context
+    shortDesc: String?,
+    shortDescFocus: FocusRequester,
+    shortDescError: String?,
+    longDescFocus: FocusRequester,
+    createIssuePLViewModel: CreateIssueViewModel,
+    longDesc: String?,
+    longDescError: String?,
+    context: Context
 ) {
-    val focusManager= LocalFocusManager.current
-Column(){
-    OutlinedTextField(
-        value = shortDesc.orEmpty(),
-        label = {
-            Text(
-                text = stringResource(id = R.string.short_description),
-                color = hintGray,
-                style = normal18Text500,
-                textAlign = TextAlign.Start
+    val focusManager = LocalFocusManager.current
+    Column() {
+        OutlinedTextField(
+            value = shortDesc.orEmpty(),
+            label = {
+                Text(
+                    text = stringResource(id = R.string.subject),
+                    color = hintGray,
+                    style = normal18Text500,
+                    textAlign = TextAlign.Start
+                )
+            },
+            onValueChange = {
+                createIssuePLViewModel.onShortDescChanged(it)
+                createIssuePLViewModel.updateShortDescError(null)
+            },
+            modifier = Modifier.focusRequester(shortDescFocus)
+                .fillMaxWidth().padding(start = 10.dp, end = 10.dp)
+                .background(appWhite, shape = RoundedCornerShape(16.dp)),
+            textStyle = normal18Text500,
+            isError = shortDescError?.isNotEmpty() == true,
+            keyboardOptions = KeyboardOptions(
+                capitalization = KeyboardCapitalization.Sentences,
+                imeAction = ImeAction.Next,
+                keyboardType = KeyboardType.Text
+            ),
+            maxLines = 1,
+            shape = RoundedCornerShape(8.dp),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = appTheme,
+                unfocusedBorderColor = appOrange,
+                cursorColor = cursorColor,
+                errorBorderColor = errorRed
             )
-        },
-        onValueChange = {
-            createIssuePLViewModel.onShortDescChanged(it)
-            createIssuePLViewModel.updateShortDescError(null)
-        },
-        modifier = Modifier.focusRequester(shortDescFocus)
-            .fillMaxWidth().padding(start = 10.dp, end = 10.dp)
-            .background(appWhite, shape = RoundedCornerShape(16.dp)),
-        textStyle = normal18Text500,
-        isError = shortDescError?.isNotEmpty() == true,
-        keyboardOptions = KeyboardOptions(
-            capitalization = KeyboardCapitalization.Sentences,
-            imeAction = ImeAction.Next,
-            keyboardType = KeyboardType.Text
-        ),
-        maxLines = 1,
-        shape = RoundedCornerShape(8.dp),
-        colors = TextFieldDefaults.outlinedTextFieldColors(
-            focusedBorderColor = appTheme, unfocusedBorderColor = appOrange,
-            cursorColor = cursorColor, errorBorderColor = errorRed
         )
-    )
-    if (!shortDescError.isNullOrEmpty()) {
-        Text(
-            text = shortDescError, style = normal12Text400,
-            color = errorRed,
-            modifier = Modifier.padding(start = 16.dp, top = 2.dp)
-        )
+        if (!shortDescError.isNullOrEmpty()) {
+            Text(
+                text = shortDescError,
+                style = normal12Text400,
+                color = errorRed,
+                modifier = Modifier.padding(start = 16.dp, top = 2.dp, bottom = 2.dp)
+            )
+        }
     }
-}
     Column() {
         OutlinedTextField(
             value = longDesc.orEmpty(),
             label = {
                 Text(
-                    text = stringResource(id = R.string.long_description),
+                    text = stringResource(id = R.string.description),
                     color = hintGray,
                     style = normal18Text500,
                     textAlign = TextAlign.Start
@@ -474,7 +547,7 @@ Column(){
                 createIssuePLViewModel.updateLongDescError(null)
             },
             modifier = Modifier.height(100.dp).focusRequester(longDescFocus)
-                .fillMaxWidth().padding(top=10.dp,start = 10.dp, end = 10.dp)
+                .fillMaxWidth().padding(top = 5.dp, start = 10.dp, end = 10.dp)
                 .background(appWhite, shape = RoundedCornerShape(16.dp)),
             textStyle = normal18Text500,
             isError = longDescError?.isNotEmpty() == true,
@@ -487,13 +560,16 @@ Column(){
             maxLines = 5,
             shape = RoundedCornerShape(8.dp),
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = appTheme, unfocusedBorderColor = appOrange,
-                cursorColor = cursorColor, errorBorderColor = errorRed
+                focusedBorderColor = appTheme,
+                unfocusedBorderColor = appOrange,
+                cursorColor = cursorColor,
+                errorBorderColor = errorRed
             )
         )
         if (!longDescError.isNullOrEmpty()) {
             Text(
-                text = longDescError, style = normal12Text400,
+                text = longDescError,
+                style = normal12Text400,
                 color = errorRed,
                 modifier = Modifier.padding(start = 16.dp, top = 2.dp)
             )
@@ -501,6 +577,7 @@ Column(){
     }
 }
 
+@SuppressLint("SuspiciousIndentation")
 @Composable
 fun UploadImageCard(
     isError: Boolean,
@@ -513,9 +590,9 @@ fun UploadImageCard(
     setImageUploadRequired: (Boolean) -> Unit,
     hasUploadedOnce: Boolean,
     setHasUploadedOnce: (Boolean) -> Unit,
-    hasSelectedFromGalery:Boolean,
-    setHasSelectedFromGalery: (Boolean) -> Unit,
-){
+    hasSelectedFromGalery: Boolean,
+    setHasSelectedFromGalery: (Boolean) -> Unit
+) {
     var selectedImageUris by remember { mutableStateOf(List<Uri?>(3) { null }) }
     var imagesData by remember { mutableStateOf(List<Images?>(3) { null }) }
     var currentIndex by remember { mutableStateOf(-1) }
@@ -531,8 +608,17 @@ fun UploadImageCard(
             val imageData = Images(mimetype = mimeType, base64 = base64String)
             imagesData = imagesData.toMutableList().also { it[currentIndex] = imageData }
 
-            setImageUploadRequired(true)
-            setHasUploadedOnce(false)
+            setImageUploadRequired(false)
+            setHasUploadedOnce(true)
+
+            val validImages = imagesData.filterNotNull()
+            if (validImages.isNotEmpty()) {
+                createIssueViewModel.clearImageUploadError()
+                createIssueViewModel.imageUpload(
+                    imageUploadBody = ImageUploadBody(images = validImages),
+                    context = context
+                )
+            }
         }
     }
 
@@ -543,7 +629,8 @@ fun UploadImageCard(
         if (imageUploading) {
             CenterProgress()
         } else {
-            val singleImageSelected = selectedImageUris.count { it != null } == 1
+            val filledCount = selectedImageUris.count { it != null }
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -589,19 +676,26 @@ fun UploadImageCard(
                                         imagesData = imagesData.toMutableList().also {
                                             it[index] = null
                                         }
-                                        setImageUploadRequired(true)
-                                        setHasUploadedOnce(false)
+                                        setImageUploadRequired(false)
+                                        setHasUploadedOnce(true)
+
+                                        val validImages = imagesData.filterNotNull()
+                                        createIssueViewModel.clearImageUploadError()
+                                        createIssueViewModel.imageUpload(
+                                            imageUploadBody = ImageUploadBody(images = validImages),
+                                            context = context
+                                        )
                                     }
                                     .size(20.dp)
                             )
                         }
-                    } else {
+                    } else if (index == filledCount && filledCount < 3) {
+                        // Show only the next available upload card
                         DashedBorderCard(
                             onClick = {
                                 currentIndex = index
                                 launcher.launch("image/*")
                                 setHasSelectedFromGalery(true)
-
                             },
                             label = "Image ${index + 1}",
                             tintColor = cardDataColor,
@@ -610,36 +704,140 @@ fun UploadImageCard(
                     }
                 }
             }
-
-            val isUploadEnabled = selectedImageUris.any { it != null } && !hasUploadedOnce
-
-            ClickableText(
-                text = stringResource(id = R.string.upload_images),
-                borderColor = if (isError) errorRed else appOrange,
-                textColor = if (isError) errorRed else appOrange,
-                style = normal16Text500,
-                top = 5.dp,
-                isUploadEnabled = isUploadEnabled,
-            ) {
-                val validImages = imagesData.filterNotNull()
-                if (validImages.isNotEmpty()) {
-                    createIssueViewModel.clearImageUploadError()
-                    createIssueViewModel.imageUpload(
-                        imageUploadBody = ImageUploadBody(images = validImages),
-                        context = context
-                    )
-                    setImageUploadRequired(false)
-                    setHasUploadedOnce(true)
-                } else {
-                    CommonMethods().toastMessage(
-                        context = context,
-                        toastMsg = context.getString(R.string.please_select_images_to_upload)
-                    )
-                }
-            }
         }
     }
 }
+
+//@SuppressLint("SuspiciousIndentation")
+//@Composable
+//fun UploadImageCard(
+//    isError: Boolean,
+//    imageUploaded: Boolean,
+//    imageUploading: Boolean,
+//    context: Context,
+//    createIssueViewModel: CreateIssueViewModel,
+//    cardDataColor: Color,
+//    imageUploadRequired: Boolean,
+//    setImageUploadRequired: (Boolean) -> Unit,
+//    hasUploadedOnce: Boolean,
+//    setHasUploadedOnce: (Boolean) -> Unit,
+//    hasSelectedFromGalery: Boolean,
+//    setHasSelectedFromGalery: (Boolean) -> Unit
+//) {
+//    var selectedImageUris by remember { mutableStateOf(List<Uri?>(3) { null }) }
+//    var imagesData by remember { mutableStateOf(List<Images?>(3) { null }) }
+//    var currentIndex by remember { mutableStateOf(-1) }
+//
+//    val launcher = rememberLauncherForActivityResult(
+//        contract = ActivityResultContracts.GetContent()
+//    ) { uri ->
+//        if (uri != null && currentIndex in 0..2) {
+//            selectedImageUris = selectedImageUris.toMutableList().also { it[currentIndex] = uri }
+//            val bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+//            val base64String = bitmapToBase64(bitmap)
+//            val mimeType = context.contentResolver.getType(uri) ?: "image/jpeg"
+//            val imageData = Images(mimetype = mimeType, base64 = base64String)
+//            imagesData = imagesData.toMutableList().also { it[currentIndex] = imageData }
+//
+//            setImageUploadRequired(false) // since auto-upload, no button needed
+//            setHasUploadedOnce(true)
+//
+//            val validImages = imagesData.filterNotNull()
+//            if (validImages.isNotEmpty()) {
+//                createIssueViewModel.clearImageUploadError()
+//                createIssueViewModel.imageUpload(
+//                    imageUploadBody = ImageUploadBody(images = validImages),
+//                    context = context
+//                )
+//            }
+//        }
+//    }
+//
+//    Column(
+//        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+//        horizontalAlignment = Alignment.CenterHorizontally
+//    ) {
+//        if (imageUploading) {
+//            CenterProgress()
+//        } else {
+//            val singleImageSelected = selectedImageUris.count { it != null } == 1
+//            Row(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(vertical = 10.dp, horizontal = 10.dp),
+//                horizontalArrangement = Arrangement.spacedBy(12.dp)
+//            ) {
+//                selectedImageUris.forEachIndexed { index, uri ->
+//                    if (uri != null) {
+//                        val bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+//                        Box(
+//                            modifier = Modifier
+//                                .size(100.dp)
+//                                .clickable {
+//                                    currentIndex = index
+//                                    launcher.launch("image/*")
+//                                }
+//                        ) {
+//                            Card(
+//                                shape = RoundedCornerShape(10.dp),
+//                                border = BorderStroke(1.dp, Color.LightGray),
+//                                modifier = Modifier.fillMaxSize()
+//                            ) {
+//                                Image(
+//                                    bitmap = bitmap.asImageBitmap(),
+//                                    contentDescription = null,
+//                                    contentScale = ContentScale.Crop,
+//                                    modifier = Modifier.fillMaxSize()
+//                                )
+//                            }
+//
+//                            Icon(
+//                                imageVector = Icons.Default.Close,
+//                                contentDescription = "Delete",
+//                                tint = Color.White,
+//                                modifier = Modifier
+//                                    .align(Alignment.TopEnd)
+//                                    .padding(4.dp)
+//                                    .background(Color.Black.copy(alpha = 0.6f), CircleShape)
+//                                    .clickable {
+//                                        selectedImageUris = selectedImageUris.toMutableList().also {
+//                                            it[index] = null
+//                                        }
+//                                        imagesData = imagesData.toMutableList().also {
+//                                            it[index] = null
+//                                        }
+//                                        setImageUploadRequired(false)
+//                                        setHasUploadedOnce(true)
+//
+//                                        val validImages = imagesData.filterNotNull()
+////                                        if (validImages.isNotEmpty()) {
+//                                            createIssueViewModel.clearImageUploadError()
+//                                            createIssueViewModel.imageUpload(
+//                                                imageUploadBody = ImageUploadBody(images = validImages),
+//                                                context = context
+//                                            )
+////                                        }
+//                                    }
+//                                    .size(20.dp)
+//                            )
+//                        }
+//                    } else {
+//                        DashedBorderCard(
+//                            onClick = {
+//                                currentIndex = index
+//                                launcher.launch("image/*")
+//                                setHasSelectedFromGalery(true)
+//                            },
+//                            label = "Image ${index + 1}",
+//                            tintColor = cardDataColor,
+//                            modifier = Modifier.size(100.dp)
+//                        )
+//                    }
+//                }
+//            }
+//        }
+//    }
+//}
 
 fun resizeBitmap(bitmap: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
     val aspectRatio = bitmap.width.toFloat() / bitmap.height.toFloat()
@@ -664,4 +862,3 @@ fun bitmapToBase64(bitmap: Bitmap): String {
     val byteArray = byteArrayOutputStream.toByteArray()
     return Base64.encodeToString(byteArray, Base64.NO_WRAP)
 }
-

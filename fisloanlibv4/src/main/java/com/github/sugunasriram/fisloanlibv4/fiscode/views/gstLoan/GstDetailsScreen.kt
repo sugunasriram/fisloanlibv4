@@ -29,15 +29,15 @@ import com.github.sugunasriram.fisloanlibv4.R
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.CenterProgress
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.CenteredMoneyImage
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.CurvedPrimaryButtonFull
-import com.github.sugunasriram.fisloanlibv4.fiscode.components.ScreenWithHamburger
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.InputField
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.RegisterText
+import com.github.sugunasriram.fisloanlibv4.fiscode.components.ScreenWithHamburger
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateSignInPage
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToGstInvoiceLoanScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToGstNumberVerifyScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.gst.GstOtpResponse
-import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appBlueTitle
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.disableColor
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.lightishGrayColor
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal14Text400
@@ -50,7 +50,6 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.gstLoan.GstDetailV
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun GstDetailsScreen(navController: NavHostController, fromFlow: String) {
-
     BackHandler {
         navigateToGstInvoiceLoanScreen(navController = navController, fromFlow = fromFlow)
     }
@@ -77,7 +76,6 @@ fun GstDetailsScreen(navController: NavHostController, fromFlow: String) {
     val middleLoan by gstDetailViewModel.middleLoan.observeAsState(false)
     val errorMessage by gstDetailViewModel.errorMessage.collectAsState()
 
-
     val (focusGstName) = FocusRequester.createRefs()
     val (focusGstNumber) = FocusRequester.createRefs()
 
@@ -88,7 +86,7 @@ fun GstDetailsScreen(navController: NavHostController, fromFlow: String) {
         }
     }
     when {
-        navigationToSignIn -> navigateSignInPage (navController)
+        navigationToSignIn -> navigateSignInPage(navController)
         showInternetScreen -> CommonMethods().ShowInternetErrorScreen(navController)
         showTimeOutScreen -> CommonMethods().ShowTimeOutErrorScreen(navController)
         showServerIssueScreen -> CommonMethods().ShowServerIssueErrorScreen(navController)
@@ -101,7 +99,7 @@ fun GstDetailsScreen(navController: NavHostController, fromFlow: String) {
                 focusGstName = focusGstName, focusGstNumber = focusGstNumber, fromFlow = fromFlow,
                 generatingOtp = generatingOtp, gstUserName = gstUserName, context = context,
                 cygnetGenerateOtpResponse = cygnetGenerateOtpResponse, gstNameError = gstNameError,
-                gstNumberError = gstNumberError, gstDetailViewModel = gstDetailViewModel,
+                gstNumberError = gstNumberError, gstDetailViewModel = gstDetailViewModel
             )
         }
     }
@@ -109,10 +107,19 @@ fun GstDetailsScreen(navController: NavHostController, fromFlow: String) {
 
 @Composable
 fun GstDetailsScreenView(
-    generatedOtp: Boolean, navController: NavHostController, focusGstName: FocusRequester,
-    focusGstNumber: FocusRequester, generatingOtp: Boolean, fromFlow: String, gstNumber: String,
-    cygnetGenerateOtpResponse: GstOtpResponse?, gstUserName: String, context: Context,
-    gstNameError: String?, gstNumberError: String?, gstDetailViewModel: GstDetailViewModel
+    generatedOtp: Boolean,
+    navController: NavHostController,
+    focusGstName: FocusRequester,
+    focusGstNumber: FocusRequester,
+    generatingOtp: Boolean,
+    fromFlow: String,
+    gstNumber: String,
+    cygnetGenerateOtpResponse: GstOtpResponse?,
+    gstUserName: String,
+    context: Context,
+    gstNameError: String?,
+    gstNumberError: String?,
+    gstDetailViewModel: GstDetailViewModel
 ) {
     if (generatingOtp) {
         CenterProgress()
@@ -120,12 +127,15 @@ fun GstDetailsScreenView(
         if (generatedOtp) {
             cygnetGenerateOtpResponse?.data?.id?.let { id ->
                 navigateToGstNumberVerifyScreen(
-                    navController = navController, mobileNumber = id, fromFlow = fromFlow
+                    navController = navController,
+                    mobileNumber = id,
+                    fromFlow = fromFlow
                 )
             }
         } else {
             ScreenWithHamburger(
-                isSelfScrollable = false, navController = navController
+                isSelfScrollable = false,
+                navController = navController
             ) {
                 GstDetailsContent(
                     gstNumber = gstNumber, gstUserName = gstUserName, context = context,
@@ -141,46 +151,75 @@ fun GstDetailsScreenView(
 
 @Composable
 fun GstDetailsContent(
-    gstNumber: String, gstUserName: String, gstNameError: String?, gstNumberError: String?,
-    focusGstName: FocusRequester, focusGstNumber: FocusRequester, context: Context,
-    gstDetailViewModel: GstDetailViewModel, navController: NavHostController, fromFlow: String
+    gstNumber: String,
+    gstUserName: String,
+    gstNameError: String?,
+    gstNumberError: String?,
+    focusGstName: FocusRequester,
+    focusGstNumber: FocusRequester,
+    context: Context,
+    gstDetailViewModel: GstDetailViewModel,
+    navController: NavHostController,
+    fromFlow: String
 ) {
     CenteredMoneyImage(imageSize = 120.dp, top = 20.dp)
     RegisterText(
-        text = stringResource(id = R.string.gst_details), textColor = appBlueTitle,
+        text = stringResource(id = R.string.gst_details),
+        textColor = appBlueTitle,
         style = normal32Text700
     )
     GstUserNameInputField(
-        gstUserName = gstUserName, gstNameError = gstNameError, focusGstName = focusGstName,
-        focusGstNumber = focusGstNumber, gstDetailViewModel = gstDetailViewModel
+        gstUserName = gstUserName,
+        gstNameError = gstNameError,
+        focusGstName = focusGstName,
+        focusGstNumber = focusGstNumber,
+        gstDetailViewModel = gstDetailViewModel
     )
     GstNumberInputField(
-        gstNumber = gstNumber, gstNumberError = gstNumberError, focusGstNumber = focusGstNumber,
+        gstNumber = gstNumber,
+        gstNumberError = gstNumberError,
+        focusGstNumber = focusGstNumber,
         gstDetailViewModel = gstDetailViewModel
     )
     RegisterText(
-        text = stringResource(id = R.string.sample_gst), textColor = lightishGrayColor,
-        start = 40.dp, end = 40.dp, style = normal20Text500
+        text = stringResource(id = R.string.sample_gst),
+        textColor = lightishGrayColor,
+        start = 40.dp,
+        end = 40.dp,
+        style = normal20Text500
     )
     VerifyButton(
-        gstNumber = gstNumber, gstUserName = gstUserName, gstDetailViewModel = gstDetailViewModel,
-        context = context, navController = navController, focusGstName = focusGstName,
-        focusGstNumber = focusGstNumber, fromFlow = fromFlow
+        gstNumber = gstNumber,
+        gstUserName = gstUserName,
+        gstDetailViewModel = gstDetailViewModel,
+        context = context,
+        navController = navController,
+        focusGstName = focusGstName,
+        focusGstNumber = focusGstNumber,
+        fromFlow = fromFlow
     )
 }
 
 @Composable
 fun GstUserNameInputField(
-    gstUserName: String, gstNameError: String?, focusGstName: FocusRequester,
-    focusGstNumber: FocusRequester, gstDetailViewModel: GstDetailViewModel
+    gstUserName: String,
+    gstNameError: String?,
+    focusGstName: FocusRequester,
+    focusGstNumber: FocusRequester,
+    gstDetailViewModel: GstDetailViewModel
 ) {
     RegisterText(
-        text = stringResource(id = R.string.gst_username), textColor = appBlueTitle,
-        top = 60.dp, style = normal24Text700
+        text = stringResource(id = R.string.gst_username),
+        textColor = appBlueTitle,
+        top = 60.dp,
+        style = normal24Text700
     )
     RegisterText(
         text = stringResource(id = R.string.link_gst_account),
-        textColor = appBlueTitle, start = 40.dp, end = 40.dp, style = normal14Text400
+        textColor = appBlueTitle,
+        start = 40.dp,
+        end = 40.dp,
+        style = normal14Text400
     )
     InputField(
         top = 10.dp, inputText = TextFieldValue(gstUserName), modifier = Modifier.focusRequester(focusGstName),
@@ -192,7 +231,7 @@ fun GstUserNameInputField(
             keyboardType = KeyboardType.Text
         ),
         keyboardActions = KeyboardActions(onNext = { focusGstNumber.requestFocus() }),
-        onValueChange = {newValue->
+        onValueChange = { newValue ->
             gstDetailViewModel.onGstUserNameChanged(newValue.text)
             gstDetailViewModel.updateGstNameError(null)
         },
@@ -202,26 +241,36 @@ fun GstUserNameInputField(
 
 @Composable
 fun GstNumberInputField(
-    gstNumber: String, gstNumberError: String?, focusGstNumber: FocusRequester,
+    gstNumber: String,
+    gstNumberError: String?,
+    focusGstNumber: FocusRequester,
     gstDetailViewModel: GstDetailViewModel
 ) {
     RegisterText(
-        text = stringResource(id = R.string.enter_gstin), textColor = appBlueTitle, top = 60.dp,
+        text = stringResource(id = R.string.enter_gstin),
+        textColor = appBlueTitle,
+        top = 60.dp,
         style = normal24Text700
     )
     RegisterText(
         text = stringResource(id = R.string.business_gstin),
-        textColor = appBlueTitle, start = 40.dp, end = 40.dp, style = normal14Text400
+        textColor = appBlueTitle,
+        start = 40.dp,
+        end = 40.dp,
+        style = normal14Text400
     )
     InputField(
-        top = 10.dp, inputText = TextFieldValue( gstNumber), hint = stringResource(id = R.string.gst_digit),
+        top = 10.dp,
+        inputText = TextFieldValue(gstNumber),
+        hint = stringResource(id = R.string.gst_digit),
         hintAlign = TextAlign.Center,
         modifier = Modifier.focusRequester(focusGstNumber),
         keyboardOptions = KeyboardOptions(
-            capitalization = KeyboardCapitalization.Characters, imeAction = ImeAction.Done,
+            capitalization = KeyboardCapitalization.Characters,
+            imeAction = ImeAction.Done,
             keyboardType = KeyboardType.Text
         ),
-        onValueChange = {newValue->
+        onValueChange = { newValue ->
             gstDetailViewModel.onGstNumberChanged(newValue.text)
             gstDetailViewModel.updateGstNumberError(null)
         },
@@ -231,9 +280,14 @@ fun GstNumberInputField(
 
 @Composable
 fun VerifyButton(
-    gstNumber: String, gstUserName: String, gstDetailViewModel: GstDetailViewModel,
-    focusGstName: FocusRequester, focusGstNumber: FocusRequester, fromFlow: String,
-    context: Context, navController: NavHostController
+    gstNumber: String,
+    gstUserName: String,
+    gstDetailViewModel: GstDetailViewModel,
+    focusGstName: FocusRequester,
+    focusGstNumber: FocusRequester,
+    fromFlow: String,
+    context: Context,
+    navController: NavHostController
 ) {
     val buttonBackGroundColor =
         if (gstNumber.isNotEmpty() && gstUserName.isNotEmpty()) appOrange else disableColor
@@ -243,11 +297,13 @@ fun VerifyButton(
         modifier = Modifier.padding(start = 30.dp, end = 30.dp, bottom = 20.dp, top = 50.dp)
     ) {
         gstDetailViewModel.verifyGstValidation(
-            gstNumber = gstNumber, gstUserName = gstUserName, navController = navController,
-            context = context, focusGstName = focusGstName, focusGstNumber = focusGstNumber,
+            gstNumber = gstNumber,
+            gstUserName = gstUserName,
+            navController = navController,
+            context = context,
+            focusGstName = focusGstName,
+            focusGstNumber = focusGstNumber,
             fromFlow = fromFlow
         )
     }
 }
-
-

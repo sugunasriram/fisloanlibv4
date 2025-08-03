@@ -2,7 +2,6 @@ package com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan
 
 import kotlinx.serialization.Serializable
 
-
 @Serializable
 data class UpdateConsentHandler(
     val data: UpdatedObject? = null,

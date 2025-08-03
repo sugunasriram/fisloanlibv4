@@ -6,25 +6,26 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.first
 
-object TokenManager{
+object TokenManager {
     private lateinit var dataStore: DataStore<Preferences>
 
     fun initialize(dataStore: DataStore<Preferences>) {
         this.dataStore = dataStore
     }
 
-    suspend fun save(key:String,value:String){
-       val  dataStoreKey = stringPreferencesKey(key)
-        dataStore.edit {settings ->
+    suspend fun save(key: String, value: String) {
+        val dataStoreKey = stringPreferencesKey(key)
+        dataStore.edit { settings ->
             settings[dataStoreKey] = value
         }
     }
 
-    suspend fun read(key:String):String?{
+    suspend fun read(key: String): String? {
         val dataStoreKey = stringPreferencesKey(key)
         val preferences = dataStore.data.first()
         return preferences[dataStoreKey]
     }
+
     fun isInitialized(): Boolean {
         return this::dataStore.isInitialized
     }

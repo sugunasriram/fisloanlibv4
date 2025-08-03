@@ -4,21 +4,21 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CreateIssueResponse (
+data class CreateIssueResponse(
     val status: Boolean? = null,
     val data: CreateIssueResponseData? = null,
     val statusCode: Long? = null
 )
 
 @Serializable
-data class CreateIssueResponseData (
+data class CreateIssueResponseData(
     val requestId: String? = null,
     val issue_id: String? = null,
     val message: String? = null
 )
 
 @Serializable
-data class CreateIssueBody (
+data class CreateIssueBody(
     val loanType: String? = null,
 
     @SerialName("order_id")
@@ -58,13 +58,13 @@ data class CreateIssueBody (
 )
 
 @Serializable
-data class IssueListBody (
+data class IssueListBody(
     val page: Int? = 1,
     val pageSize: Int? = 10
 )
 
 @Serializable
-data class IssueList (
+data class IssueList(
     val issueList: List<IssueObj>? = null
 )
 
@@ -73,7 +73,7 @@ data class IssueObj(
     @SerialName("_id") val id: String? = null,
     @SerialName("summary") val summary: Summary? = null,
     @SerialName("createdAt") val createdAt: String? = null,
-    @SerialName("updatedAt") val updatedAt: String? = null,
+    @SerialName("updatedAt") val updatedAt: String? = null
 )
 
 @Serializable
@@ -85,7 +85,7 @@ data class Summary(
     @SerialName("long_description") val longDescription: String? = null,
     @SerialName("additional_description") val additionalDescription: AdditionalDescription? = null,
     @SerialName("images") val images: List<String>? = null,
-    @SerialName("category") val category: String ?=null,
+    @SerialName("category") val category: String ? = null,
     @SerialName("sub_category_desc") val subCategoryDesc: String? = null,
     @SerialName("state") val state: String? = null,
     @SerialName("status") val status: String? = null,
@@ -97,7 +97,7 @@ data class Summary(
     @SerialName("resolutions_providers") val resolutionsProviders: ResolutionsProviders ? = null,
     @SerialName("expected_response_time") val expectedResponseTime: ExpectedResponseTime? = null,
     @SerialName("expected_resolution_time") val expectedResolutionTime: ExpectedResolutionTime? = null,
-    @SerialName("loanType") val loanType: String ?= null,
+    @SerialName("loanType") val loanType: String ? = null,
     @SerialName("created_at") val createdAt: String? = null,
     @SerialName("updated_at") val updatedAt: String? = null,
     @SerialName("sub_category") val subCategory: String? = null
@@ -115,7 +115,7 @@ data class RespondentAction(
     @SerialName("short_desc") val shortDesc: String? = null,
     @SerialName("updated_at") val updatedAt: String? = null,
     @SerialName("updated_by") val updatedBy: UpdatedBy? = null,
-    @SerialName("cascaded_level") val cascadedLevel: Int? = null,
+    @SerialName("cascaded_level") val cascadedLevel: Int? = null
 )
 
 @Serializable
@@ -158,7 +158,7 @@ data class UpdatedBy(
     @SerialName("person") val person: Person? = null,
     @SerialName("contact_phone") val contactPhone: String? = null,
     @SerialName("org_name") val orgName: String? = null,
-    @SerialName("contact_email") val contactEmail: String? = null,
+    @SerialName("contact_email") val contactEmail: String? = null
 )
 
 @Serializable
@@ -185,12 +185,11 @@ data class Person(
     @SerialName("name") val name: String? = null
 )
 
-
 @Serializable
 data class IssueListResponse(
     @SerialName("status") val status: Boolean? = false,
     @SerialName("data") val data: ResponseData? = null,
-    @SerialName("statusCode") val statusCode: Int?= null
+    @SerialName("statusCode") val statusCode: Int? = null
 )
 
 @Serializable
@@ -207,4 +206,3 @@ data class PageData(
     @SerialName("total_page") val totalPage: Int? = null,
     @SerialName("data") val issues: List<IssueObj>? = null
 )
-

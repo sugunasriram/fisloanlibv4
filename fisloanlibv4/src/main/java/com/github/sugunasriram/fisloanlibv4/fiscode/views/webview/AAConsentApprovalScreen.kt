@@ -2,6 +2,7 @@ package com.github.sugunasriram.fisloanlibv4.fiscode.views.webview
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -19,7 +20,6 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.gst.GstConsent
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.gst.GstData
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.ConsentApprovalRequest
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.ConsentApprovalResponse
-import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.OfferResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan.WebViewModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.LoanNotApprovedScreen
@@ -29,7 +29,10 @@ import kotlinx.serialization.json.Json
 @SuppressLint("ResourceType")
 @Composable
 fun AAConsentApprovalScreen(
-    navController: NavHostController, id: String? = null, url: String? = null, fromFlow: String
+    navController: NavHostController,
+    id: String? = null,
+    url: String? = null,
+    fromFlow: String
 ) {
     val context = LocalContext.current
     val consentApprovalViewModel: WebViewModel = viewModel()
@@ -49,13 +52,13 @@ fun AAConsentApprovalScreen(
     val navigationToSignIn by consentApprovalViewModel.navigationToSignIn.collectAsState()
 
     when {
-        navigationToSignIn -> navigateSignInPage (navController)
+        navigationToSignIn -> navigateSignInPage(navController)
         showInternetScreen -> CommonMethods().ShowInternetErrorScreen(navController)
         showTimeOutScreen -> CommonMethods().ShowTimeOutErrorScreen(navController)
         showServerIssueScreen -> CommonMethods().ShowServerIssueErrorScreen(navController)
         unexpectedErrorScreen -> CommonMethods().ShowUnexpectedErrorScreen(navController)
         unAuthorizedUser -> CommonMethods().ShowUnAuthorizedErrorScreen(navController)
-        middleLoan ->  MiddleOfTheLoanScreen(navController,errorMessage,)
+        middleLoan -> MiddleOfTheLoanScreen(navController, errorMessage)
 //        middleLoan -> CommonMethods().ShowMiddleLoanErrorScreen(navController, errorMessage)
         loanNotFound -> { LoanNotApprovedScreen(navController) }
 
@@ -65,18 +68,23 @@ fun AAConsentApprovalScreen(
                     text = stringResource(R.string.generating_account_aggregator),
                     updatedText = stringResource(id = R.string.generating_best_offers),
                     image = R.raw.generating_aa_consent,
-                    showTimer = true, navController = navController
+                    showTimer = true,
+                    navController = navController
                 )
             } else {
                 if (isLoadingSuccess) {
                     ApiSuccess(
-                        fromFlow = fromFlow, consentApprovalResponse = consentApprovalResponse,
+                        fromFlow = fromFlow,
+                        consentApprovalResponse = consentApprovalResponse,
                         gstConsentApprovalResponse = gstConsentApprovalResponse,
                         navController = navController
                     )
                 } else {
                     decideApiCalling(
-                        fromFlow = fromFlow, context = context, id = id, url = url,
+                        fromFlow = fromFlow,
+                        context = context,
+                        id = id,
+                        url = url,
                         consentApprovalViewModel = consentApprovalViewModel
                     )
                 }
@@ -86,25 +94,37 @@ fun AAConsentApprovalScreen(
 }
 
 fun decideApiCalling(
-    fromFlow: String, consentApprovalViewModel: WebViewModel, context: Context, id: String?,
+    fromFlow: String,
+    consentApprovalViewModel: WebViewModel,
+    context: Context,
+    id: String?,
     url: String?
 ) {
     if (fromFlow.equals("Personal Loan", ignoreCase = true)) {
         consentApprovalViewModel.aaConsentApprovalApi(
-            context = context, consentBodyModel = ConsentApprovalRequest(
-                id = id, url = url, loanType = "PERSONAL_LOAN"
+            context = context,
+            consentBodyModel = ConsentApprovalRequest(
+                id = id,
+                url = url,
+                loanType = "PERSONAL_LOAN"
             )
         )
     } else if (fromFlow.equals("Invoice Loan", ignoreCase = true)) {
         consentApprovalViewModel.gstConsentApproval(
-            context = context, consentApproval = ConsentApprovalRequest(
-                id = id, url = url, loanType = "INVOICE_BASED_LOAN"
+            context = context,
+            consentApproval = ConsentApprovalRequest(
+                id = id,
+                url = url,
+                loanType = "INVOICE_BASED_LOAN"
             )
         )
     } else if (fromFlow.equals("Purchase Finance", ignoreCase = true)) {
         consentApprovalViewModel.financeConsentApproval(
-            context = context, consentApproval = ConsentApprovalRequest(
-                id = id, url = url, loanType = "PURCHASE_FINANCE"
+            context = context,
+            consentApproval = ConsentApprovalRequest(
+                id = id,
+                url = url,
+                loanType = "PURCHASE_FINANCE"
             )
         )
     }
@@ -112,13 +132,15 @@ fun decideApiCalling(
 
 @Composable
 fun ApiSuccess(
-    navController: NavHostController, gstConsentApprovalResponse: GstConsentResponse?,
-    fromFlow: String, consentApprovalResponse: ConsentApprovalResponse?
+    navController: NavHostController,
+    gstConsentApprovalResponse: GstConsentResponse?,
+    fromFlow: String,
+    consentApprovalResponse: ConsentApprovalResponse?
 ) {
     if (fromFlow.equals("Personal Loan", ignoreCase = true)) {
         val transactionId = consentApprovalResponse?.data?.offerResponse?.get(0)?.offer?.txnId
         transactionId?.let {
-            navigateToLoanOffersListScreen(navController,  "No Need Response Item", fromFlow)
+            navigateToLoanOffersListScreen(navController, "No Need Response Item", fromFlow)
 //            navigateToLoanProcessScreen(
 //                navController, transactionId= it,
 //                statusId = 2, responseItem = "No Need Response Item", offerId = "1234",
@@ -133,19 +155,18 @@ fun ApiSuccess(
                 val responseItem = json.encodeToString(GstData.serializer(), data)
                 navigateToLoanProcessScreen(
                     navController = navController,
-                    transactionId=it,
+                    transactionId = it,
                     statusId = 12,
                     offerId = "1234",
                     fromFlow = fromFlow,
-                    responseItem = responseItem,
+                    responseItem = responseItem
                 )
             }
         }
     } else if (fromFlow.equals("Purchase Finance", ignoreCase = true)) {
         val transactionId = consentApprovalResponse?.data?.offerResponse?.get(0)?.offer?.txnId
         transactionId?.let {
-
-            navigateToLoanOffersListScreen(navController,  "No Need Response Item", fromFlow)
+            navigateToLoanOffersListScreen(navController, "No Need Response Item", fromFlow)
 //            consentApprovalResponse?.data?.let { offerResponseList ->
 //                val json = Json { prettyPrint = true }
 //                val responseItem =
@@ -159,7 +180,3 @@ fun ApiSuccess(
         }
     }
 }
-
-
-
-

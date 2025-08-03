@@ -24,7 +24,7 @@ data class StatusData(
     val requestId: String? = null,
 
     @SerialName("data")
-    val data: DataStatus? = null,
+    val data: DataStatus? = null
 )
 
 @Serializable
@@ -34,7 +34,7 @@ data class DataStatus(
     val status: Boolean? = null,
 
     @SerialName("data")
-    val data: UserStatusData? = null,
+    val data: UserStatusData? = null
 )
 
 @Serializable
@@ -43,5 +43,5 @@ data class UserStatusData(
     val catalog: OfferResponseItem? = null,
 
     @SerialName("id")
-    val id: String? = null,
+    val id: String? = null
 )

@@ -36,14 +36,18 @@ fun PrePaymentStatusScreen(
     hintText: String = stringResource(id = R.string.repayment_successfully_processed),
     image: Painter = painterResource(id = R.drawable.payment_success),
     showButton: Boolean = false,
-    orderId:String,
-    fromFlow:String,
+    orderId: String,
+    fromFlow: String,
     onClick: () -> Unit
 ) {
-    LaunchedEffect (Unit){
+    LaunchedEffect(Unit) {
         delay(5000)
-        navigateToRepaymentScheduleScreen(navController = navController, orderId = orderId, fromFlow = fromFlow,
-            fromScreen = "PrePart Payment Status")
+        navigateToRepaymentScheduleScreen(
+            navController = navController,
+            orderId = orderId,
+            fromFlow = fromFlow,
+            fromScreen = "PrePart Payment Status"
+        )
     }
     Box(
         modifier = Modifier
@@ -57,53 +61,52 @@ fun PrePaymentStatusScreen(
                 modifier = Modifier
                     .size(300.dp)
                     .fillMaxSize(),
-                contentScale = ContentScale.Fit,
+                contentScale = ContentScale.Fit
             )
             StartingText(
                 text = headerText,
                 textColor = appBlack,
-                start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp,
+                start = 30.dp,
+                end = 30.dp,
+                top = 10.dp,
+                bottom = 5.dp,
                 style = semiBold24Text700,
                 alignment = Alignment.TopCenter
             )
             StartingText(
-                text = if(showButton) stringResource(id = R.string.unsuccessful)
-                       else stringResource(id = R.string.successful),
-                textColor = if(showButton) errorRed else appGreen,
-                start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp,
+                text = if (showButton) {
+                    stringResource(id = R.string.unsuccessful)
+                } else {
+                    stringResource(id = R.string.successful)
+                },
+                textColor = if (showButton) errorRed else appGreen,
+                start = 30.dp,
+                end = 30.dp,
+                top = 10.dp,
+                bottom = 5.dp,
                 style = semiBold24Text700,
                 alignment = Alignment.TopCenter
             )
-            if (!showButton){
+            if (!showButton) {
                 StartingText(
                     text = hintText,
                     textColor = hintGray,
-                    start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 10.dp,
+                    bottom = 5.dp,
                     style = normal14Text500,
                     alignment = Alignment.TopCenter
                 )
             }
 
-            if (showButton){
+            if (showButton) {
                 ClickableTextWithIcon(
-                    text = stringResource(id = R.string.retry), image = R.drawable.refresh_icon
+                    text = stringResource(id = R.string.retry),
+                    image = R.drawable.refresh_icon
                 ) { onClick() }
             }
         }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PrePaymentStatusScreenPreview() {
-    val fakeNavController = rememberNavController()
-    PrePaymentStatusScreen(
-        navController = fakeNavController,
-        orderId = "123456",
-        fromFlow = "LOAN_DETAILS",
-        headerText = stringResource(id = R.string.repayment_un_successful),
-        showButton = true,
-        image = painterResource(id = R.drawable.payment_unsuccess),
-        onClick = { /* No-op for preview */ }
-    )
-}

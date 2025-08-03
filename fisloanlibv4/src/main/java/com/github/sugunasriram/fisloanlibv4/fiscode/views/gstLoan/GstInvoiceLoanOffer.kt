@@ -39,8 +39,8 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToGstLoan
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.GstOfferListModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.gst.OfferResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appBlueTitle
-import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.grayD9
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.bold14Text500
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.grayD9
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal14Text400
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal32Text700
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
@@ -51,10 +51,10 @@ import java.time.format.DateTimeFormatter
 
 private val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
 
-//@Composable
-//fun GstInvoiceLoanOfferScreen(
+// @Composable
+// fun GstInvoiceLoanOfferScreen(
 //    navController: NavHostController, offerResponse: String, fromFlow: String
-//) {
+// ) {
 //    val offer = json.decodeFromString(GstData.serializer(), offerResponse)
 //
 //    val transactionId = offer?.offerResponse?.get(0)?.txnID
@@ -105,11 +105,13 @@ private val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
 //            }
 //        }
 //    }
-//}
+// }
 
 @Composable
 fun GstInvoiceLoanOfferScreen(
-    navController: NavHostController, offerResponse: String, fromFlow: String
+    navController: NavHostController,
+    offerResponse: String,
+    fromFlow: String
 ) {
     var backPressedTime by remember { mutableLongStateOf(0L) }
     val context = LocalContext.current
@@ -120,7 +122,8 @@ fun GstInvoiceLoanOfferScreen(
             navigateApplyByCategoryScreen(navController)
         } else {
             CommonMethods().toastMessage(
-                context = context, toastMsg = "Press back again to go to the home page"
+                context = context,
+                toastMsg = "Press back again to go to the home page"
             )
             backPressedTime = currentTime
         }
@@ -133,42 +136,56 @@ fun GstInvoiceLoanOfferScreen(
 
     val navigationToSignIn by loanAgreementViewModel.navigationToSignIn.collectAsState()
 
-
     if (navigationToSignIn) {
-        navigateSignInPage (navController)
-    }
-    else if (gstOfferListLoading) {
+        navigateSignInPage(navController)
+    } else if (gstOfferListLoading) {
         CenterProgress()
     } else {
         if (gstOfferListLoaded) {
-
             val transactionId = gstOfferList?.data?.get(0)?.offerResponse?.txnID
 
             FixedTopBottomScreen(
-                navController = navController, showBottom = false, onPrimaryButtonClick = {},
+                navController = navController,
+                showBottom = false,
+                onPrimaryButtonClick = {},
                 onBackClick = { navController.popBackStack() }
             ) {
                 StartingText(
-                    text = stringResource(id = R.string.loan_offer), textColor = appBlueTitle,
-                    start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp,
+                    text = stringResource(id = R.string.loan_offer),
+                    textColor = appBlueTitle,
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 10.dp,
+                    bottom = 5.dp,
                     style = normal32Text700
                 )
                 StartingText(
                     text = stringResource(id = R.string.select_invoice_from_offer_list),
-                    start = 30.dp, end = 30.dp, bottom = 5.dp, style = normal14Text400,
-                    textAlign = TextAlign.Start,
+                    start = 30.dp,
+                    end = 30.dp,
+                    bottom = 5.dp,
+                    style = normal14Text400,
+                    textAlign = TextAlign.Start
                 )
                 val invoice = stringResource(id = R.string.invoices)
 //                val totalInvoices = gstOfferList?.data?.get(0)?.offerResponse?.size
                 val totalInvoices = gstOfferList?.data?.size
                 StartingText(
-                    text = "$invoice ($totalInvoices)", textColor = appBlueTitle,
-                    start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp, style = bold14Text500
+                    text = "$invoice ($totalInvoices)",
+                    textColor = appBlueTitle,
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 10.dp,
+                    bottom = 5.dp,
+                    style = bold14Text500
                 )
                 StartingText(
                     text = stringResource(id = R.string.sharing_invoices),
-                    start = 30.dp, end = 30.dp, bottom = 5.dp, style = normal14Text400,
-                    textAlign = TextAlign.Start,
+                    start = 30.dp,
+                    end = 30.dp,
+                    bottom = 5.dp,
+                    style = normal14Text400,
+                    textAlign = TextAlign.Start
                 )
                 repeat(1) {
                     transactionId?.let {
@@ -186,28 +203,38 @@ fun GstInvoiceLoanOfferScreen(
                     }
                 }
             }
-        }else {
+        } else {
             loanAgreementViewModel.gstOfferList(loanType = "INVOICE_BASED_LOAN", context = context)
         }
     }
 }
 
-
+// fun OfferCard(offer: GstOfferData, transactionId:String, navController: NavHostController, fromFlow:
 @Composable
-//fun OfferCard(offer: GstOfferData, transactionId:String, navController: NavHostController, fromFlow:
-fun OfferCard(offer: GstOfferListModel, transactionId:String, navController: NavHostController, fromFlow:
-String) {
+fun OfferCard(
+    offer: GstOfferListModel,
+    transactionId: String,
+    navController: NavHostController,
+    fromFlow:
+        String
+) {
     ClickableLoanStatusCard(
-        cardColor = Color.White, borderColor = appBlueTitle,
-        start = 30.dp, end = 30.dp, top = 15.dp,
+        cardColor = Color.White,
+        borderColor = appBlueTitle,
+        start = 30.dp,
+        end = 30.dp,
+        top = 15.dp,
         onClick = {
-            //Sugu - TODO
-            offer?.data?.get(0)?.offerResponse?.let{offerResponse ->
+            // Sugu - TODO
+            offer?.data?.get(0)?.offerResponse?.let { offerResponse ->
                 val offerDetail = json.encodeToString(OfferResponse.serializer(), offerResponse)
-    //            val offerDetail = json.encodeToString(GstOfferData.serializer(), offer?.data?.get(0)?.offerResponse)
+                //            val offerDetail = json.encodeToString(GstOfferData.serializer(), offer?.data?.get(0)?.offerResponse)
                 navigateToGstLoanOfferListScreen(
-                    navController = navController, transactionId = transactionId, offerResponse =
-                    offerDetail, fromFlow = fromFlow
+                    navController = navController,
+                    transactionId = transactionId,
+                    offerResponse =
+                    offerDetail,
+                    fromFlow = fromFlow
                 )
             }
         }
@@ -215,10 +242,15 @@ String) {
         offer.data?.forEach { offerResponse ->
             offerResponse?.offerResponse?.providerDescriptor?.name?.let { name ->
                 StartingText(
-                    text = "Padmavati Steel Corporation Pvt. Ltd.", textAlign = TextAlign.Start,
-                    start = 8.dp, end = 8.dp, bottom = 5.dp, top = 10.dp, style = normal14Text400,
+                    text = "Padmavati Steel Corporation Pvt. Ltd.",
+                    textAlign = TextAlign.Start,
+                    start = 8.dp,
+                    end = 8.dp,
+                    bottom = 5.dp,
+                    top = 10.dp,
+                    style = normal14Text400
 
-                    )
+                )
             }
             offerResponse?.offerResponse?.itemTags?.forEach { itemTag ->
                 itemTag.tags?.invoiceNumber?.let { invoiceNumber ->
@@ -230,10 +262,14 @@ String) {
 
                         StartingText(
                             text = "$formattedDate.   $invoiceNumber.     \u20A8 $invoiceAmount",
-                            start = 8.dp, end = 8.dp, bottom = 10.dp, top = 10.dp,
-                            style = normal14Text400, textAlign = TextAlign.Start,
+                            start = 8.dp,
+                            end = 8.dp,
+                            bottom = 10.dp,
+                            top = 10.dp,
+                            style = normal14Text400,
+                            textAlign = TextAlign.Start
                         )
-                        offerResponse?.offerResponse?.providerDescriptor?.images?.get(0)?.url?.let{ imageUrl ->
+                        offerResponse?.offerResponse?.providerDescriptor?.images?.get(0)?.url?.let { imageUrl ->
                             val totalInvoices = offer?.data?.size
                             val context = LocalContext.current
                             val isSvg =
@@ -265,8 +301,12 @@ String) {
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 SpaceBetweenText(
-                                    image = painter, showImage = true, showText = false,
-                                    start = 10.dp, end = 10.dp, top = 5.dp,
+                                    image = painter,
+                                    showImage = true,
+                                    showText = false,
+                                    start = 10.dp,
+                                    end = 10.dp,
+                                    top = 5.dp,
                                     text = "$totalInvoices Offer"
                                 )
                             }
@@ -280,9 +320,10 @@ String) {
 
 @Preview
 @Composable
-fun GstInvoiceLoanOfferScreenPreview(){
-    GstInvoiceLoanOfferScreen(navController = rememberNavController(),
-        offerResponse="", fromFlow = "INVOICE_BASED_LOAN" )
+fun GstInvoiceLoanOfferScreenPreview() {
+    GstInvoiceLoanOfferScreen(
+        navController = rememberNavController(),
+        offerResponse = "",
+        fromFlow = "INVOICE_BASED_LOAN"
+    )
 }
-
-

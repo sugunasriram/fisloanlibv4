@@ -1,6 +1,7 @@
 package com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan
 
 import android.content.Context
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -34,6 +35,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -52,7 +54,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.github.sugunasriram.fisloanlibv4.R
-import com.github.sugunasriram.fisloanlibv4.fiscode.components.CenterProgress
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.CheckBoxText
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.CurvedPrimaryButton
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.CustomModalBottomSheet
@@ -61,22 +62,28 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.components.HorizontalDivider
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateSignInPage
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.Offer
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.OffersWithRejections
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appBlack
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appTheme
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appWhite
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.backOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.backgroundOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.bold20Text100
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.checkBoxGray
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.cursorColor
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.errorRed
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.lightGray
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal14Text500
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal14Text700
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal16Text500
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan.LoanAgreementViewModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.NoExistingLoanScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.RejectedOfferCard
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
 private val json1 = Json { prettyPrint = true }
@@ -85,143 +92,182 @@ private var loanAmountVal = ""
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun LoanOffersListScreen(navController: NavHostController, offerItem: String, fromFlow: String) {
-    val tabs = listOf("AA Offers", "Bureau Offers")
-    var selectedTabIndex by remember { mutableIntStateOf(0) }
+    val tabs = listOf("Bureau Offers", "AA Offers")
+    var selectedTabIndex by remember { mutableIntStateOf(1) }
+
     var aAOffersSearchQuery by remember { mutableStateOf("") }
-    var selectedAAFilter by remember { mutableStateOf<String?>(null) }
     var bureauOffersSearchQuery by remember { mutableStateOf("") }
-    var selectedBureauFilter by remember { mutableStateOf<String?>(null) }
+
+    // Instead of separate filters, use a single list of filters
+    val selectedFilters = remember { mutableStateListOf<String?>(null, null) }
+
+    val json = Json { ignoreUnknownKeys = true }
+    val offerWithRejected = remember(offerItem) {
+        json.decodeFromString<OffersWithRejections>(offerItem)
+    }
+    val offerList = offerWithRejected.offers
+    val rejectedLenders = offerWithRejected.rejectedLenders
 
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val filterOptionBottomSheetState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
     )
-
     BackHandler { navigateApplyByCategoryScreen(navController) }
 
     val loanAgreementViewModel: LoanAgreementViewModel = viewModel()
-    val offerList by loanAgreementViewModel.offerList.collectAsState()
-    val offerListLoaded by loanAgreementViewModel.offerListLoaded.collectAsState()
-    val offerListLoading by loanAgreementViewModel.offerListLoading.collectAsState()
-
     val navigationToSignIn by loanAgreementViewModel.navigationToSignIn.collectAsState()
 
     if (navigationToSignIn) {
-        navigateSignInPage (navController)
-    }
-    else if (offerListLoading) {
-        CenterProgress()
+        navigateSignInPage(navController)
     } else {
-        if (offerListLoaded) {
-            val aaOffers = offerList?.data?.filter { it?.bureauConsent == false } ?: emptyList()
-            val bureauOffers = offerList?.data?.filter { it?.bureauConsent == true } ?: emptyList()
+        val aaOffers = offerList?.filter { it.bureauConsent == false }
+        val bureauOffers = offerList?.filter { it.bureauConsent == true }
 
-            val filteredAaOffers = filterOffers(aaOffers, aAOffersSearchQuery, selectedAAFilter)
-            val filteredBureauOffers = filterOffers(bureauOffers, bureauOffersSearchQuery, selectedBureauFilter)
-            CustomModalBottomSheet(
-                bottomSheetState = filterOptionBottomSheetState,
-                sheetContent = {
-                    FilterModalContent(
-                        bottomSheetState = filterOptionBottomSheetState,
-                        coroutineScope = coroutineScope,
-                        context = context,
-//                        selectedFilter = selectedAAFilter,
-//                        onFilterSelected = { selectedAAFilter = it }
+        val filteredAaOffers = filterOffers(aaOffers, aAOffersSearchQuery, selectedFilters[1])
+        val filteredBureauOffers = filterOffers(bureauOffers, bureauOffersSearchQuery, selectedFilters[0])
 
-                        selectedFilter = if (selectedTabIndex == 0) selectedAAFilter else selectedBureauFilter,
-                        onFilterSelected = {
-                            if (selectedTabIndex == 0) selectedAAFilter = it else selectedBureauFilter = it
-                        },
-                        selectedTabIndex=selectedTabIndex
-                    )
-                }) {
-                FixedTopBottomScreen(
-                    navController = navController,
-                    topBarBackgroundColor = appOrange,
-                    topBarText = stringResource(R.string.loan_offer),
-                    showBackButton = true,
+        CustomModalBottomSheet(
+            bottomSheetState = filterOptionBottomSheetState,
+            sheetContent = {
+                FilterModalContent(
+                    bottomSheetState = filterOptionBottomSheetState,
+                    coroutineScope = coroutineScope,
+                    context = context,
+                    selectedFilter = selectedFilters[selectedTabIndex],
+                    onFilterSelected = { selectedFilters[selectedTabIndex] = it },
+                    selectedTabIndex = selectedTabIndex
+                )
+            }
+        ) {
+            FixedTopBottomScreen(
+                navController = navController,
+                topBarBackgroundColor = appOrange,
+                topBarText = stringResource(R.string.loan_offer),
+                showBackButton = true,
+                backgroundColor = appWhite,
+                onBackClick = { navigateApplyByCategoryScreen(navController) }
+            ) {
+                TabRow(
+                    selectedTabIndex = selectedTabIndex,
+                    modifier = Modifier.fillMaxWidth(),
                     backgroundColor = appWhite,
-                    onBackClick = { navigateApplyByCategoryScreen(navController) }
+                    indicator = { tabPositions ->
+                        TabRowDefaults.Indicator(
+                            Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex])
+                                .height(3.dp),
+                            color = appOrange
+                        )
+                    }
                 ) {
-                    TabRow(
-                        selectedTabIndex = selectedTabIndex,
-                        modifier = Modifier.fillMaxWidth(),
-                        backgroundColor = appWhite,
-                        indicator = { tabPositions ->
-                            TabRowDefaults.Indicator(
-                                Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex])
-                                    .height(3.dp),
-                                color = appOrange
+                    tabs.forEachIndexed { index, title ->
+                        val isSelected = selectedTabIndex == index
+                        Tab(
+                            selected = isSelected,
+                            onClick = { selectedTabIndex = index },
+                            modifier = Modifier
+                                .background(appWhite, RoundedCornerShape(5.dp))
+                                .padding(8.dp)
+                        ) {
+                            Text(
+                                text = title,
+                                color = if (isSelected) appOrange else checkBoxGray,
+                                modifier = Modifier.padding(8.dp)
                             )
                         }
-                    ) {
-                        tabs.forEachIndexed { index, title ->
-                            val isSelected = selectedTabIndex == index
-                            Tab(
-                                selected = isSelected,
-                                onClick = { selectedTabIndex = index },
-                                modifier = Modifier
-                                    .background(color = appWhite, shape = RoundedCornerShape(5.dp))
-                                    .padding(8.dp)
-                            ) {
-                                Text(
-                                    text = title,
-                                    color = if (isSelected) appOrange else checkBoxGray,
-                                    modifier = Modifier.padding(8.dp)
-                                )
+                    }
+                }
+
+                when (selectedTabIndex) {
+                    0 -> {
+                        if (filteredBureauOffers.isEmpty()) {
+                            Spacer(modifier = Modifier.height(150.dp))
+                            NoExistingLoanScreen(displayText = stringResource(R.string.no_existing_lenders))
+                        } else {
+                            SearchBar(
+                                searchValue = bureauOffersSearchQuery,
+                                onSearchQueryChanged = { bureauOffersSearchQuery = it },
+                                onFilterClick = {
+                                    coroutineScope.launch { filterOptionBottomSheetState.show() }
+                                }
+                            )
+                            filteredBureauOffers.forEachIndexed { index, offer ->
+                                OfferCard(navController, offer, fromFlow, index)
+                                Spacer(modifier = Modifier.height(16.dp))
                             }
+                          rejectedLenders?.chunked(2)
+                                ?.forEachIndexed { chunkIndex, lenderPair ->
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 4.dp, vertical = 4.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        lenderPair.forEachIndexed { indexInPair, lender ->
+                                            RejectedOfferCard(
+                                                navController = navController,
+                                                lender = lender,
+                                                index = chunkIndex * 2 + indexInPair,
+                                                modifier = Modifier.weight(1f)
+                                            )
+                                        }
+
+                                        // If this row has only one lender (i.e., odd count), add spacer for alignment
+                                        if (lenderPair.size == 1 && (rejectedLenders.size) > 1
+                                        ) {
+                                            Spacer(modifier = Modifier.weight(1f))
+                                        }
+                                    }
+                                }
                         }
                     }
-                    when (selectedTabIndex) {
-                        0 -> {
-                            if (filteredAaOffers.isEmpty()) {
-                               Spacer(modifier = Modifier.height(150.dp))
-                               NoExistingLoanScreen(displayText="No Existing Offers")
-                            } else {
-                                SearchBar(
-                                    searchValue = aAOffersSearchQuery,
-                                    onSearchQueryChanged = { aAOffersSearchQuery = it },
-                                    onFilterClick = {
-                                        coroutineScope.launch {
-                                            filterOptionBottomSheetState.show()
-                                        }
+
+                    1 -> {
+                        if (filteredAaOffers.isEmpty()) {
+                            Spacer(modifier = Modifier.height(150.dp))
+                            NoExistingLoanScreen(displayText = stringResource(R.string.no_existing_offers))
+                        } else {
+                            SearchBar(
+                                searchValue = aAOffersSearchQuery,
+                                onSearchQueryChanged = { aAOffersSearchQuery = it },
+                                onFilterClick = {
+                                    coroutineScope.launch { filterOptionBottomSheetState.show() }
+                                }
+                            )
+                            filteredAaOffers.forEachIndexed { index, offer ->
+                                OfferCard(navController, offer, fromFlow, index)
+                                Spacer(modifier = Modifier.height(16.dp))
+                            }
+                            rejectedLenders?.chunked(2)
+                            ?.forEachIndexed { chunkIndex, lenderPair ->
+                                val isSingleItem = lenderPair.size == 1
+
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 4.dp, vertical = 4.dp),
+                                    horizontalArrangement = if (isSingleItem) Arrangement.Center else Arrangement.spacedBy(6.dp)
+                                ) {
+                                    lenderPair.forEachIndexed { indexInPair, lender ->
+                                        RejectedOfferCard(
+                                            navController = navController,
+                                            lender = lender,
+                                            index = chunkIndex * 2 + indexInPair,
+                                            modifier = Modifier.weight(if (isSingleItem) 0.8f else 1f) // slightly narrower if centered
+                                        )
                                     }
-                                )
-                                filteredAaOffers.forEachIndexed { index, offer ->
-                                    OfferCard(navController, offer, fromFlow, index)
-                                    Spacer(modifier = Modifier.height(16.dp))
+                                    if (!isSingleItem && lenderPair.size == 1) {
+                                        Spacer(modifier = Modifier.weight(1f))
+                                    }
                                 }
                             }
-                        }
-
-                        1 -> {
-                            if (filteredBureauOffers.isEmpty()) {
-                                Spacer(modifier = Modifier.height(150.dp))
-                                NoExistingLoanScreen(displayText="No Existing Offers")
-                            } else {
-                                SearchBar(
-                                    searchValue = bureauOffersSearchQuery,
-                                    onSearchQueryChanged = { bureauOffersSearchQuery = it },
-                                    onFilterClick = {
-                                        coroutineScope.launch {
-                                            filterOptionBottomSheetState.show()
-                                        }
-                                    }
-                                )
-                                filteredBureauOffers.forEachIndexed { index, offer ->
-                                    OfferCard(navController, offer, fromFlow, index)
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                }
-                            }
-
                         }
                     }
                 }
             }
-        } else {
-            loanAgreementViewModel.offerList(loanType = "PERSONAL_LOAN", context = context)
-        }
+            }
+
     }
 }
 
@@ -230,7 +276,7 @@ fun filterOffers(
     query: String,
     sortOption: String?
 ): List<Offer> {
-        if (offers == null) return emptyList()
+    if (offers == null) return emptyList()
 
     val trimmedQuery = query.trim().lowercase()
     val queryAsNumber = trimmedQuery.toLongOrNull()
@@ -251,17 +297,17 @@ fun filterOffers(
 
         bankMatch || amountMatch
     }
-    return when (sortOption) {
-        "Highest Loan Amount" -> filtered.sortedByDescending {
+    return when (sortOption?.lowercase()) {
+        "highest loan amount" -> filtered.sortedByDescending {
             val rawAmount = it.offer?.quoteBreakUp?.firstOrNull {
                 it?.title?.contains("principal", ignoreCase = true) == true
             }?.value.orEmpty()
             rawAmount.replace(",", "").toDoubleOrNull() ?: 0.0
         }
-        "Lowest Interest" -> filtered.sortedBy {
+        "lowest interest" -> filtered.sortedBy {
             getTagValue(it, "interest_rate")?.replace("%", "")?.toDoubleOrNull() ?: Double.MAX_VALUE
         }
-        "Lowest Tenure" -> filtered.sortedBy {
+        "lowest tenure" -> filtered.sortedBy {
             getTagValue(it, "term")
                 ?.replace("[^\\d]", "")
                 ?.toIntOrNull() ?: Int.MAX_VALUE
@@ -275,16 +321,19 @@ fun getTagValue(offer: Offer, key: String): String? {
         ?.flatMap { it?.tags ?: emptyList() }
         ?.firstOrNull {
             it?.key.equals(key, ignoreCase = true) ||
-                    it?.key.equals(key.replace("_", " "), ignoreCase = true)
+                it?.key.equals(key.replace("_", " "), ignoreCase = true)
         }?.value
         ?.filter { it.isDigit() || it == '.' }
 }
+
 @Composable
-fun SearchBar(searchValue: String, placeHolderText:String=stringResource(id = R.string.search_for_amount_and_bank),
-              isFilterNeeded:Boolean=true,
-              onSearchQueryChanged: (String) -> Unit,
-              onFilterClick: () -> Unit = {}
-){
+fun SearchBar(
+    searchValue: String,
+    placeHolderText: String = stringResource(id = R.string.search_for_amount_and_bank),
+    isFilterNeeded: Boolean = true,
+    onSearchQueryChanged: (String) -> Unit,
+    onFilterClick: () -> Unit = {}
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -314,7 +363,7 @@ fun SearchBar(searchValue: String, placeHolderText:String=stringResource(id = R.
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = stringResource(id = R.string.clear),
-                        modifier = Modifier .padding(end = 8.dp).clickable { onSearchQueryChanged("") }
+                        modifier = Modifier.padding(end = 8.dp).clickable { onSearchQueryChanged("") }
                     )
                 }
             },
@@ -328,14 +377,16 @@ fun SearchBar(searchValue: String, placeHolderText:String=stringResource(id = R.
             )
         )
 
-        if(isFilterNeeded)
-        Image(
-            painter = painterResource(id = R.drawable.filter),
-            contentDescription = stringResource(id = R.string.filters),
-            modifier = Modifier.size(40.dp).padding(start = 5.dp).clickable { onFilterClick() }
-        )
+        if (isFilterNeeded) {
+            Image(
+                painter = painterResource(id = R.drawable.filter),
+                contentDescription = stringResource(id = R.string.filters),
+                modifier = Modifier.size(40.dp).padding(start = 5.dp).clickable { onFilterClick() }
+            )
+        }
     }
 }
+
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -345,7 +396,7 @@ fun FilterModalContent(
     context: Context,
     selectedFilter: String?,
     onFilterSelected: (String?) -> Unit,
-    selectedTabIndex: Int =0
+    selectedTabIndex: Int = 0
 ) {
     var selectedOption by remember { mutableStateOf(selectedFilter) }
     LaunchedEffect(selectedFilter) {
@@ -388,10 +439,8 @@ fun FilterModalContent(
         }
 
         HorizontalDivider(top = 3.dp, color = backgroundOrange, start = 3.dp, end = 3.dp)
-
-//        val options = listOf("Lowest Interest", "Lowest Tenure", "Highest Loan Amount")
         Column(
-            modifier = Modifier.fillMaxWidth() .padding(horizontal = 10.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp)
         ) {
             options.forEach { option ->
                 CheckBoxText(
@@ -420,14 +469,18 @@ fun FilterModalContent(
                 text = stringResource(id = R.string.reset),
                 textColor = appOrange,
                 backgroundColor = appWhite,
-                start = 35.dp, end = 35.dp, style = normal14Text700
+                start = 35.dp,
+                end = 35.dp,
+                style = normal14Text700
             ) {
                 selectedOption = null
             }
 
             CurvedPrimaryButton(
                 text = stringResource(id = R.string.apply),
-                start = 35.dp, end = 35.dp, style = normal14Text700
+                start = 35.dp,
+                end = 35.dp,
+                style = normal14Text700
             ) {
                 onFilterSelected(selectedOption)
                 coroutineScope.launch { bottomSheetState.hide() }
@@ -439,5 +492,5 @@ fun FilterModalContent(
 @Preview
 @Composable
 private fun PreviewLoanOfferListScreen() {
-    LoanOffersListScreen(rememberNavController(),"","")
+    LoanOffersListScreen(rememberNavController(), "", "")
 }

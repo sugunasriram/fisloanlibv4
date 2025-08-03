@@ -29,20 +29,27 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal30Text700
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal36Text700
 
 @Composable
-fun NoLoanOffersAvailableScreen(navController: NavHostController,
-                                onClick: () -> Unit = { navigateApplyByCategoryScreen(navController = navController) }) {
+fun NoLoanOffersAvailableScreen(
+    navController: NavHostController,titleText:String=stringResource(R.string.no_loan_offers_available),
+    onClick: () -> Unit = { navigateApplyByCategoryScreen(navController = navController) }
+) {
     TopBottomBarForNegativeScreen(showTop = false, showBottom = true, navController = navController) {
-
         StartingText(
-            text = "SORRY!",
+            text =  stringResource(R.string.sorry),
             textColor = errorRed,
-            start = 30.dp, end = 30.dp, top = 60.dp, bottom = 15.dp,
+            start = 30.dp,
+            end = 30.dp,
+            top = 60.dp,
+            bottom = 15.dp,
             style = normal36Text700,
             alignment = Alignment.Center
         )
         StartingText(
-            text = "No Loan Offers Available", textColor = appBlack, style = normal30Text700,
-            alignment = Alignment.TopCenter, bottom = 40.dp
+            text = titleText,
+            textColor = appBlack,
+            style = normal30Text700,
+            alignment = Alignment.TopCenter,
+            bottom = 40.dp
         )
         Image(
             painter = painterResource(id = R.drawable.error_no_loan_offers_available),
@@ -53,20 +60,22 @@ fun NoLoanOffersAvailableScreen(navController: NavHostController,
         RegisterText(
             text = stringResource(id = R.string.we_regret_no_loan_offers),
             style = normal14Text700,
-            textColor = hintGray, top = 10.dp, bottom = 25.dp
+            textColor = hintGray,
+            top = 10.dp,
+            bottom = 25.dp
         )
 
         ClickableText(
-            text ="Go Back", style = normal20Text700
+            text = "Go Back",
+            style = normal20Text700
         ) { onClick() }
-
     }
 }
+
 @Preview
 @Composable
 private fun NoLoanOffersAvailableScreenPreview() {
     Surface {
-        NoLoanOffersAvailableScreen(rememberNavController(),{})
+        NoLoanOffersAvailableScreen(rememberNavController(),"", {})
     }
-
 }

@@ -106,6 +106,7 @@ class AppBridgeManager(private val activity: ComponentActivity) {
 //                        LaunchScreen(route)
 
                         LaunchedEffect(Unit) {
+                            Log.d("AppBridgeManager", "Launching DownPaymentScreen with response")
                             navController.navigate(AppScreens.DownPaymentScreen.route)
                             navController.getBackStackEntry(AppScreens.DownPaymentScreen.route)
                                 .savedStateHandle
@@ -152,6 +153,7 @@ class AppBridgeManager(private val activity: ComponentActivity) {
                                 "}"
 
                         LaunchedEffect(Unit) {
+                            Log.d("AppBridgeManager", "Failed to get verifySessionResponse, using mock data")
                             navController.navigate(AppScreens.DownPaymentScreen.route)
                             navController.getBackStackEntry(AppScreens.DownPaymentScreen.route)
                                 .savedStateHandle

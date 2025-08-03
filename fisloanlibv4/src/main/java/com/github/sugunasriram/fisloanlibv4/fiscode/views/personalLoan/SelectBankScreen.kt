@@ -31,13 +31,22 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan.AccountDetailViewModel
 
 @Composable
-fun SelectBankScreen(navController: NavHostController, loanPurpose: String, fromFlow: String,
-                     id:String, transactionId:String,url:String) {
-
+fun SelectBankScreen(
+    navController: NavHostController,
+    loanPurpose: String,
+    fromFlow: String,
+    id: String,
+    transactionId: String,
+    url: String
+) {
     BackHandler {
         navigateToSelectAccountAggregatorScreen(
-            navController = navController, loanPurpose = loanPurpose, fromFlow = fromFlow,
-            id = id, transactionId = transactionId,url = url
+            navController = navController,
+            loanPurpose = loanPurpose,
+            fromFlow = fromFlow,
+            id = id,
+            transactionId = transactionId,
+            url = url
         )
 //        if (fromFlow.equals("Invoice Loan", ignoreCase = true)) {
 //            navigateToAccountAggregatorScreen(
@@ -72,7 +81,7 @@ fun SelectBankScreen(navController: NavHostController, loanPurpose: String, from
                 navController = navController,
                 context = context, accountDetailViewModel = accountDetailViewModel,
                 fromFlow = fromFlow, loanPurpose = loanPurpose, bankList = bankList,
-                id = id, transactionId = transactionId,url = url
+                id = id, transactionId = transactionId, url = url
             )
         }
     }
@@ -88,7 +97,9 @@ fun SelectBankView(
     fromFlow: String,
     loanPurpose: String,
     bankList: BankList?,
-    id:String, transactionId:String,url:String
+    id: String,
+    transactionId: String,
+    url: String
 ) {
     val selectedOptions = remember { mutableStateListOf<String>() }
     if (inProgress) {
@@ -105,8 +116,13 @@ fun SelectBankView(
                 showBackButton = true,
                 onBackClick = {
                     navigateToSelectAccountAggregatorScreen(
-                        navController = navController, loanPurpose = loanPurpose, fromFlow = fromFlow,
-                        id = id, transactionId = transactionId,url = url)
+                        navController = navController,
+                        loanPurpose = loanPurpose,
+                        fromFlow = fromFlow,
+                        id = id,
+                        transactionId = transactionId,
+                        url = url
+                    )
                 },
                 showBottom = true,
                 showErrorMsg = showError,
@@ -117,8 +133,12 @@ fun SelectBankView(
                 onCheckBoxChange = {
                     val allSelected = selectedOptions.size == bankList?.data?.size
                     val updatedList =
-                        if (allSelected) emptyList() else bankList?.data?.mapNotNull { it?.bankName }
-                            ?: emptyList()
+                        if (allSelected) {
+                            emptyList()
+                        } else {
+                            bankList?.data?.mapNotNull { it?.bankName }
+                                ?: emptyList()
+                        }
                     selectedOptions.clear()
                     selectedOptions.addAll(updatedList)
                     showError = false
@@ -128,8 +148,14 @@ fun SelectBankView(
                 onPrimaryButtonClick = {
                     if (selectedOptions.isNotEmpty()) {
                         Log.d("Selected Lenders:", selectedOptions.toList().toString())
-                        navigateToWebViewFlowOneScreen(navController, loanPurpose,
-                            fromFlow,id = id, transactionId = transactionId,url = url)
+                        navigateToWebViewFlowOneScreen(
+                            navController,
+                            loanPurpose,
+                            fromFlow,
+                            id = id,
+                            transactionId = transactionId,
+                            url = url, ""
+                        )
 //                        onSelectBankClick(
 //                        selectedOption = selectedOption, navController = navController,
 //                        fromFlow = fromFlow, purpose = purpose, context = context
@@ -153,7 +179,6 @@ fun SelectBankView(
                     )
                 }
             }
-
         }
     }
 }
@@ -161,10 +186,12 @@ fun SelectBankView(
 @Preview
 @Composable
 private fun SelectBankPreview() {
-    SelectBankScreen(rememberNavController(), "", "Personal Loan",
-        "id", "tnxId", "url")
+    SelectBankScreen(
+        rememberNavController(),
+        "",
+        "Personal Loan",
+        "id",
+        "tnxId",
+        "url"
+    )
 }
-
-
-
-

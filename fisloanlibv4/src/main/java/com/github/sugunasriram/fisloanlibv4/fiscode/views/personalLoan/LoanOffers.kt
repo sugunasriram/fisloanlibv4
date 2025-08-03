@@ -74,7 +74,7 @@ private val json = Json { prettyPrint = true }
 
 @SuppressLint("ResourceType")
 @Composable
-fun LoanOffers(navController: NavHostController, purpose: String, fromFlow: String,withoutAAResponse : String) {
+fun LoanOffers(navController: NavHostController, purpose: String, fromFlow: String, withoutAAResponse: String) {
     var backPressedTime by remember { mutableLongStateOf(0L) }
     val context = LocalContext.current
 
@@ -84,19 +84,20 @@ fun LoanOffers(navController: NavHostController, purpose: String, fromFlow: Stri
             navigateApplyByCategoryScreen(navController)
         } else {
             CommonMethods().toastMessage(
-                context = context, toastMsg = "Press back again to go to the home page"
+                context = context,
+                toastMsg = "Press back again to go to the home page"
             )
             backPressedTime = currentTime
         }
     }
     val webViewModel: WebViewModel = viewModel()
 
-    //without AA GetUserStatus Response
-    if(purpose == stringResource(R.string.getUerFlow)) {
+    // without AA GetUserStatus Response
+    if (purpose == stringResource(R.string.getUerFlow)) {
         json.decodeFromString(SearchModel.serializer(), withoutAAResponse)
             ?.takeIf { it.data != null }?.let {
-            webViewModel.updateSearchResponse(it)
-        }
+                webViewModel.updateSearchResponse(it)
+            }
     }
 
     val webScreenLoading = webViewModel.webProgress.collectAsState()
@@ -107,7 +108,6 @@ fun LoanOffers(navController: NavHostController, purpose: String, fromFlow: Stri
 
     val gstSearchResponse by webViewModel.gstSearchResponse.collectAsState()
 
-
     val loanAgreementViewModel: LoanAgreementViewModel = viewModel()
     val navigationToSignIn by loanAgreementViewModel.navigationToSignIn.collectAsState()
     val errorMessage by webViewModel.errorMessage.collectAsState()
@@ -117,7 +117,7 @@ fun LoanOffers(navController: NavHostController, purpose: String, fromFlow: Stri
         errorMessage.isNotEmpty() || middleLoan -> CommonMethods().ShowMiddleLoanErrorScreen(navController, errorMessage)
         navigationToSignIn -> navigateSignInPage(navController)
         webScreenLoading.value -> SearchLoaderAnimation(navController)
-        else ->  LoanOffer(
+        else -> LoanOffer(
             purpose,
             webScreenLoaded,
             fromFlow,
@@ -144,20 +144,25 @@ private fun LoanOffer(
     backPressedTime: Long
 ) {
     var backPressedTime1 = backPressedTime
-    val endUse = if (purpose.equals("Other Consumption Purpose", ignoreCase = true))
+    val endUse = if (purpose.equals("Other Consumption Purpose", ignoreCase = true)) {
         "other"
-    else if (purpose.equals("Consumer Durable Purchase", ignoreCase = true))
+    } else if (purpose.equals("Consumer Durable Purchase", ignoreCase = true)) {
         "consumerDurablePurchase"
-    else purpose.lowercase()
+    } else {
+        purpose.lowercase()
+    }
 
     if (!webScreenLoaded.value) {
         loadWebScreen(
-            fromFlow = fromFlow, webViewModel = webViewModel, context = context,
-            endUse = endUse, purpose = purpose
+            fromFlow = fromFlow,
+            webViewModel = webViewModel,
+            context = context,
+            endUse = endUse,
+            purpose = purpose
         )
     } else {
         if (gstSearchResponse?.data?.url != null) {
-            NavigateToWebView(
+            NavigateToWebView(context=context,
                 gstSearchResponse = gstSearchResponse,
                 fromFlow = fromFlow,
                 navController = navController,
@@ -172,12 +177,13 @@ private fun LoanOffer(
                         offers = null,
                         consentResponse = null
                     )
-                ), searchModel = null
+                ),
+                searchModel = null
             )
         } else {
             if (searchResponse?.data?.offerResponse.isNullOrEmpty()) {
-                Log.d("LoanOffers", "From : ${fromFlow}")
-                Log.d("LoanOffers", "searchResponse : ${searchResponse}")
+                Log.d("LoanOffers", "From : $fromFlow")
+                Log.d("LoanOffers", "searchResponse : $searchResponse")
                 Log.d("LoanOffers", "searchResponse Data: ${searchResponse?.data}")
                 Log.d("LoanOffers", "searchResponse id: ${searchResponse?.data?.id}")
                 if (searchResponse?.data?.url != null) {
@@ -187,11 +193,13 @@ private fun LoanOffer(
                         fromFlow,
                         searchResponse?.data?.id.toString(),
                         searchResponse?.data?.transactionId.toString(),
-                        searchResponse?.data?.url.toString()
+                        searchResponse?.data?.url.toString(),
+                        ""
                     )
                 } else {
                     CommonMethods().toastMessage(
-                        context = context, toastMsg = "Unable to Load WebPage"
+                        context = context,
+                        toastMsg = "Unable to Load WebPage"
                     )
                 }
             } else {
@@ -199,16 +207,20 @@ private fun LoanOffer(
                     navController = navController,
                     isSelfScrollable = false,
                     primaryButtonText = stringResource(
-                        id = if (!searchResponse?.data?.url.isNullOrEmpty() && !searchResponse?.data?.consentResponse.isNullOrEmpty())
-                            R.string.give_aa_consent else R.string.next
+                        id = if (!searchResponse?.data?.url.isNullOrEmpty() && !searchResponse?.data?.consentResponse.isNullOrEmpty()) {
+                            R.string.give_aa_consent
+                        } else {
+                            R.string.next
+                        }
                     ),
                     onPrimaryButtonClick = {
-                        //Sugu2
+                        // Sugu2
 
                         val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
                         val kycUrlData =
                             json.encodeToString(
-                                KycUrlData.serializer(), KycUrlData(
+                                KycUrlData.serializer(),
+                                KycUrlData(
                                     searchResponse?.data?.id.toString(),
                                     searchResponse?.data?.url.toString(),
                                     searchResponse?.data?.transactionId.toString()
@@ -217,12 +229,12 @@ private fun LoanOffer(
                         navigateToAccountAggregatorScreen(
                             navController,
                             loanPurpose = kycUrlData,
-                            fromFlow,searchResponse?.data?.id.toString(),
+                            fromFlow,
+                            searchResponse?.data?.id.toString(),
                             searchResponse?.data?.url.toString(),
                             searchResponse?.data?.transactionId.toString(),
                             false
                         )
-
 
 //                        if (searchResponse?.data?.url != null && searchResponse?.data?.consentResponse != null) {
 //                            navigateToWebViewFlowOneScreen(
@@ -243,7 +255,6 @@ private fun LoanOffer(
 //                                fromFlow = fromFlow
 //                            )
 //                        }
-
                     },
                     onBackClick = {
                         val currentTime = System.currentTimeMillis()
@@ -260,8 +271,11 @@ private fun LoanOffer(
                 ) {
                     StartingText(
                         text = stringResource(id = R.string.loan_offers),
-                        textColor = appBlueTitle, alignment = Alignment.Center,
-                        start = 30.dp, end = 30.dp, top = 10.dp,
+                        textColor = appBlueTitle,
+                        alignment = Alignment.Center,
+                        start = 30.dp,
+                        end = 30.dp,
+                        top = 10.dp,
                         style = normal30Text700
                     )
 
@@ -283,7 +297,6 @@ private fun LoanOffer(
                     ) {
                         ConsentCard(searchResponse?.data?.consentResponse)
                     }
-
                 }
             }
         }
@@ -297,7 +310,8 @@ private fun SearchLoaderAnimation(navController: NavHostController) {
         image = R.raw.we_are_currently_processing_hour_glass,
         updatedImage = R.raw.we_are_currently_processing_clock,
         delayInMillis = 60000,
-        showTimer = true, navController = navController
+        showTimer = true,
+        navController = navController
     )
 }
 
@@ -316,11 +330,14 @@ fun ConsentCard(consentResponse: List<AAConsentDetails?>?) {
         ) {
             RegisterText(
                 text = stringResource(id = R.string.get_more_offers),
-                textColor = appBlack, style = normal24Text700, top = 8.dp
+                textColor = appBlack,
+                style = normal24Text700,
+                top = 8.dp
             )
             StartingText(
                 text = stringResource(id = R.string.get_offers_from_following_lenders___),
-                style = normal12Text400, alignment = Alignment.Center
+                style = normal12Text400,
+                alignment = Alignment.Center
             )
             Row(
                 modifier = Modifier
@@ -332,12 +349,13 @@ fun ConsentCard(consentResponse: List<AAConsentDetails?>?) {
                 consentResponse?.forEach { details ->
                     if (details != null) {
                         ConsentCardDetails(
-                            details.name ?: "Unknown Bank", details.image,
-                            details.min_interest_rate, details.max_interest_rate
+                            details.name ?: "Unknown Bank",
+                            details.image,
+                            details.min_interest_rate,
+                            details.max_interest_rate
                         )
                     }
                 }
-
             }
         }
     }
@@ -368,7 +386,7 @@ fun ConsentCardDetails(
             .padding(10.dp),
         elevation = 5.dp,
         shape = RoundedCornerShape(8.dp),
-        backgroundColor = lightBlue,
+        backgroundColor = lightBlue
     ) {
         Column(
             modifier = Modifier
@@ -402,39 +420,7 @@ fun ConsentCardDetails(
     }
 }
 
-fun loadWebScreen(
-    fromFlow: String, webViewModel: WebViewModel, context: Context, endUse: String, purpose: String,
-) {
-    if (fromFlow.equals("Personal Loan", ignoreCase = true)) {
-        webViewModel.searchApi(
-            context = context, searchBodyModel = SearchBodyModel(
-                loanType = "PERSONAL_LOAN", endUse = endUse, bureauConsent = "on"
-            )
-        )
-    } else if (fromFlow.equals("Invoice Loan", ignoreCase = true)) {
-        // Here when it in the Gst Invoice Loan purpose equals to Invoice ID
-        webViewModel.searchGst(
-            gstSearchBody = GstSearchBody(
-                loanType = "INVOICE_BASED_LOAN", bureauConsent = "on", tnc = "on",
-                id = purpose
-            ),
-            context = context
-        )
-    } else if (fromFlow.equals("Purchase Finance", ignoreCase = true) ||
-        fromFlow.equals("Purchase_Finance", ignoreCase = true)) {
-        webViewModel.financeSearch(
-            financeSearchModel = FinanceSearchModel(
-                loanType = "PURCHASE_FINANCE", bureauConsent = "on", tnc = "on", endUse = "travel",
-                downpayment = "200", merchantGst = "24AAHFC3011G1Z4", merchantPan = "EGBQA2212D",
-                isFinancing = "on", merchantBankAccountNumber = "639695357641006",
-                merchantIfscCode = "XRSY0YPV5SW", merchantBankAccountHolderName = "mohan",
-                productCategory = "fashion", productBrand = "style", productSKUID = "12345678",
-                productPrice = "1000"
-            ),
-            context = context,
-        )
-    }
-}
+
 fun formatInterestRate(minRate: String?, maxRate: String?): String {
     val minInterestRaw = minRate?.replace("%", "")
     val maxInterestRaw = maxRate?.replace("%", "")
@@ -443,6 +429,6 @@ fun formatInterestRate(minRate: String?, maxRate: String?): String {
         ?.stripTrailingZeros()?.toPlainString() ?: minInterestRaw
     val formattedMaxInterest = maxInterestRaw?.toDoubleOrNull()?.toBigDecimal()
         ?.stripTrailingZeros()?.toPlainString() ?: maxInterestRaw
-    
+
     return "$formattedMinInterest% - $formattedMaxInterest%"
 }

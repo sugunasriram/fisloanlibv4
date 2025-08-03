@@ -17,8 +17,8 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.components.CenterProgress
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.CenteredMoneyImage
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.CurvedPrimaryButtonFull
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.FixedTopBottomScreen
-import com.github.sugunasriram.fisloanlibv4.fiscode.components.RegisterText
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.OtpSuccessImage
+import com.github.sugunasriram.fisloanlibv4.fiscode.components.RegisterText
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateSignInPage
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToGstKycWebViewScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToLoanProcessScreen
@@ -33,7 +33,10 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.gstLoan.GstBankDet
 
 @Composable
 fun GstBankKycVerificationScreen(
-    navController: NavHostController, transactionId: String, kycUrl: String, offerId: String,
+    navController: NavHostController,
+    transactionId: String,
+    kycUrl: String,
+    offerId: String,
     verificationStatus: String,
     fromFlow: String
 ) {
@@ -51,7 +54,7 @@ fun GstBankKycVerificationScreen(
     val unexpectedErrorScreen by gstBankDetailViewModel.unexpectedError.observeAsState(false)
     val unAuthorizedUser by gstBankDetailViewModel.unAuthorizedUser.observeAsState(false)
     when {
-        navigationToSignIn -> navigateSignInPage (navController)
+        navigationToSignIn -> navigateSignInPage(navController)
         showInternetScreen -> CommonMethods().ShowInternetErrorScreen(navController)
         showTimeOutScreen -> CommonMethods().ShowTimeOutErrorScreen(navController)
         showServerIssueScreen -> CommonMethods().ShowServerIssueErrorScreen(navController)
@@ -72,10 +75,16 @@ fun GstBankKycVerificationScreen(
 
 @Composable
 fun GstBankKycVerificationScreenView(
-    navController: NavHostController, verificationStatus: String, bankDetailCollecting: Boolean,
+    navController: NavHostController,
+    verificationStatus: String,
+    bankDetailCollecting: Boolean,
     transactionId: String,
-    bankDetailCollected: Boolean, offerId: String, fromFlow: String, context: Context,
-    bankDetailResponse: GstOfferConfirmResponse?, kycUrl: String,
+    bankDetailCollected: Boolean,
+    offerId: String,
+    fromFlow: String,
+    context: Context,
+    bankDetailResponse: GstOfferConfirmResponse?,
+    kycUrl: String,
     gstBankDetailViewModel: GstBankDetailViewModel
 ) {
     if (verificationStatus == "2") {
@@ -92,9 +101,12 @@ fun GstBankKycVerificationScreenView(
                         if (verificationStatus.equals("3")) {
                             transactionId?.let {
                                 navigateToLoanProcessScreen(
-                                    navController = navController, transactionId= it, statusId = 14,
+                                    navController = navController,
+                                    transactionId = it,
+                                    statusId = 14,
                                     offerId = offerId,
-                                    responseItem = "No Need", fromFlow = "Invoice Loan"
+                                    responseItem = "No Need",
+                                    fromFlow = "Invoice Loan"
                                 )
                             }
                         }
@@ -107,41 +119,52 @@ fun GstBankKycVerificationScreenView(
                     )
 
                     IndividualButton(
-                        verificationStatus = verificationStatus, navController = navController,
+                        verificationStatus = verificationStatus,
+                        navController = navController,
                         transactionId = transactionId,
-                        fromFlow = fromFlow, kycUrl = kycUrl, offerId = offerId, context = context
+                        fromFlow = fromFlow,
+                        kycUrl = kycUrl,
+                        offerId = offerId,
+                        context = context
                     )
 
                     EntityButton(
-                        verificationStatus = verificationStatus, navController = navController,
+                        verificationStatus = verificationStatus,
+                        navController = navController,
                         transactionId = transactionId,
-                        context = context, bankDetailResponse = bankDetailResponse,
+                        context = context,
+                        bankDetailResponse = bankDetailResponse,
                         fromFlow = fromFlow
                     )
 
                     if (verificationStatus.equals("3")) {
                         RegisterText(
                             text = stringResource(id = R.string.kyc_completed),
-                            textColor = midNightBlue, style = normal36Text500,
-                            modifier = Modifier.padding(10.dp),
+                            textColor = midNightBlue,
+                            style = normal36Text500,
+                            modifier = Modifier.padding(10.dp)
                         )
                         OtpSuccessImage(top = 40.dp)
                     }
                 }
             } else {
-                //Sugu - if entityKyc > 0 & GetUserStatus has led to this
-                if (kycUrl.length>0 && !kycUrl.equals("No Need KYC URL", true)){
+                // Sugu - if entityKyc > 0 & GetUserStatus has led to this
+                if (kycUrl.length > 0 && !kycUrl.equals("No Need KYC URL", true)) {
                     kycUrl?.let { entityKycUrl ->
                         navigateToGstKycWebViewScreen(
-                            navController = navController, transactionId= transactionId,
+                            navController = navController,
+                            transactionId = transactionId,
                             kycUrl = entityKycUrl,
                             offerId = offerId,
-                            fromScreen = "2", fromFlow = fromFlow
+                            fromScreen = "2",
+                            fromFlow = fromFlow
                         )
                     }
-                }else {
+                } else {
                     gstBankDetailViewModel.gstLoanApproved(
-                        id = offerId, loanType = "INVOICE_BASED_LOAN", context = context
+                        id = offerId,
+                        loanType = "INVOICE_BASED_LOAN",
+                        context = context
                     )
                 }
             }
@@ -153,12 +176,14 @@ fun GstBankKycVerificationScreenView(
 //            backGroudColorChange = verificationStatus.equals("3"),
             onPrimaryButtonClick = {
                 if (verificationStatus.equals("3")) {
-
                     transactionId?.let {
                         navigateToLoanProcessScreen(
-                            navController = navController, transactionId= it,
-                            statusId = 14, responseItem = "No Need",
-                            offerId = offerId, fromFlow = fromFlow
+                            navController = navController,
+                            transactionId = it,
+                            statusId = 14,
+                            responseItem = "No Need",
+                            offerId = offerId,
+                            fromFlow = fromFlow
                         )
                     }
                 }
@@ -166,25 +191,35 @@ fun GstBankKycVerificationScreenView(
         ) {
             CenteredMoneyImage(imageSize = 175.dp, top = 10.dp)
             RegisterText(
-                text = stringResource(id = R.string.bank_kyc_verification), style = normal32Text700
+                text = stringResource(id = R.string.bank_kyc_verification),
+                style = normal32Text700
             )
 
             IndividualButton(
-                verificationStatus = verificationStatus, navController = navController,
+                verificationStatus = verificationStatus,
+                navController = navController,
                 transactionId = transactionId,
-                fromFlow = fromFlow, kycUrl = kycUrl, offerId = offerId, context = context
+                fromFlow = fromFlow,
+                kycUrl = kycUrl,
+                offerId = offerId,
+                context = context
             )
 
             EntityButton(
-                verificationStatus = verificationStatus, navController = navController,
+                verificationStatus = verificationStatus,
+                navController = navController,
                 transactionId = transactionId,
-                context = context, bankDetailResponse = bankDetailResponse, fromFlow = fromFlow
+                context = context,
+                bankDetailResponse = bankDetailResponse,
+                fromFlow = fromFlow
             )
 
             if (verificationStatus.equals("3")) {
                 RegisterText(
-                    text = stringResource(id = R.string.kyc_completed), textColor = midNightBlue,
-                    modifier = Modifier.padding(10.dp), style = normal36Text500
+                    text = stringResource(id = R.string.kyc_completed),
+                    textColor = midNightBlue,
+                    modifier = Modifier.padding(10.dp),
+                    style = normal36Text500
                 )
                 OtpSuccessImage(top = 40.dp)
             }
@@ -194,9 +229,12 @@ fun GstBankKycVerificationScreenView(
 
 @Composable
 fun EntityButton(
-    verificationStatus: String, navController: NavHostController,
-    transactionId: String, context: Context,
-    fromFlow: String, bankDetailResponse: GstOfferConfirmResponse?,
+    verificationStatus: String,
+    navController: NavHostController,
+    transactionId: String,
+    context: Context,
+    fromFlow: String,
+    bankDetailResponse: GstOfferConfirmResponse?
 ) {
     CurvedPrimaryButtonFull(
         text = stringResource(id = R.string.entity_kyc),
@@ -208,10 +246,12 @@ fun EntityButton(
                 response.data?.catalog?.fromURL?.let { entityKycUrl ->
                     response.data.catalog.itemID?.let { offerId ->
                         navigateToGstKycWebViewScreen(
-                            navController = navController, transactionId= transactionId,
+                            navController = navController,
+                            transactionId = transactionId,
                             kycUrl = entityKycUrl,
                             offerId = offerId,
-                            fromScreen = "2", fromFlow = fromFlow
+                            fromScreen = "2",
+                            fromFlow = fromFlow
                         )
                     }
                 }
@@ -226,9 +266,13 @@ fun EntityButton(
 
 @Composable
 fun IndividualButton(
-    verificationStatus: String, navController: NavHostController, fromFlow: String, kycUrl: String,
+    verificationStatus: String,
+    navController: NavHostController,
+    fromFlow: String,
+    kycUrl: String,
     transactionId: String,
-    offerId: String, context: Context
+    offerId: String,
+    context: Context
 ) {
     CurvedPrimaryButtonFull(
         text = stringResource(id = R.string.individual_kyc),
@@ -236,9 +280,12 @@ fun IndividualButton(
     ) {
         if (verificationStatus.equals("1")) {
             navigateToGstKycWebViewScreen(
-                navController = navController, transactionId = transactionId, kycUrl = kycUrl,
+                navController = navController,
+                transactionId = transactionId,
+                kycUrl = kycUrl,
                 offerId = offerId,
-                fromScreen = "1", fromFlow = fromFlow
+                fromScreen = "1",
+                fromFlow = fromFlow
             )
         } else {
             CommonMethods().toastMessage(context, "Individual KYC Competed")

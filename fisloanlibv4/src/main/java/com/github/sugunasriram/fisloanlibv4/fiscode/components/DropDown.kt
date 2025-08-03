@@ -18,6 +18,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -43,7 +44,10 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal20Text400
 
 @Composable
 fun CustomDropDownField(
-    start: Dp = 15.dp, end: Dp = 15.dp, top: Dp = 10.dp, bottom: Dp = 0.dp,
+    start: Dp = 15.dp,
+    end: Dp = 15.dp,
+    top: Dp = 10.dp,
+    bottom: Dp = 0.dp,
     selectedText: String,
     hint: String,
     expand: Boolean,
@@ -54,30 +58,35 @@ fun CustomDropDownField(
     onNextFocus: FocusRequester = FocusRequester.Default,
     error: String? = null,
     onDismiss: () -> Unit,
-    onItemSelected: (String) -> Unit
+    onItemSelected: (String) -> Unit,
+    enabled: Boolean = true
 ) {
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val displayText = if (selectedText.isEmpty()) hint else selectedText.replaceFirstChar { it.uppercase() }
 
-    Column(modifier=modifier) {
+    Column(modifier = modifier.alpha(if (enabled) 1f else 0.5f)) {
         Box(
             modifier = Modifier
                 .padding(start = start, end = end, top = top, bottom = bottom)
                 .fillMaxWidth().height(55.dp)
                 .background(Color.White, shape = RoundedCornerShape(8.dp))
                 .then(
-                    if (!error.isNullOrEmpty()) Modifier.border(
-                        width = 1.dp,
-                        color = errorRed,
-                        shape = RoundedCornerShape(8.dp)
-                    ) else  Modifier.border(
-                        width = 1.dp,
-                        color = appOrange,
-                        shape = RoundedCornerShape(8.dp)
-                    )
+                    if (!error.isNullOrEmpty()) {
+                        Modifier.border(
+                            width = 1.dp,
+                            color = errorRed,
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                    } else {
+                        Modifier.border(
+                            width = 1.dp,
+                            color = appOrange,
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                    }
                 )
-                .clickable {
+                .clickable(enabled = enabled) {
                     setExpand(!expand)
                     if (!expand) {
                         focusManager.clearFocus()
@@ -99,9 +108,9 @@ fun CustomDropDownField(
                 Icon(
                     painter = painterResource(id = R.drawable.arrow_down),
                     contentDescription = stringResource(id = R.string.down_ward_image),
-                    modifier = Modifier.padding(end=5.dp)
+                    modifier = Modifier.padding(end = 5.dp)
                         .size(24.dp)
-                        .clickable {
+                        .clickable(enabled = enabled) {
                             setExpand(!expand)
                             if (!expand) {
                                 focusManager.clearFocus()
@@ -110,36 +119,39 @@ fun CustomDropDownField(
                         }
                 )
             }
-            DropdownMenu(
-                expanded = expand,
-                onDismissRequest = onDismiss,
-                modifier = Modifier
-                    .fillMaxWidth().padding(horizontal = 10.dp)
-                    .background(appWhite, shape = RoundedCornerShape(8.dp))
-            ) {
-                itemList.forEach { label ->
-                    androidx.compose.material3.DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = label,
-                                style = normal20Text400,
-                                color = if (label == selectedText) appWhite else appBlack
-                            )
-                        },
-                        onClick = {
-                            onItemSelected(label)
-                            setExpand(false)
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(if (label == selectedText) appOrange else Color.Transparent)
-                    )
+            if (enabled) {
+                DropdownMenu(
+                    expanded = expand,
+                    onDismissRequest = onDismiss,
+                    modifier = Modifier
+                        .fillMaxWidth().padding(horizontal = 10.dp)
+                        .background(appWhite, shape = RoundedCornerShape(8.dp))
+                ) {
+                    itemList.forEach { label ->
+                        androidx.compose.material3.DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = label,
+                                    style = normal20Text400,
+                                    color = if (label == selectedText) appWhite else appBlack
+                                )
+                            },
+                            onClick = {
+                                onItemSelected(label)
+                                setExpand(false)
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(if (label == selectedText) appOrange else Color.Transparent)
+                        )
+                    }
                 }
             }
         }
         if (!error.isNullOrEmpty()) {
             Text(
-                text = error, style = normal12Text400,
+                text = error,
+                style = normal12Text400,
                 color = errorRed,
                 modifier = Modifier.padding(start = start, top = 2.dp)
             )
@@ -153,7 +165,7 @@ fun ClickableDropDownField(
     end: Dp = 8.dp,
     top: Dp = 5.dp,
     bottom: Dp = 0.dp,
-    errorTextStart:Dp=8.dp,
+    errorTextStart: Dp = 8.dp,
     selectedText: String,
     expand: Boolean,
     setExpand: (Boolean) -> Unit,
@@ -168,7 +180,7 @@ fun ClickableDropDownField(
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    Column(modifier=modifier) {
+    Column(modifier = modifier) {
         Box(
             modifier = Modifier.focusRequester(focus)
                 .padding(start = start, end = end, top = top, bottom = bottom)
@@ -176,11 +188,15 @@ fun ClickableDropDownField(
                 .shadow(8.dp, shape = RoundedCornerShape(16.dp))
                 .background(Color.White, shape = RoundedCornerShape(16.dp))
                 .then(
-                    if (!error.isNullOrEmpty()) Modifier.border(
-                        width = 1.dp,
-                        color = errorRed,
-                        shape = RoundedCornerShape(16.dp)
-                    ) else Modifier
+                    if (!error.isNullOrEmpty()) {
+                        Modifier.border(
+                            width = 1.dp,
+                            color = errorRed,
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                    } else {
+                        Modifier
+                    }
                 )
                 .clickable {
                     setExpand(!expand)
@@ -203,7 +219,7 @@ fun ClickableDropDownField(
                 Icon(
                     painter = painterResource(id = R.drawable.arrow_down),
                     contentDescription = stringResource(id = R.string.down_ward_image),
-                    modifier = Modifier.padding(end=5.dp)
+                    modifier = Modifier.padding(end = 5.dp)
                         .size(24.dp)
                         .clickable {
                             setExpand(!expand)
@@ -243,13 +259,11 @@ fun ClickableDropDownField(
         }
         if (!error.isNullOrEmpty()) {
             Text(
-                text = error, style = normal12Text400,
+                text = error,
+                style = normal12Text400,
                 color = errorRed,
                 modifier = Modifier.padding(start = errorTextStart, top = 2.dp)
             )
         }
     }
-
 }
-
-

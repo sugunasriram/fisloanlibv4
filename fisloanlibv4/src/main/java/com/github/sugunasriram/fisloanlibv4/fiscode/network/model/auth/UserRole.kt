@@ -8,7 +8,6 @@ data class UserRole(
     val status: Boolean? = null
 )
 
-
 @Serializable
 data class RoleData(
     val _id: String,

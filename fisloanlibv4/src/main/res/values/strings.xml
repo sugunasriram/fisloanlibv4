@@ -3,8 +3,11 @@
     <string name="app_name">Nearshop Finance App</string>
     <string name="request_a_loan">Request a Loan</string>
     <string name="loan_disbursed">Loan Disbursed</string>
-    <string name="loan_agreement">Loan Agreement </string>
-    <string name="document">Document </string>
+    <string name="loan_agreement">Loan Agreement</string>
+    <string name="download_loan_agreement">Download Loan Agreement</string>
+    <string name="download_loan_details">Download Loan Details</string>
+    <string name="download">Download</string>
+    <string name="document">Document</string>
     <string name="add_bank_details">Add Bank Details</string>
     <string name="set_up_repayment">Setup Repayment</string>
     <string name="emandate">Setup eNach/eMandate</string>
@@ -89,10 +92,11 @@
     <string name="official_mail_id_should_not_be_same">Official email ID should not be the same as personal email ID</string>
     <string name="please_select_images_with_in_2mb">Please select an images with in 2MB</string>
     <string name="please_select_documents_to_upload">Please select documents to upload</string>
-    <string name="pincode_icon">Pincode Icon</string>
+   <string name="pincode_icon">Pincode Icon</string>
     <string name="lock_icon">Lock Icon</string>
     <string name="register_check">Our agent may call you to assist further</string>
     <string name="get_otp">Get OTP</string>
+    <string name="phone">Phone</string>
     <string name="enter_register_phnumber">Registered Phone Number *</string>
     <string name="enter_register_email">Enter Registered Email</string>
     <string name="phone_number">Phone Number</string>
@@ -101,7 +105,7 @@
     <string name="register_user">Not A Registered User?</string>
     <string name="sign_up">Sign Up</string>
     <string name="welcome_text">Welcome to \nIntegra Borrower App</string>
-    <string name="my_profile">My Profile</string>
+   <string name="my_profile">My Profile</string>
     <string name="update_profile">Update profile</string>
     <string name="please_update_your_profile_to_proceed">Please update your profile to proceed</string>
     <string name="edit_icon">Edit Icon</string>
@@ -115,6 +119,9 @@
     <string name="forward_logo">Forward Logo</string>
     <string name="loan">Loan</string>
     <string name="interest">Interest</string>
+    <string name="min_interest">Min Interest</string>
+    <string name="max_interest">Max Interest</string>
+    <string name="no_offer_generated">No offer Generated</string>
     <string name="deposit">Deposit</string>
     <string name="repay_loan">Repay loan    of ₹ 30,595    in 12 months</string>
     <string name="forward_direction_icon">Forward Direction Icon</string>
@@ -123,6 +130,8 @@
     <string name="lead_penalty">Late repayment will lead to penalty</string>
     <string name="processing_charge">Processing charge</string>
     <string name="processing_please_wait">Processing Please Wait</string>
+    <string name="identifying_account_details_for_loan_disbursement">Identifying Account Details for Loan Disbursement</string>
+    <string name="generating_loan_agreement_for_signing">Generating Loan Agreement for Signing</string>
     <string name="repayment">Repayment</string>
     <string name="repay_before">Repay Before</string>
     <string name="late_charge">Late charge</string>
@@ -155,7 +164,9 @@
     <string name="request_same_lender">REQUEST SAME LENDER</string>
     <string name="home_page_text">One-time registration. Online loan application. No document upload needed.</string>
     <string name="udyam_number">UDYAM Number</string>
-    <string name="adhar_linked_number">Aadhar Linked With Mobile Number</string>
+    <string name="adhar_number">Aadhar Number</string>
+    <string name="mobile_number_linked_with_your_aadhaar">Mobile Number Linked With Your
+        Aadhaar</string>
     <string name="account_aggregator_consent">Account Aggregator Consent</string>
     <string name="request_loan">Request a Loan</string>
     <string name="annual_income">Annual Income</string>
@@ -222,9 +233,9 @@
     <string name="permanent_address_with_star">Permanent Address *</string>
     <string name="official_address">Official Address</string>
     <string name="permanent_address">Permanent Address</string>
-    <string name="city">City/District</string>
+    <string name="city">City</string>
     <string name="house_number">House No, Building, Street, Area</string>
-    <string name="locality">Locality/Town</string>
+    <string name="district">District</string>
     <string name="entity_kyc">Entity KYC</string>
     <string name="udyam_kyc">UDYAM KYC</string>
     <string name="enter_account_details">Enter Disbursement Account Details</string>
@@ -251,7 +262,8 @@
     <string name="terms_and_conditions">Terms &amp; Conditions</string>
     <string name="kfs_link">Key Factor Statement Link</string>
     <string name="bureau_offers">Bureau Offers</string>
-    <string name="installment_amount">Installment Amount</string>
+    <string name="quick_offers">Quick Offers</string>
+    <string name="installment_amount">Installment Amount(INR)</string>
     <string name="loan_offers">Loan Offers</string>
     <string name="check_now">Check Now</string>
     <string name="more_details">More Details</string>
@@ -309,7 +321,7 @@
     <string name="payment_history">Payment History</string>
     <string name="emi_schedule">EMI Schedule</string>
     <string name="we_are_currently_processing">We\'re currently processing your request\nKindly hold on for a moment.</string>
-    <!--    <string name="please_wait_processing">We apologize for the delay as we work to bring you the best offers. Please wait for 2 minutes</string>-->
+<!--    <string name="please_wait_processing">We apologize for the delay as we work to bring you the best offers. Please wait for 2 minutes</string>-->
     <string name="please_wait_processing">Almost there! Good things take time. We are fetching
         the best loan offers for you. Hang tight—just 2 minutes to go!</string>
     <string name="time_expired">Time expired</string>
@@ -332,15 +344,15 @@
     <string name="eighty_lakh">₹ 80 Lakh</string>
     <string name="bottom_sheet_close">Bottom Sheet Close</string>
     <string name="bottom_sheet_header">Credit information company Consent</string>
-    <!--    <string name="bottom_sheet_body">You hereby undertake and confirm that the information and data-->
-    <!--        furnished by you to the platform is true and correct. The platform has been integrated with-->
-    <!--        lenders who use Credit Information Companies (CIC) to conduct credit checks on body-->
-    <!--        corporates/MSME and Individuals. You acknowledge and confirm that you have consented to the-->
-    <!--        sharing of sensitive data provided by you with such lenders and CICs for the purposes of-->
-    <!--        obtaining the name and account number of banks with whom you have an open cash credit or-->
-    <!--        overdraft acount. In addition, you consent to the data being used to failitate the creation-->
-    <!--        of a credit offer which may include the account to which the funds may be disbursed as per-->
-    <!--        prevailing RBI norms</string>-->
+<!--    <string name="bottom_sheet_body">You hereby undertake and confirm that the information and data-->
+<!--        furnished by you to the platform is true and correct. The platform has been integrated with-->
+<!--        lenders who use Credit Information Companies (CIC) to conduct credit checks on body-->
+<!--        corporates/MSME and Individuals. You acknowledge and confirm that you have consented to the-->
+<!--        sharing of sensitive data provided by you with such lenders and CICs for the purposes of-->
+<!--        obtaining the name and account number of banks with whom you have an open cash credit or-->
+<!--        overdraft acount. In addition, you consent to the data being used to failitate the creation-->
+<!--        of a credit offer which may include the account to which the funds may be disbursed as per-->
+<!--        prevailing RBI norms</string>-->
     <string name="bottom_sheet_body"><![CDATA[
     I, hereby consent and authorize Nearshop FIS to share my name,
         phone number and other details captured on this application form with the following lenders to be processed for
@@ -423,7 +435,7 @@
     <string name="please_enter_valid_income_within_limits">Please Enter valid income with in limits </string>
     <string name="please_select_loan_purpose">Please select your loan purpose</string>
     <string name="generating_account_aggregator">Generating Account Aggregator Consent</string>
-    <string name="generating_best_offers">Generating Best Offers for you\nPlease Wait</string>
+    <string name="generating_best_offers">Generating Best Offers For You\nPlease Wait</string>
     <string name="ondc_icon">ondc - icon</string>
     <string name="kyc_verification">KYC Verification</string>
     <string name="initiating_kyc_verification">Initiating KYC Verification</string>
@@ -456,6 +468,7 @@
     <string name="share_bank_statement">Share Bank Statement</string>
     <string name="select_your_account_aggregator">Select your Account Aggregator</string>
     <string name="select_the_lender">Select the Lender with whom you wish to share your details for this loan request</string>
+    <string name="lender_list">Lender list</string>
     <string name="share_bank_statements_instantly">Share bank statements digitally, securely and instantly</string>
     <string name="select_account_aggregator">Select Account Aggregator</string>
     <string name="choose_rbi_approved_account">Choose one of the RBI approved Account Aggregators to share your financial information</string>
@@ -476,7 +489,9 @@
     <string name="max_100_characters_allowed">Maximum 100 characters allowed</string>
     <string name="please_enter_min_10_characters">Please enter minimum 10 characters</string>
     <string name="please_enter_min_3_characters">Please enter minimum 3 characters</string>
-    <string name="please_enter_valid_address">Please enter valid address</string>
+ <string name="please_enter_valid_address">Please enter valid address</string>
+ <string name="please_enter_valid_area">Please enter valid area</string>
+ <string name="please_enter_valid_town">Please enter valid locality/town</string>
     <string name="enter_valid_town">Enter valid locality/town</string>
     <string name="enter_valid_area">Enter valid area</string>
     <string name="please_enter_pincode">Please Enter Pincode</string>
@@ -493,15 +508,20 @@
     <string name="sorry">SORRY!</string>
     <string name="try_again">Try Again</string>
     <string name="no_offers_available">No Loan offers available</string>
+    <string name="no_lenders_available">No Lenders available</string>
     <string name="no_offers_available_discription">We regret to inform you that there are no loan offers available for you currently</string>
     <string name="we_regret_loan_not_approved">We regret to inform you that your loan application\n did not meet approval criteria.</string>
     <string name="we_regret_no_loan_offers">We regret to inform you that there are no loan offers\n available for you at the moment</string>
     <string name="no_existing_loans">No existing Loans</string>
+    <string name="no_existing_offers">No existing Offers</string>
+    <string name="no_existing_lenders">No existing Lenders</string>
+    <string name="once_you_raise_issue_it_will_be_listed">Once you raise an issue, it will be listed here for tracking and updates</string>
     <string name="session_timed_out">Session timed out</string>
     <string name="request_timed_out">Request timed out</string>
     <string name="un_authorized_access">Unauthorized Access</string>
     <string name="loan_not_approved">Loan Not Approved</string>
-    <string name="something_went_wrong">Something went wrong</string>
+    <string name="something_went_wrong">We hit a snag on our end</string>
+    <string name="we_are_working_on_it_please_try_again">We’re working on it — please try again in a moment.</string>
     <string name="oops">Oops!</string>
     <string name="unable_to_connect">Unable to connect</string>
     <string name="check_your_internet">Please check your internet connectivity &amp;</string>
@@ -546,18 +566,18 @@
     <string name="select_product">Select Product</string>
     <string name="dmi_finance_private">DMI FINANCE PRIVATE LIMITED 32000</string>
     <string name="describe_the_issue">Describe the issue</string>
-    <string name="short_description">Short description</string>
-    <string name="long_description">Long description</string>
+    <string name="subject">Subject</string>
     <string name="select_the_appropriate_issue">Select the appropriate issue</string>
     <string name="interest_and_charges">Interest &amp; Charges </string>
     <string name="payments">Payments </string>
     <string name="generic">Generic </string>
-    <string name="category">Category </string>
+    <string name="category">Category</string>
     <string name="sub_category">Sub-Category </string>
     <string name="delay_in_disbursement">Delay In Disbursement </string>
     <string name="incorrect_amount_disbursed">Incorrect Amount Disbursed </string>
     <string name="raise_issue">Raise Issue </string>
     <string name="view_issue">View Issue </string>
+    <string name="view_all_issue">View All Issue </string>
     <string name="select_invoice_from_offer_list">Select an invoice from the below list to check the loan offers from lenders</string>
     <string name="offer">1 offer</string>
     <string name="please_select_the_account_type">Please Select the Account Type</string>
@@ -577,13 +597,20 @@
     <string name="close">Close</string>
     <string name="item_name">Item Name </string>
     <string name="category_name">"Category Name"</string>
+    <string name="reported_issues">Reported Issues</string>
     <string name="issue_has_been_reported_successfully">Issue has been reported successfully</string>
     <string name="issue_has_been_reported_successfully_discription">Your issued ticket is under process, it usually may takes 1 to 2 working day, you can reach us on 8798765000 for other query. Thank you</string>
     <string name="other_details">Other Details</string>
     <string name="issue_description">Issue Description</string>
     <string name="issue_image">Issue Image</string>
     <string name="no_missed_emi_found">No Missed EMI found</string>
-    <string name="max_loan_amount">Loan Amount (INR)</string>
+    <string name="loan_amount_inr">Loan Amount (INR)</string>
+    <string name="max_loan_amount">Max Loan Amount</string>
+    <string name="max_amount">Max Amount</string>
+    <string name="min_loan_amount">Min Loan Amount</string>
+    <string name="min_amount">Min Amount</string>
+    <string name="interest_rage">Interest Range</string>
+    <string name="tenure_range">Tenure Range</string>
     <string name="enter_official_address">Enter official address</string>
     <string name="please_use_hundred_characters">Please Use 100 Characters</string>
     <string name="consumer_durable_purchase">Consumer Durable Purchase</string>
@@ -686,21 +713,24 @@
     <string name="downloading_file">Downloading file …</string>
 
     <string name="give_aa_consent">Give AA consent"</string>
-    <string name="get_more_offers">Get More Offers</string>
+    <string name="get_more_offers">More Offers</string>
+    <string name="requires_sharing_bank_statements">Requires sharing of bank statement</string>
+    <string name="rejected_lenders">Rejected Lenders</string>
     <string name="get_offers_from_following_lenders...">Get offers from following lenders by giving AA consent</string>
     <string name="please_upload_images">Please upload image</string>
     <string name="please_select_images_to_upload">Please select images to upload</string>
     <string name="image_not_uploaded">Image not uploaded</string>
     <string name="please_select_category">Please select Category</string>
     <string name="please_select_sub_category">Please select Sub-Category</string>
-    <string name="please_enter_short_description">Please enter Short description</string>
-    <string name="please_enter_long_description">Please enter Long description</string>
-    <string name="please_enter_proper_short_description">Please enter proper Short description</string>
-    <string name="please_enter_proper_long_description">Please enter proper Long Description</string>
+    <string name="please_enter_subject">Please enter subject</string>
+    <string name="please_enter_description">Please enter description</string>
+    <string name="please_enter_proper_subject">Please enter proper subject</string>
+    <string name="please_enter_proper_description">Please enter proper description</string>
+    <string name="please_enter_all_mandatory_details_and_upload_photo">Please enter all mandatory details and upload the issue photo</string>
     <string name="please_enter_the_permanent_address">Please Enter The Permanent Address</string>
     <string name="please_enter_proper_permanent_address">Please Enter Proper Permanent Address</string>
     <string name="getUerFlow">GetUserStatus Flow</string>
-    <string name="no_existing_issues">No existing Issues</string>
+  <string name="no_current_issues_found">No current issues found</string>
     <string name="please_enter_valid_dob">Please Enter Valid Date Of Birth</string>
 
     <string name="pan_">PAN</string>
@@ -727,6 +757,8 @@
 
     <string name="cancellable">Cancellable</string>
     <string name="returnable">Returnable</string>
+    <string name="non_cancellable">Non-Cancellable</string>
+    <string name="non_returnable">Non-Returnable</string>
     <string name="product_details">Product Details</string>
     <string name="please_enter_valid_downpayment_amount">Please enter a valid downpayment amount</string>
     <string name="please_provide_your_preferred_tenure">Please provide your preferred loan tenure</string>
@@ -736,7 +768,36 @@
     <string name="view_emi_schedule">View EMI Schedule</string>
     <string name="your_loan_for_the_below_product_has_been_approved">Your Loan for the below product has been approved</string>
     <string name="please_enter_valid_loan_amount_within_limits">Please Enter valid Loan amount with in limits </string>
+    <string name="issue_phoneNumber">080 69112423</string>
+    <string name="ondc_support_nearshop_in">ondc.support@nearshop.in</string>
+    <string name="reach_out_to_us">Reach out to us @</string>
+    <string name="please_write_your_concern_here_if_we_are_not_reachable_over_call_email_we_will_get_back_to_you_soon">Please write your concern here. If we are not reachable over call/email. we will get back to you soon</string>
 
-    <string name="non_cancellable">Non-Cancellable</string>
-    <string name="non_returnable">Non-Returnable</string>
+    <string name="please_ensure_that_your_bank_details">Please ensure that your bank details are
+        accurate</string>
+    <string name="incorrect_or_invalid_entries_may_lead_to_failure">Incorrect or invalid entries
+        may lead to failure in processing your request.</string>
+
+    <string name="what_is_cic_consent">What is CIC Consent?</string>
+    <string name="cic_consent_meaning">By giving your CIC (Credit Information Company) consent,
+        you\'re allowing us to securely access your credit report from credit bureaus like CIBIL
+        or Experian.This helps our partner lenders check your creditworthiness and offer the best loan options for you.Don’t worry—this doesn’t affect your credit score.</string>
+
+    <string name="please_wait_while_the_image_is_uploading">Please wait while the image is
+        uploading</string>
+    <string name="need_quick_cash">Need quick cash for personal needs like medical bills, travel,
+        or education? A Personal Loan gives you money without asking for any security.</string>
+    <string name="want_to_buy">Want to buy appliances, electronics, or\ngadgets but prefer to pay
+        later? Purchase\nFinance lets you shop now and pay in easy\ninstallments.</string>
+    <string name="running_a_business">Running a business and waiting for customer payments? A GST
+        Invoice Loan
+        lets you borrow money based on your unpaid GST invoices.</string>
+    <string name="coming_soon_dots">Coming Soon...</string>
+
+
+    <string name="please_enter_valid_date">Please enter a valid date (dd: 01–31, mm: 01–12, yyyy:
+        1925–last year)</string>
+    <string name="your_issue_has_been_submitted">Your issue has been submitted.</string>
+    <string name="by_giving_your_cic_credit_information">By giving your CIC (Credit Information Company) consent, you\'re allowing us to securely access your credit report from credit bureaus like CIBIL or Experian.\nThis helps our partner lenders check your creditworthiness and offer the best loan options for you.\nDon’t worry—this doesn’t affect your credit score.</string>
+
 </resources>

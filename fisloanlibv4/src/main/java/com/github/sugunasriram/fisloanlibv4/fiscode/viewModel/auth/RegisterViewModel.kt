@@ -16,7 +16,6 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateSignInPag
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.core.ApiRepository
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.core.ApiRepository.handleAuthGetAccessTokenApi
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.AddressModel
-import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.Data
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.DocumentUpload
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.Logout
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.PanVerificationResponse
@@ -70,23 +69,21 @@ class RegisterViewModel : ViewModel() {
         _errorMessage.value = message
     }
 
-
     private val _showErrorMsg = MutableLiveData(false)
-    val showErrorMsg: LiveData<Boolean>  = _showErrorMsg
+    val showErrorMsg: LiveData<Boolean> = _showErrorMsg
 
     fun onSetError(value: Boolean) {
-        _showErrorMsg.value=value
+        _showErrorMsg.value = value
     }
-
 
     private val _errorMsg: MutableLiveData<String?> = MutableLiveData("")
     val errorMsg: LiveData<String?> = _errorMsg
 
     private val _isAddress1Validated = MutableLiveData(true)
-    val isAddress1Validated: LiveData<Boolean>  = _isAddress1Validated
+    val isAddress1Validated: LiveData<Boolean> = _isAddress1Validated
 
     private val _isAddress2Validated = MutableLiveData(true)
-    val isAddress2Validated: LiveData<Boolean>  = _isAddress2Validated
+    val isAddress2Validated: LiveData<Boolean> = _isAddress2Validated
 
     private val _firstName: MutableLiveData<String?> = MutableLiveData("")
     val firstName: LiveData<String?> = _firstName
@@ -94,15 +91,17 @@ class RegisterViewModel : ViewModel() {
     private val _firstNameError: MutableLiveData<String?> = MutableLiveData("")
     val firstNameError: LiveData<String?> = _firstNameError
 
+    @SuppressLint("SuspiciousIndentation")
     fun onFirstNameChanged(value: String, context: Context) {
 //        val sanitizedInput = value.replace(Regex("[^a-zA-Z ]"), "")
 //        _firstName.value = sanitizedInput.take(30)
         _firstName.value = value
-        if (value.length < 4) {
-            _firstNameError.value = context.getString(R.string.first_name_should_contain_minimum_4_letters)
-        } else if (value.length >= 30) {
+//        if (value.length < 4) {
+//            _firstNameError.value = context.getString(R.string.first_name_should_contain_minimum_4_letters)
+//        } else
+        if (value.length >= 30) {
             _firstNameError.value = context.getString(R.string.first_name_not_exceeded_30_characters)
-        }else {
+        } else {
             _firstNameError.value = null
         }
     }
@@ -119,13 +118,12 @@ class RegisterViewModel : ViewModel() {
     private val _documentUploadResponse = MutableStateFlow<DocumentUpload?>(null)
     val documentUploadResponse: StateFlow<DocumentUpload?> = _documentUploadResponse
 
-
     private val _lastName = MutableLiveData("")
     val lastName: LiveData<String> = _lastName
     private val _lastNameError = MutableLiveData<String?>(null)
     val lastNameError: LiveData<String?> = _lastNameError
 
-    fun onLastNameChanged(value: String,context: Context) {
+    fun onLastNameChanged(value: String, context: Context) {
 //        val sanitizedInput = value.replace(Regex("[^a-zA-Z ]"), "").take(30)
         _lastName.value = value
         if (value.length >= 30) {
@@ -142,13 +140,15 @@ class RegisterViewModel : ViewModel() {
     private val _personalEmailIdError: MutableLiveData<String?> = MutableLiveData(null)
     val personalEmailIdError: LiveData<String?> = _personalEmailIdError
 
-    fun onPersonalEmailIdChanged(value: String,context: Context) {
+    fun onPersonalEmailIdChanged(value: String, context: Context) {
         _personalEmailId.value = value
-        if(!CommonMethods().isValidEmail(value)){
+        if (!CommonMethods().isValidEmail(value)) {
             _personalEmailIdError.value = context.getString(R.string.enter_valid_personal_email_id)
-        } else if(value == _officialEmailId.value ) {
-            _personalEmailIdError.value = context.getString(R.string.personal_mail_id_should_not_be_same)
-        } else{
+        }
+//        else if(_employeeType.value.equals("salaried",ignoreCase = true)|| value == _officialEmailId.value ) {
+//            _personalEmailIdError.value = context.getString(R.string.personal_mail_id_should_not_be_same)
+//        }
+        else {
             _personalEmailIdError.value = null
         }
     }
@@ -158,24 +158,20 @@ class RegisterViewModel : ViewModel() {
     private val _officialEmailIdError: MutableLiveData<String?> = MutableLiveData(null)
     val officialEmailIdError: LiveData<String?> = _officialEmailIdError
 
-    fun onOfficialEmailIdChanged(value: String,context: Context) {
+    fun onOfficialEmailIdChanged(value: String, context: Context) {
         _officialEmailId.value = value
-        if(!_employeeType.value.equals("Salaried",ignoreCase = true)){
-            _officialEmailIdError.value = null
-        }
-        if(!CommonMethods().isValidEmail(value)){
+        if (!CommonMethods().isValidEmail(value)) {
             _officialEmailIdError.value = context.getString(R.string.enter_valid__official_email_id)
-        } else if(value == _personalEmailId.value ) {
+        } else if (value == _personalEmailId.value) {
             _officialEmailIdError.value = context.getString(R.string.official_mail_id_should_not_be_same)
-        }
-        else {
+        } else {
             _officialEmailIdError.value = null
         }
     }
     fun clearOfficialEmail() {
 //        _officialEmailId.value = null
         _officialEmailIdError.value = null
-        _companyNameError.value=null
+        _companyNameError.value = null
     }
 
     private val _phoneNumber: MutableLiveData<String?> = MutableLiveData(null)
@@ -183,9 +179,9 @@ class RegisterViewModel : ViewModel() {
     private val _phoneNumberError: MutableLiveData<String?> = MutableLiveData(null)
     val phoneNumberError: LiveData<String?> = _phoneNumberError
 
-    fun onPhoneNumberChanged(value: String,context: Context) {
+    fun onPhoneNumberChanged(value: String, context: Context) {
         _phoneNumber.value = value
-        if(value.length <=10){
+        if (value.length <= 10) {
             _phoneNumberError.value = context.getString(R.string.enter_valid_phone_number)
         } else {
             _phoneNumberError.value = null
@@ -201,11 +197,22 @@ class RegisterViewModel : ViewModel() {
         _dob.value = value.take(10)
         val pattern = Regex("^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\\d{4}$")
 
-        if (!pattern.matches(value)) {
+        //Check for each date, Month,Year
+        val parts = value.split("-")
+        val day = parts.getOrNull(0)?.toIntOrNull()
+        val month = parts.getOrNull(1)?.toIntOrNull()
+        val year = parts.getOrNull(2)?.toIntOrNull()
+
+        val prevYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR) -1
+
+        val isValid = day in 1..31 && month in 1..12 && year in 1925..prevYear
+        if (!isValid) {
+            _dobError.value = context.getString(R.string.please_enter_valid_date)
+            return
+        }else if (!pattern.matches(value)) {
             _dobError.value = context.getString(R.string.please_enter_date_format)
             return
-        }
-        if (!isValidAdultDob(value)) {
+        } else if (!isValidAdultDob(value)) {
             _dobError.value = context.getString(R.string.you_must_be_18_years)
         } else {
             _dobError.value = null
@@ -234,9 +241,9 @@ class RegisterViewModel : ViewModel() {
     private val _genderError: MutableLiveData<String?> = MutableLiveData(null)
     val genderError: LiveData<String?> = _genderError
 
-    fun onGenderChanged(value: String,context: Context) {
+    fun onGenderChanged(value: String, context: Context) {
         _gender.value = value
-        _genderError.value=null
+        _genderError.value = null
     }
 
     private val _panNumber: MutableLiveData<String?> = MutableLiveData(null)
@@ -247,10 +254,10 @@ class RegisterViewModel : ViewModel() {
     private val _panApiThrewError: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val panApiThrewError: StateFlow<Boolean> = _panApiThrewError
 
-    fun onPanNumberChanged(value: String,context: Context,navController: NavHostController) {
+    fun onPanNumberChanged(value: String, context: Context, navController: NavHostController) {
 //        val sanitizedInput = value.replace(Regex("[^a-zA-Z0-9]"), "").take(10)
         _panNumber.value = value
-        if(CommonMethods().isValidPanNumber(value) != true){
+        if (CommonMethods().isValidPanNumber(value) != true) {
             _panError.value = context.getString(R.string.enter_valid_pan_number)
         } else {
 //            getUserNameFormPan(value,navController)
@@ -273,7 +280,7 @@ class RegisterViewModel : ViewModel() {
                 if (error is ResponseException &&
                     error.response.status.value == 401
                 ) {
-                    //Get Access Token using RefreshToken
+                    // Get Access Token using RefreshToken
                     if (checkForAccessToken && handleAuthGetAccessTokenApi()) {
                         getUserNameFormPan(pan, navController, false)
                     } else {
@@ -294,11 +301,11 @@ class RegisterViewModel : ViewModel() {
     }
 
     private fun handleGetUserNameFormPanSuccess(panVerificationResponse: PanVerificationResponse?) {
-      panVerificationResponse?.let {
-          _firstName.value =  it.data.first_name
-          _lastName.value = it.data.last_name
-          _panApiThrewError.value = false
-      }
+        panVerificationResponse?.let {
+            _firstName.value = it.data.first_name
+            _lastName.value = it.data.last_name
+            _panApiThrewError.value = false
+        }
     }
 
     private val _employeeType: MutableLiveData<String?> = MutableLiveData(null)
@@ -306,7 +313,7 @@ class RegisterViewModel : ViewModel() {
     private val _employeeTypeError: MutableLiveData<String?> = MutableLiveData(null)
     val employeeTypeError: LiveData<String?> = _employeeTypeError
 
-    fun onEmployeeTypeChanged(value: String,context: Context) {
+    fun onEmployeeTypeChanged(value: String, context: Context) {
         _employeeType.value = value
         _employeeTypeError.value = null
     }
@@ -329,20 +336,20 @@ class RegisterViewModel : ViewModel() {
     private val _udyamNumberError: MutableLiveData<String?> = MutableLiveData(null)
     val udyamNumberError: LiveData<String?> = _udyamNumberError
 
-fun onUdyamNumberChanged(value: String, context: Context) {
-    if (value.isEmpty()) {
-        _udyamNumber.value = null
-        _udyamNumberError.value = null
-    } else {
-//        val sanitizedInput = value.replace(Regex("[^a-zA-Z0-9-]"), "").take(19)
-        _udyamNumber.value = value
-        if (CommonMethods().isValidUdyamNumber(value)!= true) {
-            _udyamNumberError.value = context.getString(R.string.enter_valid_udyam_number)
-        } else {
+    fun onUdyamNumberChanged(value: String, context: Context) {
+        if (value.isEmpty()) {
+            _udyamNumber.value = null
             _udyamNumberError.value = null
+        } else {
+//        val sanitizedInput = value.replace(Regex("[^a-zA-Z0-9-]"), "").take(19)
+            _udyamNumber.value = value
+            if (CommonMethods().isValidUdyamNumber(value) != true) {
+                _udyamNumberError.value = context.getString(R.string.enter_valid_udyam_number)
+            } else {
+                _udyamNumberError.value = null
+            }
         }
     }
-}
 
     private val _officialAddressField: MutableLiveData<AddressModel?> = MutableLiveData(null)
     val officialAddressField: LiveData<AddressModel?> = _officialAddressField
@@ -353,10 +360,10 @@ fun onUdyamNumberChanged(value: String, context: Context) {
     val officialAddressError: LiveData<String?> = _officialAddressError
 
     fun onOfficialAddressChanged(address: String) {
-        _officialAddress.value = listOf(_area1.value,_town1.value, _city1.value, _state1.value, _pinCode1.value)
+        _officialAddress.value = listOf(_area1.value, _district1.value, _city1.value, _state1.value, _pinCode1.value)
             .filterNot { it.isNullOrEmpty() }
             .joinToString(", ")
-        _officialAddressError.value=null
+        _officialAddressError.value = null
     }
 
     private val _pinCode1: MutableLiveData<String?> = MutableLiveData(null)
@@ -371,12 +378,14 @@ fun onUdyamNumberChanged(value: String, context: Context) {
         if (sanitizedValue.length < 6) {
             _pinCode1Error.value = context.getString(R.string.enter_valid_pincode)
             _city1.value = ""
-            _state1.value=""
-            _isAddress1Validated.value=false
+            _state1.value = ""
+            _district1.value=""
+            _isAddress1Validated.value = false
         } else {
             getCity1(sanitizedValue, context)
             _pinCode1Error.value = null
-            _isAddress1Validated.value=true
+            _district1Error.value = null
+            _isAddress1Validated.value = true
         }
     }
 
@@ -421,12 +430,12 @@ fun onUdyamNumberChanged(value: String, context: Context) {
         }
     }
 
-    private val _town1: MutableLiveData<String?> = MutableLiveData(null)
-    val town1: LiveData<String?> = _town1
-    private val _town1Error: MutableLiveData<String?> = MutableLiveData(null)
-    val town1Error: LiveData<String?> = _town1Error
+    private val _district1: MutableLiveData<String?> = MutableLiveData(null)
+    val district1: LiveData<String?> = _district1
+    private val _district1Error: MutableLiveData<String?> = MutableLiveData(null)
+    val district1Error: LiveData<String?> = _district1Error
 
-    fun onTown1Changed(value: String, context: Context) {
+    fun onDistrict1Changed(value: String, context: Context) {
         val allowedSpecialChars = ",.-/#'&"
 
         // Only allow ASCII letters, digits, whitespace, and allowed special characters
@@ -434,7 +443,7 @@ fun onUdyamNumberChanged(value: String, context: Context) {
             (it.isLetterOrDigit() && it.code < 128) || it.isWhitespace() || it in allowedSpecialChars
         }.take(100)
 
-        _town1.value = sanitizedValue
+        _district1.value = sanitizedValue
 
         val hasInvalidChars = value.any {
             !(it.isLetterOrDigit() && it.code < 128) && !it.isWhitespace() && it !in allowedSpecialChars
@@ -442,29 +451,29 @@ fun onUdyamNumberChanged(value: String, context: Context) {
 
         when {
             sanitizedValue.length > 100 -> {
-                _town1Error.value = context.getString(R.string.max_100_characters_allowed)
+                _district1Error.value = context.getString(R.string.max_100_characters_allowed)
                 _isAddress1Validated.value = false
             }
             sanitizedValue.length < 3 -> {
-                _town1Error.value = context.getString(R.string.please_enter_min_3_characters)
+                _district1Error.value = context.getString(R.string.please_enter_min_3_characters)
                 _isAddress1Validated.value = false
             }
             sanitizedValue.trim().all { it.isDigit() } -> {
-                _town1Error.value = context.getString(R.string.please_enter_valid_address)
+                _district1Error.value = context.getString(R.string.please_enter_valid_address)
                 _isAddress1Validated.value = false
             }
             hasInvalidChars -> {
-                _town1Error.value = context.getString(R.string.special_characters_not_allowed)
+                _district1Error.value = context.getString(R.string.special_characters_not_allowed)
                 _isAddress1Validated.value = false
             }
             else -> {
-                _town1Error.value = null
+                _district1Error.value = null
                 _isAddress1Validated.value = true
             }
         }
     }
 
-    fun documentUpload(documentUploadBody: ImageUploadBody, navController : NavHostController, context: Context) {
+    fun documentUpload(documentUploadBody: ImageUploadBody, navController: NavHostController, context: Context) {
         _documentUploading.value = true
         viewModelScope.launch(Dispatchers.IO) {
             handleDocumentUpload(documentUploadBody, navController, context)
@@ -511,17 +520,15 @@ fun onUdyamNumberChanged(value: String, context: Context) {
         }
     }
 
-
-
     private val _city1: MutableLiveData<String?> = MutableLiveData(null)
     val city1: LiveData<String?> = _city1
     private val _city1Error: MutableLiveData<String?> = MutableLiveData(null)
     val city1Error: LiveData<String?> = _city1Error
 
-    fun onCity1Changed(value: String,context: Context) {
+    fun onCity1Changed(value: String, context: Context) {
         _city1.value = value
-        _city1Error.value=null
-        _isAddress1Validated.value=true
+        _city1Error.value = null
+        _isAddress1Validated.value = true
     }
 
     private val _state1: MutableLiveData<String?> = MutableLiveData(null)
@@ -529,266 +536,147 @@ fun onUdyamNumberChanged(value: String, context: Context) {
     private val _state1Error: MutableLiveData<String?> = MutableLiveData(null)
     val state1Error: LiveData<String?> = _state1Error
 
-    fun onState1Changed(value: String,context: Context) {
+    fun onState1Changed(value: String, context: Context) {
         _state1.value = value
-        _state1Error.value=null
-        _isAddress1Validated.value=true
+        _state1Error.value = null
+        _isAddress1Validated.value = true
     }
-
-//    private val _permanentAddressField: MutableLiveData<String?> = MutableLiveData(null)
-//    val permanentAddressField: LiveData<String?> = _permanentAddressField
 
     private val _permanentAddressField: MutableLiveData<AddressModel?> = MutableLiveData(null)
     val permanentAddressField: LiveData<AddressModel?> = _permanentAddressField
 
-    private val _permanentAddress: MutableLiveData<String?> = MutableLiveData(null)
-    val permanentAddress: LiveData<String?> = _permanentAddress
-    private val _permanentAddressError: MutableLiveData<String?> = MutableLiveData(null)
-    val permanentAddressError: LiveData<String?> = _permanentAddressError
-
-    fun onPermanentAddressChanged(address: String) {
-        _permanentAddress.value = listOf(_area2.value,_town2.value, _city2.value, _state2.value, _pinCode2.value)
-            .filterNot { it.isNullOrEmpty() }
-            .joinToString(", ")
-        _permanentAddressError.value=null
-        _isAddress2Validated.value=true
-    }
-
-    private val _pinCode2: MutableLiveData<String?> = MutableLiveData(null)
-    val pinCode2: LiveData<String?> = _pinCode2
-    private val _pinCode2Error: MutableLiveData<String?> = MutableLiveData(null)
-    val pinCode2Error: LiveData<String?> = _pinCode2Error
-
-    fun onPinCode2Changed(value: String,context: Context) {
-        val sanitizedValue = value.take(6).filter { it.isDigit() } // Only take first 6 digits
-        _pinCode2.value = sanitizedValue
-
-        if (sanitizedValue.length < 6) {
-            _pinCode2Error.value = context.getString(R.string.enter_valid_pincode)
-            _city2.value = ""
-            _state2.value=""
-            _isAddress2Validated.value=false
-        } else {
-            getCity2(sanitizedValue, context)
-            _pinCode2Error.value = null
-            _isAddress2Validated.value=true
-        }
-    }
-
-    private val _area2: MutableLiveData<String?> = MutableLiveData(null)
-    val area2: LiveData<String?> = _area2
-    private val _area2Error: MutableLiveData<String?> = MutableLiveData(null)
-    val area2Error: LiveData<String?> = _area2Error
-
-    fun onArea2Changed(value: String,context: Context) {
-        _area2.value = value.take(100)
-        val allowedSpecialChars = ",.-/#'&"
-        val hasInvalidChars = value.any {
-            !it.isLetterOrDigit() && !it.isWhitespace() && it !in allowedSpecialChars
-        }
-        if (value.length > 100) {
-            _area2Error.value = context.getString(R.string.max_100_characters_allowed)
-            _isAddress2Validated.value=false
-            return
-        }
-        if (value.length < 10) {
-            _area2Error.value = context.getString(R.string.please_enter_min_10_characters)
-            _isAddress2Validated.value=false
-            return
-        }
-
-        if (value.trim().all { it.isDigit() }) {
-            _area2Error.value = context.getString(R.string.please_enter_valid_address)
-            _isAddress2Validated.value = false
-            return
-        }
-
-        if (hasInvalidChars) {
-            _area2Error.value = context.getString(R.string.special_characters_not_allowed)
-            _isAddress2Validated.value=false
-//                "Only letters, numbers, spaces, and , . - / # ' are allowed."
-        } else {
-            _area2Error.value = null
-            _isAddress2Validated.value=true
-        }
-    }
-
-    private val _city2: MutableLiveData<String?> = MutableLiveData(null)
-    val city2: LiveData<String?> = _city2
-    private val _city2Error: MutableLiveData<String?> = MutableLiveData(null)
-    val city2Error: LiveData<String?> = _city2Error
-
-    fun onCity2Changed(value: String,context: Context) {
-        _city2.value = value
-        _city2Error.value=null
-        _isAddress2Validated.value=true
-    }
-
-    private val _town2: MutableLiveData<String?> = MutableLiveData(null)
-    val town2: LiveData<String?> = _town2
-    private val _town2Error: MutableLiveData<String?> = MutableLiveData(null)
-    val town2Error: LiveData<String?> = _town2Error
-
-    fun onTown2Changed(value: String,context: Context) {
-        _town2.value = value.take(100)
-        val allowedSpecialChars = ",.-/#'&"
-        val hasInvalidChars = value.any {
-            !it.isLetterOrDigit() && !it.isWhitespace() && it !in allowedSpecialChars
-        }
-        if (value.length > 100) {
-            _town2Error.value = context.getString(R.string.max_100_characters_allowed)
-            _isAddress2Validated.value=false
-            return
-        }
-        if (value.length < 3) {
-            _town2Error.value = context.getString(R.string.please_enter_min_3_characters)
-            _isAddress2Validated.value=false
-            return
-        }
-
-        if (value.trim().all { it.isDigit() }) {
-            _town2Error.value = context.getString(R.string.please_enter_valid_address)
-            _isAddress2Validated.value = false
-            return
-        }
-        if (hasInvalidChars) {
-            _town2Error.value = context.getString(R.string.special_characters_not_allowed)
-            _isAddress2Validated.value=false
-//                "Only letters, numbers, spaces, and , . - / # ' are allowed."
-        } else {
-            _town2Error.value = null
-            _isAddress2Validated.value=true
-        }
-    }
-
-    private val _state2: MutableLiveData<String?> = MutableLiveData(null)
-    val state2: LiveData<String?> = _state2
-    private val _state2Error: MutableLiveData<String?> = MutableLiveData(null)
-    val state2Error: LiveData<String?> = _state2Error
-
-    fun onState2Changed(value: String,context: Context) {
-        _state2.value = value
-        _state2Error.value=null
-        _isAddress2Validated.value=true
-    }
     private val _income: MutableLiveData<String?> = MutableLiveData("")
     val income: LiveData<String?> = _income
 
     @OptIn(ExperimentalMaterialApi::class)
     fun address1Validation(
-        scope: CoroutineScope, bottomSheetStateValue: ModalBottomSheetState, pinCode: String,
-        area: String, town: String, city: String,state:String, context: Context,
-        areaFocus:FocusRequester,townFocus:FocusRequester,pincodeFocus:FocusRequester
+        scope: CoroutineScope,
+        bottomSheetStateValue: ModalBottomSheetState,
+        pinCode: String,
+        area: String,
+        district: String,
+        city: String,
+        state: String,
+        context: Context,
+        areaFocus: FocusRequester,
+        districtFocus: FocusRequester,
+        pincodeFocus: FocusRequester
     ) {
-        var isAddress1Valid=true
-        if (town.isEmpty()) {
-            _town1Error.value=context.getString(R.string.enter_valid_town)
-            townFocus.requestFocus()
-            isAddress1Valid=false
+        val allowedSpecialChars = ",.-/#'&"
+        val hasInvalidChars = area.any {
+            !(it.isLetterOrDigit() && it.code < 128) && !it.isWhitespace() && it !in allowedSpecialChars
+        }
+        var isAddress1Valid = true
+        if (district.isEmpty()) {
+            _district1Error.value = context.getString(R.string.enter_valid_town)
+            districtFocus.requestFocus()
+            isAddress1Valid = false
+        } else if (district.length < 3) {
+            _district1Error.value = context.getString(R.string.please_enter_min_3_characters)
+            districtFocus.requestFocus()
+            isAddress1Valid = false
+        } else if (district.length > 100) {
+            _district1Error.value = context.getString(R.string.max_100_characters_allowed)
+            districtFocus.requestFocus()
+            isAddress1Valid = false
+        } else if (district.all { it.isDigit() }) {
+            _district1Error.value = context.getString(R.string.please_enter_valid_town)
+            districtFocus.requestFocus()
+            isAddress1Valid = false
+        } else if (hasInvalidChars) {
+            _district1Error.value = context.getString(R.string.special_characters_not_allowed)
+            districtFocus.requestFocus()
+            isAddress1Valid = false
         }
         if (pinCode.isEmpty()) {
-            _pinCode1Error.value=context.getString(R.string.enter_valid_pincode)
+            _pinCode1Error.value = context.getString(R.string.enter_valid_pincode)
             pincodeFocus.requestFocus()
-            isAddress1Valid=false
+            isAddress1Valid = false
         }
         if (area.isEmpty()) {
-            _area1Error.value=context.getString(R.string.enter_valid_area)
+            _area1Error.value = context.getString(R.string.enter_valid_area)
             areaFocus.requestFocus()
-            isAddress1Valid=false
+            isAddress1Valid = false
+        } else if (area.length < 10) {
+            _area1Error.value = context.getString(R.string.please_enter_min_10_characters)
+            areaFocus.requestFocus()
+            isAddress1Valid = false
+        } else if (area.length > 100) {
+            _area1Error.value = context.getString(R.string.max_100_characters_allowed)
+            areaFocus.requestFocus()
+            isAddress1Valid = false
+        } else if (area.all { it.isDigit() }) {
+            _area1Error.value = context.getString(R.string.please_enter_valid_area)
+            areaFocus.requestFocus()
+            isAddress1Valid = false
+        } else if (hasInvalidChars) {
+            _area1Error.value = context.getString(R.string.special_characters_not_allowed)
+            areaFocus.requestFocus()
+            isAddress1Valid = false
         }
-        if(isAddress1Valid && _isAddress1Validated.value==true){
-            val fullAddress= AddressModel(area, town, city, state,pinCode)
+
+        if (isAddress1Valid && _isAddress1Validated.value == true) {
+            val fullAddress = AddressModel(area, district, city, state, pinCode)
             _officialAddressField.value = fullAddress
             scope.launch { bottomSheetStateValue.hide() }
-            _officialAddressError.value=null
+            _officialAddressError.value = null
         }
     }
 
     fun clearAddress() {
-        _area1.value=null
-        _town1.value=null
-        _city1.value=null
-        _state1.value =null
-        _pinCode1.value=null
+        _area1.value = null
+        _district1.value = null
+        _city1.value = null
+        _state1.value = null
+        _pinCode1.value = null
 
-        _area1Error.value= null
-        _town1Error.value= null
+        _area1Error.value = null
+        _district1Error.value = null
         _pinCode1Error.value = null
 
-            val fullAddress= AddressModel(null, null, null, null,null)
-            _officialAddressField.value = fullAddress
-            _officialAddressError.value=null
-    }
-
-    @OptIn(ExperimentalMaterialApi::class)
-    fun address2Validation(
-        scope: CoroutineScope, bottomSheetStateValue: ModalBottomSheetState, pinCode: String,
-        area: String, town: String, city: String,state:String, context: Context,
-    ) {
-        var isAddress2Valid=true
-        if (pinCode.isEmpty()) {
-            _pinCode2Error.value=context.getString(R.string.enter_valid_pincode)
-            isAddress2Valid=false
-        }
-        if (area.isEmpty()) {
-            _area2Error.value=context.getString(R.string.enter_valid_area)
-            isAddress2Valid=false
-        }
-        if (town.isEmpty()) {
-            _town2Error.value=context.getString(R.string.enter_valid_town)
-            isAddress2Valid=false
-        }
-        if(isAddress2Valid && _isAddress2Validated.value==true){
-            val fullAddress= AddressModel(area, town, city, state,pinCode)
-            _permanentAddressField.value = fullAddress
-            scope.launch { bottomSheetStateValue.hide() }
-            _permanentAddressError.value=null
-        }
+        val fullAddress = AddressModel(null, null, null, null, null)
+        _officialAddressField.value = fullAddress
+        _officialAddressError.value = null
     }
 
     fun onClickUpdateProfile(
         navController: NavHostController,
         isUploadDocument: Boolean,
         context: Context,
-        officialAddressField:AddressModel,
-//        permanentAddressField:AddressModel,
+        officialAddressField: AddressModel,
         profile: Profile,
-        profileRequester: ProfileFocusRequester,
+        profileRequester: ProfileFocusRequester
 //        isGST:Boolean
     ) {
         clearMessage()
-        if (!validateProfile(profile, officialAddressField,context,profileRequester)) {
-            _showErrorMsg.value=true
-            _errorMsg.value=context.getString(R.string.please_check_all_fields)
-        }else if(isUploadDocument && (profile.statements.isNullOrEmpty()|| profile.invoices.isNullOrEmpty())){
-            _showErrorMsg.value=true
-            _errorMsg.value=context.getString(R.string.documents_not_uploaded_please_click_upload_documents_button)
-        }else if( _checkBox.value == false){
-            _showErrorMsg.value=true
-            _errorMsg.value=context.getString(R.string.please_accept_our_agent_may_call_u)
+        if (!validateProfile(profile, officialAddressField, context, profileRequester)) {
+            _showErrorMsg.value = true
+            _errorMsg.value = context.getString(R.string.please_check_all_fields)
+        } else if (isUploadDocument && (profile.statements.isNullOrEmpty() || profile.invoices.isNullOrEmpty())) {
+            _showErrorMsg.value = true
+            _errorMsg.value = context.getString(R.string.documents_not_uploaded_please_click_upload_documents_button)
+        } else if (_checkBox.value == false) {
+            _showErrorMsg.value = true
+            _errorMsg.value = context.getString(R.string.please_accept_our_agent_may_call_u)
         } else {
-            _showErrorMsg.value=false
+            _showErrorMsg.value = false
             updateUserDetails(profile, context, navController)
+//            Log.d("res_H", profile.toString())
         }
     }
-    private fun validateProfile(profile: Profile,
-                                officialAddressField:AddressModel,
-//                                permanentAddressField:AddressModel,
-                                context: Context,   profileRequester: ProfileFocusRequester): Boolean {
+    private fun validateProfile(
+        profile: Profile,
+        officialAddressField: AddressModel,
+        context: Context,
+        profileRequester: ProfileFocusRequester
+    ): Boolean {
         var isProfileValid = true
         val dobPattern = Regex("^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\\d{4}$")
 
-        if(profile.udyamNumber !=null){
-            if(CommonMethods().isValidUdyamNumber(profile.udyamNumber)!=true){
+        if (profile.udyamNumber != null) {
+            if (CommonMethods().isValidUdyamNumber(profile.udyamNumber) != true) {
                 _udyamNumberError.value = context.getString(R.string.enter_valid_udyam_number)
                 profileRequester.udyamNumberFocus.requestFocus()
-                isProfileValid = false
-            }
-        }
-        if(profile.companyName !=null){
-           if (profile.companyName.length > 50) {
-                _companyNameError.value =context.getString(R.string.company_name_should_not_exceed_50_characters)
-                profileRequester.companyNameFocus.requestFocus()
                 isProfileValid = false
             }
         }
@@ -797,7 +685,7 @@ fun onUdyamNumberChanged(value: String, context: Context) {
                 _companyNameError.value = context.getString(R.string.enter_company_name)
                 profileRequester.companyNameFocus.requestFocus()
                 isProfileValid = false
-            }else if (profile.companyName.length > 50) {
+            } else if (profile.companyName.length > 50) {
                 _companyNameError.value = context.getString(R.string.company_name_should_not_exceed_50_characters)
                 profileRequester.companyNameFocus.requestFocus()
                 isProfileValid = false
@@ -812,30 +700,27 @@ fun onUdyamNumberChanged(value: String, context: Context) {
             _dobError.value = context.getString(R.string.enter_dob)
             profileRequester.dobFocus.requestFocus()
             isProfileValid = false
-        }else if(!dobPattern.matches(profile.dob)) {
+        } else if (!dobPattern.matches(profile.dob)) {
             _dobError.value = context.getString(R.string.please_enter_date_format)
             profileRequester.dobFocus.requestFocus()
             isProfileValid = false
-        }else if(!isValidAdultDob(profile.dob)) {
+        } else if (!isValidAdultDob(profile.dob)) {
             _dobError.value = context.getString(R.string.you_must_be_18_years)
             profileRequester.dobFocus.requestFocus()
             isProfileValid = false
         }
-        if(profile.officialEmail !=null){
-            if(!CommonMethods().isValidEmail(profile.officialEmail)){
+
+        if (profile.employmentType.equals("salaried")) {
+            if (profile.officialEmail.isNullOrEmpty()) {
+                _officialEmailIdError.value = context.getString(R.string.enter_valid_email_id)
+                profileRequester.officialEmailIdFocus.requestFocus()
+                isProfileValid = false
+            } else if (!CommonMethods().isValidEmail(profile.officialEmail)) {
                 _officialEmailIdError.value = context.getString(R.string.enter_valid__official_email_id)
                 profileRequester.officialEmailIdFocus.requestFocus()
                 isProfileValid = false
-            }else if(profile.officialEmail == profile.email ) {
+            } else if (profile.officialEmail == profile.email) {
                 _officialEmailIdError.value = context.getString(R.string.official_mail_id_should_not_be_same)
-                profileRequester.officialEmailIdFocus.requestFocus()
-                isProfileValid = false
-            }
-        }
-
-        if(profile.employmentType.equals("salaried")){
-            if (profile.officialEmail.isNullOrEmpty()) {
-                _officialEmailIdError.value = context.getString(R.string.enter_valid_email_id)
                 profileRequester.officialEmailIdFocus.requestFocus()
                 isProfileValid = false
             }
@@ -844,9 +729,8 @@ fun onUdyamNumberChanged(value: String, context: Context) {
             _personalEmailIdError.value = context.getString(R.string.enter_valid_email_id)
             profileRequester.personalEmailIdFocus.requestFocus()
             isProfileValid = false
-        }else if(!CommonMethods().isValidEmail(profile.email)){
+        } else if (!CommonMethods().isValidEmail(profile.email)) {
             _personalEmailIdError.value = context.getString(R.string.enter_valid_personal_email_id)
-//            _personalEmailIdError.value = "------valid email needed"
             profileRequester.personalEmailIdFocus.requestFocus()
             isProfileValid = false
         }
@@ -857,23 +741,25 @@ fun onUdyamNumberChanged(value: String, context: Context) {
         }
 
         if (profile.lastName.isNullOrEmpty()) {
-            _lastNameError.value =context.getString(R.string.enter_valid_last_name)
+            _lastNameError.value = context.getString(R.string.enter_valid_last_name)
             profileRequester.lastNameFocus.requestFocus()
             isProfileValid = false
-        }else if (profile.lastName.length >= 30) {
+        } else if (profile.lastName.length >= 30) {
             _lastNameError.value = context.getString(R.string.last_name_not_exceeded_30_characters)
             profileRequester.lastNameFocus.requestFocus()
             isProfileValid = false
         }
         if (profile.firstName?.isEmpty() == true) {
-            _firstNameError.value =context.getString(R.string.enter_valid_first_name)
+            _firstNameError.value = context.getString(R.string.enter_valid_first_name)
             profileRequester.firstNameFocus.requestFocus()
             isProfileValid = false
-        }else if (profile.firstName?.length!! < 4) {
-            _firstNameError.value = context.getString(R.string.first_name_should_contain_minimum_4_letters)
-            profileRequester.firstNameFocus.requestFocus()
-            isProfileValid = false
-        } else if (profile.firstName.length >= 30) {
+        }
+//        else if (profile.firstName?.length!! < 4) {
+//            _firstNameError.value = context.getString(R.string.first_name_should_contain_minimum_4_letters)
+//            profileRequester.firstNameFocus.requestFocus()
+//            isProfileValid = false
+//        }
+        else if (profile.firstName?.length!! >= 30) {
             _firstNameError.value = context.getString(R.string.first_name_not_exceeded_30_characters)
             profileRequester.firstNameFocus.requestFocus()
             isProfileValid = false
@@ -883,7 +769,7 @@ fun onUdyamNumberChanged(value: String, context: Context) {
             _panError.value = context.getString(R.string.enter_valid_pan_number)
             profileRequester.panFocus.requestFocus()
             isProfileValid = false
-        }else if(CommonMethods().isValidPanNumber(profile.panNumber) != true){
+        } else if (CommonMethods().isValidPanNumber(profile.panNumber) != true) {
             _panError.value = context.getString(R.string.enter_valid_pan_number)
             profileRequester.panFocus.requestFocus()
             isProfileValid = false
@@ -898,16 +784,15 @@ fun onUdyamNumberChanged(value: String, context: Context) {
     private val _mobileNumber: MutableLiveData<String?> = MutableLiveData()
     val mobileNumber: LiveData<String?> = _mobileNumber
 
-
     private val _checkBox: MutableLiveData<Boolean> = MutableLiveData(false)
     val checkBox: LiveData<Boolean> = _checkBox
 
     fun onCheckChanged(checkBox: Boolean) {
         _checkBox.value = checkBox
-        if(checkBox){
-            onValidatingError(checkBox,null)
-        }else{
-            onValidatingError(checkBox,"Please accept that our agent may call you to assist further")
+        if (checkBox) {
+            onValidatingError(checkBox, null)
+        } else {
+            onValidatingError(checkBox, "Please accept that our agent may call you to assist further")
         }
         updateGeneralError(null)
     }
@@ -917,10 +802,9 @@ fun onUdyamNumberChanged(value: String, context: Context) {
     private val _errorValidationMsg: MutableLiveData<String?> = MutableLiveData(null)
     val errorValidationMsg: LiveData<String?> = _errorValidationMsg
 
-    fun onValidatingError(value: Boolean,errorMsg: String?) {
+    fun onValidatingError(value: Boolean, errorMsg: String?) {
         _showValidationError.value = value
-        _errorValidationMsg.value=errorMsg
-
+        _errorValidationMsg.value = errorMsg
     }
 
     private val _generalError: MutableLiveData<String?> = MutableLiveData("")
@@ -942,8 +826,6 @@ fun onUdyamNumberChanged(value: String, context: Context) {
     private val _successResponse = MutableStateFlow<Signup?>(null)
     val successResponse: StateFlow<Signup?> = _successResponse
 
-
-
     private val _shouldShowKeyboard: MutableLiveData<Boolean> = MutableLiveData(false)
     val shouldShowKeyboard: LiveData<Boolean> = _shouldShowKeyboard
 
@@ -957,7 +839,6 @@ fun onUdyamNumberChanged(value: String, context: Context) {
     private val _upDated = MutableStateFlow(false)
     val upDated: StateFlow<Boolean> = _upDated
 
-
     private val _shownMsg = MutableStateFlow(false)
     val shownMsg: StateFlow<Boolean> = _shownMsg
 
@@ -969,7 +850,9 @@ fun onUdyamNumberChanged(value: String, context: Context) {
     }
 
     private fun updateUserDetails(
-        profile: Profile, context: Context, navController: NavHostController
+        profile: Profile,
+        context: Context,
+        navController: NavHostController
     ) {
         _isUpdating.value = true
         viewModelScope.launch(Dispatchers.IO) {
@@ -978,7 +861,9 @@ fun onUdyamNumberChanged(value: String, context: Context) {
     }
 
     private suspend fun handleUpdateUserDetails(
-        profile: Profile, context: Context, navController: NavHostController,
+        profile: Profile,
+        context: Context,
+        navController: NavHostController,
         checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
@@ -988,11 +873,11 @@ fun onUdyamNumberChanged(value: String, context: Context) {
                 handleUpdateUserDetailsSuccess(response, profile)
             }
         }.onFailure { error ->
-            //Session Management
+            // Session Management
             if (error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                //Get Access Token using RefreshToken
+                // Get Access Token using RefreshToken
                 if (checkForAccessToken && handleAuthGetAccessTokenApi()) {
                     handleUpdateUserDetails(profile, context, navController, false)
                 } else {
@@ -1020,21 +905,26 @@ fun onUdyamNumberChanged(value: String, context: Context) {
         withContext(Dispatchers.Main) {
             if (error is ResponseException) {
                 CommonMethods().handleResponseException(
-                    error = error, context = context, updateErrorMessage = ::updateErrorMessage,
-                    _showServerIssueScreen = _showServerIssueScreen, _middleLoan = _middleLoan,
-                    _unAuthorizedUser = _unAuthorizedUser, _unexpectedError = _unexpectedError,
+                    error = error,
+                    context = context,
+                    updateErrorMessage = ::updateErrorMessage,
+                    _showServerIssueScreen = _showServerIssueScreen,
+                    _middleLoan = _middleLoan,
+                    _unAuthorizedUser = _unAuthorizedUser,
+                    _unexpectedError = _unexpectedError,
                     _showLoader = _showLoader
                 )
             } else {
                 CommonMethods().handleGeneralException(
-                    error = error, _showInternetScreen = _showInternetScreen,
-                    _showTimeOutScreen = _showTimeOutScreen, _unexpectedError = _unexpectedError
+                    error = error,
+                    _showInternetScreen = _showInternetScreen,
+                    _showTimeOutScreen = _showTimeOutScreen,
+                    _unexpectedError = _unexpectedError
                 )
             }
         }
         _isUpdating.value = false
     }
-
 
     private val _checkBoxDetail: MutableLiveData<Boolean> = MutableLiveData(false)
     val checkBoxDetail: LiveData<Boolean> = _checkBoxDetail
@@ -1064,7 +954,9 @@ fun onUdyamNumberChanged(value: String, context: Context) {
     }
 
     private suspend fun handleUserDetail(
-        context: Context, navController: NavHostController, checkForAccessToken: Boolean = true
+        context: Context,
+        navController: NavHostController,
+        checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
             ApiRepository.getUserDetail()
@@ -1076,7 +968,7 @@ fun onUdyamNumberChanged(value: String, context: Context) {
             if (error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                //Get Access Token using RefreshToken
+                // Get Access Token using RefreshToken
                 if (checkForAccessToken && handleAuthGetAccessTokenApi()) {
                     // Retry getting user details with the new access token
                     handleUserDetail(context, navController, false)
@@ -1088,7 +980,7 @@ fun onUdyamNumberChanged(value: String, context: Context) {
                 }
             } else {
                 // Handle other types of failures
-                handleFailure(error = error, context =  context)
+                handleFailure(error = error, context = context)
             }
         }
     }
@@ -1109,44 +1001,28 @@ fun onUdyamNumberChanged(value: String, context: Context) {
                 _companyName.value = it.data?.companyName
                 _udyamNumber.value = it.data?.udyamNumber
                 _income.value = it.data?.income
-//                _officialAddress.value = it.data?.address1
-//                _officialAddress.value = it.data?.address1
-//                val address1 = it.data?.address1?.split(",")?.map { it.trim() }
-//                _area1.value = address1?.getOrNull(0) ?: ""
-//                _town1.value = address1?.getOrNull(1) ?: ""
+//
                 _area1.value = it.data?.address1
-                _town1.value = it.data?.address2
+                _district1.value = it.data?.address2
                 _city1.value = it.data?.city1
                 _state1.value = it.data?.state1
                 _pinCode1.value = it.data?.pincode1
-                _officialAddressField.value =AddressModel(_area1.value, _town1.value, _city1.value, _state1.value, _pinCode1.value)
-//                _permanentAddress.value = it.data?.address2
-//                _permanentAddress.value = it.data?.address2
-//                val address2 = it.data?.address2?.split(",")?.map { it.trim() }
-//                _area2.value = address2?.getOrNull(0) ?: ""
-//                _town2.value = address2?.getOrNull(1) ?: ""
-//                _city2.value = it.data?.city2
-//                _state2.value = it.data?.state2
-//                _pinCode2.value = it.data?.pincode2
-
-//                _officialAddressField.value =
-//                    listOf(
-//                    AddressModel(_area1.value, _town1.value, _city1.value, _state1.value, _pinCode1.value)
-//                ).filterNot { it.isNullOrEmpty() }
-//                    .joinToString(",")
-
-//                _permanentAddressField.value =AddressModel(_area2.value, _town2.value, _city2.value, _state2.value, _pinCode2.value)
-//                _permanentAddressField.value = listOf(
-//                    _area2.value, _town2.value, _city2.value, _state2.value, _pinCode2.value
-//                ).filterNot { it.isNullOrEmpty() }
-//                    .joinToString(",")
+                _officialAddressField.value = AddressModel(_area1.value, _district1.value, _city1.value, _state1.value, _pinCode1.value)
+//
                 _inProgress.value = false
                 _isCompleted.value = true
                 _getUserResponse.value = it
                 TokenManager.save("userName", it.data?.firstName.toString())
                 TokenManager.save("mobileNumber", it.data?.mobileNumber.toString())
+                TokenManager.save("email", it.data?.email.toString())
                 TokenManager.save("address", it.data?.pincode1.toString())
-                _documentUploadResponse.value = DocumentUpload(data = listOf(it.data?.invoices?.get(0),it.data?.statements?.get(0)))
+                _documentUploadResponse.value = DocumentUpload(
+                    data = listOf(
+                        it.data?.statements?.firstOrNull(),
+                        it.data?.invoices?.firstOrNull()
+                    )
+                )
+//                _documentUploadResponse.value = DocumentUpload(data = listOf(it.data?.statements?.get(0), it.data?.invoices?.get(0)))
             }
         }
     }
@@ -1167,128 +1043,16 @@ fun onUdyamNumberChanged(value: String, context: Context) {
                         } else {
                             _city1.value = it.cities[0]
                             _state1.value = it.state
+                            _district1.value=it.district
                         }
                     }
                 } ?: withContext(Dispatchers.Main) {
-                    _pinCode1Error.value="Please enter valid pincode"
+                    _pinCode1Error.value = "Please enter valid pincode"
                 }
             }.onFailure {
                 withContext(Dispatchers.Main) {
                     Log.d("PinCodeError", it.toString())
                 }
-            }
-        }
-    }
-
-    private val _pinCode2Response = MutableStateFlow<PincodeModel?>(null)
-    val pinCode2Response: StateFlow<PincodeModel?> = _pinCode2Response
-
-    private fun getCity2(pinCode: String, context: Context) {
-        viewModelScope.launch(Dispatchers.IO) {
-            kotlin.runCatching {
-                ApiRepository.getCity(pinCode)
-            }.onSuccess { response ->
-                response?.let {
-                    _pinCode2Response.value = it
-                    withContext(Dispatchers.Main) {
-                        _city2.value = it.cities?.get(0)
-                        _state2.value = it.state
-                    }
-                } ?: withContext(Dispatchers.Main) {
-                    _pinCode2Error.value="Please enter valid pincode"
-                }
-            }.onFailure {
-                withContext(Dispatchers.Main) {
-                    Log.d("PinCodeError", it.toString())
-                }
-            }
-        }
-    }
-
-    private val _resendingOtp = MutableStateFlow(false)
-    val resendingOtp: StateFlow<Boolean> = _resendingOtp
-
-    private val _reSendedOtp = MutableStateFlow(false)
-    val reSendedOtp: StateFlow<Boolean> = _reSendedOtp
-
-    private val _resendOtpResponse = MutableStateFlow<Data?>(null)
-    val resendOtpResponse: StateFlow<Data?> = _resendOtpResponse
-
-    fun authResendOTP(orderId: String, context: Context, navController: NavHostController) {
-        _resendingOtp.value = true
-        viewModelScope.launch(Dispatchers.IO) {
-            handleReSendOtp(orderId, context, navController)
-        }
-    }
-
-    private suspend fun handleReSendOtp(
-        orderId: String, context: Context, navController: NavHostController,
-        checkForAccessToken: Boolean = true
-    ) {
-        kotlin.runCatching {
-            ApiRepository.authResendOTP(orderId)
-        }.onSuccess { response ->
-            response?.let {
-                handleReSendOtpSuccess(response)
-            }
-        }.onFailure { error ->
-            if (error is ResponseException &&
-                error.response.status.value == 401
-            ) {
-                //Get Access Token using RefreshToken
-                if (checkForAccessToken && handleAuthGetAccessTokenApi()) {
-                    handleReSendOtp(orderId, context, navController, false)
-                } else {
-                    // If unable to refresh the token, navigate to the sign-in page
-                    withContext(Dispatchers.Main) {
-                        navigateSignInPage(navController)
-                    }
-                }
-            } else {
-                handleReSendOtpFailure(error, context)
-            }
-        }
-    }
-
-    private suspend fun handleReSendOtpSuccess(response: Data) {
-        withContext(Dispatchers.Main) {
-            _reSendedOtp.value = true
-            _resendOtpResponse.value = response
-            _resendingOtp.value = false
-        }
-    }
-
-    private suspend fun handleReSendOtpFailure(error: Throwable, context: Context) {
-        withContext(Dispatchers.Main) {
-            if (error is ResponseException) {
-                handleReSendOtpResponseException(error, context)
-            } else {
-                CommonMethods().handleGeneralException(
-                    error = error, _showInternetScreen = _showInternetScreen,
-                    _showTimeOutScreen = _showTimeOutScreen, _unexpectedError = _unexpectedError
-                )
-            }
-            _resendingOtp.value = false
-        }
-    }
-
-    private fun handleReSendOtpResponseException(error: ResponseException, context: Context) {
-        val statusCode = error.response.status.value
-        when (statusCode) {
-            400 -> {
-                CommonMethods().toastMessage(context,"Please Enter Valid Otp")
-             }
-
-            401 -> {
-                _unAuthorizedUser.value = true
-            }
-
-            500 -> {
-                _showServerIssueScreen.value = true
-            }
-
-            else -> {
-                _unexpectedError.value = true
             }
         }
     }
@@ -1296,8 +1060,11 @@ fun onUdyamNumberChanged(value: String, context: Context) {
     private val _logoutResponse = MutableStateFlow<Logout?>(null)
     val logoutResponse: StateFlow<Logout?> = _logoutResponse
 
-    fun logout(refreshToken: String, navController: NavHostController,
-               checkForAccessToken: Boolean = true) {
+    fun logout(
+        refreshToken: String,
+        navController: NavHostController,
+        checkForAccessToken: Boolean = true
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
             kotlin.runCatching {
                 ApiRepository.logout(refreshToken)
@@ -1306,6 +1073,8 @@ fun onUdyamNumberChanged(value: String, context: Context) {
                     response?.let {
                         _logoutResponse.value = it
                         TokenManager.save("accessToken", "")
+                        TokenManager.save("sseId", "")
+
                         navigateSignInPage(navController, true)
                     }
                 }
@@ -1314,7 +1083,7 @@ fun onUdyamNumberChanged(value: String, context: Context) {
                     error.response.status.value == 401
                 ) {
                     if (checkForAccessToken && handleAuthGetAccessTokenApi()) {
-                        logout(refreshToken, navController,false)
+                        logout(refreshToken, navController, false)
                     } else {
                         withContext(Dispatchers.Main) {
                             _logoutResponse.value = null
@@ -1325,10 +1094,9 @@ fun onUdyamNumberChanged(value: String, context: Context) {
                         _logoutResponse.value = null
                     }
                 }
-                }
+            }
         }
     }
-
 
     private fun isNotValidAddress(input: String): Boolean {
         val regex = Regex("^[a-zA-Z0-9,./#'\\-\\s]*$")

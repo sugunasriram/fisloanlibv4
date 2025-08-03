@@ -15,12 +15,12 @@ data class ProfileFocusRequester(
     val firstNameFocus: FocusRequester,
     val lastNameFocus: FocusRequester,
     val personalEmailIdFocus: FocusRequester,
-    val officialEmailIdFocus:FocusRequester,
-    val employeeTypeFocus:FocusRequester,
-    val dobFocus:FocusRequester,
-    val genderFocus:FocusRequester,
-    val companyNameFocus:FocusRequester,
-    val udyamNumberFocus:FocusRequester,
+    val officialEmailIdFocus: FocusRequester,
+    val employeeTypeFocus: FocusRequester,
+    val dobFocus: FocusRequester,
+    val genderFocus: FocusRequester,
+    val companyNameFocus: FocusRequester,
+    val udyamNumberFocus: FocusRequester
 )
 
 @Serializable
@@ -51,7 +51,3 @@ data class Profile(
     val statements: List<String>? = null,
     val invoices: List<String>? = null
 )
-
-
-
-

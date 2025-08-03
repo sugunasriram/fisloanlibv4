@@ -10,7 +10,6 @@ data class OrderPaymentStatusResponse(
     val statusCode: Long? = null
 )
 
-
 @Serializable
 data class OrderPaymentStatusItem(
     @SerialName("_id")
@@ -52,34 +51,3 @@ data class TagListItem(
     val descriptor: Descriptor? = null,
     val value: String? = null
 )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

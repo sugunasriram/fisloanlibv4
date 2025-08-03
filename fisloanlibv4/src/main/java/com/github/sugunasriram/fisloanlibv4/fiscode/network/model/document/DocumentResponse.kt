@@ -24,7 +24,7 @@ data class ContactUsData(
     val email: String? = null,
 
     @SerialName("mobile_number")
-    val mobileNumber: String? = null,
+    val mobileNumber: String? = null
 )
 
 @Serializable
@@ -143,7 +143,7 @@ data class DocumentItem(
     @SerialName("paragraph_16")
     val paragraph16: String? = null,
 
-	@SerialName("paragraph_16a")
+    @SerialName("paragraph_16a")
     val paragraph16a: String? = null,
 
     @SerialName("paragraph_15")
@@ -173,7 +173,7 @@ data class DocumentItem(
     @SerialName("subheading_17")
     val subheading17: String? = null,
 
-	@SerialName("subheading_18")
+    @SerialName("subheading_18")
     val subheading18: String? = null,
 
     @SerialName("subheading_16")
@@ -308,58 +308,58 @@ data class DocumentItem(
     @SerialName("paragraph_55")
     val paragraph55: String? = null,
 
-	@SerialName("list_1")
+    @SerialName("list_1")
     val list1: String? = null,
 
-	@SerialName("list_2")
+    @SerialName("list_2")
     val list2: String? = null,
 
-	@SerialName("list_3")
+    @SerialName("list_3")
     val list3: String? = null,
 
-	@SerialName("list_4")
+    @SerialName("list_4")
     val list4: String? = null,
 
-	@SerialName("list_5")
+    @SerialName("list_5")
     val list5: String? = null,
 
-	@SerialName("list_6")
+    @SerialName("list_6")
     val list6: String? = null,
 
-	@SerialName("list_7")
+    @SerialName("list_7")
     val list7: String? = null,
 
-	@SerialName("list_8")
+    @SerialName("list_8")
     val list8: String? = null,
 
-	@SerialName("list_9")
+    @SerialName("list_9")
     val list9: String? = null,
 
-	@SerialName("list_10")
+    @SerialName("list_10")
     val list10: String? = null,
 
-	@SerialName("list_11")
+    @SerialName("list_11")
     val list11: String? = null,
 
-	@SerialName("list_12")
+    @SerialName("list_12")
     val list12: String? = null,
 
-	@SerialName("list_13")
+    @SerialName("list_13")
     val list13: String? = null,
 
-	@SerialName("list_14")
+    @SerialName("list_14")
     val list14: String? = null,
 
-	@SerialName("list_15")
+    @SerialName("list_15")
     val list15: String? = null,
 
-	@SerialName("list_16")
+    @SerialName("list_16")
     val list16: String? = null,
 
-	@SerialName("list_17")
+    @SerialName("list_17")
     val list17: String? = null,
 
-	@SerialName("list_18")
-    val list18: String? = null,
+    @SerialName("list_18")
+    val list18: String? = null
 
 )

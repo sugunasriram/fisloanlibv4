@@ -22,30 +22,33 @@ fun KYCFailedScreen(navController: NavHostController) {
     BackHandler { navigateApplyByCategoryScreen(navController) }
     FixedTopBottomScreen(
         navController = navController,
-        backgroundColor= appWhite,
+        backgroundColor = appWhite,
         showBackButton = true,
-        onBackClick = { navController.popBackStack()},
+        onBackClick = { navController.popBackStack() },
         topBarBackgroundColor = appWhite
     ) {
-
         StartingText(
             text = stringResource(R.string.kyc_failed),
             textColor = failureRed,
-            start = 30.dp, end = 30.dp, top = 150.dp, bottom = 50.dp,
+            start = 30.dp,
+            end = 30.dp,
+            top = 150.dp,
+            bottom = 50.dp,
             style = normalSerif32Text500,
             alignment = Alignment.Center
         )
         Image(
             painter = painterResource(id = R.drawable.kyc_failed_image),
-            contentDescription = "", contentScale = ContentScale.Crop,
+            contentDescription = "",
+            contentScale = ContentScale.Crop
         )
     }
 }
 
-//@Preview
-//@Composable
-//private fun KYCFailedPReviewScreen() {
+// @Preview
+// @Composable
+// private fun KYCFailedPReviewScreen() {
 //    Surface {
 //        KYCFailedScreen(rememberNavController())
 //    }
-//}
+// }

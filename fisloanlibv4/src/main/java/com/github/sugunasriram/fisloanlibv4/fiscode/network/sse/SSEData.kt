@@ -1,7 +1,10 @@
 package com.github.sugunasriram.fisloanlibv4.fiscode.network.sse
 
-import android.content.om.OverlayManagerTransaction
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.Descriptor
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.OfferResponseItem
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.RejectedLenders
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.SearchResponseModel
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -19,16 +22,30 @@ data class DataContent(
 
 @Serializable
 data class EventData(
-    val transactionId: String? = null, //Sugu - To remove
+    val transactionId: String? = null, // Sugu - To remove
     val txnId: String? = null,
     val type: String? = null,
     val data: Catalog? = null,
+//    val data: JsonElement? = null,
+    val fromSubmissionResponse: SearchResponseModel? = null,
+    val offers: List<OfferCatalog>? = null,
+    val rejectedLenders: List<RejectedLenders>? = null,
     val catalog: Catalog? = null,
     val postRequestId: String? = null,
     val consent: Boolean? = false,
     val id: String? = null,
     val url: String? = null,
+    val error: ErrorObj? = null
+)
 
+@Serializable
+data class OfferCatalog(
+    @SerialName("_id")
+    val id: String? = null,
+    @SerialName("offer")
+    val offer: OfferResponseItem? = null,
+    @SerialName("bureau_consent")
+    val bureauConsent: Boolean? = false
 )
 
 @Serializable
@@ -60,10 +77,12 @@ data class Catalog(
     val fulfillments: List<Fulfillment>? = null,
     val SETTLEMENT_AMOUNT: String? = null,
     val quote_breakup: List<SSEQuoteBreakUp>? = null,
+    @SerialName("_id")
+    val id: String? = null,
 
-    val error: ErrorObj? = null,
+    val error: ErrorObj? = null
 
-    )
+)
 
 @Serializable
 data class SSEProviderDescriptor(
@@ -103,8 +122,6 @@ data class ItemTag(
     val display: Boolean? = null,
     val tags: Map<String, String?>? = null
 )
-
-
 
 @Serializable
 data class Payment(

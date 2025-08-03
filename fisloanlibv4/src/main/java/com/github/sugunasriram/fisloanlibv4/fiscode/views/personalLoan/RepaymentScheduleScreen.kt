@@ -3,6 +3,7 @@ package com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan
 import android.content.Context
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -94,6 +95,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.lightGray
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal12Text400
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal14Text400
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal14Text500
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal14Text700
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal16Text500
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal16Text700
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal18Text400
@@ -106,23 +108,28 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.MiddleOfTheLoa
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.PrePaymentStatusScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.time.Duration
+import java.time.Period
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Locale
-import java.time.Duration
-import java.time.Period
 import java.time.format.DateTimeParseException
+import java.util.Locale
 
 var amount_to_be_paid = ""
 var coolOffPeriodDate = ""
 var principal = ""
+var prepartPaymentCharges: String? = null
+
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun RepaymentScheduleScreen(navController: NavHostController, orderId: String, fromFlow: String,
-                            fromScreen:String) {
-
+fun RepaymentScheduleScreen(
+    navController: NavHostController,
+    orderId: String,
+    fromFlow: String,
+    fromScreen: String
+) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
@@ -157,33 +164,40 @@ fun RepaymentScheduleScreen(navController: NavHostController, orderId: String, f
     val navigationToSignIn by getOrderPaymentStatusViewModel.navigationToSignIn.collectAsState()
 
     val paymentOptionBottomSheet = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
     )
 
     val bottomSheetStateValue = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
     )
     val loanType = CommonMethods().setFromFlow(fromFlow)
+
 
     // Call getOrderPaymentStatus when the composable first loads
     LaunchedEffect(Unit) {
         // Fetch payment status
         getOrderPaymentStatusViewModel.getOrderPaymentStatus(
-            loanType = loanType, loanId = orderId, context = context
+            loanType = loanType,
+            loanId = orderId,
+            context = context
         )
     }
 
-
     when {
-        navigationToSignIn -> navigateSignInPage (navController)
+        navigationToSignIn -> navigateSignInPage(navController)
         showInternetScreen -> CommonMethods().ShowInternetErrorScreen(navController)
         showTimeOutScreen -> CommonMethods().ShowTimeOutErrorScreen(navController)
         showServerIssueScreen -> CommonMethods().ShowServerIssueErrorScreen(navController)
         unexpectedErrorScreen -> CommonMethods().ShowUnexpectedErrorScreen(navController)
         unAuthorizedUser -> CommonMethods().ShowUnAuthorizedErrorScreen(navController)
-        middleLoan ->  MiddleOfTheLoanScreen(navController,errorMessage,onGoBack = {
-            navController.popBackStack() // or any custom behavior
-        }
+        middleLoan -> MiddleOfTheLoanScreen(
+            navController,
+            errorMessage,
+            onGoBack = {
+                navController.popBackStack() // or any custom behavior
+            }
         )
 //        middleLoan -> CommonMethods().ShowMiddleLoanErrorScreen(navController)
         errorHandling -> {
@@ -193,7 +207,7 @@ fun RepaymentScheduleScreen(navController: NavHostController, orderId: String, f
                 fromFlow = fromFlow,
                 headerText = stringResource(id = R.string.repayment_un_successful),
                 showButton = true,
-                image = painterResource(id = R.drawable.payment_unsuccess),
+                image = painterResource(id = R.drawable.payment_unsuccess)
             ) {}
         }
 
@@ -212,9 +226,9 @@ fun RepaymentScheduleScreen(navController: NavHostController, orderId: String, f
                 checkOrderIssueResponse = checkOrderIssueResponse,
                 orderPaymentStatusList = orderPaymentStatusList,
                 orderPaymentListLoaded = orderPaymentListLoaded,
-                orderByIdResponse = orderByIdResponse,checked = checked,
-                checkingStatus = checkingStatus,loanStatus = loanStatus,
-                fromScreen=fromScreen
+                orderByIdResponse = orderByIdResponse, checked = checked,
+                checkingStatus = checkingStatus, loanStatus = loanStatus,
+                fromScreen = fromScreen
             )
         }
     }
@@ -223,28 +237,54 @@ fun RepaymentScheduleScreen(navController: NavHostController, orderId: String, f
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun RepaymentScheduleScreenHandle(
-    checkingOrderIssues: Boolean, checkedOrderIssues: Boolean, gettingOrderById: Boolean,
-    orderId: String, bottomSheetStateValue: ModalBottomSheetState, context: Context,
+    checkingOrderIssues: Boolean,
+    checkedOrderIssues: Boolean,
+    gettingOrderById: Boolean,
+    orderId: String,
+    bottomSheetStateValue: ModalBottomSheetState,
+    context: Context,
     getOrderPaymentStatusViewModel: GetOrderPaymentStatusViewModel,
-    loanAgreementViewModel: LoanAgreementViewModel, updateProcessed: Boolean,
-    updateProcessing: Boolean, fromFlow: String, navController: NavHostController,
-    paymentOptionBottomSheet: ModalBottomSheetState, scope: CoroutineScope,
-    updatedLoanAgreement: UpdateLoanAgreement?, orderPaymentListLoading: Boolean,
-    checkOrderIssueResponse: CheckOrderIssueModel?, orderByIdLoaded: Boolean,
-    orderPaymentStatusList: ArrayList<OrderPaymentStatusItem>?, loanType: String,
-    orderPaymentListLoaded: Boolean, orderByIdResponse: OrderByIdResponse?, checked: Boolean,
-    checkingStatus: Boolean, loanStatus: StatusResponse?, fromScreen:String
+    loanAgreementViewModel: LoanAgreementViewModel,
+    updateProcessed: Boolean,
+    updateProcessing: Boolean,
+    fromFlow: String,
+    navController: NavHostController,
+    paymentOptionBottomSheet: ModalBottomSheetState,
+    scope: CoroutineScope,
+    updatedLoanAgreement: UpdateLoanAgreement?,
+    orderPaymentListLoading: Boolean,
+    checkOrderIssueResponse: CheckOrderIssueModel?,
+    orderByIdLoaded: Boolean,
+    orderPaymentStatusList: ArrayList<OrderPaymentStatusItem>?,
+    loanType: String,
+    orderPaymentListLoaded: Boolean,
+    orderByIdResponse: OrderByIdResponse?,
+    checked: Boolean,
+    checkingStatus: Boolean,
+    loanStatus: StatusResponse?,
+    fromScreen: String
 ) {
     var selectedOption by remember { mutableStateOf("") }
     if (checkingOrderIssues || gettingOrderById || checkingStatus || orderPaymentListLoading) {
         CenterProgress()
     } else {
         if (checkedOrderIssues || orderByIdLoaded || checked || orderPaymentListLoaded) {
-            if (checked){
+            if (checked) {
                 loanStatus?.data?.data?.data?.catalog?.let { loanDetails ->
 //                    ModalBottomSheetLayout(
 //                        sheetState = bottomSheetStateValue,
 //                        sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+
+                    // Extract the PRE_PAYMENT_CHARGE value from quoteBreakUp
+                    loanDetails.quoteBreakUp?.forEach { item ->
+                        if (item?.title?.lowercase() == "pre_payment_charge" ||
+                            item?.title?.lowercase() == "pre_payment_charges" ) {
+                            prepartPaymentCharges = item.value
+                            Log.d("PrePaymentCharges 1",
+                                "prepartPaymentCharges: $prepartPaymentCharges")
+                        }
+                    }
+
                     CustomModalBottomSheet(
                         bottomSheetState = bottomSheetStateValue,
                         sheetContent = {
@@ -276,12 +316,13 @@ fun RepaymentScheduleScreenHandle(
                                     onOptionSelected = { option ->
                                         selectedOption = option
 //                                        if (option == "PAY_EMI" || option == "MISSED_EMI_PAYMENT" || option == "PRE_PART_PAYMENT" || option == "FORECLOSURE") {
-                                        if ( option == "MISSED_EMI_PAYMENT" || option == "PRE_PART_PAYMENT" || option == "FORECLOSURE") {
+                                        if (option == "MISSED_EMI_PAYMENT" || option == "PRE_PART_PAYMENT" || option == "FORECLOSURE") {
                                             scope.launch { bottomSheetStateValue.show() }
                                         }
                                     },
                                     loanDetails = loanDetails, orderId = orderId
-                                )}
+                                )
+                            }
                         ) {
                             RepaymentScheduleView(
                                 navController = navController, scope = scope, context = context,
@@ -292,7 +333,7 @@ fun RepaymentScheduleScreenHandle(
                                 bottomSheetState = paymentOptionBottomSheet, orderId = orderId,
                                 getOrderPaymentStatusViewModel = getOrderPaymentStatusViewModel,
                                 loanAgreementViewModel = loanAgreementViewModel,
-                                loanType = loanType,fromScreen=fromScreen
+                                loanType = loanType, fromScreen = fromScreen
                             )
                         }
                     }
@@ -302,6 +343,19 @@ fun RepaymentScheduleScreenHandle(
 //                    ModalBottomSheetLayout(
 //                        sheetState = bottomSheetStateValue,
 //                        sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+
+                    // Extract the PRE_PAYMENT_CHARGE value from quoteBreakUp
+                    loanDetails.quoteBreakUp?.forEach { item ->
+                        if (item?.title?.lowercase() == "pre_payment_charge" ||
+                            item?.title?.lowercase() == "pre_payment_charges" ) {
+                            prepartPaymentCharges = item.value
+                            Log.d("PrePaymentCharges 2",
+                                "prepartPaymentCharges: $prepartPaymentCharges")
+
+                        }
+                    }
+
+
                     CustomModalBottomSheet(
                         bottomSheetState = bottomSheetStateValue,
                         sheetContent = {
@@ -355,7 +409,7 @@ fun RepaymentScheduleScreenHandle(
                                 bottomSheetState = paymentOptionBottomSheet, orderId = orderId,
                                 getOrderPaymentStatusViewModel = getOrderPaymentStatusViewModel,
                                 loanAgreementViewModel = loanAgreementViewModel,
-                                loanType = loanType,fromScreen=fromScreen
+                                loanType = loanType, fromScreen = fromScreen
                             )
                         }
                     }
@@ -363,23 +417,31 @@ fun RepaymentScheduleScreenHandle(
             }
         } else {
             loanAgreementViewModel.getOrderById(
-                orderId = orderId, context = context, loanType = loanType
+                orderId = orderId,
+                context = context,
+                loanType = loanType
             )
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun RepaymentScheduleView(
     navController: NavHostController,
     checkOrderIssueResponse: CheckOrderIssueModel?,
-    loanDetails: OfferResponseItem, fromFlow: String, orderPaymentListLoaded: Boolean,
-    orderPaymentStatusList: ArrayList<OrderPaymentStatusItem>?, context: Context,
-    bottomSheetState: ModalBottomSheetState, scope: CoroutineScope, orderId: String,
+    loanDetails: OfferResponseItem,
+    fromFlow: String,
+    orderPaymentListLoaded: Boolean,
+    orderPaymentStatusList: ArrayList<OrderPaymentStatusItem>?,
+    context: Context,
+    bottomSheetState: ModalBottomSheetState,
+    scope: CoroutineScope,
+    orderId: String,
     getOrderPaymentStatusViewModel: GetOrderPaymentStatusViewModel,
-    loanAgreementViewModel: LoanAgreementViewModel, loanType: String, fromScreen:String
+    loanAgreementViewModel: LoanAgreementViewModel,
+    loanType: String,
+    fromScreen: String
 ) {
     val focusManager = LocalFocusManager.current
     val backGroundColor: Color = Color.White
@@ -391,19 +453,24 @@ fun RepaymentScheduleView(
         ?.any { fulfilment ->
             val status = fulfilment?.state?.descriptor?.code.orEmpty()
             status.contains("completed", ignoreCase = true) ||
-                    status.contains("closed", ignoreCase = true)
+                status.contains("closed", ignoreCase = true)
         } ?: false
     val isLoanInitiated = loanDetails.fulfillments
         ?.any { fulfilment ->
             val status = fulfilment?.state?.descriptor?.code.orEmpty()
             status.contains("INITIATED", ignoreCase = true) ||
-                    status.contains("SANCTIONED", ignoreCase = true)
+                status.contains("SANCTIONED", ignoreCase = true)
         } ?: false
     BackHandler {
-        if(fromScreen == "Loan Summary") navController.popBackStack()
-        else if(fromScreen == "Loan Status") navController.popBackStack()
-        else if(fromScreen == "PrePayment") navController.popBackStack()
-        else navigateApplyByCategoryScreen(navController)
+        if (fromScreen == "Loan Summary") {
+            navController.popBackStack()
+        } else if (fromScreen == "Loan Status") {
+            navController.popBackStack()
+        } else if (fromScreen == "PrePayment") {
+            navController.popBackStack()
+        } else {
+            navigateApplyByCategoryScreen(navController)
+        }
     }
     FixedTopBottomScreen(
         navController = navController,
@@ -413,19 +480,25 @@ fun RepaymentScheduleView(
         backgroundColor = backgroundOrange,
         contentStart = 0.dp, contentEnd = 0.dp,
         onBackClick = {
-            if(fromScreen == "Loan Summary") navController.popBackStack()
-            else if(fromScreen == "Loan Status") navController.popBackStack()
-            else if(fromScreen == "PrePayment") navController.popBackStack()
-            else navigateApplyByCategoryScreen(navController) },
+            if (fromScreen == "Loan Summary") {
+                navController.popBackStack()
+            } else if (fromScreen == "Loan Status") {
+                navController.popBackStack()
+            } else if (fromScreen == "PrePayment") {
+                navController.popBackStack()
+            } else {
+                navigateApplyByCategoryScreen(navController)
+            }
+        },
         showBottom = true,
         showTripleButton = true,
         primaryButtonText = stringResource(R.string.repayment),
         onPrimaryButtonClick = {
             if (isLoanDisbursed) {
                 scope.launch { bottomSheetState.show() }
-            }else if(isLoanClosed) {
+            } else if (isLoanClosed) {
                 CommonMethods().toastMessage(context, "Loan has been closed.")
-            }else {
+            } else {
                 CommonMethods().toastMessage(context, "Loan has not been disbursed yet. Please wait.")
             }
         },
@@ -433,45 +506,47 @@ fun RepaymentScheduleView(
         onSecondaryButtonClick = {
             loanAgreementViewModel.status(loanType = loanType, context = context, orderId = orderId)
             getOrderPaymentStatusViewModel.getOrderPaymentStatus(
-                loanType = loanType, loanId = orderId, context = context
+                loanType = loanType,
+                loanId = orderId,
+                context = context
             )
         },
         tertiaryButtonText = stringResource(R.string.home),
-        onTertiaryButtonClick = {navigateApplyByCategoryScreen(navController)}
+        onTertiaryButtonClick = { navigateApplyByCategoryScreen(navController) }
     ) {
 //        Get Cool Off Period
-                loanDetails.itemTags?.forEach { itemTags ->
-                    itemTags?.let {
-                        it.tags.let { tags ->
-                            tags.forEach { tag ->
-                                if (tag.key.contains("cool_off", ignoreCase = true)) {
-                                    coolOffPeriodDate = tag.value?:""
-                                    return@forEach // Exit the loop after processing the first matching tag
-                                }
-                            }
+        loanDetails.itemTags?.forEach { itemTags ->
+            itemTags?.let {
+                it.tags.let { tags ->
+                    tags.forEach { tag ->
+                        if (tag.key.contains("cool_off", ignoreCase = true)) {
+                            coolOffPeriodDate = tag.value ?: ""
+                            return@forEach // Exit the loop after processing the first matching tag
                         }
                     }
                 }
+            }
+        }
 
-                //PRINCIPAL
-                loanDetails.quoteBreakUp?.forEach { quoteBreakUp ->
-                    quoteBreakUp?.let {
-                        it.title?.let { title ->
-                            it.value?.let { description ->
-                                if (title.equals("PRINCIPAL", ignoreCase = true)) {
-                                    principal = description
-                                    return@forEach // Exit the loop after processing the first matching tag
-                                }
-                            }
+        // PRINCIPAL
+        loanDetails.quoteBreakUp?.forEach { quoteBreakUp ->
+            quoteBreakUp?.let {
+                it.title?.let { title ->
+                    it.value?.let { description ->
+                        if (title.equals("PRINCIPAL", ignoreCase = true)) {
+                            principal = description
+                            return@forEach // Exit the loop after processing the first matching tag
                         }
                     }
                 }
+            }
+        }
         CompleteLoanDetails(
-                    loanDetails = loanDetails, context = context,
-                    orderPaymentListLoaded = orderPaymentListLoaded,
-                    orderPaymentStatusList = orderPaymentStatusList,
-                checkOrderIssueResponse = checkOrderIssueResponse,
-            fromFlow = fromFlow, navController = navController,isLoanClosed=isLoanClosed,isLoanInitiated=isLoanInitiated
+            loanDetails = loanDetails, context = context,
+            orderPaymentListLoaded = orderPaymentListLoaded,
+            orderPaymentStatusList = orderPaymentStatusList,
+            checkOrderIssueResponse = checkOrderIssueResponse,
+            fromFlow = fromFlow, navController = navController, isLoanClosed = isLoanClosed, isLoanInitiated = isLoanInitiated
         )
     }
 }
@@ -479,11 +554,20 @@ fun RepaymentScheduleView(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun BottomSheetHandle(
-    loanDetails: OfferResponseItem, context: Context, navController: NavHostController,
-    loanAgreementViewModel: LoanAgreementViewModel, scope: CoroutineScope,
-    updateProcessed: Boolean, updateProcessing: Boolean, fromFlow: String,
-    bottomSheetStateValue: ModalBottomSheetState, updatedLoanAgreement: UpdateLoanAgreement?,
-    orderPaymentListLoading: Boolean, selectedOption: String, orderId: String, loanType: String
+    loanDetails: OfferResponseItem,
+    context: Context,
+    navController: NavHostController,
+    loanAgreementViewModel: LoanAgreementViewModel,
+    scope: CoroutineScope,
+    updateProcessed: Boolean,
+    updateProcessing: Boolean,
+    fromFlow: String,
+    bottomSheetStateValue: ModalBottomSheetState,
+    updatedLoanAgreement: UpdateLoanAgreement?,
+    orderPaymentListLoading: Boolean,
+    selectedOption: String,
+    orderId: String,
+    loanType: String
 ) {
     when (selectedOption) {
 //        "PAY_EMI" -> {
@@ -528,27 +612,29 @@ fun BottomSheetHandle(
 
 @Composable
 fun CompleteLoanDetails(
-    loanDetails: OfferResponseItem, orderPaymentListLoaded: Boolean,checkOrderIssueResponse: CheckOrderIssueModel?, context: Context,
-    orderPaymentStatusList: ArrayList<OrderPaymentStatusItem>?,navController: NavHostController,fromFlow: String,
-    isLoanClosed:Boolean,isLoanInitiated:Boolean
+    loanDetails: OfferResponseItem,
+    orderPaymentListLoaded: Boolean,
+    checkOrderIssueResponse: CheckOrderIssueModel?,
+    context: Context,
+    orderPaymentStatusList: ArrayList<OrderPaymentStatusItem>?,
+    navController: NavHostController,
+    fromFlow: String,
+    isLoanClosed: Boolean,
+    isLoanInitiated: Boolean
 ) {
+    val relevantPayments = orderPaymentStatusList?.filter { payment ->
+        payment.status == "PAID"
+    }
     // Application Details
-    ApplicantDetails(loanDetails,context)
-    // Loan Details
-//    LoanApplicationDetails(loanDetails)
+    ApplicantDetails(loanDetails, context)
     // Loan Summary
     LoanSummary(loanDetails)
     // EMI Details Table
     EmiDetail(loanDetails)
     if (orderPaymentListLoaded) {
         Log.d("PaymentHistory", "orderPaymentStatusList : $orderPaymentStatusList")
-
-        val relevantPayments = orderPaymentStatusList?.filter { payment ->
-            payment.status == "PAID"
-        }
         if (!relevantPayments.isNullOrEmpty()) {
             Log.d("PaymentHistory", "orderPaymentStatusList-Not empty: $orderPaymentStatusList")
-
             PaymentHistoryCard(relevantPayments)
         }
     }
@@ -556,19 +642,26 @@ fun CompleteLoanDetails(
     GRODetailsCard(loanDetails, context)
     // Contact details
     ContactDetailsCard(loanDetails)
-    // Loan Agreement Details
-    LoanAgreementDetailsCard(loanDetails, context)
     // Loan Cancellation Terms
     CancellationTermsCard(loanDetails, context)
 //    if(!isLoanInitiated && !isLoanClosed){
-    ReportIssueCard(checkOrderIssueResponse,loanDetails, navController,fromFlow)
-//    }
-//    Spacer(modifier = Modifier.height(30.dp))
+    ReportIssueCard(checkOrderIssueResponse, loanDetails, navController, fromFlow)
+    // Loan Agreement Details
+    LoanAgreementDetailsCard(loanDetails, context)
+    DownloadLoanDetailsCard(loanDetails, relevantPayments ?: emptyList(), context)
 }
+
 @Composable
-fun ApplicantDetails(loanDetails: OfferResponseItem,context: Context) {
-    DisplayCard(cardColor = appWhite, borderColor = appWhite,roundedCornerDp=6.dp,
-        start=10.dp,end=10.dp,bottom = 10.dp,top=10.dp) {
+fun ApplicantDetails(loanDetails: OfferResponseItem, context: Context) {
+    DisplayCard(
+        cardColor = appWhite,
+        borderColor = appWhite,
+        roundedCornerDp = 6.dp,
+        start = 10.dp,
+        end = 10.dp,
+        bottom = 10.dp,
+        top = 10.dp
+    ) {
         loanDetails.fulfillments?.forEach { fulfilment ->
             fulfilment?.customer?.let { customer ->
                 customer.person?.name?.let { name ->
@@ -577,7 +670,10 @@ fun ApplicantDetails(loanDetails: OfferResponseItem,context: Context) {
                         textColorHeader = slateGrayColor,
                         textValue = name,
                         style = normal14Text400,
-                        end = 5.dp, start = 8.dp, top = 10.dp, bottom = 10.dp
+                        end = 5.dp,
+                        start = 8.dp,
+                        top = 10.dp,
+                        bottom = 8.dp
                     )
                 }
 
@@ -585,9 +681,12 @@ fun ApplicantDetails(loanDetails: OfferResponseItem,context: Context) {
                     OnlyReadAbleText(
                         textHeader = stringResource(id = R.string.applicant_email),
                         textColorHeader = slateGrayColor,
-                        textValue = email,
+                        textValue = email.lowercase(),
                         style = normal14Text400,
-                        end = 5.dp, start = 8.dp, top = 10.dp, bottom = 10.dp
+                        end = 5.dp,
+                        start = 8.dp,
+                        top = 8.dp,
+                        bottom = 8.dp
                     )
                 }
 
@@ -597,15 +696,23 @@ fun ApplicantDetails(loanDetails: OfferResponseItem,context: Context) {
                         textColorHeader = slateGrayColor,
                         textValue = mobileNumber,
                         style = normal14Text400,
-                        end = 5.dp, start = 8.dp, top = 10.dp, bottom = 10.dp
+                        end = 5.dp,
+                        start = 8.dp,
+                        top = 8.dp,
+                        bottom = 8.dp
                     )
                 }
-
             }
         }
     }
-    DisplayCard(cardColor = appWhite, borderColor = appWhite,roundedCornerDp=6.dp,
-        start=10.dp,end=10.dp,bottom = 10.dp){
+    DisplayCard(
+        cardColor = appWhite,
+        borderColor = appWhite,
+        roundedCornerDp = 6.dp,
+        start = 10.dp,
+        end = 10.dp,
+        bottom = 10.dp
+    ) {
         val applicationId = loanDetails.itemId
 //        val applicationId = loanDetails.id
         loanDetails.fulfillments?.forEach { fulfilment ->
@@ -616,7 +723,10 @@ fun ApplicantDetails(loanDetails: OfferResponseItem,context: Context) {
                         textColorHeader = slateGrayColor,
                         textValue = loanStatus,
                         style = normal14Text400,
-                        end = 5.dp, start = 8.dp,  top = 10.dp, bottom = 10.dp
+                        end = 5.dp,
+                        start = 8.dp,
+                        top = 10.dp,
+                        bottom = 8.dp
                     )
                 }
             }
@@ -627,7 +737,10 @@ fun ApplicantDetails(loanDetails: OfferResponseItem,context: Context) {
                         textColorHeader = slateGrayColor,
                         textValue = applicationId,
                         style = normal14Text400,
-                        end = 5.dp, start = 8.dp, top = 10.dp, bottom = 10.dp
+                        end = 5.dp,
+                        start = 8.dp,
+                        top = 8.dp,
+                        bottom = 8.dp
                     )
                 }
 
@@ -638,27 +751,34 @@ fun ApplicantDetails(loanDetails: OfferResponseItem,context: Context) {
                             textColorHeader = slateGrayColor,
                             textValue = loanType,
                             style = normal14Text400,
-                            end = 5.dp, start = 8.dp,  top = 10.dp, bottom = 10.dp
+                            end = 5.dp,
+                            start = 8.dp,
+                            top = 8.dp,
+                            bottom = 8.dp
                         )
                     }
                 }
                 OnlyReadAbleText(
-                    textHeader = stringResource(id = R.string.loan_amount) + "(INR)",
+                    textHeader = stringResource(id = R.string.loan_amount),
                     textColorHeader = slateGrayColor,
-                    textValue = principal,
+                    textValue = CommonMethods().formatIndianDoubleCurrency(principal.toDouble()),
                     style = normal14Text400,
-                    end = 5.dp, start = 8.dp,  top = 10.dp, bottom = 10.dp
+                    end = 5.dp,
+                    start = 8.dp,
+                    top = 8.dp,
+                    bottom = 8.dp
                 )
-
-
 
                 loanDetails.itemPrice?.value?.let {
                     OnlyReadAbleText(
                         textHeader = stringResource(id = R.string.total_payable_amount),
-                        textValue = it,
+                        textValue = CommonMethods().formatIndianDoubleCurrency(it.toDouble()),
                         textColorHeader = slateGrayColor,
                         style = normal14Text400,
-                        end = 5.dp, start = 8.dp,  top = 10.dp, bottom = 10.dp
+                        end = 5.dp,
+                        start = 8.dp,
+                        top = 8.dp,
+                        bottom = 8.dp
                     )
                 }
                 loanDetails.itemTags?.forEach { itemTags ->
@@ -673,8 +793,10 @@ fun ApplicantDetails(loanDetails: OfferResponseItem,context: Context) {
                                         if (tag.key.contains("cool_off", ignoreCase = true) ||
                                             tag.key.contains("cool off", ignoreCase = true)
                                         ) {
-                                            convertUTCToLocalDateTime(tag.value?:"")
-                                        } else {
+                                            convertUTCToLocalDateTime(tag.value)
+                                        } else if(tag.key.contains("amount", ignoreCase = true)){
+                                            CommonMethods().formatIndianDoubleCurrency(tag.value.toDouble())
+                                        }else {
                                             tag.value
                                         }
 
@@ -683,7 +805,9 @@ fun ApplicantDetails(loanDetails: OfferResponseItem,context: Context) {
                                             textHeader = newTitle,
                                             textValue = displayValue,
                                             textColorHeader = slateGrayColor,
-                                            style = normal14Text400, bottom = 5.dp,start = 6.dp,
+                                            style = normal14Text400,
+                                            bottom = 5.dp,
+                                            start = 6.dp,
                                             onClick = { CommonMethods().openLink(context, displayValue) }
                                         )
                                     } else if (newTitle.equals("kfs Link", ignoreCase = true)) {
@@ -691,46 +815,51 @@ fun ApplicantDetails(loanDetails: OfferResponseItem,context: Context) {
                                             textHeader = newTitle,
                                             textValue = displayValue,
                                             textColorHeader = slateGrayColor,
-                                            style = normal14Text400, bottom = 5.dp,start = 6.dp,
+                                            style = normal14Text400,
+                                            bottom = 5.dp,
+                                            start = 6.dp,
                                             onClick = { CommonMethods().openLink(context, displayValue) }
                                         )
-                                    } else if ((newTitle.equals("term", ignoreCase = true)  ||
-                                        newTitle.contains("frequency", ignoreCase = true)) &&
-                                        displayValue?.startsWith("P") == true) {
+                                    } else if ((
+                                        newTitle.equals("term", ignoreCase = true) ||
+                                            newTitle.contains("frequency", ignoreCase = true)
+                                        ) &&
+                                        displayValue?.startsWith("P") == true
+                                    ) {
                                         convertISODurationToReadable(displayValue ?: "").let {
-                                            readableDuration ->
+                                                readableDuration ->
                                             OnlyReadAbleText(
                                                 textHeader = newTitle,
-                                                textValue = readableDuration?: "",
+                                                textValue = readableDuration ?: "",
                                                 style = normal14Text400,
                                                 textColorHeader = slateGrayColor,
-                                                end = 5.dp, start = 5.dp,  top = 10.dp, bottom = 10.dp
+                                                end = 5.dp,
+                                                start = 5.dp,
+                                                top = 8.dp,
+                                                bottom = 8.dp
                                             )
                                         }
-
-                                    }
-                                    else{
+                                    } else {
                                         OnlyReadAbleText(
                                             textHeader = newTitle,
-                                            textValue = displayValue?:"",
+                                            textValue = displayValue ?: "",
                                             style = normal14Text400,
                                             textColorHeader = slateGrayColor,
-                                            end = 5.dp, start = 5.dp,  top = 10.dp, bottom = 10.dp
+                                            end = 5.dp,
+                                            start = 5.dp,
+                                            top = 8.dp,
+                                            bottom = 8.dp
                                         )
                                     }
-
                                 }
                             }
                         }
                     }
                 }
-
             }
         }
     }
-
 }
-
 
 fun convertISODurationToReadable(durationStr: String): String {
     return try {
@@ -763,23 +892,30 @@ fun LoanSummary(offer: OfferResponseItem) {
     var showLoanSummaryCard by remember { mutableStateOf(false) }
     SpaceBetweenTextIcon(
         text = stringResource(id = R.string.loan_summary),
-        imageSize = 15.dp, textStart = 10.dp, bottom = 0.dp,
+        imageSize = 15.dp,
+        textStart = 10.dp,
+        bottom = 0.dp,
         image = if (showLoanSummaryCard) R.drawable.arrow_up else R.drawable.arrow_forward
     ) { showLoanSummaryCard = !showLoanSummaryCard }
     if (showLoanSummaryCard) {
-        DisplayCard(cardColor = appWhite, borderColor = appWhite,roundedCornerDp=6.dp,
-            start=10.dp,end=10.dp) {
+        DisplayCard(
+            cardColor = appWhite,
+            borderColor = appWhite,
+            roundedCornerDp = 6.dp,
+            start = 10.dp,
+            end = 10.dp
+        ) {
             offer.quoteBreakUp?.forEach { quoteBreakUp ->
                 quoteBreakUp?.let {
                     it.title?.let { title ->
                         val newTitle = CommonMethods().displayFormattedText(title)
                         it.value?.let { description ->
-                            val currency = it.currency?.let { " ($it)" } ?: ""
                             OnlyReadAbleText(
-                                textHeader = newTitle + currency, textValue = description,
+                                textHeader = newTitle,
+                                textValue = CommonMethods().formatIndianDoubleCurrency(description.toDouble()),
                                 style = normal14Text400,
                                 textColorHeader = slateGrayColor,
-                                end = 5.dp, start = 5.dp,  top = 10.dp, bottom = 5.dp,
+                                end = 5.dp, start = 5.dp, top = 8.dp, bottom = 5.dp,
                                 modifier = Modifier.fillMaxWidth()
                             )
                         }
@@ -789,17 +925,25 @@ fun LoanSummary(offer: OfferResponseItem) {
         }
     }
 }
+
 @Composable
 fun ContactDetailsCard(lspTags: OfferResponseItem) {
     var showContactDetailsCard by remember { mutableStateOf(false) }
     SpaceBetweenTextIcon(
         text = stringResource(id = R.string.lending_service_provider_details),
-        imageSize = 15.dp, textStart = 10.dp, bottom = 0.dp,
+        imageSize = 15.dp,
+        textStart = 10.dp,
+        bottom = 0.dp,
         image = if (showContactDetailsCard) R.drawable.arrow_up else R.drawable.arrow_forward
     ) { showContactDetailsCard = !showContactDetailsCard }
     if (showContactDetailsCard) {
-        DisplayCard(cardColor = appWhite, borderColor = appWhite,roundedCornerDp=6.dp,
-            start=10.dp,end=10.dp) {
+        DisplayCard(
+            cardColor = appWhite,
+            borderColor = appWhite,
+            roundedCornerDp = 6.dp,
+            start = 10.dp,
+            end = 10.dp
+        ) {
             val lspInfo = lspTags.providerTags?.firstOrNull { it?.name == "Lsp Info" }?.tags
             lspInfo?.forEach { (key, value) ->
                 val newTitle = CommonMethods().displayFormattedText(key)
@@ -808,12 +952,16 @@ fun ContactDetailsCard(lspTags: OfferResponseItem) {
                     textValue = value,
                     textColorHeader = slateGrayColor,
                     style = normal14Text400,
-                    end = 5.dp, start = 5.dp, top = 20.dp, bottom = 5.dp,
+                    end = 5.dp,
+                    start = 5.dp,
+                    top = 8.dp,
+                    bottom = 5.dp
                 )
             }
         }
     }
 }
+
 @Composable
 fun EmiDetail(loanDetails: OfferResponseItem) {
     var showEmiDetailsCard by remember { mutableStateOf(false) }
@@ -829,10 +977,15 @@ fun EmiDetail(loanDetails: OfferResponseItem) {
     }
 
     if (showEmiDetailsCard) {
-        DisplayCard(cardColor = appWhite, borderColor = appWhite, roundedCornerDp = 6.dp,
-            start = 10.dp, end = 10.dp
+        DisplayCard(
+            cardColor = appWhite,
+            borderColor = appWhite,
+            roundedCornerDp = 6.dp,
+            start = 10.dp,
+            end = 10.dp
         ) {
-            Column(modifier = Modifier.padding(8.dp).fillMaxWidth()
+            Column(
+                modifier = Modifier.padding(8.dp).fillMaxWidth()
             ) {
                 TableRow(
                     emiNumber = "EMI No.",
@@ -853,7 +1006,7 @@ fun EmiDetail(loanDetails: OfferResponseItem) {
                                             TableRow(
                                                 emiNumber = emiNum,
                                                 dueDate = date,
-                                                amount = amount,
+                                                amount = "₹$amount",
                                                 status = status
                                             )
                                         }
@@ -870,8 +1023,11 @@ fun EmiDetail(loanDetails: OfferResponseItem) {
 
 @Composable
 fun TableRow(
-    emiNumber: String, dueDate: String, amount: String,
-    status: String, isTitleRow: Boolean = false
+    emiNumber: String,
+    dueDate: String,
+    amount: String,
+    status: String,
+    isTitleRow: Boolean = false
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceAround,
@@ -906,20 +1062,30 @@ fun TableRow(
         )
     }
 }
+
 @Composable
 fun PaymentHistoryCard(payment: List<OrderPaymentStatusItem?>?) {
     var showPaymentHistoryCard by remember { mutableStateOf(false) }
     SpaceBetweenTextIcon(
         text = stringResource(id = R.string.payment_history),
-        imageSize = 15.dp, textStart = 10.dp, bottom = 0.dp,
+        imageSize = 15.dp,
+        textStart = 10.dp,
+        bottom = 0.dp,
         image = if (showPaymentHistoryCard) R.drawable.arrow_up else R.drawable.arrow_forward
     ) { showPaymentHistoryCard = !showPaymentHistoryCard }
     if (showPaymentHistoryCard) {
-        DisplayCard(cardColor = appWhite, borderColor = appWhite,roundedCornerDp=6.dp,
-            start=10.dp,end=10.dp) {
+        DisplayCard(
+            cardColor = appWhite,
+            borderColor = appWhite,
+            roundedCornerDp = 6.dp,
+            start = 10.dp,
+            end = 10.dp
+        ) {
             payment?.forEach { payment ->
                 val paymentDate =
-                    payment?.updatedAt?.let { CommonMethods().displayFormattedDate(it) }
+                    payment?.updatedAt?.let {
+                        CommonMethods().displayFormattedDate(it)
+                    }
                 payment?.params?.amount?.let { amount ->
                     val newTextHeader =
                         CommonMethods().displayFormattedText(payment.time?.label ?: "")
@@ -929,7 +1095,8 @@ fun PaymentHistoryCard(payment: List<OrderPaymentStatusItem?>?) {
                         start = 10.dp, end = 20.dp, top = 8.dp, bottom = 5.dp,
                         textColorHeader = slateGrayColor,
                         textValue = "₹$amount",
-                        textBelowValue = "$paymentDate  PAID",
+//                        textBelowValue = "$paymentDate  PAID",
+                        textBelowValue = "PAID",
                         textBelowStyle = normal12Text400,
                         textColorBelowValue = appGray,
                         modifier = Modifier.fillMaxWidth()
@@ -945,13 +1112,19 @@ fun GRODetailsCard(groTags: OfferResponseItem, context: Context) {
     var showGroDetails by remember { mutableStateOf(false) }
     SpaceBetweenTextIcon(
         text = stringResource(id = R.string.gro_details),
-        imageSize = 15.dp, textStart = 10.dp, bottom = 0.dp,
+        imageSize = 15.dp,
+        textStart = 10.dp,
+        bottom = 0.dp,
         image = if (showGroDetails) R.drawable.arrow_up else R.drawable.arrow_forward
-    )
-    { showGroDetails = !showGroDetails }
+    ) { showGroDetails = !showGroDetails }
     if (showGroDetails) {
-        DisplayCard(cardColor = appWhite, borderColor = appWhite,roundedCornerDp=6.dp,
-            start=10.dp,end=10.dp) {
+        DisplayCard(
+            cardColor = appWhite,
+            borderColor = appWhite,
+            roundedCornerDp = 6.dp,
+            start = 10.dp,
+            end = 10.dp
+        ) {
             val groInfo = groTags.providerTags?.firstOrNull { it?.name == "Contact Info" }?.tags
             groInfo?.forEach { (key, value) ->
                 val newTitle = CommonMethods().displayFormattedText(key)
@@ -962,7 +1135,7 @@ fun GRODetailsCard(groTags: OfferResponseItem, context: Context) {
                         textValue = value,
                         textColorHeader = slateGrayColor,
                         style = normal14Text400,
-                        end = 5.dp, start = 5.dp, top = 20.dp, bottom = 5.dp,
+                        end = 5.dp, start = 5.dp, top = 8.dp, bottom = 5.dp,
                         onClick = { CommonMethods().openLink(context, value) }
                     )
                 } else {
@@ -971,7 +1144,10 @@ fun GRODetailsCard(groTags: OfferResponseItem, context: Context) {
                         textValue = value,
                         textColorHeader = slateGrayColor,
                         style = normal14Text400,
-                        end = 5.dp, start = 5.dp, top = 20.dp, bottom = 5.dp,
+                        end = 5.dp,
+                        start = 5.dp,
+                        top = 8.dp,
+                        bottom = 5.dp
                     )
                 }
             }
@@ -981,23 +1157,109 @@ fun GRODetailsCard(groTags: OfferResponseItem, context: Context) {
 
 @Composable
 fun LoanAgreementDetailsCard(loanDocument: OfferResponseItem, context: Context) {
-    var showLoanAgreementCard by remember { mutableStateOf(false) }
+    val lenderName = loanDocument.providerDescriptor?.name.orEmpty()
+    loanDocument.documents?.forEach { document ->
+        document?.url?.let { loanPdfUrl ->
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth().padding( top = 5.dp)
+                    .background(color = Color.Transparent)
+            ) {
+                Text(
+                    text = stringResource(id = R.string.download_loan_agreement),
+                    style = normal16Text700,
+                    color = appBlack,
+                    modifier = Modifier.padding(start = 10.dp)
+                )
+                CurvedPrimaryButton(
+                    text = stringResource(id = R.string.download),
+                    style = normal14Text700,
+                    start = 15.dp,
+                    end = 15.dp,top=5.dp, bottom = 5.dp,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                ) {
+                    val fileName = loanPdfUrl.substringAfterLast("/").substringBefore("?").ifEmpty { "loan_agreement" }
+                    CommonMethods().downloadPdf(context, loanPdfUrl, fileName,
+                                "$lenderName-LoanAgreement")
+                }
+            }
+        }
+    }
+}
+@Composable
+fun DownloadLoanDetailsCard(loanDocument: OfferResponseItem,payment: List<OrderPaymentStatusItem>, context: Context) {
+    val lenderName = loanDocument.providerDescriptor?.name.orEmpty()
+    loanDocument.documents?.forEach { document ->
+        document?.url?.let { loanPdfUrl ->
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth() .fillMaxWidth().padding( top = 5.dp, bottom = 5.dp)
+                    .background(color = Color.Transparent)
+            ) {
+                Text(
+                    text = stringResource(id = R.string.download_loan_details),
+                    style = normal16Text700,
+                    color = appBlack,
+                    modifier = Modifier.padding(start = 10.dp)
+                )
+                CurvedPrimaryButton(
+                    text = stringResource(id = R.string.download),
+                    style = normal14Text700,
+                    start = 15.dp,
+                    end = 15.dp,top=5.dp, bottom = 5.dp,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                ) {
+                    CommonMethods().generatePdfAndNotify(context, loanDocument,payment, lenderName)
+                   }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun CancellationTermsCard(loanDocument: OfferResponseItem, context: Context) {
+    var showCancellationTermsCard by remember { mutableStateOf(false) }
     SpaceBetweenTextIcon(
-        text = stringResource(id = R.string.loan_agreement),
-        imageSize = 15.dp, textStart = 10.dp, bottom = 0.dp,
-        image = if (showLoanAgreementCard) R.drawable.arrow_up else R.drawable.arrow_forward
-    ) { showLoanAgreementCard = !showLoanAgreementCard }
-    if (showLoanAgreementCard) {
-        DisplayCard(cardColor = appWhite, borderColor = appWhite,roundedCornerDp=6.dp,
-            start=10.dp,end=10.dp) {
-            loanDocument.documents?.forEach { document ->
-                document?.url?.let { loanPdfUrl ->
-                    OnlyClickAbleText(
-                        textHeader = stringResource(id = R.string.document),
-                        textValue = loanPdfUrl,
+        text = stringResource(id = R.string.cancellation_terms),
+        imageSize = 15.dp,
+        textStart = 10.dp,
+        bottom = 0.dp,
+        image = if (showCancellationTermsCard) R.drawable.arrow_up else R.drawable.arrow_forward
+    ) { showCancellationTermsCard = !showCancellationTermsCard }
+    if (showCancellationTermsCard) {
+        DisplayCard(
+            cardColor = appWhite,
+            borderColor = appWhite,
+            roundedCornerDp = 6.dp,
+            start = 10.dp,
+            end = 10.dp
+        ) {
+            loanDocument.cancellationTerms?.firstOrNull()?.let { cancellationTerms ->
+                cancellationTerms.cancellationFeePercentage?.let { cancellationFeePercentage ->
+                    OnlyReadAbleText(
+                        textHeader = stringResource(id = R.string.cancellation_fee),
+                        textValue = cancellationFeePercentage,
                         textColorHeader = slateGrayColor,
-                        style = normal14Text400, bottom = 5.dp,
-                        onClick = { CommonMethods().openLink(context, loanPdfUrl) }
+                        style = normal14Text400,
+                        end = 5.dp,
+                        start = 5.dp,
+                        top = 8.dp,
+                        bottom = 5.dp
+                    )
+                }
+                cancellationTerms.externalRefUrl?.let { privacy ->
+                    OnlyClickAbleText(
+                        textHeader = stringResource(id = R.string.privacy),
+                        textValue = privacy,
+                        textColorHeader = slateGrayColor,
+                        style = normal14Text400,
+                        end = 5.dp, start = 5.dp, top = 8.dp, bottom = 10.dp,
+                        onClick = { CommonMethods().openLink(context, privacy) }
                     )
                 }
             }
@@ -1006,44 +1268,12 @@ fun LoanAgreementDetailsCard(loanDocument: OfferResponseItem, context: Context) 
 }
 
 @Composable
-fun CancellationTermsCard(loanDocument: OfferResponseItem, context: Context) {
-    var showCancellationTermsCard by remember { mutableStateOf(false) }
-    SpaceBetweenTextIcon(
-        text = stringResource(id = R.string.cancellation_terms),
-        imageSize = 15.dp, textStart = 10.dp, bottom = 0.dp,
-        image = if (showCancellationTermsCard) R.drawable.arrow_up else R.drawable.arrow_forward
-    ) { showCancellationTermsCard = !showCancellationTermsCard }
-    if (showCancellationTermsCard) {
-        DisplayCard(cardColor = appWhite, borderColor = appWhite,roundedCornerDp=6.dp,
-            start=10.dp,end=10.dp) {
-                loanDocument.cancellationTerms?.firstOrNull()?.let { cancellationTerms ->
-                    cancellationTerms.cancellationFeePercentage?.let { cancellationFeePercentage ->
-                        OnlyReadAbleText(
-                            textHeader = stringResource(id = R.string.cancellation_fee),
-                            textValue = cancellationFeePercentage,
-                            textColorHeader = slateGrayColor,
-                            style = normal14Text400,
-                            end = 5.dp, start = 5.dp, top = 20.dp, bottom = 5.dp,
-                        )
-                    }
-                    cancellationTerms.externalRefUrl?.let { privacy ->
-                        OnlyClickAbleText(
-                            textHeader = stringResource(id = R.string.privacy),
-                            textValue = privacy,
-                            textColorHeader = slateGrayColor,
-                            style = normal14Text400,
-                            end = 5.dp, start = 5.dp, top = 20.dp, bottom = 10.dp,
-                            onClick = { CommonMethods().openLink(context, privacy) }
-                        )
-                    }
-                }
-            }
-
-    }
-}
-@Composable
-fun ReportIssueCard(checkOrderIssueResponse: CheckOrderIssueModel?, loanDetails: OfferResponseItem,
-                    navController: NavHostController, fromFlow: String,) {
+fun ReportIssueCard(
+    checkOrderIssueResponse: CheckOrderIssueModel?,
+    loanDetails: OfferResponseItem,
+    navController: NavHostController,
+    fromFlow: String
+) {
     var isReportIssueClicked by remember { mutableStateOf(false) }
     val summary = checkOrderIssueResponse?.data?.data?.firstOrNull()?.summary
 
@@ -1053,8 +1283,10 @@ fun ReportIssueCard(checkOrderIssueResponse: CheckOrderIssueModel?, loanDetails:
         stringResource(id = R.string.view_issue)
     }
     SpaceBetweenTextIcon(
-        text =headerText,
-        imageSize = 15.dp, textStart = 10.dp, bottom = 0.dp,
+        text = headerText,
+        imageSize = 15.dp,
+        textStart = 10.dp,
+        bottom = 0.dp,
         image = if (isReportIssueClicked) R.drawable.arrow_down else R.drawable.arrow_forward
     ) { isReportIssueClicked = !isReportIssueClicked }
     if (isReportIssueClicked) {
@@ -1065,15 +1297,20 @@ fun ReportIssueCard(checkOrderIssueResponse: CheckOrderIssueModel?, loanDetails:
                         loanDetails.providerId?.let { providerId ->
                             if (summary == null) {
                                 navigateToCreateIssueScreen(
-                                    navController = navController, orderId = orderId,
-                                    providerId = providerId, orderState = loanState,
+                                    navController = navController,
+                                    orderId = orderId,
+                                    providerId = providerId,
+                                    orderState = loanState,
                                     fromFlow = fromFlow
                                 )
                             } else {
                                 navigateToIssueListScreen(
-                                    navController = navController, orderId = orderId,
-                                    fromFlow = fromFlow, providerId = providerId,
-                                    loanState = loanState, fromScreen = "Loan Detail"
+                                    navController = navController,
+                                    orderId = orderId,
+                                    fromFlow = fromFlow,
+                                    providerId = providerId,
+                                    loanState = loanState,
+                                    fromScreen = "Loan Detail"
                                 )
                             }
                         }
@@ -1081,15 +1318,20 @@ fun ReportIssueCard(checkOrderIssueResponse: CheckOrderIssueModel?, loanDetails:
                 }
             }
         }
-
     }
 }
 
 @Composable
 fun PaymentOptionsPopUp(
-    fromFlow: String, context: Context, showMissedEmi: Boolean, onDismiss: () -> Unit,
-    onOptionSelected: (String) -> Unit, loanDetails: OfferResponseItem,
-    navController: NavHostController, orderId: String, loanType: String
+    fromFlow: String,
+    context: Context,
+    showMissedEmi: Boolean,
+    onDismiss: () -> Unit,
+    onOptionSelected: (String) -> Unit,
+    loanDetails: OfferResponseItem,
+    navController: NavHostController,
+    orderId: String,
+    loanType: String
 ) {
     var selectedOption by remember { mutableStateOf("") }
     var prePartPaymentAmount by remember { mutableStateOf("") }
@@ -1107,9 +1349,12 @@ fun PaymentOptionsPopUp(
 
     if (updateProcessed) {
         PrePartPaymentResponseHandle(
-            updatedLoanAgreement = updatedLoanAgreement, selectedOption = selectedOption,
-            navController = navController, prePartPaymentAmount = prePartPaymentAmount,
-            fromFlow = fromFlow, orderId = orderId
+            updatedLoanAgreement = updatedLoanAgreement,
+            selectedOption = selectedOption,
+            navController = navController,
+            prePartPaymentAmount = prePartPaymentAmount,
+            fromFlow = fromFlow,
+            orderId = orderId
         )
     }
 
@@ -1122,7 +1367,6 @@ fun PaymentOptionsPopUp(
                 .wrapContentHeight()
                 .fillMaxWidth()
         ) {
-
             if (showPaymentOptionPopup) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
@@ -1137,12 +1381,15 @@ fun PaymentOptionsPopUp(
                         modifier = Modifier.weight(0.8f)
                     )
                     IconButton(onClick = { onDismiss() }) {
-                        Icon(imageVector = Icons.Default.Close, contentDescription = "Close",
-                            tint = appOrange)
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Close",
+                            tint = appOrange
+                        )
                     }
                 }
 
-                HorizontalDivider(start=0.dp,end=0.dp,bottom = 8.dp, top = 0.dp, color = appOrange)
+                HorizontalDivider(start = 0.dp, end = 0.dp, bottom = 8.dp, top = 0.dp, color = appOrange)
 
 //                TextDescriptionWithRadioButton(
 //                    text = stringResource(id = R.string.pay_emi).uppercase(),
@@ -1170,7 +1417,6 @@ fun PaymentOptionsPopUp(
                     )
 
                     Spacer(modifier = Modifier.height(10.dp))
-
                 }
                 TextDescriptionWithRadioButton(
                     text = stringResource(id = R.string.foreclosure).uppercase(),
@@ -1219,7 +1465,7 @@ fun PaymentOptionsPopUp(
 
                             // Validation
                             showError = inputAmount <= 0 || inputAmount > maxAmount
-                            if(showError) errorMsg="Enter Valid Amount"
+                            if (showError) errorMsg = "Enter Valid Amount"
                         },
                         shape = RoundedCornerShape(8.dp),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
@@ -1245,37 +1491,36 @@ fun PaymentOptionsPopUp(
                 }
                 if (showError) {
                     Text(
-                        text = errorMsg, style = normal12Text400,
+                        text = errorMsg,
+                        style = normal12Text400,
                         color = errorRed,
                         modifier = Modifier.padding(start = 16.dp, top = 15.dp)
                     )
                 }
                 CurvedPrimaryButton(
-                    text = stringResource(id = R.string.proceed), style = bold16Text400,
+                    text = stringResource(id = R.string.proceed),
+                    style = bold16Text400,
                     modifier = Modifier.padding(top = 15.dp)
                 ) {
-                    if(selectedOption == "PRE_PART_PAYMENT"){
+                    if (selectedOption == "PRE_PART_PAYMENT") {
                         if (prePartPaymentAmount.isEmpty()) {
-                            showError=true
-                            errorMsg="Please Enter the Amount to make Pre Part Payment"
-//                            CommonMethods().toastMessage(context, "Please Enter the Amount")
+                            showError = true
+                            errorMsg = "Please Enter the Amount to make Pre Part Payment"
                         } else {
-                            if(!showError) {
+                            if (!showError) {
                                 onOptionSelected(selectedOption)
                                 showConfirmationPopUp = true
                             }
                         }
-                    } else if(selectedOption == ""){
-                        showError=true
-                        errorMsg="Please select an option to proceed further"
-//                        CommonMethods().toastMessage(context, "Please select an option")
+                    } else if (selectedOption == "") {
+                        showError = true
+                        errorMsg = "Please select an option to proceed further"
                     }
 //                    else{
 //                        Log.d("res_H",selectedOption)
 //                        onOptionSelected(selectedOption)
 //                        showConfirmationPopUp = true
 //                    }
-
                 }
             }
         }
@@ -1287,13 +1532,15 @@ fun PaymentOptionsPopUp(
                 headerText = stringResource(id = R.string.pre_part_payment),
                 updateProcessing = updateProcessing,
                 text = msg,
-                amount =  "₹$prePartPaymentAmount",
+                amount = "₹$prePartPaymentAmount",
                 showTextDescriptor = false,
                 onYesClick = {
                     loanDetails.id?.let { id ->
                         loanAgreementViewModel.updateLoanAgreementApi(
-                            context, UpdateLoanBody(
-                                subType = "PRE_PART_PAYMENT", id = id,
+                            context,
+                            UpdateLoanBody(
+                                subType = "PRE_PART_PAYMENT",
+                                id = id,
                                 amount = prePartPaymentAmount,
                                 loanType = loanType
                             )
@@ -1305,7 +1552,7 @@ fun PaymentOptionsPopUp(
                     onOptionSelected(selectedOption)
                     showPaymentOptionPopup = true
                     showPopup = true
-                },
+                }
             )
         }
     }
@@ -1319,26 +1566,33 @@ fun convertUTCToLocalDateTime(utcDateTime: String): String {
 
     val remainingTime =
         CommonMethods().getRemainingTime(utcDateTime) ?: CommonMethods.RemainingTime(
-            isFuture = false, days = 0, hours = 0, minutes = 0, seconds = 0
+            isFuture = false,
+            days = 0,
+            hours = 0,
+            minutes = 0,
+            seconds = 0
         )
     val remainingTimeStr = CommonMethods().timeBufferString(remainingTime)
 
     val dateTimeStr = zonedDateTime.format(formatter)
-    //Sugu2
+    // Sugu2
 //    val formatedStr = "$remainingTimeStr\n($dateTimeStr)"
     val formatedStr = "Till - $dateTimeStr"
 
     return formatedStr
 }
 
+
 @Composable
 fun RepaymentBottomCommon(
     headerText: String = stringResource(id = R.string.foreclosure),
     text: String = stringResource(id = R.string.are_u_sure_want_to_pay),
-    amount:String="",
+    amount: String = "",
     textDescriptor: String = stringResource(id = R.string.may_include_late_charges),
     showTextDescriptor: Boolean = true,
-    updateProcessing: Boolean = false, onYesClick: () -> Unit, onNoClick: () -> Unit
+    updateProcessing: Boolean = false,
+    onYesClick: () -> Unit,
+    onNoClick: () -> Unit
 ) {
     Box(
         modifier = Modifier.padding(top = 15.dp).fillMaxWidth(),
@@ -1352,16 +1606,19 @@ fun RepaymentBottomCommon(
             )
             RegisterText(
                 text = text,
-                textColor = hintGray,top = 10.dp,
-                style = normal14Text500,
+                textColor = hintGray,
+                top = 10.dp,
+                style = normal14Text500
 //                boxAlign = Alignment.TopCenter
             )
 
-            MultiStyleText(amount, appBlack, " ?", hintGray,normal16Text700,
-                normal16Text500,start=0.dp,top=5.dp,
-               arrangement = Arrangement.Center)
+            MultiStyleText(
+                amount, appBlack, " ?", hintGray, normal16Text700,
+                normal16Text500, start = 0.dp, top = 5.dp,
+                arrangement = Arrangement.Center
+            )
 
-            if (showTextDescriptor){
+            if (showTextDescriptor) {
                 StartingText(
                     text = textDescriptor,
                     textColor = hintGray,
@@ -1377,27 +1634,32 @@ fun RepaymentBottomCommon(
                 modifier = Modifier
                     .padding(vertical = 25.dp, horizontal = 90.dp)
                     .fillMaxWidth()
-            )
-            {
+            ) {
                 if (!updateProcessing) {
-                    CurvedPrimaryButton(text = stringResource(id = R.string.no),
-                        textColor = appOrange, backgroundColor = appWhite, style = normal14Text500,
-                        start = 30.dp, end = 30.dp)
-                    { onNoClick() }
-                    CurvedPrimaryButton(text = stringResource(id = R.string.yes), style = normal14Text500,
-                        start = 30.dp, end = 30.dp)
-                    { onYesClick() }
-                }else{
+                    CurvedPrimaryButton(
+                        text = stringResource(id = R.string.no),
+                        textColor = appOrange,
+                        backgroundColor = appWhite,
+                        style = normal14Text500,
+                        start = 30.dp,
+                        end = 30.dp
+                    ) { onNoClick() }
+                    CurvedPrimaryButton(
+                        text = stringResource(id = R.string.yes),
+                        style = normal14Text500,
+                        start = 30.dp,
+                        end = 30.dp
+                    ) { onYesClick() }
+                } else {
                     Box(
                         modifier = Modifier.fillMaxWidth(),
                         contentAlignment = Alignment.Center
-                    ){
+                    ) {
                         CircularProgressIndicator(
                             color = appOrange,
                             modifier = Modifier.padding(all = 8.dp).size(30.dp)
                         )
                     }
-
                 }
             }
         }
@@ -1407,10 +1669,18 @@ fun RepaymentBottomCommon(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun PayEmi(
-    updateProcessing: Boolean, navController: NavHostController, updateProcessed: Boolean,
-    loanDetails: OfferResponseItem, loanAgreementViewModel: LoanAgreementViewModel,
-    scope: CoroutineScope, bottomSheetStateValue: ModalBottomSheetState, fromFlow: String,
-    updatedLoanAgreement: UpdateLoanAgreement?, context: Context, orderId: String, loanType: String
+    updateProcessing: Boolean,
+    navController: NavHostController,
+    updateProcessed: Boolean,
+    loanDetails: OfferResponseItem,
+    loanAgreementViewModel: LoanAgreementViewModel,
+    scope: CoroutineScope,
+    bottomSheetStateValue: ModalBottomSheetState,
+    fromFlow: String,
+    updatedLoanAgreement: UpdateLoanAgreement?,
+    context: Context,
+    orderId: String,
+    loanType: String
 ) {
     val firstUnpaidEmi = loanDetails.payments
         ?.firstOrNull { it?.type == "POST_FULFILLMENT" && it.status == "NOT-PAID" }
@@ -1419,21 +1689,26 @@ fun PayEmi(
     val msg = "Are you sure you want to pay"
     if (updateProcessed) {
         PayEMIResponseHandling(
-            emiAmount = amount, navController = navController, fromFlow = fromFlow,
-            updatedLoanAgreement = updatedLoanAgreement, orderId = orderId
+            emiAmount = amount,
+            navController = navController,
+            fromFlow = fromFlow,
+            updatedLoanAgreement = updatedLoanAgreement,
+            orderId = orderId
         )
     }
     RepaymentBottomCommon(
         headerText = stringResource(id = R.string.pay_emi),
         updateProcessing = updateProcessing,
         text = msg,
-        amount =  "₹ $amount",
+        amount = "₹ $amount",
         showTextDescriptor = false,
         onYesClick = {
             loanDetails.id?.let { id ->
                 loanAgreementViewModel.updateLoanAgreementApi(
-                    context, UpdateLoanBody(
-                        subType = "PAY_EMI", id = id,
+                    context,
+                    UpdateLoanBody(
+                        subType = "PAY_EMI",
+                        id = id,
                         amount = "",
                         loanType = loanType
                     )
@@ -1441,24 +1716,36 @@ fun PayEmi(
             }
         },
         onNoClick = {
-            scope.launch { bottomSheetStateValue.hide()
-        }
+            scope.launch {
+                bottomSheetStateValue.hide()
+            }
         }
     )
-
 }
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MissedEmi(
-    updateProcessing: Boolean, navController: NavHostController, updateProcessed: Boolean,
-    loanDetails: OfferResponseItem, loanAgreementViewModel: LoanAgreementViewModel,
-    scope: CoroutineScope, bottomSheetStateValue: ModalBottomSheetState, fromFlow: String,
-    updatedLoanAgreement: UpdateLoanAgreement?, context: Context, orderId: String, loanType: String
+    updateProcessing: Boolean,
+    navController: NavHostController,
+    updateProcessed: Boolean,
+    loanDetails: OfferResponseItem,
+    loanAgreementViewModel: LoanAgreementViewModel,
+    scope: CoroutineScope,
+    bottomSheetStateValue: ModalBottomSheetState,
+    fromFlow: String,
+    updatedLoanAgreement: UpdateLoanAgreement?,
+    context: Context,
+    orderId: String,
+    loanType: String
 ) {
     if (updateProcessed) {
         MissedEmiPaymentResponseHandling(
-            updatedLoanAgreement = updatedLoanAgreement, loanDetails = loanDetails,
-            navController = navController, fromFlow = fromFlow, orderId = orderId
+            updatedLoanAgreement = updatedLoanAgreement,
+            loanDetails = loanDetails,
+            navController = navController,
+            fromFlow = fromFlow,
+            orderId = orderId
         )
     }
     var delayFound = false
@@ -1476,9 +1763,12 @@ fun MissedEmi(
                 onYesClick = {
                     loanDetails.id?.let { id ->
                         loanAgreementViewModel.updateLoanAgreementApi(
-                            context, UpdateLoanBody(
-                                subType = "MISSED_EMI_PAYMENT", id = id,
-                                amount = "", loanType = loanType
+                            context,
+                            UpdateLoanBody(
+                                subType = "MISSED_EMI_PAYMENT",
+                                id = id,
+                                amount = "",
+                                loanType = loanType
                             )
                         )
                     }
@@ -1495,10 +1785,18 @@ fun MissedEmi(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ForeClosure(
-    loanDetails: OfferResponseItem, updatedLoanAgreement: UpdateLoanAgreement?, fromFlow: String,
-    updateProcessed: Boolean, updateProcessing: Boolean, context: Context, orderId: String,
-    navController: NavHostController, loanAgreementViewModel: LoanAgreementViewModel,
-    scope: CoroutineScope, bottomSheetStateValue: ModalBottomSheetState, loanType: String
+    loanDetails: OfferResponseItem,
+    updatedLoanAgreement: UpdateLoanAgreement?,
+    fromFlow: String,
+    updateProcessed: Boolean,
+    updateProcessing: Boolean,
+    context: Context,
+    orderId: String,
+    navController: NavHostController,
+    loanAgreementViewModel: LoanAgreementViewModel,
+    scope: CoroutineScope,
+    bottomSheetStateValue: ModalBottomSheetState,
+    loanType: String
 ) {
     val fullAmount = loanDetails.itemPrice?.value
 //    if (updateProcessing) {
@@ -1507,12 +1805,15 @@ fun ForeClosure(
 
     if (updateProcessed) {
         ForeClosureResponseHandling(
-            fullAmount = fullAmount, navController = navController, fromFlow = fromFlow,
-            updatedLoanAgreement = updatedLoanAgreement, orderId = orderId
+            fullAmount = fullAmount,
+            navController = navController,
+            fromFlow = fromFlow,
+            updatedLoanAgreement = updatedLoanAgreement,
+            orderId = orderId
         )
     }
 
-    //Sugu
+    // Sugu
 //    fullAmount?.let { amount ->
     principal?.let { amount ->
         amount_to_be_paid = amount
@@ -1527,12 +1828,15 @@ fun ForeClosure(
                 onYesClick = {
                     loanDetails.id?.let { id ->
                         loanAgreementViewModel.updateLoanAgreementApi(
-                            context = context, updateLoanBody = UpdateLoanBody(
-                                subType = "FORECLOSURE", id = id, amount = "", loanType = loanType
+                            context = context,
+                            updateLoanBody = UpdateLoanBody(
+                                subType = "FORECLOSURE",
+                                id = id,
+                                amount = "",
+                                loanType = loanType
                             )
                         )
                     }
-
                 },
                 onNoClick = { scope.launch { bottomSheetStateValue.hide() } }
             )
@@ -1544,8 +1848,12 @@ fun ForeClosure(
                 onYesClick = {
                     loanDetails.id?.let { id ->
                         loanAgreementViewModel.updateLoanAgreementApi(
-                            context, UpdateLoanBody(
-                                subType = "FORECLOSURE", id = id, amount = "", loanType = loanType
+                            context,
+                            UpdateLoanBody(
+                                subType = "FORECLOSURE",
+                                id = id,
+                                amount = "",
+                                loanType = loanType
                             )
                         )
                     }
@@ -1558,8 +1866,11 @@ fun ForeClosure(
 
 @Composable
 fun MissedEmiPaymentResponseHandling(
-    updatedLoanAgreement: UpdateLoanAgreement?, loanDetails: OfferResponseItem,
-    navController: NavHostController, fromFlow: String, orderId: String
+    updatedLoanAgreement: UpdateLoanAgreement?,
+    loanDetails: OfferResponseItem,
+    navController: NavHostController,
+    fromFlow: String,
+    orderId: String
 ) {
     loanDetails.payments?.forEach {
         if (it?.type == "POST_FULFILLMENT" && it.status == "DELAYED") {
@@ -1570,9 +1881,12 @@ fun MissedEmiPaymentResponseHandling(
                     updatedLoan.payments?.get(0)?.let { payment ->
                         payment.url?.let { paymentUrl ->
                             navigateToPrePaymentWebViewScreen(
-                                navController = navController, orderId = orderId,
-                                headerText = paymentUrl, status = paymentStatusText,
-                                fromFlow = fromFlow, paymentOption = "Missed EMI"
+                                navController = navController,
+                                orderId = orderId,
+                                headerText = paymentUrl,
+                                status = paymentStatusText,
+                                fromFlow = fromFlow,
+                                paymentOption = "Missed EMI"
                             )
                         }
                     }
@@ -1582,10 +1896,14 @@ fun MissedEmiPaymentResponseHandling(
         }
     }
 }
+
 @Composable
 fun PayEMIResponseHandling(
-    emiAmount: String?, navController: NavHostController,
-    updatedLoanAgreement: UpdateLoanAgreement?, fromFlow: String, orderId: String
+    emiAmount: String?,
+    navController: NavHostController,
+    updatedLoanAgreement: UpdateLoanAgreement?,
+    fromFlow: String,
+    orderId: String
 ) {
     emiAmount?.let {
         val paymentStatusText = "EMI of ₹$amount_to_be_paid successfully processed"
@@ -1594,8 +1912,12 @@ fun PayEMIResponseHandling(
                 updatedLoan.payments?.get(0)?.let { payment ->
                     payment.url?.let { paymentUrl ->
                         navigateToPrePaymentWebViewScreen(
-                            navController = navController, orderId = orderId, fromFlow = fromFlow,
-                            headerText = paymentUrl, status = paymentStatusText, paymentOption = "Pay EMI"
+                            navController = navController,
+                            orderId = orderId,
+                            fromFlow = fromFlow,
+                            headerText = paymentUrl,
+                            status = paymentStatusText,
+                            paymentOption = "Pay EMI"
                         )
                     }
                 }
@@ -1606,8 +1928,11 @@ fun PayEMIResponseHandling(
 
 @Composable
 fun ForeClosureResponseHandling(
-    fullAmount: String?, navController: NavHostController,
-    updatedLoanAgreement: UpdateLoanAgreement?, fromFlow: String, orderId: String
+    fullAmount: String?,
+    navController: NavHostController,
+    updatedLoanAgreement: UpdateLoanAgreement?,
+    fromFlow: String,
+    orderId: String
 ) {
     fullAmount?.let {
         val paymentStatusText = "ForeClosure of ₹$amount_to_be_paid successfully processed"
@@ -1616,8 +1941,12 @@ fun ForeClosureResponseHandling(
                 updatedLoan.payments?.get(0)?.let { payment ->
                     payment.url?.let { paymentUrl ->
                         navigateToPrePaymentWebViewScreen(
-                            navController = navController, orderId = orderId, fromFlow = fromFlow,
-                            headerText = paymentUrl, status = paymentStatusText,paymentOption = "ForeClosure"
+                            navController = navController,
+                            orderId = orderId,
+                            fromFlow = fromFlow,
+                            headerText = paymentUrl,
+                            status = paymentStatusText,
+                            paymentOption = "ForeClosure"
                         )
                     }
                 }
@@ -1628,28 +1957,41 @@ fun ForeClosureResponseHandling(
 
 @Composable
 fun PrePartPaymentResponseHandle(
-    updatedLoanAgreement: UpdateLoanAgreement?, selectedOption: String, fromFlow: String,
-    navController: NavHostController, prePartPaymentAmount: String, orderId: String
+    updatedLoanAgreement: UpdateLoanAgreement?,
+    selectedOption: String,
+    fromFlow: String,
+    navController: NavHostController,
+    prePartPaymentAmount: String,
+    orderId: String
 ) {
     var paymentStatusText = ""
-    if (selectedOption == "PRE_PART_PAYMENT")
+    if (selectedOption == "PRE_PART_PAYMENT") {
         paymentStatusText = "Repayment of ₹$prePartPaymentAmount "
-    else if (selectedOption == "FORECLOSURE" || selectedOption == "MISSED_EMI_PAYMENT")
+        if (!prepartPaymentCharges.isNullOrEmpty()) {
+            paymentStatusText += " with prepayment charge of ₹$prepartPaymentCharges"
+        }else {
+            Log.d("PrePaymentCharges", "prepartPaymentCharges is not found or empty")
+        }
+    } else if (selectedOption == "FORECLOSURE" || selectedOption == "MISSED_EMI_PAYMENT") {
         paymentStatusText = "Repayment of $amount_to_be_paid "
+    }
     updatedLoanAgreement?.data?.let agreement@{
         it.updatedObject?.let { updatedLoan ->
             updatedLoan.payments?.forEach {
                 it?.let { payment ->
-                payment.url?.let { paymentUrl ->
-                    navigateToPrePaymentWebViewScreen(
-                        navController = navController, orderId = orderId, headerText = paymentUrl,
-                        status = paymentStatusText, fromFlow = fromFlow,paymentOption ="Pre Part Payment"
-                    )
-                    return@agreement
+                    payment.url?.let { paymentUrl ->
+                        navigateToPrePaymentWebViewScreen(
+                            navController = navController,
+                            orderId = orderId,
+                            headerText = paymentUrl,
+                            status = paymentStatusText,
+                            fromFlow = fromFlow,
+                            paymentOption = "Pre Part Payment"
+                        )
+                        return@agreement
+                    }
                 }
-            }
             }
         }
     }
 }
-

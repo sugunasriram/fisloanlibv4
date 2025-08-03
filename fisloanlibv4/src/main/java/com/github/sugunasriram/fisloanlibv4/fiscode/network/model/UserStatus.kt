@@ -2,11 +2,9 @@ package com.github.sugunasriram.fisloanlibv4.fiscode.network.model
 
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.AAConsentDetails
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.Offer
-import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.OfferResponse
-import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.OfferResponseItem
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.RejectedLenders
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Serializer
 
 @Serializable
 data class UserStatus(
@@ -83,18 +81,17 @@ data class UserItem(
 
     @SerialName("consentResponse")
     val consentResponse: List<AAConsentDetails?>? = null,
+    @SerialName("rejectedLenders")
+    val rejectedLenders: List<RejectedLenders?>? = null,
 
     @SerialName("offerResponse")
-    val offerResponse: List<Offer?>? = null,
+    val offerResponse: List<Offer?>? = null
 )
 
 @Serializable
 data class UserStatusItem(
     @SerialName("_id")
     val id: String? = null,
-
-
-
 
     @SerialName("provider_tags")
     val providerTags: List<ProviderTagsItem?>? = null,
@@ -160,7 +157,7 @@ data class UserStatusItem(
     val fulfillments: List<FulfillmentsItem?>? = null,
 
     @SerialName("payment_id")
-    val paymentId: String? = null,
+    val paymentId: String? = null
 )
 
 @Serializable
@@ -329,7 +326,7 @@ data class PaymentsItem(
     val collectedBy: String? = null,
 
     @SerialName("tags")
-    val tags: List<TagsItem?>? = null,
+    val tags: List<TagsItem?>? = null
 )
 
 @Serializable
@@ -432,7 +429,6 @@ data class Params(
     @SerialName("currency")
     val currency: String? = null
 )
-
 
 @Serializable
 data class Time(

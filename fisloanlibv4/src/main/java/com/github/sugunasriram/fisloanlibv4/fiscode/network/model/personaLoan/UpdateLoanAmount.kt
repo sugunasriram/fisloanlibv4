@@ -3,7 +3,6 @@ package com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.pf.PfOfferResponseItem
 import kotlinx.serialization.Serializable
 
-
 @Serializable
 data class UpdateLoanAmountBody(
     val requestAmount: String? = null,
@@ -38,6 +37,3 @@ data class UpdateLoanAmountPfResponseData(
     val offerResponse: PfOfferResponseItem? = null,
     val id: String? = null
 )
-
-
-

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -50,18 +51,23 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appWhite
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.backgroundOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.checkBoxGray
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.disableColor
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.errorRed
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal12Text400
-import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal14Text500
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal14Text700
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal16Text500
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal16Text700
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal18Text500
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal18Text700
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal20Text500
+import com.github.sugunasriram.fisloanlibv4.fiscode.views.igm.StatusChip
+import com.github.sugunasriram.fisloanlibv4.fiscode.views.igm.onRaiseIssueClick
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun FixedTopBottomScreen(
-    navController: NavHostController, modifier: Modifier = Modifier,
+    navController: NavHostController,
+    modifier: Modifier = Modifier,
     showTopBar: Boolean = true,
     showBackButton: Boolean = true,
     topBarText: String = "",
@@ -73,13 +79,15 @@ fun FixedTopBottomScreen(
     showCheckBox: Boolean = false,
     showSingleButton: Boolean = false,
     showArrowButton: Boolean = false,
+    showGetMoreOffersButton: Boolean = false,
     showDoubleButton: Boolean = false,
     showTripleButton: Boolean = false,
     checkboxState: Boolean = false,
     checkBoxText: String = stringResource(id = R.string.accept),
     onCheckBoxChange: ((Boolean) -> Unit)? = null,
-    showErrorMsg:Boolean = false,
-    errorMsg:String?="",
+    showErrorMsg: Boolean = false,
+    errorMsg: String? = "",
+    isPrimaryButtonEnabled: Boolean = true,
     primaryButtonText: String = stringResource(id = R.string.accept),
     onArrowButtonClick: (() -> Unit)? = null,
     onPrimaryButtonClick: (() -> Unit)? = null,
@@ -88,10 +96,16 @@ fun FixedTopBottomScreen(
     tertiaryButtonText: String = stringResource(id = R.string.home),
     onTertiaryButtonClick: (() -> Unit)? = null,
     backgroundColor: Color = backgroundOrange,
-    buttonStart: Dp = 30.dp, buttonEnd: Dp = 30.dp, buttonTop: Dp = 10.dp, buttonBottom: Dp = 20.dp,
-    contentStart: Dp = 5.dp, contentEnd: Dp = 5.dp, contentTop: Dp = 0.dp, contentBottom: Dp = 0.dp,
+    buttonStart: Dp = 30.dp,
+    buttonEnd: Dp = 30.dp,
+    buttonTop: Dp = 10.dp,
+    buttonBottom: Dp = 20.dp,
+    contentStart: Dp = 5.dp,
+    contentEnd: Dp = 5.dp,
+    contentTop: Dp = 0.dp,
+    contentBottom: Dp = 0.dp,
     scrollState: ScrollState = rememberScrollState(),
-    pageContent: @Composable () -> Unit,
+    pageContent: @Composable () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
@@ -118,7 +132,12 @@ fun FixedTopBottomScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .weight(1f)
-                    .padding(start =contentStart, end = contentEnd, top = contentTop, bottom = contentBottom)
+                    .padding(
+                        start = contentStart,
+                        end = contentEnd,
+                        top = contentTop,
+                        bottom = contentBottom
+                    )
                     .fillMaxSize()
             ) {
                 pageContent()
@@ -128,7 +147,12 @@ fun FixedTopBottomScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .weight(1f)
-                    .padding(start =contentStart, end = contentEnd, top = contentTop, bottom = contentBottom)
+                    .padding(
+                        start = contentStart,
+                        end = contentEnd,
+                        top = contentTop,
+                        bottom = contentBottom
+                    )
                     .fillMaxSize()
                     .verticalScroll(scrollState)
             ) {
@@ -137,15 +161,17 @@ fun FixedTopBottomScreen(
         }
         if (showBottom) {
             if (showHyperText) {
-                HyperlinkText(onSahamatiClick = {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://sahamati.org.in/"))
-                    context.startActivity(intent)
-                },
+                HyperlinkText(
+                    onSahamatiClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://sahamati.org.in/"))
+                        context.startActivity(intent)
+                    },
                     onRbiClick = {
                         val intent =
                             Intent(Intent.ACTION_VIEW, Uri.parse("https://rbi.org.in/"))
                         context.startActivity(intent)
-                    })
+                    }
+                )
             }
             if (showCheckBox) {
                 CheckBoxText(
@@ -160,12 +186,16 @@ fun FixedTopBottomScreen(
                     }
                 )
             }
-            if(showErrorMsg){
+            if (showErrorMsg) {
                 Row(
-                    horizontalArrangement=Arrangement.Center,
-                    modifier = Modifier.fillMaxWidth()){
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     if (errorMsg != null) {
-                        Text(text = errorMsg,style = normal12Text400, color = errorRed,
+                        Text(
+                            text = errorMsg,
+                            style = normal12Text400,
+                            color = errorRed
                         )
                     }
                 }
@@ -178,6 +208,7 @@ fun FixedTopBottomScreen(
                 ) {
                     CurvedPrimaryButton(
                         text = primaryButtonText,
+                        backgroundColor = if (isPrimaryButtonEnabled) appOrange else disableColor,
                         modifier = Modifier
                             .weight(1f)
                             .padding(top = buttonTop, bottom = buttonBottom)
@@ -193,9 +224,21 @@ fun FixedTopBottomScreen(
                 ) {
                     NextArrowButton(
                         navController = navController,
-                     { onArrowButtonClick?.let { onArrowButtonClick() } })
+                        { onArrowButtonClick?.let { onArrowButtonClick() } }
+                    )
                 }
             }
+
+            if (showGetMoreOffersButton) {
+                BoxButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    buttonText = primaryButtonText,
+                    showAddOnButtonText = true,
+                ) {
+                    onPrimaryButtonClick?.let { onPrimaryButtonClick() }
+                }
+            }
+
             if (showDoubleButton) {
                 Row(
                     modifier = Modifier
@@ -206,71 +249,61 @@ fun FixedTopBottomScreen(
                 ) {
                     BoxButton(
                         modifier = Modifier.weight(1f),
-                        buttonText = secondaryButtonText, textColor = appOrange,
+                        buttonText = secondaryButtonText,
+                        textColor = appOrange,
                         backgroundColor = appWhite
                     ) {
                         onSecondaryButtonClick?.let { onSecondaryButtonClick() }
                     }
-                    BoxButton(modifier = Modifier.weight(1f),buttonText = primaryButtonText) {
+                    BoxButton(modifier = Modifier.weight(1f), buttonText = primaryButtonText) {
                         onPrimaryButtonClick?.let { onPrimaryButtonClick() }
                     }
                 }
             }
-            if(showTripleButton){
+            if (showTripleButton) {
                 Row(
                     modifier = Modifier
                         .height(90.dp)
-                        .fillMaxWidth().background(backgroundOrange),
+                        .fillMaxWidth()
+                        .background(backgroundOrange),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
                     CurvedPrimaryButton(
-                        text = primaryButtonText,style = normal14Text700,start = 5.dp,end=5.dp,
-                        modifier = Modifier.weight(1f).padding(horizontal = 4.dp),
+                        text = primaryButtonText,
+                        style = normal14Text700,
+                        start = 5.dp,
+                        end = 5.dp,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 4.dp)
                     ) {
                         onPrimaryButtonClick?.invoke()
                     }
 
                     CurvedPrimaryButton(
-                        text = secondaryButtonText, style = normal14Text700,start = 5.dp,end=5.dp,
-                        modifier = Modifier.weight(1f).padding(horizontal = 4.dp),
+                        text = secondaryButtonText,
+                        style = normal14Text700,
+                        start = 5.dp,
+                        end = 5.dp,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 4.dp)
                     ) {
                         onSecondaryButtonClick?.invoke()
                     }
 
-                    CurvedPrimaryButton(text = tertiaryButtonText,style = normal14Text700,start = 5.dp,end=5.dp,
-                        modifier = Modifier.weight(1f).padding(horizontal = 4.dp),
+                    CurvedPrimaryButton(
+                        text = tertiaryButtonText,
+                        style = normal14Text700,
+                        start = 5.dp,
+                        end = 5.dp,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 4.dp)
                     ) {
                         onTertiaryButtonClick?.invoke()
                     }
-
-//                    CurvedPrimaryButton(text = primaryButtonText, modifier = Modifier.weight(0.6f),
-//                        style = normal14Text700, start = 5.dp,end=5.dp) {
-//                        onPrimaryButtonClick?.let { onPrimaryButtonClick() }
-//                    }
-//                    Spacer(modifier = Modifier.width(8.dp))
-//                    CurvedPrimaryButton(text = secondaryButtonText, modifier = Modifier.weight(1f),
-//                        style = normal14Text700, start = 5.dp,end=5.dp) {
-//                        onSecondaryButtonClick?.let { onSecondaryButtonClick() }
-//                    }
-//                    Spacer(modifier = Modifier.width(8.dp))
-//                    CurvedPrimaryButton(text = tertiaryButtonText, modifier = Modifier.weight(0.5f),
-//                        style = normal14Text700,start = 5.dp,end=5.dp) {
-//                        onTertiaryButtonClick?.let { onTertiaryButtonClick() }
-//                    }
-//                    BoxButton(
-//                        modifier = Modifier.weight(1f),
-//                        buttonText = secondaryButtonText, textColor = appOrange,
-//                        backgroundColor = appWhite
-//                    ) {
-//                        onSecondaryButtonClick?.let { onSecondaryButtonClick() }
-//                    }
-//                    BoxButton(modifier = Modifier.weight(1f),buttonText = primaryButtonText) {
-//                        onPrimaryButtonClick?.let { onPrimaryButtonClick() }
-//                    }
-//                    BoxButton(modifier = Modifier.weight(1f),buttonText = tertiaryButtonText) {
-//                        onTertiaryButtonClick?.let { onTertiaryButtonClick() }
-//                    }
                 }
             }
         }
@@ -279,8 +312,11 @@ fun FixedTopBottomScreen(
 
 @Composable
 fun TopBottomBarForNegativeScreen(
-    navController: NavHostController, showTop: Boolean = true, showBottom: Boolean = false,
-    isSelfScrollable: Boolean = false, pageContent: @Composable () -> Unit,
+    navController: NavHostController,
+    showTop: Boolean = true,
+    showBottom: Boolean = false,
+    isSelfScrollable: Boolean = false,
+    pageContent: @Composable () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
     Column(
@@ -336,7 +372,7 @@ fun TopBar(
     showBackButton: Boolean = true,
     onBackClick: () -> Unit = { navController.popBackStack() },
     topBarBackgroundColor: Color = appOrange,
-    topBarText: String = "",
+    topBarText: String = ""
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -344,7 +380,7 @@ fun TopBar(
         modifier = Modifier
             .background(topBarBackgroundColor)
             .fillMaxWidth()
-            .padding(top = 10.dp, bottom = 5.dp,end=5.dp)
+            .padding(top = 10.dp, bottom = 5.dp, end = 5.dp)
     ) {
         if (showBackButton) {
             BackButton(navController = navController, onClick = onBackClick)
@@ -356,16 +392,18 @@ fun TopBar(
             text = topBarText,
             style = if (topBarBackgroundColor == appOrange) normal16Text700 else normal18Text700,
             textColor = if (topBarBackgroundColor == appOrange) appWhite else appBlack,
-            start = 5.dp, textAlign = TextAlign.Start
+            start = 5.dp,
+            textAlign = TextAlign.Start
         )
-
     }
 }
 
 @Composable
 fun ScreenWithHamburger(
-    modifier: Modifier = Modifier, isSelfScrollable: Boolean = false,
-    navController: NavHostController = rememberNavController(),topBarText: String="",
+    modifier: Modifier = Modifier,
+    isSelfScrollable: Boolean = false,
+    navController: NavHostController = rememberNavController(),
+    topBarText: String = "",
     pageContent: @Composable () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -379,15 +417,21 @@ fun ScreenWithHamburger(
                 detectTapGestures(onTap = { focusManager.clearFocus() })
             }
     ) {
-
-        ModalDrawer(drawerState = drawerState,
+        ModalDrawer(
+            drawerState = drawerState,
             drawerBackgroundColor = Color.White,
             drawerContent = {
                 SideMenuContent(coroutineScope, drawerState, navController)
-            }) {
+            }
+        ) {
             Scaffold(
-                topBar = { TopBarWithMenu(coroutineScope=coroutineScope,
-                    drawerState=drawerState, topBarText = topBarText) },
+                topBar = {
+                    TopBarWithMenu(
+                        coroutineScope = coroutineScope,
+                        drawerState = drawerState,
+                        topBarText = topBarText
+                    )
+                }
             ) { paddingValues ->
                 if (isSelfScrollable) {
                     Column(
@@ -408,16 +452,15 @@ fun ScreenWithHamburger(
                 }
             }
         }
-
-
     }
 }
 
 @Composable
 fun TopBarWithMenu(
-    coroutineScope: CoroutineScope, drawerState: DrawerState,
+    coroutineScope: CoroutineScope,
+    drawerState: DrawerState,
     topBarBackgroundColor: Color = appOrange,
-    topBarText: String = "",
+    topBarText: String = ""
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -427,7 +470,6 @@ fun TopBarWithMenu(
             .fillMaxWidth()
             .padding(top = 10.dp, bottom = 10.dp)
     ) {
-
         Image(
             painter = painterResource(R.drawable.hamburger_menu),
             contentDescription = stringResource(id = R.string.hamburger_menu),
@@ -449,10 +491,11 @@ fun TopBarWithMenu(
 
 @Composable
 fun SideBarLayout(
-    userName: String, contact: String,
+    userName: String,
+    contact: String,
     modifier: Modifier = Modifier,
     onBackClick: (() -> Unit)? = null,
-    pageContent: @Composable () -> Unit,
+    pageContent: @Composable () -> Unit
 ) {
     Column(
         modifier = modifier.fillMaxSize()
@@ -460,16 +503,24 @@ fun SideBarLayout(
         Box {
 //            Box {
             HeaderCard {
-                SideMenuProfileCard(userName = userName, contact = "+91 $contact",
+                SideMenuProfileCard(
+                    userName = userName,
+                    contact = "+91 $contact",
                     navController = rememberNavController(),
-                    onBackClick = { onBackClick?.let { onBackClick() } })
+                    onBackClick = { onBackClick?.let { onBackClick() } }
+                )
             }
 //            }
             Box(modifier = Modifier.padding(top = 230.dp)) {
                 HeaderCard(
-                    topStart = 10.dp, topEnd = 10.dp, bottomStart = 0.dp, bottomEnd = 0.dp,
-                    start = 10.dp, end = 10.dp,
-                    cardColor = appWhite, borderColor = appWhite
+                    topStart = 10.dp,
+                    topEnd = 10.dp,
+                    bottomStart = 0.dp,
+                    bottomEnd = 0.dp,
+                    start = 10.dp,
+                    end = 10.dp,
+                    cardColor = appWhite,
+                    borderColor = appWhite
                 ) {
                     Column(
                         verticalArrangement = Arrangement.SpaceEvenly,
@@ -479,10 +530,8 @@ fun SideBarLayout(
                     ) {
                         pageContent()
                     }
-
                 }
             }
         }
-
     }
 }

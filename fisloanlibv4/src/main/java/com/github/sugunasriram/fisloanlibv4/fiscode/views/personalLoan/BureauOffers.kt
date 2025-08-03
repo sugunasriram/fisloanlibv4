@@ -1,12 +1,29 @@
 package com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan
 
 import android.annotation.SuppressLint
+import android.content.Context
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -16,65 +33,105 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
+import coil.decode.SvgDecoder
 import coil.request.ImageRequest
 import com.github.sugunasriram.fisloanlibv4.R
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.CustomModalBottomSheet
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.FixedTopBottomScreen
-import com.github.sugunasriram.fisloanlibv4.fiscode.components.FullWidthRoundShapedCard
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.HeaderWithValue
-import com.github.sugunasriram.fisloanlibv4.fiscode.components.ImageTextButtonRow
-import com.github.sugunasriram.fisloanlibv4.fiscode.components.LoaderAnimation
+import com.github.sugunasriram.fisloanlibv4.fiscode.components.HorizontalDivider
+import com.github.sugunasriram.fisloanlibv4.fiscode.components.RegisterText
+import com.github.sugunasriram.fisloanlibv4.fiscode.components.StartingText
+import com.github.sugunasriram.fisloanlibv4.fiscode.components.WrapBorderButton
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateSignInPage
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToAccountAggregatorScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToLoanOffersListDetailScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.finance.FinanceSearchModel
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.gst.GstSearchBody
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.Offer
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.OfferResponseItem
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.RejectedLenders
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.SearchBodyModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.SearchModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.SearchResponseModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appBlack
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appGray
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appWhite
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.backOrange
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.backgroundOrange
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.bold20Text100
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.grayBackground
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.grayD6
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal12Text400
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal14Text400
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal14Text700
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal20Text700
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan.LoanAgreementViewModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan.WebViewModel
+import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.LoadingOfferCard
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.MiddleOfTheLoanScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.NoLoanOffersAvailableScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.RejectedOfferCard
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.RequestTimeOutScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.webview.NavigateToWebView
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import java.util.Locale
 
 private val json = Json { prettyPrint = true }
-@OptIn(ExperimentalMaterialApi::class)
-@SuppressLint("ResourceType")
-@Composable
-fun BureauOffersScreen(navController: NavHostController, loanPurpose: String,
-                       fromFlow: String,withoutAAResponse : String) {
 
+@SuppressLint("ResourceType")
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun BureauOffersScreen(
+    navController: NavHostController,
+    loanPurpose: String,
+    fromFlow: String,
+    withoutAAResponse: String
+) {
     val context = LocalContext.current
     val webViewModel: WebViewModel = viewModel()
-    if(loanPurpose == stringResource(R.string.getUerFlow)) {
-        json.decodeFromString(SearchModel.serializer(), withoutAAResponse)
-            ?.takeIf { it.data != null }?.let {
-                webViewModel.updateSearchResponse(it)
-            }
+    // decode once, remember
+    val decodedWithoutAAResponse = remember(withoutAAResponse) {
+        try {
+            json.decodeFromString(SearchModel.serializer(), withoutAAResponse)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    if (loanPurpose == stringResource(R.string.getUerFlow)) {
+        decodedWithoutAAResponse?.takeIf { it.data != null }?.let {
+            webViewModel.updateSearchResponse(it)
+        }
+    } else if (loanPurpose == "formSubmission") {
+        decodedWithoutAAResponse?.takeIf { it.data != null }?.let {
+            webViewModel.updateSearchResponse(it)
+        }
     }
 
     BackHandler { navigateApplyByCategoryScreen(navController) }
+
     val webScreenLoading = webViewModel.webProgress.collectAsState()
     val webScreenLoaded = webViewModel.webViewLoaded.collectAsState()
     val searchResponse by webViewModel.searchResponse.collectAsState()
@@ -86,117 +143,119 @@ fun BureauOffersScreen(navController: NavHostController, loanPurpose: String,
     val showServerIssueScreen by webViewModel.showServerIssueScreen.observeAsState(false)
     val unexpectedErrorScreen by webViewModel.unexpectedError.observeAsState(false)
     val unAuthorizedUser by webViewModel.unAuthorizedUser.observeAsState(false)
-
     val gstSearchResponse by webViewModel.gstSearchResponse.collectAsState()
 
     val loanAgreementViewModel: LoanAgreementViewModel = viewModel()
     val navigationToSignIn by loanAgreementViewModel.navigationToSignIn.collectAsState()
     var bureauOffersSearchQuery by remember { mutableStateOf("") }
-
     val coroutineScope = rememberCoroutineScope()
     var selectedFilter by remember { mutableStateOf<String?>(null) }
     val filterOptionBottomSheetState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
     )
+
+    // use decodedWithoutAAResponse if loanPurpose matches
+    val effectiveSearchResponse = if (loanPurpose == stringResource(R.string.getUerFlow)) {
+        decodedWithoutAAResponse // <-- changed
+    } else if (loanPurpose == "formSubmission") {
+        decodedWithoutAAResponse // <-- changed
+    } else {
+        searchResponse // <-- changed
+    }
 
     when {
         navigationToSignIn -> navigateSignInPage(navController)
         showInternetScreen -> CommonMethods().ShowInternetErrorScreen(navController)
-//        showTimeOutScreen -> CommonMethods().ShowTimeOutErrorScreen(navController)
-        showTimeOutScreen -> RequestTimeOutScreen(navController,{ navigateApplyByCategoryScreen(navController) })
+        showTimeOutScreen -> RequestTimeOutScreen(navController) {
+            navigateApplyByCategoryScreen(navController)
+        }
+
         showServerIssueScreen -> CommonMethods().ShowServerIssueErrorScreen(navController)
         unexpectedErrorScreen -> CommonMethods().ShowUnexpectedErrorScreen(navController)
         unAuthorizedUser -> CommonMethods().ShowUnAuthorizedErrorScreen(navController)
-        middleLoan -> MiddleOfTheLoanScreen(navController,errorMessage,false)
+        middleLoan -> MiddleOfTheLoanScreen(navController, errorMessage, false)
         searchFailed -> NoLoanOffersAvailableScreen(navController)
-        errorMessage.isNotEmpty() -> CommonMethods().ShowMiddleLoanErrorScreen(navController, errorMessage)
-
-        webScreenLoading.value -> LoaderAnimation(
-            image = R.raw.we_are_currently_processing_clock,
-            updatedImage = R.raw.we_are_currently_processing_hour_glass,
-            showTimer = true, navController = navController
+        errorMessage.isNotEmpty() -> CommonMethods().ShowMiddleLoanErrorScreen(
+            navController,
+            errorMessage
         )
 
         else -> {
-            val endUse = if (loanPurpose.equals("Other Consumption Purpose", ignoreCase = true))
-                "other"
-            else if (loanPurpose.equals("Consumer Durable Purchase", ignoreCase = true))
-                "consumerDurablePurchase"
-            else loanPurpose.lowercase()
-
-            if (!webScreenLoaded.value) {
-                loadWebScreen(
-                    fromFlow = fromFlow, webViewModel = webViewModel, context = context,
-                    endUse = endUse, purpose = loanPurpose
+            if (gstSearchResponse?.data?.url != null) {
+                NavigateToWebView(
+                    context = context,
+                    gstSearchResponse = gstSearchResponse,
+                    fromFlow = fromFlow,
+                    navController = navController,
+                    searchResponse = SearchModel(
+                        status = true,
+                        statusCode = 200,
+                        data = SearchResponseModel(
+                            id = gstSearchResponse?.data?.id,
+                            url = gstSearchResponse?.data?.url,
+                            transactionId = gstSearchResponse?.data?.transactionId,
+                            offerResponse = null,
+                            offers = null,
+                            consentResponse = null
+                        )
+                    ),
+                    searchModel = null
                 )
-            } else {
-                if (gstSearchResponse?.data?.url != null) {
-                    NavigateToWebView(
-                        gstSearchResponse = gstSearchResponse,
-                        fromFlow = fromFlow,
-                        navController = navController,
-                        searchResponse = SearchModel(
-                            status = true,
-                            statusCode = 200,
-                            data = SearchResponseModel(
-                                id = gstSearchResponse?.data?.id,
-                                url = gstSearchResponse?.data?.url,
-                                transactionId = gstSearchResponse?.data?.transactionId,
-                                offerResponse = null,
-                                offers = null,
-                                consentResponse = null
-                            )
-                        ), searchModel = null
-                    )
-                } else {
-                    if (searchResponse?.data?.offerResponse.isNullOrEmpty()) {
-                        if (searchResponse?.data?.url != null) {
-                            navigateToAccountAggregatorScreen(
-                                navController, loanPurpose, fromFlow,
-                                searchResponse?.data?.id.toString(),
-                                searchResponse?.data?.transactionId.toString(),
-                                searchResponse?.data?.url.toString()
-                            )
-                        } else {
-                            CommonMethods().toastMessage(
-                                context = context, toastMsg = "Unable to Load WebPage"
+            }
+            else {
+                if (effectiveSearchResponse?.data?.offerResponse.isNullOrEmpty()) {
+                    if (effectiveSearchResponse?.data?.url != null) {
+                        navigateToAccountAggregatorScreen(
+                            navController,
+                            loanPurpose,
+                            fromFlow,
+                            effectiveSearchResponse?.data?.id.toString(),
+                            effectiveSearchResponse?.data?.transactionId.toString(),
+                            effectiveSearchResponse?.data?.url.toString()
+                        )
+                    } else {
+                        NoLoanOffersAvailableScreen(navController)
+                    }
+                }
+                else {
+                    CustomModalBottomSheet(
+                        bottomSheetState = filterOptionBottomSheetState,
+                        sheetContent = {
+                            FilterModalContent(
+                                bottomSheetState = filterOptionBottomSheetState,
+                                coroutineScope = coroutineScope,
+                                context = context,
+                                selectedFilter = selectedFilter,
+                                onFilterSelected = { selectedFilter = it }
                             )
                         }
-                    } else {
-                        CustomModalBottomSheet(
-                            bottomSheetState = filterOptionBottomSheetState,
-                            sheetContent = {
-                                FilterModalContent(
-                                    bottomSheetState = filterOptionBottomSheetState,
-                                    coroutineScope = coroutineScope,
-                                    context = context,
-                                    selectedFilter = selectedFilter,
-                                    onFilterSelected = { selectedFilter = it }
-                                )
-
-                            }) {
+                    ) {
                             FixedTopBottomScreen(
                                 navController = navController,
                                 topBarBackgroundColor = appOrange,
                                 topBarText = stringResource(R.string.bureau_offers),
                                 showBackButton = true,
                                 onBackClick = { navigateApplyByCategoryScreen(navController) },
-                                showBottom = true,
-                                showDoubleButton = true,
+                                showBottom = effectiveSearchResponse?.data?.url != null,
+                                showGetMoreOffersButton = true,
                                 primaryButtonText = stringResource(R.string.get_more_offers),
                                 onPrimaryButtonClick = {
-                                    navigateToAccountAggregatorScreen(
-                                        navController, loanPurpose, fromFlow,
-                                        searchResponse?.data?.id.toString(),
-                                        searchResponse?.data?.transactionId.toString(),
-                                        searchResponse?.data?.url.toString()
-                                    )
-                                },
-                                secondaryButtonText = stringResource(R.string.exit),
-                                onSecondaryButtonClick = {
-                                    navigateApplyByCategoryScreen(
-                                        navController
-                                    )
+                                    if (effectiveSearchResponse?.data?.url != null) {
+                                        navigateToAccountAggregatorScreen(
+                                            navController,
+                                            loanPurpose,
+                                            fromFlow,
+                                            effectiveSearchResponse.data.id.toString(),
+                                            effectiveSearchResponse.data.transactionId.toString(),
+                                            effectiveSearchResponse.data.url.toString()
+                                        )
+                                    } else {
+                                        CommonMethods().toastMessage(
+                                            context = context,
+                                            toastMsg = "Currently no more Offers available"
+                                        )
+                                    }
                                 },
                                 backgroundColor = appWhite
                             ) {
@@ -210,20 +269,107 @@ fun BureauOffersScreen(navController: NavHostController, loanPurpose: String,
                                     }
                                 )
                                 val filteredOffers = filterOffers(
-                                    searchResponse?.data?.offerResponse,
-                                    bureauOffersSearchQuery, selectedFilter
+                                    effectiveSearchResponse?.data?.offerResponse,
+                                    bureauOffersSearchQuery,
+                                    selectedFilter
+                                )
+                                RegisterText(
+                                    text = stringResource(R.string.quick_offers),
+                                    textColor = appOrange,
+                                    style = normal20Text700, top = 8.dp, bottom = 8.dp
                                 )
 
                                 filteredOffers.forEachIndexed { index, offer ->
                                     OfferCard(navController, offer, fromFlow, index)
-                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Spacer(modifier = Modifier.height(8.dp))
                                 }
+                                effectiveSearchResponse?.data?.rejectedLenders
+                                    ?.chunked(2)
+                                    ?.forEachIndexed { chunkIndex, lenderPair ->
+
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 4.dp, vertical = 4.dp),
+                                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                        ) {
+                                            lenderPair.forEachIndexed { indexInPair, lender ->
+                                                if (lender != null) {
+                                                    RejectedOfferCard(
+                                                        navController = navController,
+                                                        lender = lender,
+                                                        index = chunkIndex * 2 + indexInPair,
+                                                        modifier = Modifier.weight(1f)
+                                                    )
+                                                }
+                                            }
+
+                                            // If this row has only one lender (i.e., odd count), add spacer for alignment
+                                            if (lenderPair.size == 1 && effectiveSearchResponse.data?.rejectedLenders?.size ?: 0 > 1) {
+                                                Spacer(modifier = Modifier.weight(1f))
+                                            }
+                                        }
+                                    }
                             }
                         }
-                    }
                 }
             }
         }
+    }
+}
+
+fun loadWebScreen(
+    fromFlow: String,
+    webViewModel: WebViewModel,
+    context: Context,
+    endUse: String,
+    purpose: String,
+    downPaymentAmount: String = "",
+    productPrice: String = ""
+) {
+    if (fromFlow.equals("Personal Loan", ignoreCase = true)) {
+        webViewModel.formSubmissionApi(
+            context = context,
+            searchBodyModel = SearchBodyModel(
+                loanType = "PERSONAL_LOAN",
+                endUse = endUse,
+                bureauConsent = "on"
+            )
+        )
+    }
+    else if (fromFlow.equals("Invoice Loan", ignoreCase = true)) {
+        // Here when it in the Gst Invoice Loan purpose equals to Invoice ID
+        webViewModel.searchGst(
+            gstSearchBody = GstSearchBody(
+                loanType = "INVOICE_BASED_LOAN",
+                bureauConsent = "on",
+                tnc = "on",
+                id = purpose
+            ),
+            context = context
+        )
+    }
+    else if (fromFlow.equals("Purchase Finance", ignoreCase = true)) {
+        webViewModel.pFFormSubmissionApi(
+            financeSearchModel = FinanceSearchModel(
+                loanType = "PURCHASE_FINANCE",
+                bureauConsent = "on",
+                tnc = "on",
+                endUse = "travel",
+                downpayment = downPaymentAmount,
+                merchantGst = "24AAHFC3011G1Z4",
+                merchantPan = "EGBQA2212D",
+                isFinancing = "on",
+                merchantBankAccountNumber = "639695357641006",
+                merchantIfscCode = "XRSY0YPV5SW",
+                merchantBankAccountHolderName = "mohan",
+                productCategory = "Electronics Purchase Finance",
+                productBrand = "style",
+                productSKUID = "12345678",
+                productPrice = productPrice
+            ),
+            context = context
+        )
     }
 }
 
@@ -233,7 +379,6 @@ fun OfferCard(navController: NavHostController, offerResponseItem: Offer?, fromF
         offerResponse.offer?.let { offer ->
             val json = Json { prettyPrint = true }
             val responseItem = json.encodeToString(OfferResponseItem.serializer(), offer)
-
             // Extract values from offerResponse
             val bankName = offer.providerDescriptor?.name ?: "Bank"
             val logoUrl = offer.providerDescriptor?.images?.firstOrNull()?.url
@@ -242,22 +387,30 @@ fun OfferCard(navController: NavHostController, offerResponseItem: Offer?, fromF
             var interestRate = "-"
             var tenure = "-"
             var installmentAmount = "-"
-
+            if (fromFlow.equals("Personal Loan", ignoreCase = true)) {
             offer.quoteBreakUp?.forEach { quote ->
                 if (quote?.title?.lowercase(Locale.ROOT)?.contains("principal") == true) {
                     loanAmount = quote.value ?: "-"
                 }
-            }
+            }}
+             if (fromFlow.equals("Purchase Finance", ignoreCase = true)){
+           offer.itemTags?.forEach { itemTag ->
+                itemTag?.tags?.forEach { tag ->
+                    if (tag.key.contains("PRINCIPAL_AMOUNT", ignoreCase = true)) {
+                        loanAmount = tag.value
+                    }
+                }
+            }}
 
             offer.itemTags?.forEach { itemTag ->
                 itemTag?.tags?.forEach { tag ->
                     when {
                         tag.key.equals("interest_rate", ignoreCase = true) ||
-                                tag.key.equals("interest rate", ignoreCase = true) -> {
+                            tag.key.equals("interest rate", ignoreCase = true) -> {
                             interestRate = tag.value
                         }
                         tag.key.equals("loan_term", ignoreCase = true) ||
-                                tag.key.equals("term", ignoreCase = true) -> {
+                            tag.key.equals("term", ignoreCase = true) -> {
                             tenure = tag.value
                         }
                         tag.key.contains("INSTALLMENT_AMOUNT", ignoreCase = true) -> {
@@ -269,121 +422,156 @@ fun OfferCard(navController: NavHostController, offerResponseItem: Offer?, fromF
 
             val gradientColors = when (index) {
                 0 -> listOf(
-                    Color(0xFF4CAF50), // green
+                    Color(0xFFB2FF59) ,// lime
                     Color(0xFF81C784), // light green
-                    Color(0xFFB2FF59), // lime
+                    Color(0xFF4CAF50), // green
                 )
                 1 -> listOf(
                     Color(0xFFFF8A65), // light red-orange
                     Color(0xFFFF7043), // warm red
-                    Color(0xFFD84315), // deep red-orange
+                    Color(0xFFD84315) // deep red-orange
                 )
                 2 -> listOf(
                     Color(0xFF64B5F6), // light blue
                     Color(0xFF42A5F5), // blue
-                    Color(0xFF1976D2), // deep blue
+                    Color(0xFF1976D2) // deep blue
                 )
 
                 3 -> listOf(
                     Color(0xFFFF8A80), // light red
                     Color(0xFFFF5252), // red
-                    Color(0xFF800000), // deep red
+                    Color(0xFF800000) // deep red
                 )
                 else -> listOf(
                     Color(0xFFF3D5B5), // green
                     Color(0xFF8B5E34), // light green
-                    Color(0xFF533101), // lime
+                    Color(0xFF533101) // lime
                 )
-
             }
-
-
-            FullWidthRoundShapedCard(
-                onClick = {
-                    offerResponse.id?.let { id ->
-                        navigateToLoanOffersListDetailScreen(
-                            navController = navController,
-                            responseItem = responseItem,
-                            id = id,
-                            showButtonId = "1",
-                            fromFlow = fromFlow
-                        )
-                    }
-                },
-                cardColor = appOrange, //Sugu
-                gradientColors = gradientColors,
-                bottomPadding = 15.dp,
-                start = 10.dp,
-                end = 10.dp,
-                bottom = 10.dp
+            val gradient = Brush.verticalGradient(colors = gradientColors)
+            Box(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .shadow(8.dp, RoundedCornerShape(12.dp), clip = false) // gray shadow
             ) {
-                val painter = rememberAsyncImagePainter(
-                    ImageRequest.Builder(LocalContext.current)
-                        .data(data = logoUrl ?: R.drawable.bank_icon)
-                        .apply {
-                            crossfade(true)
-                            placeholder(R.drawable.bank_icon)
-                        }.build()
-                )
+                Card(
+                    modifier = Modifier.clickable {
+                            offerResponse.id?.let { id ->
+                                navigateToLoanOffersListDetailScreen(
+                                    navController = navController,
+                                    responseItem = responseItem,
+                                    id = id,
+                                    showButtonId = "1",
+                                    fromFlow = fromFlow
+                                )
+                            }
+                        },
+                    elevation = 8.dp,
+                    backgroundColor = Color.White
+                ) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            Box(
+                                modifier = Modifier.fillMaxWidth().background(appWhite),
+                                contentAlignment = Alignment.CenterStart
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.padding(vertical = 8.dp, horizontal = 8.dp)
+                                ) {
+                                    val painter = rememberAsyncImagePainter(
+                                        ImageRequest.Builder(LocalContext.current)
+                                            .data(data = logoUrl ?: R.drawable.bank_icon)
+                                            .crossfade(true)
+                                            .placeholder(R.drawable.bank_icon)
+                                            .decoderFactory(SvgDecoder.Factory())
+                                            .build()
+                                    )
 
-                ImageTextButtonRow(
-                    imagePainter = painter,
-                    textHeader = bankName,
-                    textColor = appBlack,
-                    textStyle = normal14Text700,
-                    buttonText = stringResource(id = R.string.more_details),
-                    buttonTextStyle = normal12Text400,
-                    onButtonClick = {
-                        offerResponse.id?.let { id ->
-                            navigateToLoanOffersListDetailScreen(
-                                navController = navController,
-                                responseItem = responseItem,
-                                id = id,
-                                showButtonId = "1",
-                                fromFlow = fromFlow
-                            )
+                                    Image(
+                                        painter = painter,
+                                        contentDescription = "Bank",
+                                        modifier = Modifier.size(32.dp).weight(1f)
+                                    )
+
+                                    StartingText(
+                                        text = bankName,
+                                        start = 8.dp,
+                                        style = normal14Text700,
+                                        textColor = gradientColors.last(),
+                                        modifier = Modifier.weight(3f)
+                                    )
+                                    WrapBorderButton(
+                                        text = stringResource(id = R.string.more_details),
+                                        modifier = Modifier
+                                            .padding(
+                                                start = 0.dp,
+                                                end = 0.dp,
+                                                top = 0.dp,
+                                                bottom = 0.dp
+                                            )
+                                            .weight(2.5f),
+                                        style = normal12Text400,
+                                        shape = RoundedCornerShape(10.dp),
+                                        backgroundColor = gradientColors.last(),
+                                        textColor = appWhite
+                                    ) {
+                                        offerResponse.id?.let { id ->
+                                            navigateToLoanOffersListDetailScreen(
+                                                navController = navController,
+                                                responseItem = responseItem,
+                                                id = id,
+                                                showButtonId = "1",
+                                                fromFlow = fromFlow
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(brush = gradient)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(vertical = 16.dp, horizontal = 8.dp)
+                                ) {
+                                    Row {
+                                        HeaderWithValue(
+                                            textHeader = stringResource(id = R.string.loan_amount_inr),
+                                            textValue = loanAmount,
+                                            modifier = Modifier.weight(0.5f)
+                                        )
+                                        HeaderWithValue(
+                                            textHeader = stringResource(id = R.string.rate_of_interest),
+                                            textValue = interestRate,
+                                            modifier = Modifier.weight(0.5f)
+                                        )
+                                    }
+
+                                    Spacer(Modifier.height(15.dp))
+
+                                    Row {
+                                        HeaderWithValue(
+                                            textHeader = stringResource(id = R.string.tenure),
+                                            textValue = tenure,
+                                            modifier = Modifier.weight(0.5f)
+                                        )
+                                        HeaderWithValue(
+                                            textHeader = stringResource(id = R.string.installment_amount),
+                                            textValue = installmentAmount,
+                                            modifier = Modifier.weight(0.5f)
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
-                )
-
-                Row {
-                    HeaderWithValue(
-                        textHeader = stringResource(id = R.string.max_loan_amount),
-                        textValue = loanAmount,
-                        modifier = Modifier.weight(0.5f)
-                    )
-                    HeaderWithValue(
-                        textHeader = stringResource(id = R.string.rate_of_interest),
-                        textValue = interestRate,
-                        modifier = Modifier.weight(0.5f)
-                    )
-                }
-
-                Spacer(Modifier.height(15.dp))
-
-                Row {
-                    HeaderWithValue(
-                        textHeader = stringResource(id = R.string.tenure),
-                        textValue = tenure,
-                        modifier = Modifier.weight(0.5f)
-                    )
-                    HeaderWithValue(
-                        textHeader = stringResource(id = R.string.installment_amount),
-                        textValue = installmentAmount,
-                        modifier = Modifier.weight(0.5f)
-                    )
                 }
             }
+
         }
     }
 }
 
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewBureauOffers() {
-    val navController = rememberNavController()
-//    OfferCard(navController)
-//    BureauOffersScreen(navController = navController, loanPurpose = "Education",
-//        fromFlow = "Personal Loan")
-}

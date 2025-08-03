@@ -12,26 +12,20 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.LocalTextStyle
-import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.RadioButton
 import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import coil.decode.SvgDecoder
 import coil.request.ImageRequest
 import com.github.sugunasriram.fisloanlibv4.R
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.BankItem
@@ -42,17 +36,17 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.bold14Text500
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.customGrayColor
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.grayD9
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.hintGray
-import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.lightGray
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.lightishGray
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal14Text400
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal14Text500
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal16Text500
-import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal18Text400
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.primaryOrange
 
 @Composable
 fun RadioButtonWithText(
-    text: String, selected: Boolean, onCheckedChange: (Boolean) -> Unit,
+    text: String,
+    selected: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
     readOnly: Boolean = false
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -63,7 +57,9 @@ fun RadioButtonWithText(
             enabled = !readOnly
         )
         Text(
-            text = text, color = customGrayColor, style = normal14Text500,
+            text = text,
+            color = customGrayColor,
+            style = normal14Text500,
             modifier = if (readOnly) Modifier else Modifier.clickable { onCheckedChange(!selected) }
         )
     }
@@ -75,17 +71,19 @@ fun TextWithRadioButton(
     selected: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically,
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier.fillMaxWidth()
             .height(70.dp)
             .padding(horizontal = 15.dp, vertical = 10.dp)
             .background(grayD9, shape = RoundedCornerShape(16.dp))
     ) {
-
         Text(
-            text = text, color = appBlack, style = normal16Text500,
-            modifier = Modifier.padding(start=10.dp)
+            text = text,
+            color = appBlack,
+            style = normal16Text500,
+            modifier = Modifier.padding(start = 10.dp)
                 .clickable(onClick = { onCheckedChange(!selected) })
         )
         RadioButton(
@@ -98,8 +96,11 @@ fun TextWithRadioButton(
 
 @Composable
 fun ImageTextWithRadioButton(
-    backGroundColor: Color = appWhite, radioOptions: ArrayList<BankItem?>, top: Dp = 15.dp,
-    selectedOption: String?, onOptionSelected: (String?) -> Unit
+    backGroundColor: Color = appWhite,
+    radioOptions: ArrayList<BankItem?>,
+    top: Dp = 15.dp,
+    selectedOption: String?,
+    onOptionSelected: (String?) -> Unit
 ) {
     radioOptions.forEach { data ->
         data?.let {
@@ -119,6 +120,7 @@ fun ImageTextWithRadioButton(
                         ImageRequest.Builder(LocalContext.current).data(data = imageUrl).apply(block = fun ImageRequest.Builder.() {
                             crossfade(true)
                             placeholder(R.drawable.bank_icon)
+                            decoderFactory(SvgDecoder.Factory())
                         }).build()
                     )
                     Image(
@@ -136,7 +138,7 @@ fun ImageTextWithRadioButton(
                             .weight(1f)
                             .padding(start = 30.dp, end = 30.dp, bottom = 5.dp),
                         style = bold14Text500,
-                        textAlign = TextAlign.Start,
+                        textAlign = TextAlign.Start
                     )
                 }
 
@@ -155,8 +157,11 @@ fun ImageTextWithRadioButton(
 
 @Composable
 fun TextDescriptionWithRadioButton(
-    text: String, description: String, selectedOption: String,
-    optionValue: String, onSelectOption: () -> Unit
+    text: String,
+    description: String,
+    selectedOption: String,
+    optionValue: String,
+    onSelectOption: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -168,16 +173,15 @@ fun TextDescriptionWithRadioButton(
         RadioButton(
             selected = selectedOption == optionValue,
             onClick = onSelectOption,
-            colors = RadioButtonDefaults.colors(selectedColor = appOrange,
-                unselectedColor = appOrange)
+            colors = RadioButtonDefaults.colors(
+                selectedColor = appOrange,
+                unselectedColor = appOrange
+            )
         )
         Column {
-            StartingText(text=text, textColor = appBlack, style = normal16Text500, textAlign = TextAlign.Start)
+            StartingText(text = text, textColor = appBlack, style = normal16Text500, textAlign = TextAlign.Start)
             Spacer(modifier = Modifier.height(4.dp))
-            StartingText(text=description, textColor = hintGray, style = normal14Text400, textAlign = TextAlign.Start)
+            StartingText(text = description, textColor = hintGray, style = normal14Text400, textAlign = TextAlign.Start)
         }
-
     }
 }
-
-

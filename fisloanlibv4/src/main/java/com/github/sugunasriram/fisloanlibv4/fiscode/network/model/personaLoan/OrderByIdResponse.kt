@@ -6,12 +6,12 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class OrderByIdResponse(
 
-	@SerialName("data")
-	val data: OfferResponseItem? = null,
+    @SerialName("data")
+    val data: OfferResponseItem? = null,
 
-	@SerialName("status")
-	val status: Boolean? = null,
+    @SerialName("status")
+    val status: Boolean? = null,
 
-	@SerialName("statusCode")
-	val statusCode: Int? = null
+    @SerialName("statusCode")
+    val statusCode: Int? = null
 )

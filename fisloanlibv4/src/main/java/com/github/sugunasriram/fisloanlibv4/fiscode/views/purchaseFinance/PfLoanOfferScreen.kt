@@ -44,8 +44,8 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.components.StartingText
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateSignInPage
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToLoanOffersListDetailScreen
-import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.pf.PfOfferResponseItem
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.pf.PfOffer
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.pf.PfOfferResponseItem
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appBlack
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appBlueTitle
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appRed
@@ -59,13 +59,14 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan.LoanAgreementViewModel
 import kotlinx.serialization.json.Json
 
-
 private val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
 private var loanAmountVal = ""
 
 @Composable
 fun PfLoanOfferScreen(
-    navController: NavHostController, offerResponse: String, fromFlow: String
+    navController: NavHostController,
+    offerResponse: String,
+    fromFlow: String
 ) {
     var backPressedTime by remember { mutableLongStateOf(0L) }
     val context = LocalContext.current
@@ -76,7 +77,8 @@ fun PfLoanOfferScreen(
             navigateApplyByCategoryScreen(navController)
         } else {
             CommonMethods().toastMessage(
-                context = context, toastMsg = "Press back again to go to the home page"
+                context = context,
+                toastMsg = "Press back again to go to the home page"
             )
             backPressedTime = currentTime
         }
@@ -89,23 +91,24 @@ fun PfLoanOfferScreen(
 
     val navigationToSignIn by loanAgreementViewModel.navigationToSignIn.collectAsState()
 
-
     if (navigationToSignIn) {
-        navigateSignInPage (navController)
-    }
-    else if (pfOfferListLoading) {
+        navigateSignInPage(navController)
+    } else if (pfOfferListLoading) {
         CenterProgress()
     } else {
         if (pfOfferListLoaded) {
             FixedTopBottomScreen(
-                navController = navController, showBottom = false, isSelfScrollable = false,
+                navController = navController,
+                showBottom = false,
+                isSelfScrollable = false,
                 onBackClick = {
                     val currentTime = System.currentTimeMillis()
                     if (currentTime - backPressedTime < 2000) {
                         navigateApplyByCategoryScreen(navController)
                     } else {
                         CommonMethods().toastMessage(
-                            context = context, toastMsg = "Press back again to go to the Home page"
+                            context = context,
+                            toastMsg = "Press back again to go to the Home page"
                         )
                         backPressedTime = currentTime
                     }
@@ -114,7 +117,10 @@ fun PfLoanOfferScreen(
                 StartingText(
                     text = stringResource(id = R.string.loan_offers),
                     textColor = appBlueTitle,
-                    start = 30.dp, end = 30.dp, top = 10.dp, bottom = 5.dp,
+                    start = 30.dp,
+                    end = 30.dp,
+                    top = 10.dp,
+                    bottom = 5.dp,
                     style = normal32Text700
                 )
 
@@ -131,12 +137,10 @@ fun PfLoanOfferScreen(
                 }
             }
         } else {
-                loanAgreementViewModel.pfOfferList(loanType = "PURCHASE_FINANCE", context = context)
+            loanAgreementViewModel.pfOfferList(loanType = "PURCHASE_FINANCE", context = context)
         }
     }
 }
-
-
 
 @Composable
 fun LoanOfferCard(navController: NavHostController, offerResponseItem: PfOffer?, fromFlow: String) {
@@ -150,18 +154,25 @@ fun LoanOfferCard(navController: NavHostController, offerResponseItem: PfOffer?,
                 onClick = {
                     offerResponse.offer.id?.let { id ->
                         navigateToLoanOffersListDetailScreen(
-                            navController = navController, responseItem = responseItem,
-                            id = id, showButtonId = "1", fromFlow = fromFlow
+                            navController = navController,
+                            responseItem = responseItem,
+                            id = id,
+                            showButtonId = "1",
+                            fromFlow = fromFlow
                         )
                     }
                 },
                 cardColor = azureBlueColor,
                 bottomPadding = 0.dp,
-                start = 10.dp, end = 10.dp
+                start = 10.dp,
+                end = 10.dp
             ) {
                 LoanCardView(
-                    offerResponse = offerResponse, navController = navController,
-                    responseItem = responseItem, fromFlow = fromFlow, context = context
+                    offerResponse = offerResponse,
+                    navController = navController,
+                    responseItem = responseItem,
+                    fromFlow = fromFlow,
+                    context = context
                 )
             }
         }
@@ -170,22 +181,35 @@ fun LoanOfferCard(navController: NavHostController, offerResponseItem: PfOffer?,
 
 @Composable
 fun LoanCardView(
-    offerResponse: PfOffer, navController: NavHostController, responseItem: String,
-    fromFlow: String, context: Context
+    offerResponse: PfOffer,
+    navController: NavHostController,
+    responseItem: String,
+    fromFlow: String,
+    context: Context
 ) {
     FullWidthRoundShapedCard(
-        start = 8.dp, end = 8.dp, top = 5.dp, bottom = 30.dp,
+        start = 8.dp,
+        end = 8.dp,
+        top = 5.dp,
+        bottom = 30.dp,
         cardColor = whiteGreenColor,
         onClick = {
             offerResponse.offer?.id?.let { id ->
                 navigateToLoanOffersListDetailScreen(
-                    navController, responseItem, id, "1", fromFlow = fromFlow
+                    navController,
+                    responseItem,
+                    id,
+                    "1",
+                    fromFlow = fromFlow
                 )
             }
-        }) {
+        }
+    ) {
         LoanCard(
-            offerResponse = offerResponse, navController = navController,
-            responseItem = responseItem, fromFlow = fromFlow
+            offerResponse = offerResponse,
+            navController = navController,
+            responseItem = responseItem,
+            fromFlow = fromFlow
         )
     }
     TermsAndConditions(offerResponse, context)
@@ -202,7 +226,7 @@ fun LoanCard(
     CardHeader(offerResponse, navController, responseItem, fromFlow)
 
     HorizontalDivider(start = 0.dp, end = 0.dp)
-    //Get loan amount that user will get
+    // Get loan amount that user will get
 
     offerResponse.offer?.itemTags?.forEach { itemTag ->
         itemTag?.tags?.forEach { tag ->
@@ -218,22 +242,23 @@ fun LoanCard(
     LoanAmountTenure(offerResponse)
 }
 
-
 @Composable
 fun TermsAndConditions(offerResponse: PfOffer, context: Context) {
     var found: Boolean
     MultipleColorText(
         text = stringResource(id = R.string.terms_and_conditions),
         textColor = appWhite,
-        resendOtpColor = appRed,
+        resendOtpColor = appRed
     ) {
         found = false
         offerResponse.offer?.itemTags?.forEach { itemTag ->
             itemTag?.tags?.forEach { tag ->
-                if (tag.key.contains("tnc", ignoreCase = true) || (tag.key.contains(
-                        "term",
-                        ignoreCase = true
-                    ) && tag.key.contains("condition", ignoreCase = true))
+                if (tag.key.contains("tnc", ignoreCase = true) || (
+                    tag.key.contains(
+                            "term",
+                            ignoreCase = true
+                        ) && tag.key.contains("condition", ignoreCase = true)
+                    )
                 ) {
                     tag.value.let { termsConditions ->
                         CommonMethods().openLink(context, termsConditions)
@@ -286,7 +311,6 @@ fun LoanAmountTenure(offerResponse: PfOffer) {
                 }
             }
         }
-
     }
 }
 
@@ -295,7 +319,7 @@ fun AmountInterest(offerResponse: PfOffer) {
     var found: Boolean
     Row {
         HeaderNextRowValue(
-            textHeader = stringResource(id = R.string.max_loan_amount),
+            textHeader = stringResource(id = R.string.loan_amount_inr),
             textValue = loanAmountVal,
             textColorHeader = appBlack,
             textColorValue = appBlack,
@@ -330,8 +354,6 @@ fun AmountInterest(offerResponse: PfOffer) {
                 if (found) return@forEach
             }
         }
-
-
     }
 }
 
@@ -391,7 +413,11 @@ fun CardHeader(
                     onButtonClick = {
                         offerResponse.offer.id?.let { id ->
                             navigateToLoanOffersListDetailScreen(
-                                navController, responseItem, id, "1", fromFlow = fromFlow
+                                navController,
+                                responseItem,
+                                id,
+                                "1",
+                                fromFlow = fromFlow
                             )
                         }
                     }
@@ -401,10 +427,12 @@ fun CardHeader(
     }
 }
 
-
 @Preview
 @Composable
-fun PfInvoiceLoanOfferScreenPreview(){
-    PfLoanOfferScreen(navController = rememberNavController(),
-        offerResponse="", fromFlow = "INVOICE_BASED_LOAN" )
+fun PfInvoiceLoanOfferScreenPreview() {
+    PfLoanOfferScreen(
+        navController = rememberNavController(),
+        offerResponse = "",
+        fromFlow = "INVOICE_BASED_LOAN"
+    )
 }

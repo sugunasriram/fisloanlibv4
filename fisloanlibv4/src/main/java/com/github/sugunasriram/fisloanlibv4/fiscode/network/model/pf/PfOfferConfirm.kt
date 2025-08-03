@@ -3,32 +3,30 @@ package com.github.sugunasriram.fisloanlibv4.fiscode.network.model.pf
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-
 @Serializable
 data class PfOfferConfirm(
     val id: String? = null,
     val requestAmount: String? = null,
     val loanType: String? = null,
-    val requestTerm: String? = null,
+    val requestTerm: String? = null
 )
 
-
 @Serializable
-data class PfOfferConfirmResponse (
+data class PfOfferConfirmResponse(
     val status: Boolean? = null,
     val data: PfOfferConfirmData? = null,
     val statusCode: Long? = null
 )
 
 @Serializable
-data class PfOfferConfirmData (
+data class PfOfferConfirmData(
     val catalog: PfCatalog? = null,
     val offerResponse: PfCatalog? = null,
-    val eNACHUrlObject: PfCatalog?= null
+    val eNACHUrlObject: PfCatalog? = null
 )
 
 @Serializable
-data class PfCatalog (
+data class PfCatalog(
     @SerialName("_id")
     val id: String? = null,
 
@@ -91,20 +89,20 @@ data class PfCatalog (
 )
 
 @Serializable
-data class Price (
+data class Price(
     val currency: String? = null,
     val value: String? = null
 )
 
 @Serializable
-data class PfItemTag (
+data class PfItemTag(
     val name: String? = null,
     val display: Boolean? = null,
     val tags: PfItemTagTags? = null
 )
 
 @Serializable
-data class PfItemTagTags (
+data class PfItemTagTags(
     @SerialName("INTEREST_RATE")
     val interestRate: String? = null,
 
@@ -170,7 +168,7 @@ data class PfItemTagTags (
 )
 
 @Serializable
-data class PfProviderDescriptor (
+data class PfProviderDescriptor(
     val images: List<PfImage>? = null,
 
     @SerialName("long_desc")
@@ -183,7 +181,7 @@ data class PfProviderDescriptor (
 )
 
 @Serializable
-data class PfImage (
+data class PfImage(
     @SerialName("size_type")
     val sizeType: String? = null,
 
@@ -191,13 +189,13 @@ data class PfImage (
 )
 
 @Serializable
-data class PfProviderTag (
+data class PfProviderTag(
     val name: String? = null,
     val tags: PfProviderTagTags? = null
 )
 
 @Serializable
-data class PfProviderTagTags (
+data class PfProviderTagTags(
     @SerialName("GRO_NAME")
     val groName: String? = null,
 
@@ -236,7 +234,7 @@ data class PfProviderTagTags (
 )
 
 @Serializable
-data class QuoteBreakup (
+data class QuoteBreakup(
     val title: String? = null,
     val value: String? = null,
     val currency: String? = null

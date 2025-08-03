@@ -49,14 +49,16 @@ import java.util.Locale
 @OptIn(ExperimentalFoundationApi::class)
 @SuppressLint("ResourceType")
 @Composable
-fun EditBankDetailScreen(navController: NavHostController, id: String, fromFlow: String,
-                         accountId: String,
-                         bankAccountHolderName:String,
-                         bankAccountType:String,
-                         bankIfsc:String,
-                         bankAccountNumber:String
-                         ) {
-
+fun EditBankDetailScreen(
+    navController: NavHostController,
+    id: String,
+    fromFlow: String,
+    accountId: String,
+    bankAccountHolderName: String,
+    bankAccountType: String,
+    bankIfsc: String,
+    bankAccountNumber: String
+) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val accountDetailViewModel: AccountDetailViewModel = viewModel()
@@ -88,7 +90,7 @@ fun EditBankDetailScreen(navController: NavHostController, id: String, fromFlow:
             accountDetailViewModel.resetKeyboardRequest()
         }
     }
-    LaunchedEffect (Unit){
+    LaunchedEffect(Unit) {
         accountDetailViewModel.setAccountHolder(bankAccountHolderName)
         accountDetailViewModel.setAccountType(bankAccountType)
         accountDetailViewModel.setAccountNumber(bankAccountNumber)
@@ -104,21 +106,23 @@ fun EditBankDetailScreen(navController: NavHostController, id: String, fromFlow:
     val accountTypeList = listOf("Current", "Saving")
     var accountSelectedText by remember { mutableStateOf(bankAccountType.replaceFirstChar { it.uppercaseChar() }) }
     val onAccountDismiss: () -> Unit = { accountTypeExpand = false }
-    val onAccountSelected: (String) -> Unit = { selectedText -> accountSelectedText = selectedText
-        accountDetailViewModel.onAccountTypeChanged(selectedText.lowercase())}
+    val onAccountSelected: (String) -> Unit = { selectedText ->
+        accountSelectedText = selectedText
+        accountDetailViewModel.onAccountTypeChanged(selectedText.lowercase())
+    }
     val bringFocusRequester = remember { BringIntoViewRequester() }
     var backPressedTime by remember { mutableLongStateOf(0L) }
     BackHandler { navigateApplyByCategoryScreen(navController) }
 
     when {
-        navigationToSignIn -> navigateSignInPage (navController)
+        navigationToSignIn -> navigateSignInPage(navController)
         showInternetScreen -> CommonMethods().ShowInternetErrorScreen(navController)
         showTimeOutScreen -> CommonMethods().ShowTimeOutErrorScreen(navController)
         showServerIssueScreen -> CommonMethods().ShowServerIssueErrorScreen(navController)
         unexpectedErrorScreen -> CommonMethods().ShowUnexpectedErrorScreen(navController)
         unAuthorizedUser -> CommonMethods().ShowUnAuthorizedErrorScreen(navController)
 //        middleLoan -> CommonMethods().ShowMiddleLoanErrorScreen(navController)
-        middleLoan ->  MiddleOfTheLoanScreen(navController,errorMessage,)
+        middleLoan -> MiddleOfTheLoanScreen(navController, errorMessage)
         else -> {
             if (bankDetailUpdating) {
                 ProcessingAnimation(
@@ -128,7 +132,9 @@ fun EditBankDetailScreen(navController: NavHostController, id: String, fromFlow:
             } else {
                 if (bankDetailUpdated) {
                     navigateToBankDetailsScreen(
-                        navController = navController, id = id, fromFlow = fromFlow,
+                        navController = navController,
+                        id = id,
+                        fromFlow = fromFlow
                     )
                 } else {
                     FixedTopBottomScreen(
@@ -158,7 +164,7 @@ fun EditBankDetailScreen(navController: NavHostController, id: String, fromFlow:
                                     accountHolderName = accountHolder,
                                     ifscCode = ifscCode,
                                     accountType = accountSelectedText.lowercase(Locale.ROOT),
-                                    id = accountId,
+                                    id = accountId
                                 ),
                                 navController = navController
                             )
@@ -191,7 +197,7 @@ fun EditBankDetailScreen(navController: NavHostController, id: String, fromFlow:
                         if (fromFlow.equals("Personal Loan", ignoreCase = true)) {
                             AddBankFieldHeader(
                                 label = stringResource(id = R.string.account_type),
-                                headerImage = painterResource(id = R.drawable.account_type_icon) ,
+                                headerImage = painterResource(id = R.drawable.account_type_icon)
                             )
                             ClickableDropDownField(
                                 expand = accountTypeExpand,
@@ -200,23 +206,22 @@ fun EditBankDetailScreen(navController: NavHostController, id: String, fromFlow:
                                 end = 8.dp,
                                 bottom = 2.dp,
                                 error = accountTypeError,
-                                errorTextStart=15.dp,
+                                errorTextStart = 15.dp,
                                 selectedText = accountSelectedText, focus = focusAccountType,
                                 onNextFocus = focusAccountNumber, setExpand = { accountTypeExpand = it },
                                 itemList = accountTypeList, onDismiss = onAccountDismiss,
                                 modifier = Modifier.focusRequester(focusAccountType)
                                     .bringIntoViewRequester(bringFocusRequester),
-                                onItemSelected = {it ->
+                                onItemSelected = { it ->
                                     onAccountSelected(it)
                                     accountDetailViewModel.updateAccountTypeError(null)
                                     focusAccountNumber.requestFocus()
                                 }
                             )
-
                         }
                         AddBankField(
                             label = stringResource(id = R.string.bank_account_number),
-                            headerImge = painterResource(id = R.drawable.account_number_icon) ,
+                            headerImge = painterResource(id = R.drawable.account_number_icon),
                             value = accountNumber,
                             onValueChange = { input ->
                                 val filteredInput = input.filter { it.isDigit() } // Only allow digits
@@ -239,7 +244,7 @@ fun EditBankDetailScreen(navController: NavHostController, id: String, fromFlow:
 
                         AddBankField(
                             label = stringResource(id = R.string.bank_ifsc_code),
-                            headerImge = painterResource(id = R.drawable.bank_ifsc_icon) ,
+                            headerImge = painterResource(id = R.drawable.bank_ifsc_icon),
                             value = ifscCode,
                             onValueChange = {
                                 accountDetailViewModel.onIfscCodeChanged(it)
@@ -255,7 +260,8 @@ fun EditBankDetailScreen(navController: NavHostController, id: String, fromFlow:
                                 imeAction = ImeAction.Done,
                                 keyboardType = KeyboardType.Text,
                                 capitalization = KeyboardCapitalization.Characters
-                            ), regexPattern = "[^a-zA-Z0-9]",
+                            ),
+                            regexPattern = "[^a-zA-Z0-9]",
                             inputLimit = 11
                         )
                     }
@@ -269,8 +275,13 @@ fun EditBankDetailScreen(navController: NavHostController, id: String, fromFlow:
 @Composable
 fun EditAccountDetailsScreenPreview() {
     EditBankDetailScreen(
-        navController = NavHostController(LocalContext.current), id = "1",
-        fromFlow = "Personal Loan","","","","",""
+        navController = NavHostController(LocalContext.current),
+        id = "1",
+        fromFlow = "Personal Loan",
+        "",
+        "",
+        "",
+        "",
+        ""
     )
 }
-

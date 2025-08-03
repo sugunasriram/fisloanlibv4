@@ -8,11 +8,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.ExperimentalMaterialApi
@@ -84,11 +86,6 @@ import java.text.NumberFormat
 import java.util.Locale
 import kotlin.math.roundToInt
 
-val indianCurrencyFormatter = NumberFormat.getCurrencyInstance(Locale("en", "IN")).apply {
-    maximumFractionDigits = 0
-    minimumFractionDigits = 0
-    isGroupingUsed = true
-}
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun BasicDetailsScreen(navController: NavHostController, fromFlow: String, loanPurpose: String) {
@@ -126,9 +123,6 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String, loanP
     val companyName by registerViewModel.companyName.observeAsState("")
     val companyNameError by registerViewModel.companyNameError.observeAsState(null)
 
-    val udyamNumber by registerViewModel.udyamNumber.observeAsState("")
-
-
     val pinCode1 by registerViewModel.pinCode1.observeAsState("")
     val pinCode1Error by registerViewModel.pinCode1Error.observeAsState(null)
 
@@ -138,8 +132,8 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String, loanP
     val area1 by registerViewModel.area1.observeAsState("")
     val area1Error by registerViewModel.area1Error.observeAsState(null)
 
-    val town1 by registerViewModel.town1.observeAsState("")
-    val town1Error by registerViewModel.town1Error.observeAsState(null)
+    val town1 by registerViewModel.district1.observeAsState("")
+    val town1Error by registerViewModel.district1Error.observeAsState(null)
 
     val state1 by registerViewModel.state1.observeAsState("")
     val state1Error by registerViewModel.state1Error.observeAsState(null)
@@ -147,11 +141,7 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String, loanP
     val officialAddressField by registerViewModel.officialAddressField.observeAsState()
     val officialAddressError by registerViewModel.officialAddressError.observeAsState(null)
 
-    val city2 by registerViewModel.city2.observeAsState("")
-    val city2Error by registerViewModel.city2Error.observeAsState(null)
-
     val permanentAddressField by registerViewModel.permanentAddressField.observeAsState()
-    val permanentAddressError by registerViewModel.permanentAddressError.observeAsState(null)
     val incomeValue: String? by registerViewModel.income.observeAsState("")
 
     val firstNameFocusRequester = remember { FocusRequester() }
@@ -170,9 +160,6 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String, loanP
     val area1FocusRequester = remember { FocusRequester() }
     val town1FocusRequester = remember { FocusRequester() }
     val state1FocusRequester = remember { FocusRequester() }
-    val officialAddressFocusRequester = remember { FocusRequester() }
-    val permanentAddressFocusRequester = remember { FocusRequester() }
-
     val pinCode1Response by registerViewModel.pinCode1Response.collectAsState()
 
     val showInternetScreen by registerViewModel.showInternetScreen.observeAsState(false)
@@ -188,7 +175,6 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String, loanP
     val onCity1Selected: (String) -> Unit = { selectedText ->
         selectedCity1 = selectedText
     }
-    var selectedCity2 by remember { mutableStateOf(city2 ?: "") }
 
     val formattedGender = gender?.replaceFirstChar {
         if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
@@ -199,7 +185,8 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String, loanP
         formattedGender
     }
     val genderList = listOf(
-        stringResource(id = R.string.male), stringResource(id = R.string.female),
+        stringResource(id = R.string.male),
+        stringResource(id = R.string.female),
         stringResource(id = R.string.others)
     )
     val formattedEmployeeType = employeeType?.replaceFirstChar {
@@ -207,15 +194,14 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String, loanP
     } ?: ""
     var employmentSelectedText: String = formattedEmployeeType ?: ""
     val employeeTypeList = listOf(
-        stringResource(id = R.string.salaried), stringResource(id = R.string.self_employment)
+        stringResource(id = R.string.salaried),
+        stringResource(id = R.string.self_employment)
     )
 
     val scope = rememberCoroutineScope()
     val bottomSheet1Value = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true
-    )
-    val bottomSheet2Value = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
     )
     val annualIncomeViewModel: AnnualIncomeViewModel = viewModel()
     LaunchedEffect(incomeValue) {
@@ -234,6 +220,7 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String, loanP
     val bringPurposeFocusRequester = remember { BringIntoViewRequester() }
     var sliderSelected = remember { false }
     var purposeExpanded by rememberSaveable { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
     val purpose = listOf(
         stringResource(id = R.string.travel),
         stringResource(id = R.string.education),
@@ -255,7 +242,7 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String, loanP
     val numberOfSteps = ((maxRange - minRange) / stepSize).toInt() - 1
 
     BackHandler { navigateToPersonaLoanScreen(navController, fromFlow) }
-    var textFieldValue by remember { mutableStateOf(TextFieldValue( )) }
+    var textFieldValue by remember { mutableStateOf(TextFieldValue()) }
     val formattedIncome by remember(income) {
         mutableStateOf(annualIncomeViewModel.formatIncome(income))
     }
@@ -302,9 +289,9 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String, loanP
                             state = state1,
                             stateFocus = state1FocusRequester,
                             stateError = state1Error ?: "",
-                            town = town1,
-                            townFocus = town1FocusRequester,
-                            townError = town1Error,
+                            district = town1,
+                            districtFocus = town1FocusRequester,
+                            districtError = town1Error,
                             city = city1,
                             cityFocus = city1FocusRequester,
                             cityError = city1Error,
@@ -312,206 +299,206 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String, loanP
                             pinCodeResponse = pinCode1Response,
                             registerViewModel = registerViewModel,
                             context = context,
-                            onItemSelected = onCity1Selected
+                            onItemSelected = onCity1Selected,
+                            scrollState = scrollState
                         )
                     }
                 ) {
-                        FixedTopBottomScreen(
-                            navController = navController,
-                            contentStart = 0.dp,
-                            topBarBackgroundColor = appOrange,
-                            topBarText = stringResource(R.string.basic_detail),
-                            showBackButton = true,
-                            onBackClick = { navigateToPersonaLoanScreen(navController, fromFlow) },
-                            showBottom = true,
-                            showSingleButton = true,
-                            primaryButtonText = stringResource(R.string.next),
-                            onPrimaryButtonClick = {
-                                annualIncomeViewModel.onNextClicked(
-                                    context, selectedPurpose, income,
-                                    onFocusRequester = {
-                                        scope.launch {
-                                            purposeFocus.requestFocus()
-                                            bringPurposeFocusRequester.bringIntoView()
-                                        }
+                    FixedTopBottomScreen(
+                        navController = navController,
+                        contentStart = 0.dp,
+                        topBarBackgroundColor = appOrange,
+                        topBarText = stringResource(R.string.basic_detail),
+                        showBackButton = true,
+                        onBackClick = { navigateToPersonaLoanScreen(navController, fromFlow) },
+                        showBottom = true,
+                        showSingleButton = true,
+                        primaryButtonText = stringResource(R.string.next),
+                        onPrimaryButtonClick = {
+                            annualIncomeViewModel.onNextClicked(
+                                context,
+                                selectedPurpose,
+                                income,
+                                onFocusRequester = {
+                                    scope.launch {
+                                        purposeFocus.requestFocus()
+                                        bringPurposeFocusRequester.bringIntoView()
                                     }
+                                }
+                            )
+                        },
+                        backgroundColor = appWhite
+                    ) {
+                        RegisterText(
+                            text = stringResource(id = R.string.please_provide_more_info),
+                            style = normal20Text700,
+                            top = 20.dp,
+                            bottom = 20.dp,
+                            start = 20.dp,
+                            end = 20.dp
+                        )
+
+
+                        BasicDetailsInputField(
+                            label = stringResource(id = R.string.phone_number),
+                            value = phoneNumber ?: "",
+                            showStar = true,
+                            readOnly = true,
+//                                enable = false,
+                            leadingIcon = { Text(text = "+91", style = normal14Text500) },
+                            onValueChange = {},
+                            error = phoneNumberError,
+                            focusRequester = phoneNumberFocusRequester,
+                            leadingImage = painterResource(R.drawable.call_icon),
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Next,
+                                keyboardType = KeyboardType.Phone
+                            ),
+                            scrollState = scrollState
+                        )
+
+                        BasicDetailsInputField(
+                            label = stringResource(id = R.string.pan),
+                            value = panNumber ?: "",
+                            readOnly = true,
+                            onValueChange = { registerViewModel.onPanNumberChanged(it, context, navController) },
+                            error = panError,
+                            focusRequester = panFocusRequester,
+                            leadingImage = painterResource(R.drawable.pan_icon),
+                            keyboardOptions = KeyboardOptions(
+                                capitalization = KeyboardCapitalization.Characters,
+                                imeAction = ImeAction.Next,
+                                keyboardType = KeyboardType.Text
+                            ),
+                            scrollState = scrollState
+                        )
+
+                        BasicDetailsInputField(
+                            label = stringResource(id = R.string.first_name),
+                            value = firstName ?: "",
+                            onValueChange = {
+                                registerViewModel.onFirstNameChanged(it, context)
+                            },
+                            error = firstNameError,
+                            readOnly = true,
+                            focusRequester = firstNameFocusRequester,
+                            leadingImage = painterResource(R.drawable.person_icon),
+                            keyboardOptions = KeyboardOptions(
+                                capitalization = KeyboardCapitalization.Sentences,
+                                imeAction = ImeAction.Next,
+                                keyboardType = KeyboardType.Text
+                            ),
+                            scrollState = scrollState
+                        )
+                        BasicDetailsInputField(
+                            label = stringResource(id = R.string.last_name),
+                            value = lastName,
+                            readOnly = true,
+                            onValueChange = {
+                                registerViewModel.onLastNameChanged(
+                                    it,
+                                    context
                                 )
                             },
-                            backgroundColor = appWhite
-                        ) {
-                            RegisterText(
-                                text = stringResource(id = R.string.please_provide_more_info),
-                                style = normal20Text700,
-                                top = 20.dp, bottom = 20.dp,
-                                start = 20.dp, end = 20.dp,
-                            )
+                            error = lastNameError,
+                            focusRequester = lastNameFocusRequester,
+                            leadingImage = painterResource(R.drawable.person_icon),
+                            keyboardOptions = KeyboardOptions(
+                                capitalization = KeyboardCapitalization.Sentences,
+                                imeAction = ImeAction.Next,
+                                keyboardType = KeyboardType.Text
+                            ),
+                            scrollState = scrollState
+                        )
 
-                            BasicDetailsInputField(
-                                label = stringResource(id = R.string.first_name),
-                                value = firstName?:"",
-                                onValueChange = {
-                                    registerViewModel.onFirstNameChanged(it, context)
-                                },
-                                error = firstNameError,
-                                readOnly = true,
-                                focusRequester = firstNameFocusRequester,
-                                leadingImage = painterResource(R.drawable.person_icon),
-                                keyboardOptions = KeyboardOptions(
-                                    capitalization = KeyboardCapitalization.Sentences,
-                                    imeAction = ImeAction.Next,
-                                    keyboardType = KeyboardType.Text
+                        BasicDetailsInputField(
+                            label = stringResource(id = R.string.personal_email),
+                            value = personalEmailId ?: "",
+                            showStar = true,
+                            readOnly = true,
+                            onValueChange = {
+                                registerViewModel.onPersonalEmailIdChanged(
+                                    it,
+                                    context
                                 )
-                            )
-                            BasicDetailsInputField(
-                                label = stringResource(id = R.string.last_name),
-                                value = lastName,
-                                readOnly = true,
-                                onValueChange = {
-                                    registerViewModel.onLastNameChanged(
-                                        it,
-                                        context
-                                    )
-                                },
-                                error = lastNameError,
-                                focusRequester = lastNameFocusRequester,
-                                leadingImage = painterResource(R.drawable.person_icon),
-                                keyboardOptions = KeyboardOptions(
-                                    capitalization = KeyboardCapitalization.Sentences,
-                                    imeAction = ImeAction.Next,
-                                    keyboardType = KeyboardType.Text
-                                )
-                            )
-                            InputField(
-                                inputText = TextFieldValue(""),
-                                readOnly = true,
-                                topText = stringResource(id = R.string.employment_type),
-                                showRadio = true,
-                                top = 0.dp,
-                                start = 5.dp,
-                                end = 10.dp,
-                                showStar = true,
-                                showOnlyTextField = false,
-                                modifier = Modifier.focusRequester(employeeTypeFocusRequester),
-                                error = employeeTypeError,
-                                showBox = true,
-                                boxHeight = 55.dp,
-                                onValueChange = {},
-                                leadingImage = painterResource(R.drawable.employee_type_icon),
-                                radioList = employeeTypeList,
-                                selectedRadio = employmentSelectedText,
-                                onRadioSelected = { selectedEmployment ->
-                                    employmentSelectedText = selectedEmployment
-                                    registerViewModel.onEmployeeTypeChanged(
-                                        selectedEmployment,
-                                        context
-                                    )
-                                },
-                            )
+                            },
+                            error = personalEmailIdError,
+                            focusRequester = personalEmailIdFocusRequester,
+                            leadingImage = painterResource(R.drawable.email_icon),
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Next,
+                                keyboardType = KeyboardType.Email
+                            ),
+                            scrollState = scrollState
+                        )
 
-                                BasicDetailsInputField(
-                                    label = stringResource(id = R.string.personal_email_id),
-                                    value = personalEmailId?:"",
-                                    showStar = true,
-                                    readOnly = true,
-                                    onValueChange = {
-                                        registerViewModel.onPersonalEmailIdChanged(
-                                            it,
-                                            context
-                                        )
-                                    },
-                                    error = personalEmailIdError,
-                                    focusRequester = personalEmailIdFocusRequester,
-                                    leadingImage = painterResource(R.drawable.email_icon),
-                                    keyboardOptions = KeyboardOptions(
-                                        imeAction = ImeAction.Next,
-                                        keyboardType = KeyboardType.Email
-                                    )
-                                )
+                        DatePickerField(
+                            dob = dob ?: " ",
+                            dobFocus = dobFocusRequester,
+                            registerViewModel = registerViewModel,
+                            dobError = dobError ?: "",
+                            context = context,
+                            readOnly = true,
+                            keyboardController = keyboardController,
+                            scrollState = scrollState
+                        )
+                        InputField(
+                            inputText = TextFieldValue(""),
+                            readOnly = true,
+                            enable = false,
+                            topText = stringResource(id = R.string.gender),
+                            showStar = true,
+                            showRadio = true,
+                            top = 0.dp,
+                            start = 5.dp,
+                            end = 10.dp,
+                            showOnlyTextField = false,
+                            modifier = Modifier.focusRequester(genderFocusRequester),
+                            error = genderError,
+                            showBox = true,
+                            boxHeight = 55.dp,
+                            onValueChange = {},
+                            leadingImage = painterResource(R.drawable.gender_icon),
+                            radioList = genderList,
+                            selectedRadio = genderSelectedText,
+                            onRadioSelected = { selectedText ->
+                                genderSelectedText = selectedText
+                                registerViewModel.onGenderChanged(selectedText, context)
+                            }
+                        )
 
-                            officialEmailId?.let {
-                                BasicDetailsInputField(
-                                    label = stringResource(id = R.string.official_email_id),
-                                    value = it,
-                                    showStar = true,
-                                    readOnly = true,
-                                    onValueChange = {
-                                        registerViewModel.onOfficialEmailIdChanged(it, context)
-                                    },
-                                    error = officialEmailIdError,
-                                    focusRequester = officialEmailIdFocusRequester,
-                                    leadingImage = painterResource(R.drawable.email_icon),
-                                    keyboardOptions = KeyboardOptions(
-                                        imeAction = ImeAction.Next,
-                                        keyboardType = KeyboardType.Email
-                                    )
+                        InputField(
+                            inputText = TextFieldValue(""),
+                            readOnly = true,
+                            enable = false,
+                            topText = stringResource(id = R.string.employment_type),
+                            showRadio = true,
+                            top = 0.dp,
+                            start = 5.dp,
+                            end = 10.dp,
+                            showStar = true,
+                            showOnlyTextField = false,
+                            modifier = Modifier.focusRequester(employeeTypeFocusRequester),
+                            error = employeeTypeError,
+                            showBox = true,
+                            boxHeight = 55.dp,
+                            onValueChange = {},
+                            leadingImage = painterResource(R.drawable.employee_type_icon),
+                            radioList = employeeTypeList,
+                            selectedRadio = employmentSelectedText,
+                            onRadioSelected = { selectedEmployment ->
+                                employmentSelectedText = selectedEmployment
+                                registerViewModel.onEmployeeTypeChanged(
+                                    selectedEmployment,
+                                    context
                                 )
                             }
+                        )
 
-                            BasicDetailsInputField(
-                                label = stringResource(id = R.string.phone_number),
-                                value = phoneNumber?:"",
-                                showStar = true,
-                                readOnly = true,
-//                                enable = false,
-                                leadingIcon = { Text(text = "+91", style = normal14Text500) },
-                                onValueChange = {},
-                                error = phoneNumberError,
-                                focusRequester = phoneNumberFocusRequester,
-                                leadingImage = painterResource(R.drawable.call_icon),
-                                keyboardOptions = KeyboardOptions(
-                                    imeAction = ImeAction.Next,
-                                    keyboardType = KeyboardType.Phone
-                                )
-                            )
-                            DatePickerField(
-                                dob = dob ?: " ", dobFocus = dobFocusRequester,
-                                registerViewModel = registerViewModel, dobError = dobError ?: "",
-                                context = context, readOnly = true,
-                                keyboardController = keyboardController
-                            )
-                            InputField(
-                                inputText = TextFieldValue(""),
-                                readOnly = true,
-                                topText = stringResource(id = R.string.gender),
-                                showStar = true,
-                                showRadio = true,
-                                top = 0.dp,
-                                start = 5.dp,
-                                end = 10.dp,
-                                showOnlyTextField = false,
-                                modifier = Modifier.focusRequester(genderFocusRequester),
-                                error = genderError,
-                                showBox = true,
-                                boxHeight = 55.dp,
-                                onValueChange = {},
-                                leadingImage = painterResource(R.drawable.gender_icon),
-                                radioList = genderList,
-                                selectedRadio = genderSelectedText,
-                                onRadioSelected = { selectedText ->
-                                    genderSelectedText = selectedText
-                                    registerViewModel.onGenderChanged(selectedText, context)
-                                },
-                            )
-
-                            BasicDetailsInputField(
-                                label = stringResource(id = R.string.pan),
-                                value = panNumber?:"",
-                                readOnly = true,
-                                onValueChange = { registerViewModel.onPanNumberChanged(it, context ,navController)},
-                                error = panError,
-                                focusRequester = panFocusRequester,
-                                leadingImage = painterResource(R.drawable.pan_icon),
-                                keyboardOptions = KeyboardOptions(
-                                    capitalization = KeyboardCapitalization.Characters,
-                                    imeAction = ImeAction.Next,
-                                    keyboardType = KeyboardType.Text
-                                )
-                            )
-
-
+                        companyName?.let {
                             BasicDetailsInputField(
                                 label = stringResource(id = R.string.company_name),
-                                value = companyName?:"",
+                                value = it,
                                 readOnly = true,
                                 onValueChange = { registerViewModel.onCompanyNameChanged(it) },
                                 error = companyNameError,
@@ -521,219 +508,229 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String, loanP
                                     capitalization = KeyboardCapitalization.Sentences,
                                     imeAction = ImeAction.Next,
                                     keyboardType = KeyboardType.Text
-                                )
+                                ),
+                                scrollState = scrollState
                             )
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Image(
-                                    painter = painterResource(id = R.drawable.annual_income_range),
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .padding(start = 10.dp)
-                                        .size(24.dp)
+                        }
+
+
+                        officialEmailId?.let {
+                            BasicDetailsInputField(
+                                label = stringResource(id = R.string.official_email),
+                                value = it,
+                                showStar = true,
+                                readOnly = true,
+                                onValueChange = {
+                                    registerViewModel.onOfficialEmailIdChanged(it, context)
+                                },
+                                error = officialEmailIdError,
+                                focusRequester = officialEmailIdFocusRequester,
+                                leadingImage = painterResource(R.drawable.email_icon),
+                                keyboardOptions = KeyboardOptions(
+                                    imeAction = ImeAction.Next,
+                                    keyboardType = KeyboardType.Email
+                                ),
+                                scrollState = scrollState
+                            )
+                        }
+
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.annual_income_range),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .padding(start = 10.dp)
+                                    .size(24.dp)
+                            )
+                            Column {
+                                OutLineTextFieldHeader(
+                                    topText = stringResource(R.string.annual_income),
+                                    showOptional = false,
+                                    showStar = true,
+                                    topTextStart = 0.dp,
+                                    topTextBottom = 0.dp,
+                                    topTextTop = 0.dp,
+                                    starTop = 0.dp
                                 )
-                                Column {
-                                    OutLineTextFieldHeader(
-                                        topText = stringResource(R.string.annual_income),
-                                        showOptional = false,
-                                        showStar = true,
-                                        topTextStart = 0.dp,
-                                        topTextBottom = 0.dp,
-                                        topTextTop = 0.dp,
-                                        starTop = 0.dp,
-                                    )
 
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(start = 5.dp, end = 10.dp, top = 3.dp)
-                                            .shadow(4.dp, shape = RoundedCornerShape(16.dp))
-                                            .background(
-                                                Color.White,
-                                                shape = RoundedCornerShape(16.dp)
-                                            )
-                                    ) {
-                                        Column {
-                                            Slider(
-                                                value = sliderPosition,
-                                                onValueChange = { newValue ->
-                                                    sliderSelected = true
-                                                    val roundedValue =
-                                                        (newValue / stepSize).roundToInt() * stepSize.toFloat()
-                                                    annualIncomeViewModel.updateSliderPosition(
-                                                        roundedValue,
-                                                        context
-                                                    )
-                                                },
-                                                valueRange = 200000f..8000000f,
-                                                steps = numberOfSteps,
-                                                colors = SliderDefaults.colors(
-                                                    thumbColor = appOrange,
-                                                    activeTickColor = appOrange,
-                                                    inactiveTickColor = grayD9,
-                                                ),
-                                                modifier = Modifier.padding(
-                                                    start = 30.dp,
-                                                    end = 30.dp,
-                                                    top = 8.dp
-                                                )
-                                            )
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(start = 5.dp, end = 10.dp, top = 3.dp)
+                                        .shadow(4.dp, shape = RoundedCornerShape(16.dp))
+                                        .background(
+                                            Color.White,
+                                            shape = RoundedCornerShape(16.dp)
+                                        )
+                                ) {
+                                    Column {
 
-                                            SpaceBetweenText(
-                                                end = 35.dp,
-                                                top = 0.dp,
-                                                text = stringResource(id = R.string.two_lakh),
-                                                value = stringResource(id = R.string.eighty_lakh),
-                                                start = 35.dp,
-                                                textColor = checkBoxGray
-                                            )
-                                            TextInputLayout(
-                                                textFieldVal = TextFieldValue(text = formattedIncome,
-                                                    selection = if (textFieldValue.selection.start <= 1) {
+                                        Spacer(Modifier.padding(vertical = 5.dp))
+
+                                        TextInputLayout(
+                                            textFieldVal = TextFieldValue(
+                                                text = formattedIncome,
+                                                selection = if (textFieldValue.selection.start <= 1) {
                                                     TextRange(1)
                                                 } else {
                                                     textFieldValue.selection
-                                                }),
-                                                keyboardOptions = KeyboardOptions(
-                                                    imeAction = ImeAction.Next,
-                                                    keyboardType = KeyboardType.Number
-                                                ),
-                                                onTextChanged = { newText ->
-                                                    sliderSelected = false
-                                                    val rawInput = newText.text
-                                                    val cursorPosition = newText.selection.start
-                                                    val (cleanInput, newCursor) = processRawInput(rawInput, cursorPosition)
-                                                    val formatted = formatCurrency(applyMaxLimit(cleanInput))
+                                                }
+                                            ),
+                                            keyboardOptions = KeyboardOptions(
+                                                imeAction = ImeAction.Next,
+                                                keyboardType = KeyboardType.Number
+                                            ),
+                                            onTextChanged = { newText ->
+                                                sliderSelected = false
+                                                val rawInput = newText.text
+                                                val cursorPosition = newText.selection.start
+                                                val (cleanInput, newCursor) = processRawInput(rawInput, cursorPosition)
+                                                val formatted = formatCurrency(applyMaxLimit(cleanInput))
 
-                                                    textFieldValue =
-                                                        TextFieldValue(
-                                                            text = formatted,
-                                                            selection = TextRange(calculateFormattedCursorPosition(
+                                                textFieldValue =
+                                                    TextFieldValue(
+                                                        text = formatted,
+                                                        selection = TextRange(
+                                                            calculateFormattedCursorPosition(
                                                                 cleanInput = cleanInput,
                                                                 originalCursor = newCursor,
                                                                 formattedValue = formatCurrency(cleanInput)
-                                                            ))
+                                                            )
                                                         )
-
-                                                    val loanAmountWithoutSymbol =
-                                                        newText.text.replace("₹", "").replace(",", "")
-                                                    if (loanAmountWithoutSymbol.all { it.isDigit() }) {
-                                                        annualIncomeViewModel.onIncomeChanged( context,formatted)
-                                                    }
-                                                    if (newText.text.replace("₹", "")
-                                                            .replace(",", "").isEmpty()
-                                                    ) {
-                                                        annualIncomeViewModel.updateGeneralError(null)
-                                                    }
-                                                },
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(
-                                                        start = 30.dp,
-                                                        end = 30.dp,
-                                                        bottom = 5.dp
                                                     )
-                                                    .focusRequester(incomeFocus),
-                                                readOnly = false
-                                            )
-                                            annualIncomeErrorMessage?.let {
-                                                RegisterText(
-                                                    text = it, style = normal12Text400,
-                                                    textColor = errorRed, bottom = 5.dp
+
+                                                val loanAmountWithoutSymbol =
+                                                    newText.text.replace("₹", "").replace(",", "")
+                                                if (loanAmountWithoutSymbol.all { it.isDigit() }) {
+                                                    annualIncomeViewModel.onIncomeChanged(context, formatted)
+                                                }
+                                                if (newText.text.replace("₹", "")
+                                                        .replace(",", "").isEmpty()
+                                                ) {
+                                                    annualIncomeViewModel.updateGeneralError(null)
+                                                }
+                                            },
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(
+                                                    start = 30.dp,
+                                                    end = 30.dp,
+                                                    bottom = 5.dp
                                                 )
-                                            }
+                                                .focusRequester(incomeFocus),
+                                            readOnly = false
+                                        )
+
+                                        annualIncomeErrorMessage?.let {
+                                            RegisterText(
+                                                text = it,
+                                                style = normal12Text400,
+                                                textColor = errorRed,
+                                                bottom = 5.dp
+                                            )
                                         }
+
+                                        Slider(
+                                            value = sliderPosition,
+                                            onValueChange = { newValue ->
+                                                sliderSelected = true
+                                                val roundedValue =
+                                                    (newValue / stepSize).roundToInt() * stepSize.toFloat()
+                                                annualIncomeViewModel.updateSliderPosition(
+                                                    roundedValue,
+                                                    context
+                                                )
+                                            },
+                                            valueRange = 200000f..8000000f,
+                                            steps = numberOfSteps,
+                                            colors = SliderDefaults.colors(
+                                                thumbColor = appOrange,
+                                                activeTickColor = appOrange,
+                                                inactiveTickColor = grayD9
+                                            ),
+                                            modifier = Modifier.padding(start = 30.dp, end = 30.dp, top = 5.dp),
+                                        )
+
+                                        SpaceBetweenText(
+                                            end = 35.dp,
+                                            top = 0.dp,
+                                            text = stringResource(id = R.string.two_lakh),
+                                            value = stringResource(id = R.string.eighty_lakh),
+                                            start = 35.dp,
+                                            textColor = checkBoxGray
+                                        )
+
                                     }
                                 }
                             }
-
-                            ClickableDropDownField(
-                                start = 40.dp,
-                                end = 10.dp,
-                                top = 10.dp,
-                                bottom = 5.dp,
-                                selectedText = selectedPurpose,
-                                focus = purposeFocus,
-                                error = purposeError,
-                                errorTextStart = 42.dp,
-                                expand = purposeExpanded,
-                                setExpand = { purposeExpanded = it },
-                                itemList = purpose,
-                                onDismiss = onPurposeDismiss,
-                                onItemSelected = onPurposeSelected,
-                                modifier = Modifier.focusRequester(purposeFocus)
-                                    .bringIntoViewRequester(bringPurposeFocusRequester)
-                            )
-
-                            val address1 = if (officialAddressField != null) {
-                                listOfNotNull(
-                                    listOfNotNull(
-                                        officialAddressField!!.area?.takeIf { it.isNotBlank() },
-                                        officialAddressField!!.town?.takeIf { it.isNotBlank() }
-                                    ).takeIf { it.isNotEmpty() }?.joinToString(", "),
-
-                                    listOfNotNull(
-                                        officialAddressField!!.city?.takeIf { it.isNotBlank() },
-                                        officialAddressField!!.state?.takeIf { it.isNotBlank() }
-                                    ).takeIf { it.isNotEmpty() }?.joinToString(", "),
-
-                                    officialAddressField!!.pincode?.takeIf { it.isNotBlank() }
-                                ).joinToString("\n")
-                            } else {
-                                ""
-                            }
-
-                            val address2 = if (permanentAddressField != null) {
-                                listOfNotNull(
-                                    listOfNotNull(
-                                        permanentAddressField!!.area?.takeIf { it.isNotBlank() },
-                                        permanentAddressField!!.town?.takeIf { it.isNotBlank() }
-                                    ).takeIf { it.isNotEmpty() }?.joinToString(", "),
-
-                                    listOfNotNull(
-                                        permanentAddressField!!.city?.takeIf { it.isNotBlank() },
-                                        permanentAddressField!!.state?.takeIf { it.isNotBlank() }
-                                    ).takeIf { it.isNotEmpty() }?.joinToString(", "),
-
-                                    permanentAddressField!!.pincode?.takeIf { it.isNotBlank() }
-                                ).joinToString("\n")
-                            } else {
-                                ""
-                            }
-                            if(!pinCode1.isNullOrEmpty()) {
-                                AddressFields(
-                                    bottomSheet1Value = bottomSheet1Value,
-                                    address1 = address1,
-                        //                                address1 ="${officialAddressField?.area},${officialAddressField?.town} \n ${officialAddressField?.city},${officialAddressField?.state}\n ${officialAddressField?.pincode}",
-                                    bottomSheet2Value = bottomSheet2Value,
-                                    scope = scope,
-                                    address1Focus = officialAddressFocusRequester,
-                                    address1Error = officialAddressError,
-                        //                                address2 ="${permanentAddressField?.area},${permanentAddressField?.town} \n ${permanentAddressField?.city},${permanentAddressField?.state}\n ${permanentAddressField?.pincode}",
-                                    address2 = address2,
-                                    address2Focus = permanentAddressFocusRequester,
-                                    address2Error = permanentAddressError,
-                                    readOnly = true
-                                )
-                            }
                         }
 
-                    }
+                        ClickableDropDownField(
+                            start = 40.dp,
+                            end = 10.dp,
+                            top = 10.dp,
+                            bottom = 5.dp,
+                            selectedText = selectedPurpose,
+                            focus = purposeFocus,
+                            error = purposeError,
+                            errorTextStart = 42.dp,
+                            expand = purposeExpanded,
+                            setExpand = { purposeExpanded = it },
+                            itemList = purpose,
+                            onDismiss = onPurposeDismiss,
+                            onItemSelected = onPurposeSelected,
+                            modifier = Modifier.focusRequester(purposeFocus)
+                                .bringIntoViewRequester(bringPurposeFocusRequester)
+                        )
 
+                        val address1 = if (officialAddressField != null) {
+                            listOfNotNull(
+                                listOfNotNull(
+                                    officialAddressField!!.area?.takeIf { it.isNotBlank() },
+                                    officialAddressField!!.district?.takeIf { it.isNotBlank() }
+                                ).takeIf { it.isNotEmpty() }?.joinToString(", "),
+
+                                listOfNotNull(
+                                    officialAddressField!!.city?.takeIf { it.isNotBlank() },
+                                    officialAddressField!!.state?.takeIf { it.isNotBlank() }
+                                ).takeIf { it.isNotEmpty() }?.joinToString(", "),
+
+                                officialAddressField!!.pincode?.takeIf { it.isNotBlank() }
+                            ).joinToString("\n")
+                        } else {
+                            ""
+                        }
+
+                        if (!pinCode1.isNullOrEmpty()) {
+                            AddressFields(
+                                bottomSheet1Value = bottomSheet1Value,
+                                address1 = address1,
+                                scope = scope,
+                                address1Error = officialAddressError,
+                                readOnly = true
+                            )
+                        }
+                    }
+                }
             }
         }
     } else {
         CommonMethods().HandleErrorScreens(
-            navController = navController, showInternetScreen = showInternetScreen,
-            showTimeOutScreen = showTimeOutScreen, showServerIssueScreen = showServerIssueScreen,
-            unexpectedErrorScreen = unexpectedErrorScreen, unAuthorizedUser = unAuthorizedUser
+            navController = navController,
+            showInternetScreen = showInternetScreen,
+            showTimeOutScreen = showTimeOutScreen,
+            showServerIssueScreen = showServerIssueScreen,
+            unexpectedErrorScreen = unexpectedErrorScreen,
+            unAuthorizedUser = unAuthorizedUser
         )
     }
 }
- fun processRawInput(input: String, cursorPos: Int): Pair<String, Int> {
+fun processRawInput(input: String, cursorPos: Int): Pair<String, Int> {
     // Remove non-digit characters and leading zeros
     var clean = input.filter { it.isDigit() }
     clean = clean.replaceFirst("^0+(?!$)".toRegex(), "").ifEmpty { "0" }
@@ -750,7 +747,7 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String, loanP
     return clean to newCursor
 }
 
- fun calculateFormattedCursorPosition(
+fun calculateFormattedCursorPosition(
     cleanInput: String,
     originalCursor: Int,
     formattedValue: String
@@ -781,8 +778,7 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String, loanP
     }
 }
 
-
- fun formatCurrency(amount: String): String {
+fun formatCurrency(amount: String): String {
     return try {
         val number = amount.ifEmpty { "0" }.toLong()
         NumberFormat.getCurrencyInstance(Locale("en", "IN")).apply {
@@ -795,7 +791,7 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String, loanP
     }
 }
 
-fun applyMaxLimit(amount: String,maxLimit: Long=8_000_000): String {
+fun applyMaxLimit(amount: String, maxLimit: Long = 8_000_000): String {
     return try {
         val numericValue = amount.toLong()
         numericValue.coerceAtMost(maxLimit).toString()
@@ -803,8 +799,6 @@ fun applyMaxLimit(amount: String,maxLimit: Long=8_000_000): String {
         "0"
     }
 }
-
-
 
 @Preview(showBackground = true)
 @Composable

@@ -20,6 +20,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.components.BulletImageWithTe
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.FixedTopBottomScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.LoanStatusTracker
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.StartingText
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.AppScreens
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToLoanProcessScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToSelectAccountAggregatorScreen
@@ -30,8 +31,12 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal14Text400
 
 @Composable
 fun AccountAggregatorScreen(
-    navController: NavHostController, loanPurpose: String, fromFlow: String,
-    id:String, transactionId:String,url:String
+    navController: NavHostController,
+    loanPurpose: String,
+    fromFlow: String,
+    id: String,
+    transactionId: String,
+    url: String
 ) {
     BackHandler {
         onGoBackClick(navController = navController, fromFlow = fromFlow, loanPurpose = loanPurpose)
@@ -43,7 +48,9 @@ fun AccountAggregatorScreen(
         showBackButton = true,
         onBackClick = {
             onGoBackClick(
-                navController = navController, fromFlow = fromFlow, loanPurpose = loanPurpose
+                navController = navController,
+                fromFlow = fromFlow,
+                loanPurpose = loanPurpose
             )
         },
         showBottom = true,
@@ -52,8 +59,12 @@ fun AccountAggregatorScreen(
         primaryButtonText = stringResource(R.string.next),
         onPrimaryButtonClick = {
             navigateToSelectAccountAggregatorScreen(
-                navController = navController, loanPurpose = loanPurpose, fromFlow = fromFlow,
-                id = id, transactionId = transactionId,url = url
+                navController = navController,
+                loanPurpose = loanPurpose,
+                fromFlow = fromFlow,
+                id = id,
+                transactionId = transactionId,
+                url = url
             )
         },
         backgroundColor = appWhite
@@ -84,29 +95,31 @@ fun AccountAggregatorScreen(
 
 fun onGoBackClick(navController: NavHostController, fromFlow: String, loanPurpose: String) {
     if (fromFlow.equals("Personal Loan", ignoreCase = true)) {
-     navigateApplyByCategoryScreen(navController)
-//        navigateToReviewDetailsScreen(navController, loanPurpose, fromFlow)
+        navController.popBackStack()
     } else if (fromFlow.equals("Invoice Loan", ignoreCase = true)) {
         navigateToLoanProcessScreen(
-            navController = navController, transactionId = "Sugu", statusId = 11,
+            navController = navController,
+            transactionId = "Sugu",
+            statusId = 11,
             responseItem = "No Need",
-            offerId = "1234", fromFlow = fromFlow
+            offerId = "1234",
+            fromFlow = fromFlow
         )
     } else if (fromFlow.equals("Purchase Finance", ignoreCase = true)) {
-        navigateToLoanProcessScreen(
-            navController = navController, transactionId = "Sugu",
-            statusId = 19, responseItem = "no need",
-            offerId = "1234", fromFlow = fromFlow
-        )
+          navController.popBackStack()
     }
-
 }
 
-//@Preview(widthDp = 352, heightDp = 737)
+// @Preview(widthDp = 352, heightDp = 737)
 @Preview
 @Composable
 fun AccountAggregatorScreenPreview() {
-    AccountAggregatorScreen(rememberNavController(), "loanPurpose", "fromFlow",
-        "id", "tnxId", "url")
+    AccountAggregatorScreen(
+        rememberNavController(),
+        "loanPurpose",
+        "fromFlow",
+        "id",
+        "tnxId",
+        "url"
+    )
 }
-

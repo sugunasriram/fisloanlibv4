@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -29,6 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.github.sugunasriram.fisloanlibv4.R
@@ -36,9 +38,8 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appBlack
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appGray
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appWhite
-import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.backgroundOrange
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.bold16Text400
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.gray90
-import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.hyperTextColor
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal12Text400
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal14Text400
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal14Text500
@@ -50,10 +51,18 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.readableTextGray
 
 @Composable
 fun StartingText(
-    text: String, textColor: Color = appOrange, modifier: Modifier = Modifier, top: Dp = 0.dp,
-    bottom: Dp = 0.dp, start: Dp = 0.dp, end: Dp = 0.dp, style: TextStyle = normal14Text400,
-    textAlign: TextAlign = TextAlign.Center, backGroundColor: Color = Color.Transparent,
-    alignment: Alignment = Alignment.TopStart,textOverflow: TextOverflow=TextOverflow.Clip
+    text: String,
+    textColor: Color = appOrange,
+    modifier: Modifier = Modifier,
+    top: Dp = 0.dp,
+    bottom: Dp = 0.dp,
+    start: Dp = 0.dp,
+    end: Dp = 0.dp,
+    style: TextStyle = normal14Text400,
+    textAlign: TextAlign = TextAlign.Center,
+    backGroundColor: Color = Color.Transparent,
+    alignment: Alignment = Alignment.TopStart,
+    textOverflow: TextOverflow = TextOverflow.Clip
 ) {
     Box(
         contentAlignment = alignment,
@@ -75,9 +84,16 @@ fun StartingText(
 
 @Composable
 fun RegisterText(
-    text: String, textColor: Color = appBlack, modifier: Modifier = Modifier, top: Dp = 0.dp,
-    style: TextStyle = normal36Text700, textAlign: TextAlign = TextAlign.Center, bottom: Dp = 0.dp,
-    start: Dp = 0.dp, end: Dp = 0.dp, boxAlign: Alignment = Alignment.Center
+    text: String,
+    textColor: Color = appBlack,
+    modifier: Modifier = Modifier,
+    top: Dp = 0.dp,
+    style: TextStyle = normal36Text700,
+    textAlign: TextAlign = TextAlign.Center,
+    bottom: Dp = 0.dp,
+    start: Dp = 0.dp,
+    end: Dp = 0.dp,
+    boxAlign: Alignment = Alignment.Center
 ) {
     Box(
         contentAlignment = boxAlign,
@@ -95,27 +111,55 @@ fun RegisterText(
 }
 
 @Composable
-fun MultiStyleText(text1: String, color1: Color,
-                   text2: String, color2: Color,
-                   style1:TextStyle=normal26Text700,style2:TextStyle=normal26Text700,
-                   start:Dp=20.dp,top:Dp=30.dp,bottom: Dp=0.dp,arrangement:Arrangement.Horizontal=Arrangement.Start
-                   ) {
+fun MultiStyleText(
+    text1: String,
+    color1: Color,
+    text2: String,
+    color2: Color,
+    style1: TextStyle = normal26Text700,
+    style2: TextStyle = normal26Text700,
+    start: Dp = 20.dp,
+    top: Dp = 30.dp,
+    bottom: Dp = 0.dp,
+    arrangement: Arrangement.Horizontal = Arrangement.Start,
+    modifier : Modifier = Modifier.padding(top = top, start = start, bottom = bottom).fillMaxWidth()
+) {
     Row(
         horizontalArrangement = arrangement,
-        modifier = Modifier
-            .padding(top = top, start = start, bottom = bottom)
-            .fillMaxWidth()
+        modifier = modifier
     ) {
         Text(text = text1, color = color1, style = style1)
         Text(text = text2, color = color2, style = style2)
     }
 }
 
+@Preview
+@Composable
+fun MultiStyleTextPreview() {
+    MultiStyleText(
+        text1 = "* ",
+        color1 = appOrange,
+        text2 = "World!",
+        color2 = appBlack,
+        style1 = normal26Text700,
+        style2 = normal26Text700,
+        start = 20.dp,
+        top = 30.dp
+    )
+}
+
 @Composable
 fun MultipleColorText(
-    text: String, modifier: Modifier = Modifier, textColor: Color = appBlack,
-    start: Dp = 8.dp, resendOtpColor: Color = appOrange, end: Dp = 8.dp, top: Dp = 8.dp,
-    bottom: Dp = 8.dp, style: TextStyle = normal16Text500, onClick: () -> Unit,
+    text: String,
+    modifier: Modifier = Modifier,
+    textColor: Color = appBlack,
+    start: Dp = 8.dp,
+    resendOtpColor: Color = appOrange,
+    end: Dp = 8.dp,
+    top: Dp = 8.dp,
+    bottom: Dp = 8.dp,
+    style: TextStyle = normal16Text500,
+    onClick: () -> Unit
 ) {
     val isClickable = resendOtpColor == appOrange
     val annotatedString = AnnotatedString.Builder().apply {
@@ -136,10 +180,11 @@ fun MultipleColorText(
             style = style,
             modifier = modifier
                 .then(if (isClickable) Modifier.clickable { onClick() } else Modifier)
-                .padding(start = start, end = end, top = top, bottom = bottom),
+                .padding(start = start, end = end, top = top, bottom = bottom)
         )
     }
 }
+
 @Composable
 fun OnlyReadAbleText(
     textHeader: String,
@@ -154,7 +199,7 @@ fun OnlyReadAbleText(
     style: TextStyle = normal14Text400,
     showImage: Boolean = false,
     textValueAlignment: TextAlign = TextAlign.Start,
-    image: Painter = painterResource(R.drawable.person_icon),
+    image: Painter = painterResource(R.drawable.person_icon)
 ) {
     Row(
         horizontalArrangement = Arrangement.Start,
@@ -196,9 +241,17 @@ fun OnlyReadAbleText(
 
 @Composable
 fun EditableText(
-    textHeader: String, textValue: String, modifier: Modifier = Modifier, end: Dp = 20.dp,
-    textColorHeader: Color = readableTextGray, textColorValue: Color = appBlack, start: Dp = 20.dp,
-    top: Dp = 8.dp, bottom: Dp = 0.dp, style: TextStyle = normal14Text400, showImage: Boolean=false,
+    textHeader: String,
+    textValue: String,
+    modifier: Modifier = Modifier,
+    end: Dp = 20.dp,
+    textColorHeader: Color = readableTextGray,
+    textColorValue: Color = appBlack,
+    start: Dp = 20.dp,
+    top: Dp = 8.dp,
+    bottom: Dp = 0.dp,
+    style: TextStyle = normal14Text400,
+    showImage: Boolean = false,
     image: Painter = painterResource(R.drawable.person_icon),
     onClickEdit: () -> Unit
 ) {
@@ -209,11 +262,11 @@ fun EditableText(
             .fillMaxWidth()
             .padding(start = start, end = end, top = top, bottom = bottom)
     ) {
-        if(showImage){
+        if (showImage) {
             Image(
                 painter = image,
                 contentDescription = "",
-                modifier = Modifier.size(24.dp).padding(end=10.dp)
+                modifier = Modifier.size(24.dp).padding(end = 10.dp)
             )
         }
         Text(
@@ -232,19 +285,25 @@ fun EditableText(
         Image(
             painter = painterResource(R.drawable.edit_icon),
             contentDescription = "",
-            modifier = Modifier.size(25.dp).padding(end=10.dp)
+            modifier = Modifier.size(25.dp).padding(end = 10.dp)
                 .clickable { onClickEdit() }
         )
     }
 }
+
 @Composable
 fun HeaderWithValue(
-    textHeader: String,headerColor: Color = appWhite,
-    textValue: String,valueColor: Color = appWhite,
-    modifier: Modifier=Modifier,
-    start: Dp = 10.dp, end: Dp = 10.dp, top: Dp = 8.dp, bottom: Dp = 0.dp,
+    textHeader: String,
+    headerColor: Color = appWhite,
+    textValue: String,
+    valueColor: Color = appWhite,
+    modifier: Modifier = Modifier,
+    start: Dp = 10.dp,
+    end: Dp = 10.dp,
+    top: Dp = 8.dp,
+    bottom: Dp = 0.dp,
     headerStyle: TextStyle = normal12Text400,
-    valueStyle: TextStyle= normal14Text700,
+    valueStyle: TextStyle = normal14Text700,
     headerTextAlign: TextAlign = TextAlign.Start,
     valueTextAlign: TextAlign = TextAlign.Start
 ) {
@@ -263,19 +322,24 @@ fun HeaderWithValue(
             style = valueStyle,
             color = valueColor,
             modifier = Modifier.fillMaxWidth(),
-            textAlign =valueTextAlign
+            textAlign = valueTextAlign
         )
     }
 }
 
 @Composable
 fun BulletImageWithText(
-    @DrawableRes image: Int = R.drawable.arrow_icon, start: Dp = 15.dp, end: Dp = 15.dp,
+    @DrawableRes image: Int = R.drawable.arrow_icon,
+    start: Dp = 15.dp,
+    end: Dp = 15.dp,
     text: String = stringResource(id = R.string.share_bank_statements_instantly),
-    top: Dp = 25.dp, bottom: Dp = 0.dp
+    top: Dp = 25.dp,
+    bottom: Dp = 0.dp
 ) {
-    Row(horizontalArrangement = Arrangement.Start,
-        modifier = Modifier.fillMaxWidth().padding(start = start, end = end, top = top, bottom = bottom)) {
+    Row(
+        horizontalArrangement = Arrangement.Start,
+        modifier = Modifier.fillMaxWidth().padding(start = start, end = end, top = top, bottom = bottom)
+    ) {
         Image(
             painter = painterResource(id = image),
             contentDescription = null,
@@ -292,12 +356,17 @@ fun BulletImageWithText(
 
 @Composable
 fun HyperlinkText(
-    modifier: Modifier = Modifier, textColor: Color = appOrange, start: Dp = 8.dp,
-    end: Dp = 8.dp, top: Dp = 8.dp, bottom: Dp = 8.dp, style: TextStyle = normal14Text500,
-    onSahamatiClick: () -> Unit, onRbiClick: () -> Unit
+    modifier: Modifier = Modifier,
+    textColor: Color = appOrange,
+    start: Dp = 8.dp,
+    end: Dp = 8.dp,
+    top: Dp = 8.dp,
+    bottom: Dp = 8.dp,
+    style: TextStyle = normal14Text500,
+    onSahamatiClick: () -> Unit,
+    onRbiClick: () -> Unit
 ) {
     val annotatedString = buildAnnotatedString {
-
         append("visit ")
 
         pushStringAnnotation(tag = "URL", annotation = "sahamati")
@@ -339,15 +408,23 @@ fun HyperlinkText(
 
 @Composable
 fun HeaderValueInARow(
-    textHeader: String, textValue: String, modifier: Modifier = Modifier, end: Dp = 20.dp,
-    textColorHeader: Color = gray90, textColorValue: Color = appBlack, start: Dp = 10.dp,
-    headerStyle: TextStyle = normal14Text400, valueStyle: TextStyle = normal14Text500,
-    valueTextAlign: TextAlign = TextAlign.End, top: Dp = 8.dp, bottom: Dp = 0.dp,
-    isLoanDetails:Boolean=false
+    textHeader: String,
+    textValue: String,
+    modifier: Modifier = Modifier,
+    end: Dp = 20.dp,
+    textColorHeader: Color = gray90,
+    textColorValue: Color = appBlack,
+    start: Dp = 10.dp,
+    headerStyle: TextStyle = normal14Text400,
+    valueStyle: TextStyle = normal14Text500,
+    valueTextAlign: TextAlign = TextAlign.End,
+    top: Dp = 8.dp,
+    bottom: Dp = 0.dp,
+    isLoanDetails: Boolean = false
 ) {
     Row(
         horizontalArrangement = Arrangement.Start,
-        modifier = modifier.fillMaxWidth().background(if(isLoanDetails)appWhite else Color.Transparent)
+        modifier = modifier.fillMaxWidth().background(if (isLoanDetails)appWhite else Color.Transparent)
             .padding(start = start, end = end, top = top, bottom = bottom)
     ) {
         val textModifier = if (isLoanDetails) {
@@ -370,15 +447,26 @@ fun HeaderValueInARow(
         )
     }
 }
+
 @Composable
 fun HeaderValueWithTextBelow(
-    textHeader: String, textColorHeader: Color = gray90, modifier: Modifier = Modifier,
-    textHeaderStyle: TextStyle = normal14Text400, textValue: String, top: Dp = 8.dp,
-    textColorValue: Color = appBlack, textValueStyle: TextStyle = normal14Text500,
-    textBelowValue: String, textColorBelowValue: Color = appGray, bottom: Dp = 0.dp,
-    textBelowStyle: TextStyle = normal12Text400, start: Dp = 15.dp, end: Dp = 15.dp,
+    textHeader: String,
+    textColorHeader: Color = gray90,
+    modifier: Modifier = Modifier,
+    textHeaderStyle: TextStyle = normal14Text400,
+    textValue: String,
+    top: Dp = 8.dp,
+    textColorValue: Color = appBlack,
+    textValueStyle: TextStyle = normal14Text500,
+    textBelowValue: String,
+    textColorBelowValue: Color = appGray,
+    bottom: Dp = 0.dp,
+    textBelowStyle: TextStyle = normal12Text400,
+    start: Dp = 15.dp,
+    end: Dp = 15.dp
 ) {
-    Column(modifier = modifier
+    Column(
+        modifier = modifier
             .fillMaxWidth().background(appWhite)
             .padding(start = start, end = end, top = top, bottom = bottom)
     ) {
@@ -413,17 +501,27 @@ fun HeaderValueWithTextBelow(
                 softWrap = true
             )
         }
-        HorizontalDivider(start=0.dp,end=0.dp, top = 4.dp)
+        HorizontalDivider(start = 0.dp, end = 0.dp, top = 4.dp)
     }
 }
+
 @Composable
 fun ClickableHeaderValueWithTextBelow(
-    textHeader: String, textColorHeader: Color = gray90, textValue: String,
-    textHeaderStyle: TextStyle = normal14Text400, textColorValue: Color = appOrange,
-    textValueStyle: TextStyle = normal14Text400, textBelowValue: String, start: Dp = 15.dp,
-    end: Dp = 15.dp, textBelowStyle: TextStyle = normal12Text400, modifier: Modifier = Modifier,
-    textColorBelowValue: Color = appGray, top: Dp = 8.dp, bottom: Dp = 0.dp,
-   onClick: () -> Unit
+    textHeader: String,
+    textColorHeader: Color = gray90,
+    textValue: String,
+    textHeaderStyle: TextStyle = normal14Text400,
+    textColorValue: Color = appOrange,
+    textValueStyle: TextStyle = normal14Text400,
+    textBelowValue: String,
+    start: Dp = 15.dp,
+    end: Dp = 15.dp,
+    textBelowStyle: TextStyle = normal12Text400,
+    modifier: Modifier = Modifier,
+    textColorBelowValue: Color = appGray,
+    top: Dp = 8.dp,
+    bottom: Dp = 0.dp,
+    onClick: () -> Unit
 ) {
     Column(
         modifier = modifier
@@ -461,6 +559,63 @@ fun ClickableHeaderValueWithTextBelow(
                 softWrap = true
             )
         }
-        HorizontalDivider(start=0.dp,end=0.dp, top = 4.dp)
+        HorizontalDivider(start = 0.dp, end = 0.dp, top = 4.dp)
     }
+}
+
+@Composable
+fun WarningIconAndText(
+    title: String,
+    subtext: String,
+    painter: Painter = painterResource(id = R.drawable.about)
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White)
+            .padding(6.dp)
+            .padding(vertical = 20.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.Start
+        ) {
+            Image(
+                painter = painter,
+                contentDescription = title.lowercase(),
+                modifier = Modifier.size(24.dp)
+            )
+
+            Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+
+            Column {
+                Text(
+                    text = title,
+                    style = bold16Text400,
+                    color = appBlack
+                )
+
+                Spacer(modifier = Modifier.padding(vertical = 4.dp))
+
+                Text(
+                    text = subtext,
+                    style = normal14Text500,
+                    color = appBlack
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.padding(vertical = 20.dp))
+
+    }
+}
+
+
+@Preview
+@Composable
+fun WarningIconAndTextPreview() {
+    WarningIconAndText(
+        title = "Please ensure that your bank details are accurate",
+        subtext = "Incorrect or invalid entries may lead to failure in processing your request.",
+    )
 }

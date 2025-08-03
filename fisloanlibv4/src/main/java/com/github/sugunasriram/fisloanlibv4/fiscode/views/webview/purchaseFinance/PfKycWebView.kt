@@ -51,8 +51,10 @@ import com.github.sugunasriram.fisloanlibv4.R
 import com.github.sugunasriram.fisloanlibv4.fiscode.app.MainActivity
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.TopBar
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToAnimationLoader
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToBankKycVerificationScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFormRejectedScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToLoanAgreementScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToLoanProcessScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.core.ApiPaths
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.sse.SSEData
@@ -61,7 +63,6 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-
 
 private val json1 = Json {
     prettyPrint = true
@@ -75,9 +76,14 @@ var redirectionSet = false
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun PfKycWebViewScreen(
-    navController: NavHostController, transactionId: String,
-    url: String, id: String, fromScreen: String,
-    fromFlow: String, isSelfScrollable: Boolean = false, pageContent: () -> Unit
+    navController: NavHostController,
+    transactionId: String,
+    url: String,
+    id: String,
+    fromScreen: String,
+    fromFlow: String,
+    isSelfScrollable: Boolean = false,
+    pageContent: () -> Unit
 ) {
     val decidedScreen = if (fromScreen == "1") "2" else "3"
     val sseViewModel: SSEViewModel = viewModel()
@@ -86,7 +92,6 @@ fun PfKycWebViewScreen(
     var errorMsg by remember { mutableStateOf<String?>(null) }
     val errorTitle = stringResource(id = R.string.kyc_failed)
 
-
     val handler = remember {
         Handler(Looper.getMainLooper()).apply {
             postDelayed({
@@ -94,16 +99,18 @@ fun PfKycWebViewScreen(
                     if (!lateNavigate) {
                         sseViewModel.stopListening()
                         navigateToBankKycVerificationScreen(
-                            navController = navController, kycUrl = "No Need KYC URL",
+                            navController = navController,
+                            kycUrl = "No Need KYC URL",
                             transactionId = transactionId,
-                            offerId = id, verificationStatus = decidedScreen, fromFlow = fromFlow
+                            offerId = id,
+                            verificationStatus = decidedScreen,
+                            fromFlow = fromFlow
                         )
                     }
                 }
             }, 3 * 60 * 1000)
         }
     }
-
 
     // Start listening to SSE events when the KYC Screen is displayed
     LaunchedEffect(Unit) {
@@ -119,14 +126,15 @@ fun PfKycWebViewScreen(
                 val formId = sseData.data?.data?.data?.form_id
 
                 Log.d(
-                    "PfWebView:", "transactionId :[" + transactionId + "] " +
-                            "sseTransactionId:[" + sseTransactionId
+                    "PfWebView:",
+                    "transactionId :[" + transactionId + "] " +
+                        "sseTransactionId:[" + sseTransactionId
                 )
 
                 sseData.data?.data?.type?.let { type ->
-                    //For KYC Verification Flow
+                    // For KYC Verification Flow
                     if (transactionId == sseTransactionId && (type == "ACTION" || type == "INFO")) {
-                        //Check if Form Rejected or Pending
+                        // Check if Form Rejected or Pending
                         if (sseData.data?.data?.data?.error != null) {
                             Log.d("KyCScreen", "Error :" + sseData.data?.data?.data?.error?.message)
                             errorMsg = sseData.data?.data?.data?.error?.message
@@ -134,45 +142,30 @@ fun PfKycWebViewScreen(
                             navigateToFormRejectedScreen(
                                 navController = navController,
                                 fromFlow = fromFlow,
-                                errorTitle = errorTitle, errorMsg = errorMsg
+                                errorTitle = errorTitle,
+                                errorMsg = errorMsg
                             )
                         } else {
                             formId?.let {
                                 TokenManager.save("formId", formId).toString()
                                 lateNavigate = true
                                 navigateToBankKycVerificationScreen(
-                                    navController = navController, kycUrl = "No Need KYC URL",
+                                    navController = navController,
+                                    kycUrl = "No Need KYC URL",
                                     transactionId = transactionId,
-                                    offerId = id, verificationStatus = decidedScreen,
+                                    offerId = id,
+                                    verificationStatus = decidedScreen,
                                     fromFlow = fromFlow
                                 )
                             }
                         }
                     }
 
-                    //For Getting Loan Agreement Url from SSE
-                    sseTransactionId = sseData.data?.data?.catalog?.txn_id
-                    if (transactionId == sseTransactionId && type == "ACTION") {
-                        sseData.data?.data?.catalog?.from_url?.let { formUrl ->
-                            lateNavigate = true
-                            if (fromFlow.equals("Purchase Finance", ignoreCase = true)) {
-                                navigateToLoanProcessScreen(
-                                    navController = navController,
-                                    transactionId = transactionId,
-                                    statusId = 22,
-                                    offerId = id,
-                                    responseItem = formUrl,
-                                    fromFlow = fromFlow
-                                )
-                            }
-                        }
-                    }
                 }
             } catch (e: Exception) {
                 Log.e("SSEParsingError", "Error parsing SSE data", e)
             }
         }
-
     }
 
     ProceedWithKYCProcess(
@@ -203,7 +196,6 @@ fun ProceedWithKYCProcess(
         )
 //        WebViewTopBar(navController, title = "Kyc Verification")
         if (isSelfScrollable) {
-
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -218,7 +210,6 @@ fun ProceedWithKYCProcess(
                     .fillMaxWidth()
                     .padding(top = 0.dp)
             ) {
-
                 val fileChooserLauncher = rememberLauncherForActivityResult(
                     contract = ActivityResultContracts.GetContent()
                 ) { uri: Uri? ->
@@ -234,7 +225,7 @@ fun ProceedWithKYCProcess(
                 AndroidView(
                     factory = { ctx ->
                         WebView(ctx).apply {
-                            //Sugu - need to test with other lender, commented for Lint
+                            // Sugu - need to test with other lender, commented for Lint
                             settings.javaScriptEnabled = true
                             settings.loadsImagesAutomatically = true
                             settings.domStorageEnabled = true
@@ -252,7 +243,7 @@ fun ProceedWithKYCProcess(
                             settings.javaScriptCanOpenWindowsAutomatically = true
                             settings.safeBrowsingEnabled = true
 
-                            WebView.setWebContentsDebuggingEnabled(true)
+//                            WebView.setWebContentsDebuggingEnabled(true)
 
                             settings.cacheMode = WebSettings.LOAD_DEFAULT
 
@@ -264,25 +255,12 @@ fun ProceedWithKYCProcess(
                                 ViewGroup.LayoutParams.MATCH_PARENT
                             )
 
-
                             webViewClient = object : WebViewClient() {
                                 override fun shouldOverrideUrlLoading(
                                     view: WebView?,
                                     url: String?
                                 ): Boolean {
-                                    url?.let {
-                                        when {
-                                            it.contains("ekycdone") || it.contains("https://pramaan.ondc.org/beta/staging/mock/seller/toENach") -> {
-                                                view?.loadUrl(it)
-                                                return false
-                                            }
 
-                                            else -> {
-                                                view?.loadUrl(it)
-                                                return true
-                                            }
-                                        }
-                                    }
                                     return false
                                 }
 
@@ -345,12 +323,10 @@ fun ProceedWithKYCProcess(
                                     openFileChooser(uploadMsg, "*/*")
                                 }
                             }
-
-
                         }
                     },
                     update = { webView ->
-                        //Sugu - need to test with other lender, commented for Lint
+                        // Sugu - need to test with other lender, commented for Lint
                         webView.settings.javaScriptEnabled = true
 
                         webView.settings.loadsImagesAutomatically = true
@@ -379,7 +355,6 @@ fun ProceedWithKYCProcess(
 
                         webView.settings.cacheMode = WebSettings.LOAD_DEFAULT
 
-
                         webView.webChromeClient = object : WebChromeClient() {
 
                             override fun onPermissionRequest(request: PermissionRequest) {
@@ -403,8 +378,9 @@ fun ProceedWithKYCProcess(
                                     .setMessage("This site wants to access your camera. Do you allow it?")
                                     .setPositiveButton("Allow") { _, _ ->
                                         ActivityCompat.requestPermissions(
-                                            context, arrayOf
-                                                (Manifest.permission.CAMERA),
+                                            context,
+                                            arrayOf
+                                            (Manifest.permission.CAMERA),
                                             CommonMethods().CAMERA_PERMISSION_REQUEST_CODE
                                         )
                                     }
@@ -452,7 +428,6 @@ fun ProceedWithKYCProcess(
                             fun openFileChooser(uploadMsg: ValueCallback<Uri>) {
                                 openFileChooser(uploadMsg, "*/*")
                             }
-
                         }
 
                         webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)

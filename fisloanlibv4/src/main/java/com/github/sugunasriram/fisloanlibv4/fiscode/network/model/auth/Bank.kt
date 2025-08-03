@@ -39,4 +39,3 @@ object BankDataDeserializer : JsonTransformingSerializer<BankData>(BankData.seri
         }
     }
 }
-

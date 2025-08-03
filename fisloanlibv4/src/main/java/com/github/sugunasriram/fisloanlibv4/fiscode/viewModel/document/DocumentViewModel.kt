@@ -93,7 +93,7 @@ class DocumentViewModel : BaseViewModel() {
                 error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                //Get Access Token using RefreshToken
+                // Get Access Token using RefreshToken
                 if (handleAuthGetAccessTokenApi()) {
                     handleContactUs(context)
                 } else {
@@ -121,7 +121,8 @@ class DocumentViewModel : BaseViewModel() {
     }
 
     private suspend fun handlePrivacyPolicy(
-        context: Context, checkForAccessToken: Boolean = true
+        context: Context,
+        checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
             ApiRepository.privacyPolicy()
@@ -132,7 +133,7 @@ class DocumentViewModel : BaseViewModel() {
                 error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                //Get Access Token using RefreshToken
+                // Get Access Token using RefreshToken
                 if (handleAuthGetAccessTokenApi()) {
                     handlePrivacyPolicy(context = context)
                 } else {
@@ -161,7 +162,8 @@ class DocumentViewModel : BaseViewModel() {
     }
 
     private suspend fun handleTermsCondition(
-        context: Context, checkForAccessToken: Boolean = true
+        context: Context,
+        checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
             ApiRepository.termCondition()
@@ -172,7 +174,7 @@ class DocumentViewModel : BaseViewModel() {
                 error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                //Get Access Token using RefreshToken
+                // Get Access Token using RefreshToken
                 if (handleAuthGetAccessTokenApi()) {
                     handleTermsCondition(context = context)
                 } else {
@@ -200,7 +202,8 @@ class DocumentViewModel : BaseViewModel() {
     }
 
     private suspend fun handleAboutUs(
-        context: Context, checkForAccessToken: Boolean = true
+        context: Context,
+        checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
             ApiRepository.aboutUs()
@@ -211,7 +214,7 @@ class DocumentViewModel : BaseViewModel() {
                 error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                //Get Access Token using RefreshToken
+                // Get Access Token using RefreshToken
                 if (handleAuthGetAccessTokenApi()) {
                     handleAboutUs(context = context)
                 } else {
@@ -235,15 +238,21 @@ class DocumentViewModel : BaseViewModel() {
         withContext(Dispatchers.Main) {
             if (error is ResponseException) {
                 CommonMethods().handleResponseException(
-                    error = error, context = context, updateErrorMessage = ::updateErrorMessage,
-                    _showServerIssueScreen = _showServerIssueScreen, _middleLoan = _middleLoan,
-                    _unAuthorizedUser = _unAuthorizedUser, _unexpectedError = _unexpectedError,
+                    error = error,
+                    context = context,
+                    updateErrorMessage = ::updateErrorMessage,
+                    _showServerIssueScreen = _showServerIssueScreen,
+                    _middleLoan = _middleLoan,
+                    _unAuthorizedUser = _unAuthorizedUser,
+                    _unexpectedError = _unexpectedError,
                     _showLoader = _showLoader
                 )
             } else {
                 CommonMethods().handleGeneralException(
-                    error = error, _showInternetScreen = _showInternetScreen,
-                    _showTimeOutScreen = _showTimeOutScreen, _unexpectedError = _unexpectedError
+                    error = error,
+                    _showInternetScreen = _showInternetScreen,
+                    _showTimeOutScreen = _showTimeOutScreen,
+                    _unexpectedError = _unexpectedError
                 )
             }
             _isLoading.value = false

@@ -1,8 +1,9 @@
 package com.github.sugunasriram.fisloanlibv4.fiscode.components
 
+//import com.github.sugunasriram.fisloanlibv4.fiscode.BuildConfig
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -26,7 +27,6 @@ import androidx.compose.material.DrawerValue
 import androidx.compose.material.Text
 import androidx.compose.material.rememberDrawerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,6 +50,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.github.sugunasriram.fisloanlibv4.R
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToAboutUsScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToContactUsScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToIssueListScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToLanguageScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToLoanStatusScreen
@@ -69,10 +70,8 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.textBlack
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.auth.RegisterViewModel
-import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.document.DocumentViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-
 
 fun openDrawer(coroutineScope: CoroutineScope, drawerState: DrawerState) {
     coroutineScope.launch {
@@ -88,7 +87,8 @@ fun closeDrawer(coroutineScope: CoroutineScope, drawerState: DrawerState) {
 
 @Composable
 fun SideMenuTextButton(
-    title: String, isSubMenu: Boolean = false,
+    title: String,
+    isSubMenu: Boolean = false,
     painter: Painter = painterResource(id = R.drawable.about),
     onClick: () -> Unit
 ) {
@@ -102,31 +102,37 @@ fun SideMenuTextButton(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Row(
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Image(
-                    painter = painter, contentDescription = title.lowercase(),
+                    painter = painter,
+                    contentDescription = title.lowercase(),
                     modifier = Modifier.size(25.dp)
                 )
                 Text(
-                    text = title, style = normal20Text400, color = appBlack,
+                    text = title,
+                    style = normal20Text400,
+                    color = appBlack,
                     modifier = Modifier.padding(start = 10.dp)
                 )
             }
-            if (!isSubMenu)
+            if (!isSubMenu) {
                 Image(
                     painter = painterResource(id = R.drawable.arrow_forward_gray),
                     contentDescription = title.lowercase(),
                     modifier = Modifier.size(25.dp)
                 )
-
+            }
         }
-        if (title != stringResource(id = R.string.logout)&& title!=stringResource(id = R.string
-            .contact_us) && !isSubMenu)
+        if (title != stringResource(id = R.string.logout) && title != stringResource(
+                id = R.string
+                    .contact_us
+            ) && !isSubMenu
+        ) {
             HorizontalDivider()
+        }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable
@@ -142,19 +148,17 @@ fun PreviewSideMenuContent() {
     )
 }
 
-
 @SuppressLint("SuspiciousIndentation", "RememberReturnType")
 @Composable
 fun SideMenuContent(
-    coroutineScope: CoroutineScope, drawerState: DrawerState, navController: NavHostController,
+    coroutineScope: CoroutineScope,
+    drawerState: DrawerState,
+    navController: NavHostController
 ) {
     val registerViewModel: RegisterViewModel = viewModel()
     val inProgress by registerViewModel.inProgress.collectAsState()
     val isCompleted by registerViewModel.isCompleted.collectAsState()
     val getUserResponse by registerViewModel.getUserResponse.collectAsState()
-
-    val documentViewModel: DocumentViewModel = viewModel()
-    val contactUsResponse by documentViewModel.contactUsResponse.collectAsState()
 
     var showLogoutConfirmationPopUp by remember { mutableStateOf(false) }
     var showAboutMenuPopUp by remember { mutableStateOf(false) }
@@ -162,91 +166,104 @@ fun SideMenuContent(
 
     val context = LocalContext.current
 
-    LaunchedEffect(Unit) {
-//        registerViewModel.getUserDetail(context, navController)
-        documentViewModel.contactUs(context)
-    }
-
     val fullName = listOfNotNull(
         getUserResponse?.data?.firstName?.takeIf { it.isNotBlank() },
         getUserResponse?.data?.lastName?.takeIf { it.isNotBlank() }
     ).joinToString(" ")
-    var expandContactUsDetails by remember { mutableStateOf(false) }
+
 
     SideBarLayout(
         userName = fullName.ifBlank { "" },
-        contact =  getUserResponse?.data?.mobileNumber.orEmpty(),
-        onBackClick = { closeDrawer(coroutineScope, drawerState) },
+        contact = getUserResponse?.data?.mobileNumber.orEmpty(),
+        onBackClick = { closeDrawer(coroutineScope, drawerState) }
     ) {
-        SideMenuTextButton(title = stringResource(id = R.string.update_profile),
+        SideMenuTextButton(
+            title = stringResource(id = R.string.update_profile),
             painter = painterResource(id = R.drawable.update_profile),
             onClick = {
                 closeDrawer(coroutineScope, drawerState)
                 navigateToUpdateProfileScreen(navController, fromFlow = "SideBar")
-            })
-        SideMenuTextButton(title = stringResource(id = R.string.loan_status),
+            }
+        )
+        SideMenuTextButton(
+            title = stringResource(id = R.string.loan_status),
             painter = painterResource(id = R.drawable.loan_status),
             onClick = {
                 closeDrawer(coroutineScope, drawerState)
                 navigateToLoanStatusScreen(navController)
-            })
-        SideMenuTextButton(title = stringResource(id = R.string.contact_us),
+            }
+        )
+
+        SideMenuTextButton(
+            title = stringResource(id = R.string.contact_us),
             painter = painterResource(id = R.drawable.contact),
-            onClick = { expandContactUsDetails = !expandContactUsDetails })
-        if (expandContactUsDetails) {
-            contactUsResponse?.data?.get(0)?.mobileNumber?.let {
-                ContactUsText(text1 = "Phone Number: ", text2 = it,
-                 onClick = {
-                     val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$it"))
-                     val chooser = Intent.createChooser(intent, "Choose Dialer")
-                     context.startActivity(chooser)
-                 })
+            onClick = {
+                closeDrawer(coroutineScope, drawerState)
+                coroutineScope.launch {
+                    TokenManager.read("email").takeIf { it != "null" }?.let {
+                        navigateToContactUsScreen(navController)
+                    } ?: run {
+                        navigateToUpdateProfileScreen(navController, fromFlow = "SideBar")
+                    }
+                }
             }
-            contactUsResponse?.data?.get(0)?.email?.let {
-                ContactUsText(text1 = "Email Id: ", text2 = it,
-                    onClick = {
-                        val intent = Intent(Intent.ACTION_SENDTO).apply { data = Uri.parse("mailto:$it") }
-                        context.startActivity(Intent.createChooser(intent, "Send Email"))
-                    })
-            }
-        }
+        )
+
         HorizontalDivider(top = 0.dp)
-        SideMenuTextButton(title = stringResource(id = R.string.my_issues),
+        SideMenuTextButton(
+            title = stringResource(id = R.string.my_issues),
             painter = painterResource(id = R.drawable.my_issues),
             onClick = {
                 closeDrawer(coroutineScope, drawerState)
                 navigateToIssueListScreen(
-                    navController = navController, orderId = "12345", fromFlow = "Both",
-                    providerId = "12345", loanState = "No Need", fromScreen = "HAMBURGER"
+                    navController = navController,
+                    orderId = "12345",
+                    fromFlow = "Both",
+                    providerId = "12345",
+                    loanState = "No Need",
+                    fromScreen = "HAMBURGER"
                 )
-            })
-        SideMenuTextButton(title = stringResource(id = R.string.notification),
+            }
+        )
+        SideMenuTextButton(
+            title = stringResource(id = R.string.notification),
             painter = painterResource(id = R.drawable.notification),
             onClick = {
                 CommonMethods().toastMessage(context = context, toastMsg = context.getString(R.string.feature_supported_in_future))
-                closeDrawer(coroutineScope, drawerState) })
-        SideMenuTextButton(title = stringResource(id = R.string.pre_payment),
+                closeDrawer(coroutineScope, drawerState)
+            }
+        )
+        SideMenuTextButton(
+            title = stringResource(id = R.string.pre_payment),
             painter = painterResource(id = R.drawable.pre_payment),
-            onClick = { closeDrawer(coroutineScope, drawerState)
+            onClick = {
+                closeDrawer(coroutineScope, drawerState)
                 navigateToPrePaymentScreen(navController)
-            })
+            }
+        )
         SideMenuTextButton(
             title = stringResource(id = R.string.settings),
             painter = painterResource(id = R.drawable.settings),
-            onClick = { showSettingsMenuPopUp = true })
+            onClick = { showSettingsMenuPopUp = true }
+        )
         SideMenuTextButton(
             title = stringResource(id = R.string.share_app),
             painter = painterResource(id = R.drawable.share),
             onClick = {
-                CommonMethods().toastMessage(context = context, toastMsg = context.getString(R.string.feature_supported_in_future))
-                closeDrawer(coroutineScope, drawerState) })
+                shareApp(context)
+                closeDrawer(coroutineScope, drawerState)
+            }
+        )
         SideMenuTextButton(
             title = stringResource(id = R.string.about),
             painter = painterResource(id = R.drawable.about),
-            onClick = { showAboutMenuPopUp = true })
-        SideMenuTextButton(stringResource(id = R.string.logout),
+            onClick = { showAboutMenuPopUp = true }
+        )
+        SideMenuTextButton(
+            stringResource(id = R.string.logout),
             painter = painterResource(id = R.drawable.logout),
-            onClick = { showLogoutConfirmationPopUp = true })
+            onClick = { showLogoutConfirmationPopUp = true }
+        )
     }
     if (showLogoutConfirmationPopUp) {
         AlertDialog(
@@ -254,9 +271,12 @@ fun SideMenuContent(
             confirmButton = {
                 CurvedPrimaryButton(
                     text = stringResource(id = R.string.yes),
-                    start = 15.dp, end = 15.dp, top = 5.dp, bottom = 5.dp
+                    start = 15.dp,
+                    end = 15.dp,
+                    top = 5.dp,
+                    bottom = 5.dp
                 ) {
-                    showLogoutConfirmationPopUp = false;
+                    showLogoutConfirmationPopUp = false
                     coroutineScope.launch {
                         val refreshToken =
                             TokenManager.read("refreshToken")
@@ -295,9 +315,8 @@ fun SideMenuContent(
                 .shadow(8.dp, shape = RoundedCornerShape(8.dp))
                 .border(1.dp, appWhite, shape = RoundedCornerShape(8.dp))
         )
-
     }
-    if (showAboutMenuPopUp)
+    if (showAboutMenuPopUp) {
         SubMenuView(
             onDismiss = { showAboutMenuPopUp = false },
             items = listOf(
@@ -313,10 +332,12 @@ fun SideMenuContent(
             }
             closeDrawer(coroutineScope, drawerState)
         }
+    }
 
-    if (showSettingsMenuPopUp)
+    if (showSettingsMenuPopUp) {
         SubMenuView(
-            position = 230.dp, height = 90.dp,
+            position = 230.dp,
+            height = 90.dp,
             onDismiss = { showSettingsMenuPopUp = false },
             items = listOf(stringResource(id = R.string.language) to R.drawable.language)
         ) { selectedItem ->
@@ -325,13 +346,33 @@ fun SideMenuContent(
                 closeDrawer(coroutineScope, drawerState)
             }
         }
+    }
+}
 
+fun shareApp(context: Context) {
+//    val packageName = BuildConfig.APPLICATION_ID
+    val packageName = "com.github.sugunasriram.fisloanlibv4.fiscode"
+
+    val appLink = "https://play.google.com/store/apps/details?id=$packageName"
+
+    val intent = Intent().apply {
+        action = Intent.ACTION_SEND
+        putExtra(Intent.EXTRA_TEXT, "Nearshop Financial Services app: $appLink")
+        type = "text/plain"
+    }
+
+    context.startActivity(Intent.createChooser(intent, "Share via"))
 }
 
 @Composable
-fun ContactUsText(text1: String, text2: String,
-                   start:Dp=40.dp, top:Dp=4.dp, bottom: Dp=0.dp, arrangement:Arrangement.Horizontal=Arrangement.Start,
-                  onClick: () -> Unit
+fun ContactUsText(
+    text1: String,
+    text2: String,
+    start: Dp = 40.dp,
+    top: Dp = 4.dp,
+    bottom: Dp = 0.dp,
+    arrangement: Arrangement.Horizontal = Arrangement.Start,
+    onClick: () -> Unit
 ) {
     Row(
         horizontalArrangement = arrangement,
@@ -340,15 +381,19 @@ fun ContactUsText(text1: String, text2: String,
             .fillMaxWidth()
     ) {
         Text(text = text1, color = appBlack, style = normal16Text500)
-        Text(text = text2, color = appOrange,
+        Text(
+            text = text2,
+            color = appOrange,
             style = normal16Text500.copy(textDecoration = TextDecoration.Underline),
-            modifier = Modifier.clickable { onClick() })
+            modifier = Modifier.clickable { onClick() }
+        )
     }
 }
 
 @Composable
 fun SubMenuView(
-    position: Dp = 80.dp, height: Dp = 170.dp,
+    position: Dp = 80.dp,
+    height: Dp = 170.dp,
     onDismiss: () -> Unit,
     items: List<Pair<String, Int>>,
     onItemClick: (String) -> Unit
@@ -387,12 +432,13 @@ fun SubMenuView(
             }
         }
     }
-
 }
 
 @Composable
 fun SideMenuProfileCard(
-    userName: String, contact: String, displayUserInfo: Boolean = true,
+    userName: String,
+    contact: String,
+    displayUserInfo: Boolean = true,
     navController: NavHostController,
     onBackClick: () -> Unit
 ) {
@@ -404,8 +450,10 @@ fun SideMenuProfileCard(
     ) {
         BackButton(navController = navController, onClick = onBackClick)
         SideMenuProfileDetails(
-            userName = userName, contact = contact,
-            displayUserInfo = displayUserInfo, modifier = Modifier.weight(1f)
+            userName = userName,
+            contact = contact,
+            displayUserInfo = displayUserInfo,
+            modifier = Modifier.weight(1f)
         )
         Spacer(modifier = Modifier.width(40.dp))
 //        Image(
@@ -415,9 +463,7 @@ fun SideMenuProfileCard(
 //                .size(55.dp)
 //                .padding(10.dp),
 //        )
-
     }
-
 }
 
 @Composable
@@ -440,7 +486,7 @@ fun SideMenuProfileDetails(
             contentDescription = stringResource(id = R.string.profile_image_icon),
             modifier = Modifier
                 .size(120.dp)
-                .padding(top = 2.dp, bottom = 5.dp),
+                .padding(top = 2.dp, bottom = 5.dp)
         )
         if (displayUserInfo) {
             Text(text = userName, style = normal18Text500, modifier = Modifier, color = appWhite)
@@ -455,6 +501,3 @@ fun SideMenuProfileDetails(
         }
     }
 }
-
-
-

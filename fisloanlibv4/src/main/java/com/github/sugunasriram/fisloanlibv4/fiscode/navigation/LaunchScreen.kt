@@ -8,8 +8,9 @@ import androidx.navigation.compose.rememberNavController
 fun LaunchScreen(startDestination: String) {
     val navController = rememberNavController()
     NavHost(
-        navController = navController, route = AppNavGraph.BUYERAPP,
-        startDestination = AppNavGraph.GRAPH_LAUNCH,
+        navController = navController,
+        route = AppNavGraph.BUYERAPP,
+        startDestination = AppNavGraph.GRAPH_LAUNCH
     ) {
         mobileNavigation(navController = navController, startDestination = startDestination)
     }
