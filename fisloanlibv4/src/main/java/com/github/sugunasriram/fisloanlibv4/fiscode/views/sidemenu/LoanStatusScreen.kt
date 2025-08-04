@@ -317,7 +317,7 @@ fun LoanStatusCard(
     val applicationId = data.itemId
 //    val applicationId = data.id
     data.itemDescriptor?.let { itemDescriptor ->
-        itemDescriptor.name?.let { loanType ->
+        itemDescriptor.code?.let { loanType ->
             Spacer(modifier = Modifier.height(10.dp))
             DisplayCard(
                 cardColor = cardColor,

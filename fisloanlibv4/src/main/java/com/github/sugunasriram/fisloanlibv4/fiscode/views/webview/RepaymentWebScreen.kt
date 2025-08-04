@@ -174,7 +174,7 @@ fun RepaymentWebScreen(
                             } else {
                                 sseViewModel.stopListening()
                                 if (fromFlow == "Purchase Finance"){
-                                    navigateToLoanAgreementScreen(
+                                    navigateToAnimationLoader(
                                         navController = navController,
                                         url = formUrl,
                                         transactionId = transactionId,
@@ -271,13 +271,18 @@ fun RepaymentWebScreen(
                             settings.setSupportMultipleWindows(true)
                             settings.javaScriptCanOpenWindowsAutomatically = true
                             settings.mediaPlaybackRequiresUserGesture = false
-                            settings.safeBrowsingEnabled = true
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                settings.safeBrowsingEnabled = true
+                            }
+
 //                            WebView.setWebContentsDebuggingEnabled(true);
                             settings.cacheMode = WebSettings.LOAD_DEFAULT
 
                             // Enable hardware acceleration for better performance
                             setLayerType(View.LAYER_TYPE_HARDWARE, null)
-                            setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_BOUND, false)
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_BOUND, false)
+                            }
 
                             layoutParams = ViewGroup.LayoutParams(
                                 ViewGroup.LayoutParams.MATCH_PARENT,

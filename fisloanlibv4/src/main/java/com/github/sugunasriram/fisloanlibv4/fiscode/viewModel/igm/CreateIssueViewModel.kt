@@ -213,6 +213,12 @@ class CreateIssueViewModel : ViewModel() {
             ) || fromFlow.equals("PERSONAL_LOAN", ignoreCase = true)
         ) {
             "PERSONAL_LOAN"
+        } else if (fromFlow.equals(
+                "Purchase Finance",
+                ignoreCase = true
+            ) || (fromFlow.equals("Loan", ignoreCase = true))
+        ) {
+            "PURCHASE_FINANCE"
         } else {
             "INVOICE_BASED_LOAN"
         }

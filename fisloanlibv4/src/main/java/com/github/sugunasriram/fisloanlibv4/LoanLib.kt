@@ -194,7 +194,7 @@ object LoanLib {
 //        personalDetails: PersonalDetails,
 //        productDetails: ProductDetails
     ) {
-        Toast.makeText(context, "Launching FIS with Params", Toast.LENGTH_SHORT).show()
+//        Toast.makeText(context, "Launching FIS with Params", Toast.LENGTH_SHORT).show()
 
         // Initialize the library
         init(context)
@@ -239,7 +239,7 @@ object LoanLib {
         sessionDetails: SessionDetails ? = null,
         callback: (LoanDetails) -> Unit
     ) {
-        Toast.makeText(context, "Launching FIS with Params", Toast.LENGTH_SHORT).show()
+//        Toast.makeText(context, "Launching FIS with Params", Toast.LENGTH_SHORT).show()
 
         // Initialize the library
         init(context)

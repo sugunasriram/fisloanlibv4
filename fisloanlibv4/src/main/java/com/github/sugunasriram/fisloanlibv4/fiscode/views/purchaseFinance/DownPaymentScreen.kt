@@ -118,8 +118,14 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import kotlin.math.floor
 
 
+var productName : String = "Samsung Galaxy S24 Ultra 5G"
+var productPrice : Long = 99000L
+var mrpPrice : Long = 110000L
+var maxAmount = 99000L
+var amount = maxAmount / 3
 
 @SuppressLint("ResourceType")
 @OptIn(ExperimentalMaterialApi::class)
@@ -155,11 +161,12 @@ val registerViewModel: RegisterViewModel = viewModel()
     var showError by remember { mutableStateOf(false) }
     var errorMsg by remember { mutableStateOf<String>("") }
     var showInValidAmountError by remember { mutableStateOf(false) }
-    val maxAmount = 99000L
-    val amount = remember { androidx.compose.runtime.mutableLongStateOf(20000) }
-    val productName : String = "Samsung Galaxy S24 Ultra 5G"
-    val productPrice : Long = 99000L
-    val mrpPrice : Long = 110000L
+
+//    val productName : String = "Samsung Galaxy S24 Ultra 5G"
+//    val productPrice : Long = 99000L
+//    val mrpPrice : Long = 110000L
+//    val maxAmount = 99000L
+//    val amount = remember { androidx.compose.runtime.mutableLongStateOf(maxAmount / 3) }
 
     val fromFlow = "Purchase Finance"
 
@@ -279,7 +286,7 @@ val registerViewModel: RegisterViewModel = viewModel()
                                                 context = context,
                                                 endUse = "PF flow",
                                                 purpose = "PF flow",
-                                                downPaymentAmount = amount.value.toString(),
+                                                downPaymentAmount = amount.toString(),
                                                 productPrice = productPrice.toString()
                                             )
                                         } catch (e: Exception) {
@@ -302,10 +309,10 @@ val registerViewModel: RegisterViewModel = viewModel()
                                 ProductDetailsCard(verifySessionResponse)
                                 userDetails?.data?.let { PFPersonalDetailsCard(profile = it) }
                                 DownPaymentDetailsCard(
-                                    amount = amount.value,
+                                    amount = amount,
                                     maxAmount = maxAmount,
                                     showInValidAmountError = showInValidAmountError,
-                                    onAmountChange = { amount.value = it },
+                                    onAmountChange = { amount = it },
                                     onValidationChanged = { showInValidAmountError = it } // <- sync state here
                                 )
 //                                PreferredTenureCard()
@@ -497,8 +504,11 @@ fun ProductDetailsCard(verifySessionResponse: VerifySessionResponse) {
                 )
                 RegisterText(
 //                    text = "Product price: ₹99,000",
-                    text = verifySessionResponse.data.sessionData.productSellingPrice?.let {
-                        "Product price: ₹$it" } ?: "Product price: NA",
+                    text = verifySessionResponse.data.sessionData.productSellingPrice?.toLongOrNull()?.let {
+                        productPrice = it
+                        maxAmount = it
+                        amount = it / 3
+                        "Product Price: ₹$it" } ?: "Product Price: NA",
                     style = normal14Text700,
                     textAlign = TextAlign.Start,
                     boxAlign = Alignment.TopStart

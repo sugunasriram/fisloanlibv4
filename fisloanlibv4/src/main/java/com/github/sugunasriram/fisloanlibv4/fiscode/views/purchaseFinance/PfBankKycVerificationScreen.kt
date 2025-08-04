@@ -16,6 +16,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToAnimati
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToLoanAgreementScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToLoanProcessScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToPfKycWebViewScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToRepaymentScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.pf.PfOfferConfirmResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.purchaseFinance.PfBankDetailViewModel
@@ -83,12 +84,12 @@ fun PfBankKycVerificationScreenView(
     } else {
         if (bankDetailCollected) {
             bankDetailResponse?.data?.catalog?.fromURL?.let { url ->
-                navigateToAnimationLoader(
-                    navController = navController,
-                    transactionId = transactionId,
-                    id = offerId,
-                    fromFlow = fromFlow,
-                    url = url
+                navigateToRepaymentScreen(
+                    navController,
+                    transactionId,
+                    url,
+                    offerId,
+                    fromFlow
                 )
             }
         } else {

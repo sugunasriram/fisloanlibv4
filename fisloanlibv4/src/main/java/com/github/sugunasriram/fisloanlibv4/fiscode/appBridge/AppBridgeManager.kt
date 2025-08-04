@@ -140,11 +140,11 @@ class AppBridgeManager(private val activity: ComponentActivity) {
                                 "            \"productSKUID\": \"47af53c0-0add-5c49-9365-8f42fafa18fe\",\n" +
                                 "            \"productReturnWindow\": \"P7D\",\n" +
                                 "            \"productModel\": null,\n" +
-                                "            \"productSellingPrice\": \"4799\",\n" +
+                                "            \"productSellingPrice\": \"90000\",\n" +
                                 "            \"productCancellable\": true,\n" +
                                 "            \"productReturnable\": true,\n" +
                                 "            \"productName\": \"VRIDDHI\",\n" +
-                                "            \"productMrpPrice\": 4800,\n" +
+                                "            \"productMrpPrice\": 100000,\n" +
                                 "            \"productSymbol\": \"https://storage.googleapis.com/nslive/62bab198-9391-5be4-b672-e78a6a299a1f/raw/1742808735478_1742808733756.png\",\n" +
                                 "            \"productQuantity\": \"1\"\n" +
                                 "        },\n" +

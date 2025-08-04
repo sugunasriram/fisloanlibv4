@@ -453,13 +453,13 @@ fun RepaymentScheduleView(
         ?.any { fulfilment ->
             val status = fulfilment?.state?.descriptor?.code.orEmpty()
             status.contains("completed", ignoreCase = true) ||
-                status.contains("closed", ignoreCase = true)
+                    status.contains("closed", ignoreCase = true)
         } ?: false
     val isLoanInitiated = loanDetails.fulfillments
         ?.any { fulfilment ->
             val status = fulfilment?.state?.descriptor?.code.orEmpty()
             status.contains("INITIATED", ignoreCase = true) ||
-                status.contains("SANCTIONED", ignoreCase = true)
+                    status.contains("SANCTIONED", ignoreCase = true)
         } ?: false
     BackHandler {
         if (fromScreen == "Loan Summary") {
@@ -761,7 +761,7 @@ fun ApplicantDetails(loanDetails: OfferResponseItem, context: Context) {
                 OnlyReadAbleText(
                     textHeader = stringResource(id = R.string.loan_amount),
                     textColorHeader = slateGrayColor,
-                    textValue = CommonMethods().formatIndianDoubleCurrency(principal.toDouble()),
+                    textValue = CommonMethods().formatIndianDoubleCurrency(principal.takeIf { it.isNotEmpty() }?.toDoubleOrNull() ?: 0.0),
                     style = normal14Text400,
                     end = 5.dp,
                     start = 8.dp,
@@ -795,7 +795,7 @@ fun ApplicantDetails(loanDetails: OfferResponseItem, context: Context) {
                                         ) {
                                             convertUTCToLocalDateTime(tag.value)
                                         } else if(tag.key.contains("amount", ignoreCase = true)){
-                                            CommonMethods().formatIndianDoubleCurrency(tag.value.toDouble())
+                                            CommonMethods().formatIndianDoubleCurrency(tag.value.takeIf { it.isNotEmpty() }?.toDoubleOrNull() ?: 0.0)
                                         }else {
                                             tag.value
                                         }
@@ -821,9 +821,9 @@ fun ApplicantDetails(loanDetails: OfferResponseItem, context: Context) {
                                             onClick = { CommonMethods().openLink(context, displayValue) }
                                         )
                                     } else if ((
-                                        newTitle.equals("term", ignoreCase = true) ||
-                                            newTitle.contains("frequency", ignoreCase = true)
-                                        ) &&
+                                                newTitle.equals("term", ignoreCase = true) ||
+                                                        newTitle.contains("frequency", ignoreCase = true)
+                                                ) &&
                                         displayValue?.startsWith("P") == true
                                     ) {
                                         convertISODurationToReadable(displayValue ?: "").let {
@@ -912,7 +912,7 @@ fun LoanSummary(offer: OfferResponseItem) {
                         it.value?.let { description ->
                             OnlyReadAbleText(
                                 textHeader = newTitle,
-                                textValue = CommonMethods().formatIndianDoubleCurrency(description.toDouble()),
+                                textValue = CommonMethods().formatIndianDoubleCurrency(description.takeIf{it.isNotEmpty()}?.toDoubleOrNull() ?: 0.0),
                                 style = normal14Text400,
                                 textColorHeader = slateGrayColor,
                                 end = 5.dp, start = 5.dp, top = 8.dp, bottom = 5.dp,
@@ -1182,7 +1182,7 @@ fun LoanAgreementDetailsCard(loanDocument: OfferResponseItem, context: Context) 
                 ) {
                     val fileName = loanPdfUrl.substringAfterLast("/").substringBefore("?").ifEmpty { "loan_agreement" }
                     CommonMethods().downloadPdf(context, loanPdfUrl, fileName,
-                                "$lenderName-LoanAgreement")
+                        "$lenderName-LoanAgreement")
                 }
             }
         }
@@ -1214,7 +1214,7 @@ fun DownloadLoanDetailsCard(loanDocument: OfferResponseItem,payment: List<OrderP
                     modifier = Modifier.padding(horizontal = 8.dp)
                 ) {
                     CommonMethods().generatePdfAndNotify(context, loanDocument,payment, lenderName)
-                   }
+                }
             }
         }
     }
