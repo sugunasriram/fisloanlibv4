@@ -137,8 +137,8 @@ fun LoanAgreementWebScreen(
 
             sseData.data?.data?.type.let { type ->
                 if (fromFlow == "Purchase Finance") {
-                    if (transactionId == sseTransactionId && type == "ACTION") {
-                        sseData.data?.data?.id?.let { id ->
+                    if (transactionId == sseTransactionId && type == "INFO") {
+                        sseData.data?.data?.data?.form_id?.let { id ->
                             navigateToLoanDisbursementScreen(
                                 navController = navController,
                                 transactionId = transactionId,

@@ -119,7 +119,7 @@ class SSEClient(private val sseUrl: String, private val scope: CoroutineScope) {
                     }
 
                     else -> {
-                        Log.d("SSEClient", "Error: ${e.localizedMessage}")
+                        Log.d("SSEClient", "Error: $e")
                     }
                 }
                 break
