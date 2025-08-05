@@ -119,7 +119,6 @@ fun RepaymentWebScreen(
                 Log.e("RepaymentScreen", "Error parsing SSE data", e)
                 null
             }
-
             sseData?.data?.data?.type?.let { type ->
                 val sseTransactionId =
                     sseData.data?.data?.txnId ?: sseData.data?.data?.catalog?.txn_id

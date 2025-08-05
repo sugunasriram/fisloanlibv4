@@ -233,7 +233,6 @@ fun MoveToDashBoard(
     ) {
         LoanDisburseAnimator()
 //        val totalDisburseAmount = sseData.data?.data?.catalog?.item_price?.value
-
         val totalDisburseAmount = sseData.data?.data?.catalog?.quote_breakup
             ?.firstOrNull {
                 val formattedTitle = it.title?.let { title -> CommonMethods().displayFormattedText(title) }
@@ -249,6 +248,7 @@ fun MoveToDashBoard(
         )
 
         if (totalDisburseAmount != null) {
+            loanAmount = totalDisburseAmount
             RegisterText(
                 text = totalDisburseAmount,
                 style = normal36Text700,

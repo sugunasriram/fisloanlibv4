@@ -81,6 +81,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToBureauO
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFormSubmissionWebScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.Profile
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.VerifySessionResponse
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.finance.PFSearchBodyModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.LenderStatusResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appBlack
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appGray
@@ -97,7 +98,9 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal16Text700
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal20Text700
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.auth.RegisterViewModel
+import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan.PersonalLoanViewModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan.WebViewModel
+import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.purchaseFinance.PurchaseFinanceViewModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.NoLoanOffersAvailableScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.CompanyConsentContent
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.ConsentDialogBox
@@ -119,6 +122,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlin.math.floor
+import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
 
 
 var productName : String = "Samsung Galaxy S24 Ultra 5G"
@@ -136,6 +140,11 @@ fun DownPaymentScreen(navController: NavHostController,
 ){
 val registerViewModel: RegisterViewModel = viewModel()
     val webViewModel: WebViewModel = viewModel()
+
+    val purchaseFinanceViewModel: PurchaseFinanceViewModel = viewModel()
+    val searchInProgress by purchaseFinanceViewModel.searchInProgress.collectAsState()
+    val searchLoaded by purchaseFinanceViewModel.searchLoaded.collectAsState()
+
     val checkboxState: Boolean by registerViewModel.checkBoxDetail.observeAsState(false)
     val showInternetScreen by registerViewModel.showInternetScreen.observeAsState(false)
     val showTimeOutScreen by registerViewModel.showTimeOutScreen.observeAsState(false)
@@ -170,6 +179,17 @@ val registerViewModel: RegisterViewModel = viewModel()
 
     val fromFlow = "Purchase Finance"
 
+
+    LaunchedEffect(Unit) {
+        purchaseFinanceViewModel.pFSearch(
+            context = context,
+            searchBodyModel = PFSearchBodyModel(
+                loanType = "PURCHASE_FINANCE",
+                bureauConsent = "on"
+            )
+        )
+    }
+
     BackHandler {
         navigateApplyByCategoryScreen(navController)
     }
@@ -188,12 +208,12 @@ val registerViewModel: RegisterViewModel = viewModel()
         showNoLenderResponse -> NoLoanOffersAvailableScreen(navController)
 //        lenderStatusProgress -> CenterProgress()
         else -> {
-            if (inProgress) {
+            if (searchInProgress || inProgress ) {
                 ProcessingAnimation(text = "Processing Please Wait...", image = R.raw.we_are_currently_processing_hour_glass)
             } else {
-                if (!isCompleted) {
+                if (!isCompleted ) {
                     registerViewModel.getUserDetail(context, navController)
-                } else {
+                } else if (searchLoaded){
                     CustomModalBottomSheet(
                         bottomSheetState = bottomSheetState,
                         sheetBackgroundColor = Color.Transparent,
@@ -279,6 +299,8 @@ val registerViewModel: RegisterViewModel = viewModel()
                                             )
 
                                             navigateToFormSubmissionWebScreen(navController, fromFlow, lenderStatusJson)
+
+                                            TokenManager.save("downpaymentAmount", amount.toString())
 
                                             loadWebScreen(
                                                 fromFlow = fromFlow,
@@ -978,7 +1000,7 @@ fun CompanyConsentContent(
     onAcceptConsent: () -> Unit,
     showDialog: MutableState<Boolean>,
     startTimer: Boolean = false,
-    timer: Int = 3
+    timer: Int = 7
 ) {
     var secondsLeft by remember { mutableStateOf(timer) }
     var isButtonEnabled by remember { mutableStateOf(false) }
