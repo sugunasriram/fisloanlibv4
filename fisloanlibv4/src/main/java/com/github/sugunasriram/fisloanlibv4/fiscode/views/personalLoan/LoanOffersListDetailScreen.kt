@@ -131,6 +131,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal16Text400
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal16Text700
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal20Text500
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
+import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan.EditLoanRequestViewModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan.EditLoanRequestViewModelFactory
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.MiddleOfTheLoanScreen
@@ -377,7 +378,9 @@ fun LoanOfferListDetailView(
                             interest = interest,
                             onClose = { coroutineScope.launch { bottomSheetState.show() } },
                             onSubmit = { downPaymentAmount ->
-                                coroutineScope.launch { bottomSheetState.show() }
+                                coroutineScope.launch {
+                                    TokenManager.save("downpaymentAmount", downPaymentAmount.toString())
+                                    bottomSheetState.show() }
                                 checkAndMakeApiCall(
                                     maxAmount - downPaymentAmount,
                                     context,
@@ -1129,6 +1132,7 @@ private fun checkAndMakeApiCall(
         ).show()
     } else {
         id.let { offerId ->
+
             editLoanRequestViewModel.updatePfApiFlow(PfFlow.Edited.status)
             editLoanRequestViewModel.pfInitiateOffer(
                 id = offerId,

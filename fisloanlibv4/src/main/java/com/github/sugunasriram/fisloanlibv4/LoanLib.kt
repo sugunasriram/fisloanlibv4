@@ -209,7 +209,8 @@ object LoanLib {
     data class LoanDetails(
         val loanAmount: Double,
         val interestRate: Double,
-        val tenure: Int
+        val tenure: Int,
+        val downpaymentAmount: Int
     ) : Serializable
 //    fun LaunchFISAppWithParamsAndCallback(
 //        context: Context,

@@ -1,12 +1,14 @@
 package com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
@@ -22,6 +24,7 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.github.sugunasriram.fisloanlibv4.LoanLib
 import com.github.sugunasriram.fisloanlibv4.R
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.DisplayCard
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.FixedTopBottomScreen
@@ -53,6 +56,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal18Text700
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal36Text700
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.slateGrayColor
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
+import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan.LoanAgreementViewModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.webview.ConsentHandlerScreen
 import kotlinx.serialization.SerializationException
@@ -88,6 +92,12 @@ fun LoanDisbursementScreen(
         sseViewModel.startListening(ApiPaths().sse)
     }
 
+    val downpaymentAmountValue = remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        downpaymentAmountValue.value = TokenManager.read("downpaymentAmount")
+    }
+
     if (sseDataForPf != null) {
         android.util.Log.d("SSETRIGGER", "Inside  MoveToDashBoard")
         sseDataForPf?.let { data ->
@@ -96,6 +106,7 @@ fun LoanDisbursementScreen(
                 id = id,
                 fromFlow = fromFlow,
                 sseData = data,
+                downpaymentAmountValue = downpaymentAmountValue,
                 context = context
             )
         }
@@ -147,6 +158,7 @@ fun LoanDisbursementScreen(
                             id = id,
                             fromFlow = fromFlow,
                             sseData = sseData,
+                            downpaymentAmountValue = downpaymentAmountValue,
                             context = context
                         )
                     }
@@ -172,12 +184,16 @@ fun LoanDisbursementScreen(
     }
 }
 
+var loanAmount: String? = "0.0"
+var interestRate: String? = "0.0"
+var tenure: String? = "0"
 @Composable
 fun MoveToDashBoard(
     navController: NavHostController,
     id: String,
     fromFlow: String,
     sseData: SSEData,
+    downpaymentAmountValue: MutableState<String?> = mutableStateOf(null),
     context: Context
 ) {
     var backPressedTime by remember { mutableLongStateOf(0L) }
@@ -191,17 +207,33 @@ fun MoveToDashBoard(
         showSingleButton = true,
         primaryButtonText = stringResource(R.string.home),
         onPrimaryButtonClick = {
-            navigateToLoanSummaryScreen(
-                navController = navController,
-                id = id,
-                consentHandler = "1",
-                fromFlow = fromFlow
-            )
+            if (fromFlow == "Purchase Finance") {
+                val downpaymentAmountVal = downpaymentAmountValue.value?.toIntOrNull() ?: 0
+
+                Log.d(
+                    "LoanDisbursementScreen",
+                    "Sugu downpaymentAmountVal: $downpaymentAmountVal, loanAmount: $loanAmount, " +
+                            "interestRate: $interestRate, tenure: $tenure"
+                )
+                LoanLib.callback?.invoke(LoanLib.LoanDetails(interestRate = interestRate?.toDoubleOrNull() ?: 0.0,
+                    loanAmount = loanAmount?.toDoubleOrNull() ?: 0.0,
+                    tenure = tenure?.toInt()?:0, downpaymentAmount = downpaymentAmountVal))
+                (context as? Activity)?.finish()
+            } else {
+                navigateToLoanSummaryScreen(
+                    navController = navController,
+                    id = id,
+                    consentHandler = "1",
+                    fromFlow = fromFlow
+                )
+            }
+
         },
         backgroundColor = appWhite
     ) {
         LoanDisburseAnimator()
 //        val totalDisburseAmount = sseData.data?.data?.catalog?.item_price?.value
+
         val totalDisburseAmount = sseData.data?.data?.catalog?.quote_breakup
             ?.firstOrNull {
                 val formattedTitle = it.title?.let { title -> CommonMethods().displayFormattedText(title) }
