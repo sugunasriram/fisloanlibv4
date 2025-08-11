@@ -22,8 +22,11 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.components.CenterProgress
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.AppScreens
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.LaunchScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToDownPaymentScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.VerifySessionResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.auth.InAppUpdateScreen
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.encodeToString
 
 class AppBridgeManager(private val activity: ComponentActivity) {
 
@@ -105,7 +108,9 @@ class AppBridgeManager(private val activity: ComponentActivity) {
                                 navController.navigate(AppScreens.DownPaymentScreen.route)
                                 navController.getBackStackEntry(AppScreens.DownPaymentScreen.route)
                                     .savedStateHandle
-                                    .set("verifySessionResponse", verifySessionResponse)
+//                                    .set("verifySessionResponse", verifySessionResponse)
+                                    .set("verifySessionResponse", Json.encodeToString<VerifySessionResponse?>(verifySessionResponse)
+                                    )
                             }
                         }
                         verifySessionInvoked &&

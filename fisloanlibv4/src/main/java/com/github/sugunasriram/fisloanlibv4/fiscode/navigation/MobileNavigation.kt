@@ -77,6 +77,9 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.views.webview.personalLoan.P
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.webview.personalLoan.WebKycScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.webview.purchaseFinance.PfKycWebViewScreen
 import com.google.gson.Gson
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.decodeFromString
+
 
 fun NavGraphBuilder.mobileNavigation(
     navController: NavHostController,
@@ -869,8 +872,11 @@ fun NavGraphBuilder.mobileNavigation(
 //        }
         composable(AppScreens.DownPaymentScreen.route) { backStackEntry ->
             val json = backStackEntry.savedStateHandle.get<String>("verifySessionResponse")
+//            val verifySessionResponse = json?.let {
+//                Gson().fromJson(it, VerifySessionResponse::class.java)
+//            }
             val verifySessionResponse = json?.let {
-                Gson().fromJson(it, VerifySessionResponse::class.java)
+                Json.decodeFromString<VerifySessionResponse?>(it)
             }
 
             if (verifySessionResponse != null) {
