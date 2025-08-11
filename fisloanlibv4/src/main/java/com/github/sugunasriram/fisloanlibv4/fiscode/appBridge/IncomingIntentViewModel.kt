@@ -52,11 +52,13 @@ class IncomingIntentViewModel : BaseViewModel() {
     private val _verifySessionResponse = MutableStateFlow<VerifySessionResponse?>(null)
     val verifySessionResponse: StateFlow<VerifySessionResponse?> = _verifySessionResponse
 
+
     fun verifySessionApi(
         sessionId: String,
         context: Context
     ) {
         _isVerifySessionChecking.value = true
+        _isVerifySessionSuccess.value = false
         viewModelScope.launch(Dispatchers.IO) {
             handleVerifySessionApi(context, sessionId)
         }
@@ -70,6 +72,8 @@ class IncomingIntentViewModel : BaseViewModel() {
                 handleVerifySessionSuccessResponse(response)
             }
         }.onFailure { error ->
+//            _isVerifySessionSuccess.value = false
+//            _isVerifySessionChecking.value = false
             // Session Management
             Log.e("TAG", "Session some failure: ${error.message}")
             _showServerIssueScreen.postValue(true)
@@ -81,11 +85,15 @@ class IncomingIntentViewModel : BaseViewModel() {
             _isVerifySessionSuccess.value = true
             _isVerifySessionChecking.value = false
 
+            Log.e("Sugu", "Session _isVerifySessionChecking: $_isVerifySessionChecking")
+
             // Save the tokens in the TokenManagers
             response.data?.accessToken?.let { accessToken ->
+                Log.e("Sugu", "Session accessToken: ${accessToken}")
                 TokenManager.save("accessToken", accessToken)
             }
             response.data?.refreshToken?.let { refreshToken ->
+                Log.e("Sugu", "Session refreshToken: ${refreshToken}")
                 TokenManager.save("refreshToken", refreshToken)
             }
             response.data?.sseId?.let { sseId ->

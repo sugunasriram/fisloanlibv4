@@ -179,7 +179,7 @@ val registerViewModel: RegisterViewModel = viewModel()
 
     val fromFlow = "Purchase Finance"
 
-
+Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
     LaunchedEffect(Unit) {
         purchaseFinanceViewModel.pFSearch(
             context = context,
