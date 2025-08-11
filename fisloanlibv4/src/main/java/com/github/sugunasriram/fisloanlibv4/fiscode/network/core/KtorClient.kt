@@ -102,8 +102,17 @@ open class KtorClient {
                         }
                     )
                 }
-                FsApp.getInstance().token?.let { token ->
-                    header("Authorization", getUserToken(token))
+                val requestPath = url.encodedPath
+                val skipAuth = requestPath.contains("verifySession", ignoreCase = true)
+
+                if (!skipAuth) {
+                    FsApp.getInstance().token?.let { token ->
+                        header("Authorization", getUserToken(token))
+                        Log.d("Ktor ==>", "Adding Authorization for $requestPath")
+
+                    }
+                } else{
+                    Log.d("Ktor ==>", "skipping Authorization for $requestPath")
                 }
             }
         }
