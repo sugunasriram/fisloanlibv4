@@ -85,7 +85,8 @@ class IncomingIntentViewModel : BaseViewModel() {
             _isVerifySessionSuccess.value = true
             _isVerifySessionChecking.value = false
 
-            Log.e("Sugu", "Session _isVerifySessionChecking: $_isVerifySessionChecking")
+            Log.e("Sugu", "Session _isVerifySessionChecking: ${_isVerifySessionChecking.value}")
+            Log.e("Sugu", "VerifySession response: $response")
 
             // Save the tokens in the TokenManagers
             response.data?.accessToken?.let { accessToken ->
