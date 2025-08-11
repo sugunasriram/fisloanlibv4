@@ -12,7 +12,7 @@ data class VerifySessionResponse(
 	val status: Boolean,
 	val message: String,
 	val data: VerifySessionData
-)
+) : java.io.Serializable
 @Serializable
 data class VerifySessionData(
 	val refreshToken: String,
@@ -22,7 +22,7 @@ data class VerifySessionData(
 	val securityKey: String,
 	val sessionData: VerifySessionDetails,
 	val sessionType: String
-)
+) : java.io.Serializable
 
 @Serializable
 data class VerifySessionDetails(
@@ -45,4 +45,4 @@ data class VerifySessionDetails(
 	val productQuantity: String?,
 	val productModel: String?,
 	val productSellingPrice: String?
-)
+) : java.io.Serializable
