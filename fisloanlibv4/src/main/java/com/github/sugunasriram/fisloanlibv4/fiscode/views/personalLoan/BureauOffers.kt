@@ -2,6 +2,7 @@ package com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -18,7 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
+import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.ModalBottomSheetState
@@ -97,6 +98,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import java.util.Locale
+import androidx.compose.material.Card
 
 private val json = Json { prettyPrint = true }
 
@@ -427,9 +429,9 @@ fun OfferCard(navController: NavHostController, offerResponseItem: Offer?, fromF
                     Color(0xFF4CAF50), // green
                 )
                 1 -> listOf(
-                    Color(0xFFFF8A65), // light red-orange
-                    Color(0xFFFF7043), // warm red
-                    Color(0xFFD84315) // deep red-orange
+                    Color(0xFFFFCC80), // light orange
+                    Color(0xFFFFA726), // medium orange
+                    Color(0xFFF57C00)  // deep orange
                 )
                 2 -> listOf(
                     Color(0xFF64B5F6), // light blue
@@ -540,7 +542,7 @@ fun OfferCard(navController: NavHostController, offerResponseItem: Offer?, fromF
                                     Row {
                                         HeaderWithValue(
                                             textHeader = stringResource(id = R.string.loan_amount_inr),
-                                            textValue = loanAmount,
+                                            textValue =  loanAmount,
                                             modifier = Modifier.weight(0.5f)
                                         )
                                         HeaderWithValue(

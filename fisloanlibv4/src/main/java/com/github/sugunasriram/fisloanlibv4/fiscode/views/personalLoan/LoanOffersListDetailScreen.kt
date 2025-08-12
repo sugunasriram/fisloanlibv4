@@ -554,13 +554,15 @@ fun LoanCardInfo(offer: OfferResponseItem) {
     offer.quoteBreakUp?.forEach { quoteBreakUp ->
         quoteBreakUp?.let {
             it.title?.let { title ->
-                if (title.lowercase(Locale.ROOT).contains("principal")) {
+                if (title.lowercase(Locale.ROOT).contains("principal") ||
+                    title.lowercase(Locale.ROOT).contains("principal_amount")) {
                     it.value?.let { value ->
                         loanAmountValue = value
                     }
                 }
 
-                if (title.lowercase(Locale.ROOT).contains("interest")) {
+                if (title.lowercase(Locale.ROOT).contains("interest") ||
+                    title.lowercase(Locale.ROOT).contains("interest_amount")) {
                     it.value?.let { value ->
                         interestAmount = value
                     }
@@ -594,6 +596,12 @@ fun LoanCardInfo(offer: OfferResponseItem) {
                         loanNAmount = value
                     }
                 }
+
+                if (title.lowercase(Locale.ROOT).contains("interest")) {
+                    it.value?.let { value ->
+                        interestAmount = value
+                    }
+                }
             }
         }
     }
@@ -620,7 +628,8 @@ fun LoanCardInfo(offer: OfferResponseItem) {
     }
 
     offer?.quoteBreakUp?.forEach { tag ->
-       if (tag?.title?.contains("INTEREST", ignoreCase = true) == true) {
+       if (tag?.title?.contains("INTEREST", ignoreCase = true) == true ||
+           tag?.title?.contains("INTEREST_AMOUNT", ignoreCase = true) == true) {
                interestAmount = tag?.value ?: ""
            }
    }
@@ -633,7 +642,7 @@ fun LoanCardInfo(offer: OfferResponseItem) {
         ) {
             HeaderWithValue(
                 textHeader = stringResource(id = R.string.loan_amount),
-                textValue = loanNAmount,
+                textValue =  CommonMethods().formatIndianDoubleCurrency(loanNAmount.toDouble()),
                 headerColor = grayA6,
                 headerStyle = normal14Text400,
                 valueColor = appBlack,
@@ -662,7 +671,7 @@ fun LoanCardInfo(offer: OfferResponseItem) {
         ) {
             HeaderWithValue(
                 textHeader = stringResource(id = R.string.interest),
-                textValue = installmentAmount,
+                textValue = CommonMethods().formatIndianDoubleCurrency(interestAmount.toDouble()),
                 headerColor = grayA6,
                 headerStyle = normal14Text400,
                 valueColor = appBlack,
@@ -800,8 +809,8 @@ fun LoanSummaryCard(offer: OfferResponseItem) {
         quoteBreakUp?.let { it ->
             it.title?.let { title ->
                 val newTitle = CommonMethods().displayFormattedText(title)
+                val currency = it.currency?.let { " ($it)" } ?: ""
                 it.value?.let { description ->
-                    val currency = it.currency?.let { " ($it)" } ?: ""
                     HeaderValueWithTextBelow(
                         textHeader = newTitle + currency,
                         textValue = description,
@@ -1132,7 +1141,6 @@ private fun checkAndMakeApiCall(
         ).show()
     } else {
         id.let { offerId ->
-
             editLoanRequestViewModel.updatePfApiFlow(PfFlow.Edited.status)
             editLoanRequestViewModel.pfInitiateOffer(
                 id = offerId,
@@ -1153,6 +1161,7 @@ sealed class PfFlow(val status: String) {
 @Composable
 fun LoanGSTCardInfo(offer: OfferResponseItem) {
     // Get loan amount that user will get
+    var loanAmount = "-"
 
     offer.itemTags?.forEach itemTag@{ itemTags ->
         itemTags?.let {
@@ -1160,8 +1169,13 @@ fun LoanGSTCardInfo(offer: OfferResponseItem) {
                 itemTags.tags.forEach { itemTagsItem ->
                     if (itemTagsItem.key.lowercase(Locale.ROOT).contains("principal")) {
                         itemTagsItem.value.let { value ->
-                            loanAmountValue = value ?: ""
-                            return@itemTag
+                            loanAmount = value ?: ""
+                        }
+                    }
+
+                    if (itemTagsItem.key.lowercase(Locale.ROOT).contains("interest")) {
+                        itemTagsItem.value.let { value ->
+                            interestAmount = value ?: ""
                         }
                     }
                 }
@@ -1169,16 +1183,15 @@ fun LoanGSTCardInfo(offer: OfferResponseItem) {
         }
     }
 //    LoanAmountInterest(offer)
-    var loanAmount = "-"
     var interestRate = "-"
     var tenure = "-"
     var installmentAmount = "-"
 
 // Get loan amount from itemPrice
-    offer.itemPrice?.value?.let {
-        val currency = offer.itemPrice.currency?.let { " ($it)" } ?: ""
-        loanAmount = "$it$currency"
-    }
+//    offer.itemPrice?.value?.let {
+//        val currency = offer.itemPrice.currency?.let { " ($it)" } ?: ""
+//        loanAmount = "$it$currency"
+//    }
 
 // Get interest rate, tenure, installment amount from itemTags
     offer.itemTags?.forEach { itemTag ->
@@ -1197,11 +1210,16 @@ fun LoanGSTCardInfo(offer: OfferResponseItem) {
                 tag.key.contains("INSTALLMENT_AMOUNT", ignoreCase = true) -> {
                     installmentAmount = "${tag.value}"
                 }
+                tag.key.equals("interest", ignoreCase = true) ||
+                        tag.key.equals("interest_amount", ignoreCase = true) -> {
+                    interestAmount = tag.value
+                }
             }
         }
     }
     offer?.quoteBreakUp?.forEach { tag ->
-        if (tag?.title?.contains("INTEREST", ignoreCase = true) == true) {
+        if (tag?.title?.contains("INTEREST", ignoreCase = true) == true ||
+            tag?.title?.contains("INTEREST_AMOUNT", ignoreCase = true) == true) {
             interestAmount = tag?.value ?: ""
         }
     }

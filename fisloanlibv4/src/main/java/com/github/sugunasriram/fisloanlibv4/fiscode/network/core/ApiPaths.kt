@@ -5,6 +5,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods.Companio
 class ApiPaths {
 
     // Session related Api Paths
+    val createSession = "superAppSessions/createSession"
     val verifySession = "superAppSessions/verifySession"
 
     // Base URL Flow Api Path

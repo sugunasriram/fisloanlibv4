@@ -138,6 +138,19 @@ fun LoanAgreementWebScreen(
             sseData.data?.data?.type.let { type ->
                 if (fromFlow == "Purchase Finance") {
                     if (transactionId == sseTransactionId && type == "INFO") {
+
+                        if (sseData.data?.data?.data?.error != null) {
+                            Log.d("LoanAgreement", "PF Error :" + sseData.data?.data?.data?.error?.message)
+                            errorMsg = sseData.data?.data?.data?.error?.message
+                            sseViewModel.stopListening()
+                            navigateToFormRejectedScreen(
+                                navController = navController,
+                                errorTitle = errorTitle,
+                                fromFlow = fromFlow,
+                                errorMsg = errorMsg
+                            )
+                        }
+
                         sseData.data?.data?.data?.form_id?.let { id ->
                             navigateToLoanDisbursementScreen(
                                 navController = navController,
@@ -146,6 +159,8 @@ fun LoanAgreementWebScreen(
                                 fromFlow = fromFlow
                             )
                         }
+
+
                     }
                 } else if (transactionId == sseTransactionId && type == "INFO") {
                     lateNavigate = true

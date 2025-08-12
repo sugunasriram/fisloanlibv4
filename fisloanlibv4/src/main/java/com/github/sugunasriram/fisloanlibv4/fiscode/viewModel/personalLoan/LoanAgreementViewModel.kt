@@ -10,6 +10,9 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.GstOfferListMo
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.OfferListModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.PfOfferListModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.StatusResponse
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.CreateSessionRequest
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.CreateSessionRequestData
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.CreateSessionResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.CustomerLoanList
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.igm.CheckOrderIssueModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.OrderByIdResponse
@@ -698,4 +701,58 @@ class LoanAgreementViewModel : BaseViewModel() {
             _pfOfferListLoaded.value = true
         }
     }
+
+
+    private val _pfRetailDetailsSent = MutableStateFlow(false)
+    val pfRetailDetailsSent: StateFlow<Boolean> = _pfRetailDetailsSent
+
+    private val _pfRetailDetailsSending = MutableStateFlow(false)
+    val pfRetailDetailsSending: StateFlow<Boolean> = _pfRetailDetailsSending
+
+    fun pfRetailSendDetails(createSessionRequest: CreateSessionRequest, context: Context) {
+        _pfRetailDetailsSending.value = true
+        viewModelScope.launch(Dispatchers.IO) {
+            handlepfRetailSendDetails(createSessionRequest = createSessionRequest, context = context)
+        }
+    }
+
+    private suspend fun handlepfRetailSendDetails(
+        createSessionRequest: CreateSessionRequest,
+        context: Context,
+        checkForAccessToken: Boolean = true
+    ) {
+        kotlin.runCatching {
+            ApiRepository.createSession(createSessionRequest = createSessionRequest)
+        }.onSuccess { response ->
+            handlepfRetailSendDetailsSuccess(response)
+        }.onFailure { error ->
+            if (checkForAccessToken &&
+                error is ResponseException &&
+                error.response.status.value == 401
+            ) {
+                if (handleAuthGetAccessTokenApi()) {
+//                    handlePfOfferList(
+//                        loanType = loanType,
+//                        context = context,
+//                        checkForAccessToken =
+//                        false
+//                    )
+                } else {
+                    _navigationToSignup.value = true
+                }
+            } else {
+                handleFailure(error = error, context = context)
+            }
+        }
+    }
+
+    private suspend fun handlepfRetailSendDetailsSuccess(response: CreateSessionResponse?) {
+        withContext(Dispatchers.Main) {
+//            _pfOfferList.value = response
+            _pfRetailDetailsSending.value = false
+            _pfRetailDetailsSent.value = true
+        }
+    }
+
+
 }

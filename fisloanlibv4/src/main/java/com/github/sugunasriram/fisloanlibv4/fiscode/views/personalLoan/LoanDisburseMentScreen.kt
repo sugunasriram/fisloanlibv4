@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -36,6 +37,8 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.components.SpaceBetweenTextI
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToLoanSummaryScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.core.ApiPaths
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.CreateSessionRequest
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.CreateSessionRequestData
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.UpdateConsentHandlerBody
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.sse.Catalog
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.sse.DataContent
@@ -59,6 +62,9 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan.LoanAgreementViewModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.webview.ConsentHandlerScreen
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -83,6 +89,8 @@ fun LoanDisbursementScreen(
     val sseDataForPf by loanAgreementViewModel.sseData.collectAsState()
     var apiTriggered by remember { mutableStateOf(false) }
 
+    val coroutineScope = rememberCoroutineScope()
+
     BackHandler { navigateApplyByCategoryScreen(navController) }
 
     val sseViewModel: SSEViewModel = viewModel()
@@ -96,6 +104,10 @@ fun LoanDisbursementScreen(
 
     LaunchedEffect(Unit) {
         downpaymentAmountValue.value = TokenManager.read("downpaymentAmount")
+        Log.d(
+            "LoanDisbursementScreen",
+            "Sugu downpaymentAmountValue: ${downpaymentAmountValue.value}"
+        )
     }
 
     if (sseDataForPf != null) {
@@ -106,6 +118,7 @@ fun LoanDisbursementScreen(
                 id = id,
                 fromFlow = fromFlow,
                 sseData = data,
+                loanAgreementViewModel = loanAgreementViewModel,
                 downpaymentAmountValue = downpaymentAmountValue,
                 context = context
             )
@@ -158,6 +171,7 @@ fun LoanDisbursementScreen(
                             id = id,
                             fromFlow = fromFlow,
                             sseData = sseData,
+                            loanAgreementViewModel = loanAgreementViewModel,
                             downpaymentAmountValue = downpaymentAmountValue,
                             context = context
                         )
@@ -193,6 +207,8 @@ fun MoveToDashBoard(
     id: String,
     fromFlow: String,
     sseData: SSEData,
+    coroutineScope: CoroutineScope = rememberCoroutineScope(),
+    loanAgreementViewModel: LoanAgreementViewModel,
     downpaymentAmountValue: MutableState<String?> = mutableStateOf(null),
     context: Context
 ) {
@@ -210,6 +226,27 @@ fun MoveToDashBoard(
             if (fromFlow == "Purchase Finance") {
                 val downpaymentAmountVal = downpaymentAmountValue.value?.toIntOrNull() ?: 0
 
+                CreateSessionRequestData(
+                    downPaymentAmount = downpaymentAmountValue.value,
+                    loanId = sseData.data?.data?.id?.toString() ?: "0"
+                ).let { requestData ->
+                    loanAgreementViewModel.pfRetailSendDetails(
+                        createSessionRequest = CreateSessionRequest(
+                            type = "FIS_RET_PF",
+                            statusCode = 200,
+                            status = true,
+                            data = CreateSessionRequestData(
+                            downPaymentAmount = requestData.downPaymentAmount,
+                            loanId = requestData.loanId
+                            ),
+                            error = null
+                        ),
+                        context = context
+                    )
+                }
+                coroutineScope.launch {
+                    delay(3000)
+                }
                 Log.d(
                     "LoanDisbursementScreen",
                     "Sugu downpaymentAmountVal: $downpaymentAmountVal, loanAmount: $loanAmount, " +
@@ -386,6 +423,7 @@ fun MoveToDashBoardPreview() {
         id = "user-001",
         fromFlow = "Purchase Finance",
         sseData = sseData,
+        loanAgreementViewModel = LoanAgreementViewModel(),
         context = context
     )
 }

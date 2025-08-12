@@ -13,6 +13,8 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.BankAccou
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.BankDetail
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.BankDetailResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.BankList
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.CreateSessionRequest
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.CreateSessionResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.CustomerLoanList
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.Data
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.DocumentUpload
@@ -104,6 +106,14 @@ object ApiRepository {
         return KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().verifySession) {
                 body = requestBody
+            }
+        }
+    }
+
+    suspend fun createSession(createSessionRequest: CreateSessionRequest): CreateSessionResponse? {
+        return KtorClient.getInstance().use { httpClient ->
+            httpClient.post(ApiPaths().createSession) {
+                body = createSessionRequest
             }
         }
     }
