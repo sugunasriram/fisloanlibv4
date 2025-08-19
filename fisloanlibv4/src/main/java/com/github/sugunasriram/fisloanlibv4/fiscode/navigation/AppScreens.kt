@@ -14,6 +14,7 @@ sealed class AppScreens(var route: String) {
     // Personal Loan Flow App Screens Navigation
     object PersonalLoanScreen : AppScreens("personal_loan_screen")
     object BasicDetailsScreen : AppScreens("basic_details_screen")
+    object ShareBankStatementScreen : AppScreens("share_bank_statement_screen")
     object ReviewDetailsScreen : AppScreens("review_detail_screen")
     object BureauOffersScreen : AppScreens("bureau_offers_screen")
     object AccountAggregatorScreen : AppScreens("account_aggregator_screen")

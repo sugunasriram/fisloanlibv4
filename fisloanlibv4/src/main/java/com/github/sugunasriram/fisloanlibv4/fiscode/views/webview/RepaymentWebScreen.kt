@@ -37,6 +37,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -109,7 +110,6 @@ fun RepaymentWebScreen(
         }
     }
 
-    LaunchedEffect(sseEvents) {
         if (sseEvents.isNotEmpty()) {
             Log.d("RepaymentScreen", "SSE entered ")
 
@@ -119,99 +119,101 @@ fun RepaymentWebScreen(
                 Log.e("RepaymentScreen", "Error parsing SSE data", e)
                 null
             }
-            sseData?.data?.data?.type?.let { type ->
-                val sseTransactionId =
-                    sseData.data?.data?.txnId ?: sseData.data?.data?.catalog?.txn_id
-                Log.d(
-                    "Repayment:",
-                    "transactionId :[" + transactionId + "] " +
-                            "sseTransactionId:[" + sseTransactionId
-                )
-                if (transactionId == sseTransactionId && type == "ACTION") {
-                    sseData.data?.data?.catalog?.from_url?.let { formUrl ->
-                        lateNavigate = true
-                        if (fromFlow.equals("Personal Loan", ignoreCase = true)) {
-                            // Check if Form Rejected or Pending
-                            if (sseData.data?.data?.data?.error != null) {
-                                Log.d(
-                                    "RepaymentScreen",
-                                    "Error :" + sseData.data?.data?.data?.error?.message
-                                )
-                                errorMsg = sseData.data?.data?.data?.error?.message
-                                navigateToFormRejectedScreen(
-                                    navController = navController,
-                                    fromFlow = fromFlow,
-                                    errorTitle = errorTitle,
-                                    errorMsg = errorMsg
-                                )
-                            } else {
-                                sseViewModel.stopListening()
-                                navigateToLoanAgreementAnimationLoader(
-                                   navController= navController,
-                                    transactionId=transactionId,
-                                    id=id,
-                                    formUrl=formUrl,
-                                    fromFlow = fromFlow
-                                )
-                            }
-                        } else {
-                            // Check if Form Rejected or Pending
-                            if (sseData.data?.data?.data?.error != null) {
-                                Log.d(
-                                    "Repayment 2",
-                                    "Error :" + sseData.data?.data?.data?.error?.message
-                                )
-                                errorMsg = sseData.data?.data?.data?.error?.message
-                                sseViewModel.stopListening()
-
-                                navigateToFormRejectedScreen(
-                                    navController = navController,
-                                    fromFlow = fromFlow,
-                                    errorTitle = errorTitle,
-                                    errorMsg = errorMsg
-                                )
-                            } else {
-                                sseViewModel.stopListening()
-                                if (fromFlow == "Purchase Finance"){
-                                    navigateToAnimationLoader(
+            if (sseData != null) {
+                sseData.data?.data?.type?.let { type ->
+                    val sseTransactionId =
+                        sseData.data.data.txnId ?: sseData.data?.data?.catalog?.txn_id
+                    Log.d(
+                        "Repayment:",
+                        "transactionId :[" + transactionId + "] " +
+                                "sseTransactionId:[" + sseTransactionId
+                    )
+                    if (transactionId == sseTransactionId && type == "ACTION") {
+                        sseData.data?.data?.catalog?.from_url?.let { formUrl ->
+                            lateNavigate = true
+                            if (fromFlow.equals("Personal Loan", ignoreCase = true)) {
+                                // Check if Form Rejected or Pending
+                                if (sseData.data?.data?.data?.error != null) {
+                                    Log.d(
+                                        "RepaymentScreen",
+                                        "Error :" + sseData.data?.data?.data?.error?.message
+                                    )
+                                    errorMsg = sseData.data?.data?.data?.error?.message
+                                    navigateToFormRejectedScreen(
                                         navController = navController,
-                                        url = formUrl,
+                                        fromFlow = fromFlow,
+                                        errorTitle = errorTitle,
+                                        errorMsg = errorMsg
+                                    )
+                                } else {
+                                    sseViewModel.stopListening()
+                                    navigateToLoanAgreementAnimationLoader(
+                                        navController = navController,
                                         transactionId = transactionId,
                                         id = id,
+                                        formUrl = formUrl,
                                         fromFlow = fromFlow
                                     )
+                                }
+                            } else {
+                                // Check if Form Rejected or Pending
+                                if (sseData.data?.data?.data?.error != null) {
+                                    Log.d(
+                                        "Repayment 2",
+                                        "Error :" + sseData.data?.data?.data?.error?.message
+                                    )
+                                    errorMsg = sseData.data?.data?.data?.error?.message
+                                    sseViewModel.stopListening()
+
+                                    navigateToFormRejectedScreen(
+                                        navController = navController,
+                                        fromFlow = fromFlow,
+                                        errorTitle = errorTitle,
+                                        errorMsg = errorMsg
+                                    )
+                                } else {
+                                    sseViewModel.stopListening()
+                                    if (fromFlow == "Purchase Finance") {
+                                        navigateToAnimationLoader(
+                                            navController = navController,
+                                            transactionId = transactionId,
+                                            id = id,
+                                            fromFlow = fromFlow,
+                                            url = formUrl
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
-                }
-                if (transactionId == sseTransactionId && type == "INFO") {
-                    // Check if Form Rejected or Pending
-                    if (sseData.data?.data?.data?.error != null) {
-                        Log.d(
-                            "RepaymentScreen 3",
-                            "Error :" + sseData.data?.data?.data?.error?.message
-                        )
-                        errorMsg = sseData.data?.data?.data?.error?.message
-                        sseViewModel.stopListening()
-                        navigateToFormRejectedScreen(
-                            navController = navController,
-                            fromFlow = fromFlow,
-                            errorTitle = errorTitle,
-                            errorMsg = errorMsg
-                        )
+                    if (transactionId == sseTransactionId && type == "INFO") {
+                        // Check if Form Rejected or Pending
+                        if (sseData.data?.data?.data?.error != null) {
+                            Log.d(
+                                "RepaymentScreen 3",
+                                "Error :" + sseData.data?.data?.data?.error?.message
+                            )
+                            errorMsg = sseData.data?.data?.data?.error?.message
+                            sseViewModel.stopListening()
+                            navigateToFormRejectedScreen(
+                                navController = navController,
+                                fromFlow = fromFlow,
+                                errorTitle = errorTitle,
+                                errorMsg = errorMsg
+                            )
+                        }
                     }
                 }
             }
         }
-    }
 
-//    DisposableEffect(Unit) {
-//        onDispose {
-//            Log.d("RepaymentScreen", "onDispose Called")
-//            sseViewModel.stopListening()
-//        }
-//    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            Log.d("RepaymentScreen", "onDispose Called")
+            sseViewModel.stopListening()
+        }
+    }
 
     var onAllActionsCompleted by remember { mutableStateOf(false) }
     BackHandler { navigateApplyByCategoryScreen(navController) }
@@ -228,12 +230,17 @@ fun RepaymentWebScreen(
         )
 
         if (isSelfScrollable) {
-            Column(modifier = Modifier.weight(1f).padding(top = 0.dp)) {
+            Column(modifier = Modifier
+                .weight(1f)
+                .padding(top = 0.dp)) {
                 pageContent()
             }
         } else {
             Box(
-                modifier = Modifier.weight(1f).fillMaxWidth().padding(top = 0.dp)
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(top = 0.dp)
             ) {
                 val fileChooserLauncher = rememberLauncherForActivityResult(
                     contract = ActivityResultContracts.GetContent()
@@ -678,8 +685,6 @@ fun RepaymentWebScreen(
                         // If you want to allow third-party cookies (optional)
                         // Pass the WebView instance directly
                         cookieManager.setAcceptThirdPartyCookies(webView, true)
-                        Log.d("WebView", "3 Sugu URL: $url")
-
                         // webView.loadUrl(url)
                         if (loadedUrl.value != url) {
                             Log.d("RepaymentWebView", "1 Loading new URL: $url")

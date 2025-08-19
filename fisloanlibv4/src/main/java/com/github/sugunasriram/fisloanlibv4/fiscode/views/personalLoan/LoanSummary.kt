@@ -3,8 +3,10 @@ package com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan
 import android.annotation.SuppressLint
 import android.content.Context
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -13,7 +15,10 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -46,6 +51,21 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.LoanNotApprove
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.MiddleOfTheLoanScreen
 import kotlinx.serialization.json.Json
 import java.util.Locale
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Card
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.fillMaxWidth
+import com.github.sugunasriram.fisloanlibv4.fiscode.components.StartingText
+import com.github.sugunasriram.fisloanlibv4.fiscode.components.WrapBorderButton
 
 private val json = Json {
     prettyPrint = true
@@ -288,69 +308,115 @@ fun LoanDetailCard(navController: NavHostController, offer: OfferResponseItem, f
             Color(0xFF1976D2) // deep blue
         )
     }
+    val gradient = Brush.verticalGradient(colors = gradientColors)
 
-    FullWidthRoundShapedCard(
-        onClick = {
-            offer.id?.let { orderId ->
-                onCardClick(fromFlow, navController, orderId)
-            }
-        },
-        cardColor = appOrange,
-        gradientColors = gradientColors,
-        bottomPadding = 15.dp,
-        start = 10.dp,
-        end = 10.dp,
-        bottom = 10.dp
+    Box(
+        modifier = Modifier
+            .padding(8.dp)
+            .shadow(8.dp, RoundedCornerShape(12.dp), clip = false) // gray shadow
     ) {
-        val painter = rememberAsyncImagePainter(
-            ImageRequest.Builder(LocalContext.current)
-                .data(data = logoUrl ?: R.drawable.bank_icon)
-                .apply {
-                    crossfade(true)
-                    placeholder(R.drawable.bank_icon)
-                    decoderFactory(SvgDecoder.Factory())
-                }.build()
-        )
-
-        ImageTextButtonRow(
-            imagePainter = painter,
-            textHeader = bankName,
-            textColor = appBlack,
-            textStyle = normal14Text700,
-            buttonText = stringResource(id = R.string.more_details),
-            buttonTextStyle = normal12Text400,
-            onButtonClick = {
+        Card(
+            modifier = Modifier.clickable {
                 offer.id?.let { orderId ->
                     onCardClick(fromFlow, navController, orderId)
                 }
+            },
+            elevation = 8.dp,
+            backgroundColor = Color.White
+        ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().background(appWhite),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(vertical = 8.dp, horizontal = 8.dp)
+                        ) {
+                            val painter = rememberAsyncImagePainter(
+                                ImageRequest.Builder(LocalContext.current)
+                                    .data(data = logoUrl ?: R.drawable.bank_icon)
+                                    .crossfade(true)
+                                    .placeholder(R.drawable.bank_icon)
+                                    .decoderFactory(SvgDecoder.Factory())
+                                    .build()
+                            )
+
+                            Image(
+                                painter = painter,
+                                contentDescription = "Bank",
+                                modifier = Modifier.size(32.dp).weight(1f)
+                            )
+
+                            StartingText(
+                                text = bankName,
+                                start = 8.dp,
+                                style = normal14Text700,
+                                textColor = gradientColors.last(),
+                                modifier = Modifier.weight(3f)
+                            )
+                            WrapBorderButton(
+                                text = stringResource(id = R.string.more_details),
+                                modifier = Modifier
+                                    .padding(
+                                        start = 0.dp,
+                                        end = 0.dp,
+                                        top = 0.dp,
+                                        bottom = 0.dp
+                                    )
+                                    .weight(2.5f),
+                                style = normal12Text400,
+                                shape = RoundedCornerShape(10.dp),
+                                backgroundColor = gradientColors.last(),
+                                textColor = appWhite
+                            ) {
+                                offer.id?.let { orderId ->
+                                    onCardClick(fromFlow, navController, orderId)
+                                }
+                            }
+                        }
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(brush = gradient)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(vertical = 16.dp, horizontal = 8.dp)
+                        ) {
+                            Row {
+                                HeaderWithValue(
+                                    textHeader = stringResource(id = R.string.loan_amount_inr),
+                                    textValue =  loanAmount,
+                                    modifier = Modifier.weight(0.5f)
+                                )
+                                HeaderWithValue(
+                                    textHeader = stringResource(id = R.string.rate_of_interest),
+                                    textValue = interestRate,
+                                    modifier = Modifier.weight(0.5f)
+                                )
+                            }
+
+                            Spacer(Modifier.height(15.dp))
+
+                            Row {
+                                HeaderWithValue(
+                                    textHeader = stringResource(id = R.string.tenure),
+                                    textValue = tenure,
+                                    modifier = Modifier.weight(0.5f)
+                                )
+                                HeaderWithValue(
+                                    textHeader = stringResource(id = R.string.installment_amount),
+                                    textValue = installmentAmount,
+                                    modifier = Modifier.weight(0.5f)
+                                )
+                            }
+                        }
+                    }
+                }
             }
-        )
-        Row {
-            HeaderWithValue(
-                textHeader = stringResource(id = R.string.loan_amount),
-                textValue = loanAmount,
-                modifier = Modifier.weight(0.5f)
-            )
-            HeaderWithValue(
-                textHeader = stringResource(id = R.string.rate_of_interest),
-                textValue = interestRate,
-                modifier = Modifier.weight(0.5f)
-            )
-        }
-
-        Spacer(Modifier.height(15.dp))
-
-        Row {
-            HeaderWithValue(
-                textHeader = stringResource(id = R.string.tenure),
-                textValue = tenure,
-                modifier = Modifier.weight(0.5f)
-            )
-            HeaderWithValue(
-                textHeader = stringResource(id = R.string.installment_amount),
-                textValue = installmentAmount,
-                modifier = Modifier.weight(0.5f)
-            )
         }
     }
 }

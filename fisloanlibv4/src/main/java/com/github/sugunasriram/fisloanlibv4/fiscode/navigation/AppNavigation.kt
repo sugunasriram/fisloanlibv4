@@ -84,6 +84,18 @@ fun navigateToBasicDetailsScreen(
     }
 }
 
+fun navigateToShareBankStatementsScreen(
+    navController: NavHostController,
+    fromFlow: String,
+    closeCurrent: Boolean = false,
+    loanPurpose: String = "Loan Purpose"
+) {
+    val destinationUrl = "${AppScreens.ShareBankStatementScreen.route}/$fromFlow/$loanPurpose"
+    navController.navigate(destinationUrl) {
+        shouldCloseCurrent(navController, closeCurrent)
+    }
+}
+
 fun navigateToReviewDetailsScreen(
     navController: NavHostController,
     loanPurpose: String,
@@ -171,8 +183,10 @@ fun navigateToWebViewFlowOneScreen(
     }
 }
 
-fun navigateToLoanStatusScreen(navController: NavHostController, closeCurrent: Boolean = false) {
-    navController.navigate(AppScreens.LoanStatusScreen.route) {
+fun navigateToLoanStatusScreen(navController: NavHostController,loanType:String,
+                               closeCurrent: Boolean = false) {
+    val encodedLoanType = Uri.encode(loanType)
+    navController.navigate("${AppScreens.LoanStatusScreen.route}/$encodedLoanType") {
         shouldCloseCurrent(navController, closeCurrent)
     }
 }

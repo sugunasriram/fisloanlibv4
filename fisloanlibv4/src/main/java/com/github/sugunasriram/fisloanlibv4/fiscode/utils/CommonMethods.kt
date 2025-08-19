@@ -63,11 +63,9 @@ import java.util.concurrent.TimeoutException
 import java.util.regex.Pattern
 
 class CommonMethods {
-
     companion object {
         const val BASE_URL = "https://stagingondcfs.jtechnoparks.in/jt-bap"
     }
-
     private val emailPattern =
         "[a-zA-Z0-9+._%\\-]{1,256}" + "@" + "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}" + "(" + "\\." + "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" + ")+"
 
@@ -124,6 +122,30 @@ class CommonMethods {
         Pattern.compile(udyamPattern).matcher(it).find()
     }
 
+    fun getThreeMonthRange(fromDate: LocalDate = LocalDate.now()): String {
+        val startDate = fromDate.minusMonths(3)
+        val endDate = fromDate
+
+        fun getDaySuffix(day: Int): String {
+            return when {
+                day in 11..13 -> "th"
+                day % 10 == 1 -> "st"
+                day % 10 == 2 -> "nd"
+                day % 10 == 3 -> "rd"
+                else -> "th"
+            }
+        }
+
+        fun formatWithSuffix(date: LocalDate): String {
+            val day = date.dayOfMonth
+            val suffix = getDaySuffix(day)
+            val formatter = DateTimeFormatter.ofPattern("d'$suffix' MMMM yyyy", Locale.ENGLISH)
+            return date.format(formatter)
+        }
+
+        return "${formatWithSuffix(startDate)} - ${formatWithSuffix(endDate)}"
+    }
+
     private fun parseErrorMessage(responseBody: String): String {
         val jsonObject = JSONObject(responseBody)
         val dataArray = jsonObject.getJSONArray("data")
@@ -144,6 +166,15 @@ class CommonMethods {
         return "₹" + formatter.format(amount)
     }
 
+    fun parseAndFormatIndianCurrency(input: String): String {
+        val cleaned = input
+            .replace("INR", "", ignoreCase = true) // Remove INR
+            .replace("[^\\d.]".toRegex(), "")      // Remove anything except digits and dot
+            .trim()
+
+        val amount = cleaned.toDoubleOrNull() ?: 0.0
+        return formatIndianDoubleCurrency(amount)
+    }
     fun formatIndianDoubleCurrency(amount: Double): String {
         val format = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
         format.maximumFractionDigits = 2
@@ -583,7 +614,8 @@ class CommonMethods {
                 "Email",
                 loanDetails.fulfillments?.firstOrNull()?.customer?.contact?.email.orEmpty().lowercase()
             )
-            drawLabelValueLine("Application ID", loanDetails.itemId ?: "")
+//            drawLabelValueLine("Application ID", loanDetails.itemId ?: "")
+            drawLabelValueLine("Application ID", loanDetails.id ?: "")
             drawLabelValueLine("Loan Type", loanDetails.itemDescriptor?.name.orEmpty())
             drawLabelValueLine("Loan Amount", formatIndianDoubleCurrency(loanDetails.itemPrice?.value.orEmpty().toDouble()))
             loanDetails.itemTags?.forEach { itemTags ->
@@ -838,8 +870,9 @@ class CommonMethods {
         val responseBody = error.response.readText()
         when (statusCode) {
             400 -> {
-                val errorMessage = CommonMethods().parseErrorMessage(responseBody)
-                CommonMethods().toastMessage(context, errorMessage)
+//                val errorMessage = CommonMethods().parseErrorMessage(responseBody)
+//                CommonMethods().toastMessage(context, errorMessage)
+                _unexpectedError.value = true
             }
 
             401 -> {

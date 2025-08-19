@@ -1,9 +1,8 @@
 package com.github.sugunasriram.fisloanlibv4.fiscode.components
 
-//import com.github.sugunasriram.fisloanlibv4.fiscode.BuildConfig
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -27,6 +26,7 @@ import androidx.compose.material.DrawerValue
 import androidx.compose.material.Text
 import androidx.compose.material.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -72,6 +72,11 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.auth.RegisterViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import android.content.Context
+import android.util.Log
+import androidx.compose.ui.text.TextStyle
+import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan.LoanAgreementViewModel
+import kotlin.math.exp
 
 fun openDrawer(coroutineScope: CoroutineScope, drawerState: DrawerState) {
     coroutineScope.launch {
@@ -88,6 +93,7 @@ fun closeDrawer(coroutineScope: CoroutineScope, drawerState: DrawerState) {
 @Composable
 fun SideMenuTextButton(
     title: String,
+    titleStyle:TextStyle = normal20Text400,
     isSubMenu: Boolean = false,
     painter: Painter = painterResource(id = R.drawable.about),
     onClick: () -> Unit
@@ -111,7 +117,7 @@ fun SideMenuTextButton(
                 )
                 Text(
                     text = title,
-                    style = normal20Text400,
+                    style = titleStyle,
                     color = appBlack,
                     modifier = Modifier.padding(start = 10.dp)
                 )
@@ -125,8 +131,7 @@ fun SideMenuTextButton(
             }
         }
         if (title != stringResource(id = R.string.logout) && title != stringResource(
-                id = R.string
-                    .contact_us
+                id = R.string.loan_status
             ) && !isSubMenu
         ) {
             HorizontalDivider()
@@ -160,9 +165,18 @@ fun SideMenuContent(
     val isCompleted by registerViewModel.isCompleted.collectAsState()
     val getUserResponse by registerViewModel.getUserResponse.collectAsState()
 
+    val loanAgreementViewModel : LoanAgreementViewModel = viewModel()
+    val plLoanListLoading by loanAgreementViewModel.plLoanListLoading.collectAsState()
+    val plLoanListLoaded by loanAgreementViewModel.plLoanListLoaded.collectAsState()
+    val pfLoanListLoading by loanAgreementViewModel.pfLoanListLoading.collectAsState()
+    val pfLoanListLoaded by loanAgreementViewModel.loanListLoaded.collectAsState()
+    val personalLoanList by loanAgreementViewModel.personalLoanList.collectAsState()
+    val purchaseFinanceList by loanAgreementViewModel.purchaseFinanceList.collectAsState()
+
     var showLogoutConfirmationPopUp by remember { mutableStateOf(false) }
     var showAboutMenuPopUp by remember { mutableStateOf(false) }
     var showSettingsMenuPopUp by remember { mutableStateOf(false) }
+    var expandLoanStatus by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
 
@@ -170,7 +184,6 @@ fun SideMenuContent(
         getUserResponse?.data?.firstName?.takeIf { it.isNotBlank() },
         getUserResponse?.data?.lastName?.takeIf { it.isNotBlank() }
     ).joinToString(" ")
-
 
     SideBarLayout(
         userName = fullName.ifBlank { "" },
@@ -187,13 +200,66 @@ fun SideMenuContent(
         )
         SideMenuTextButton(
             title = stringResource(id = R.string.loan_status),
+            titleStyle = if (expandLoanStatus) normal20Text700 else normal20Text400,
             painter = painterResource(id = R.drawable.loan_status),
             onClick = {
-                closeDrawer(coroutineScope, drawerState)
-                navigateToLoanStatusScreen(navController)
+                // Trigger API calls only when expanding for the first time
+                if (!expandLoanStatus) {
+                    loanAgreementViewModel.completeLoanList(context, "PERSONAL_LOAN")
+                    loanAgreementViewModel.completeLoanList(context, "PURCHASE_FINANCE")
+                }
+                expandLoanStatus = !expandLoanStatus
             }
         )
 
+        if (expandLoanStatus) {
+            val allLoaded = plLoanListLoaded && pfLoanListLoaded
+            val allEmpty = personalLoanList?.data.isNullOrEmpty() &&
+                    purchaseFinanceList?.data.isNullOrEmpty()
+
+            if (allLoaded && allEmpty) {
+                expandLoanStatus = false
+                CommonMethods().toastMessage(context, "No loan offers available")
+            }
+            // PERSONAL_LOAN
+            when {
+                plLoanListLoading -> CenterProgress()
+
+                plLoanListLoaded && !personalLoanList?.data.isNullOrEmpty() -> {
+                    StartingText(
+                        text = stringResource(id = R.string.personal_loan),
+                        textColor = appOrange,
+                        style = normal18Text500,
+                        modifier = Modifier.clickable {
+                            closeDrawer(coroutineScope, drawerState)
+                            navigateToLoanStatusScreen(navController, "PERSONAL_LOAN")
+                        },
+                        start = 45.dp,
+                        top = 4.dp
+                    )
+                }
+            }
+
+            // PURCHASE_FINANCE
+            when {
+                pfLoanListLoading -> CenterProgress()
+                pfLoanListLoaded && !purchaseFinanceList?.data.isNullOrEmpty() -> {
+                    StartingText(
+                        text = stringResource(id = R.string.purchase_finance),
+                        textColor = appOrange,
+                        style = normal18Text500,
+                        modifier = Modifier.clickable {
+                            closeDrawer(coroutineScope, drawerState)
+                            navigateToLoanStatusScreen(navController, "PURCHASE_FINANCE")
+                        },
+                        start = 45.dp,
+                        top = 4.dp
+                    )
+                }
+            }
+        }
+
+        HorizontalDivider(top = 0.dp)
         SideMenuTextButton(
             title = stringResource(id = R.string.contact_us),
             painter = painterResource(id = R.drawable.contact),
@@ -209,7 +275,7 @@ fun SideMenuContent(
             }
         )
 
-        HorizontalDivider(top = 0.dp)
+//        HorizontalDivider(top = 0.dp)
         SideMenuTextButton(
             title = stringResource(id = R.string.my_issues),
             painter = painterResource(id = R.drawable.my_issues),

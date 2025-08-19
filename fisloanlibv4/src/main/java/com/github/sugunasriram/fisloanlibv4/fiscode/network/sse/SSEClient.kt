@@ -32,7 +32,7 @@ import java.net.URL
 import javax.net.ssl.HttpsURLConnection
 
 class SSEClient(private val sseUrl: String, private val scope: CoroutineScope) {
-
+    private var sseJob: Job? = null
     private val _events = MutableStateFlow("")
     val events: StateFlow<String> = _events
 
@@ -42,13 +42,22 @@ class SSEClient(private val sseUrl: String, private val scope: CoroutineScope) {
 // OkHttpClient SSE
 
     fun start() {
-        scope.launch(Dispatchers.IO) {
+        if (sseJob?.isActive == true) {
+            Log.w("SSEClient", "SSE already running. Ignoring start().")
+            return
+        }
+        stop()
+        Log.d("SSEClient", "Starting new SSE connection...")
+        sseJob = scope.launch(Dispatchers.IO) {
             runSse()
         }
     }
 
     fun stop() {
+        sseJob?.cancel()
+        sseJob = null
         call?.cancel()
+        call = null
         Log.d("SSEClient", "SSE Disconnected")
     }
 
@@ -66,7 +75,6 @@ class SSEClient(private val sseUrl: String, private val scope: CoroutineScope) {
                 .callTimeout(0, java.util.concurrent.TimeUnit.SECONDS) // no timeout
                 .readTimeout(0, java.util.concurrent.TimeUnit.SECONDS)  // avoid read timeout
                 .connectTimeout(0, java.util.concurrent.TimeUnit.SECONDS) // connection must be established in 10s
-                .readTimeout(0, java.util.concurrent.TimeUnit.SECONDS)
                 .retryOnConnectionFailure(true).build()
 
             val request = Request.Builder().url(sseUrl).addHeader("Authorization", bearerToken)
@@ -113,16 +121,17 @@ class SSEClient(private val sseUrl: String, private val scope: CoroutineScope) {
                     }
                 }
             } catch (e: Exception) {
-                when (e.message) {
-                    "Socket closed" -> {
-                        Log.d("SOCKET CLOSED", "Error: ${e.localizedMessage}")
-                    }
-
-                    else -> {
-                        Log.d("SSEClient", "Error: $e")
-                    }
+                if (e is EOFException) {
+                    Log.d("SSEClient", "EOFException: ${e.message}. Reconnecting...")
+                    delay(3000)
+                    continue
+                } else if (e.message == "Socket closed") {
+                    Log.d("SSEClient SOCKET CLOSED", "Error: ${e.localizedMessage}")
+                    break
+                } else {
+                    Log.d("SSEClient", "Unhandled exception: ${e.localizedMessage}. Stopping SSE.")
+                    break
                 }
-                break
             }
         }
     }
