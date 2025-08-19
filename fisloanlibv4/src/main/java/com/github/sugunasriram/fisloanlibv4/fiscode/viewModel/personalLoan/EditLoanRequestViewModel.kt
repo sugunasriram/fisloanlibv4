@@ -1,6 +1,7 @@
 package com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -65,6 +66,14 @@ class EditLoanRequestViewModel(maxAmount: String, minAmount: String, tenure: Str
     fun onLoanAmountChanged(loanAmountInput: String) {
         val cleaned = loanAmountInput.replace("₹", "").replace(",", "")
         _loanAmount.value = cleaned.toDoubleOrNull() ?: 0.0
+    }
+
+    private val _downpaymentAmount = MutableStateFlow(maxAmount.toDoubleOrNull() ?: 0.0)
+    val downpaymentAmount: StateFlow<Double> = _downpaymentAmount
+
+    fun onDownpaymentAmountChanged(loanAmountInput: String) {
+        val cleaned = loanAmountInput.replace("₹", "").replace(",", "")
+        _downpaymentAmount.value = cleaned.toDoubleOrNull() ?: 0.0
     }
 
     private val _loanTenure = MutableStateFlow(tenure.toIntOrNull())
@@ -191,8 +200,7 @@ class EditLoanRequestViewModel(maxAmount: String, minAmount: String, tenure: Str
 
     private suspend fun handleGstOfferConfirmApi(
         gstOfferConfirm: GstOfferConfirm,
-        context:
-            Context,
+        context: Context,
         checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
@@ -469,8 +477,8 @@ class EditLoanRequestViewModel(maxAmount: String, minAmount: String, tenure: Str
             _pfOfferConfirmResponse.value = response
 
             // Get id
-            var id = response?.data?.catalog?.id
-                ?: response?.data?.offerResponse?.id
+            var id = response.data?.catalog?.id
+                ?: response.data?.offerResponse?.id
                 ?: ""
 
             pfOfferConfirmApi(
@@ -486,6 +494,7 @@ class EditLoanRequestViewModel(maxAmount: String, minAmount: String, tenure: Str
     }
 
     private suspend fun handleFailure(error: Throwable, context: Context) {
+        Log.d("res_H","pfInitiateOffer-failure" )
         withContext(Dispatchers.Main) {
             if (error is ResponseException) {
                 CommonMethods().handleResponseException(

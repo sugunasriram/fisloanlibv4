@@ -126,7 +126,9 @@ class MainActivity : ComponentActivity() {
     companion object {
         var webPermissionRequest: PermissionRequest? = null
         const val REQUEST_CODE_UPDATE = 2001
+        const val NOTIFICATION_PERMISSION_REQUEST_CODE = 1003
     }
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)

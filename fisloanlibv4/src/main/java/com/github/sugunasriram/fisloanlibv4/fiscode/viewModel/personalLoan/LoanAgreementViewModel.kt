@@ -77,8 +77,26 @@ class LoanAgreementViewModel : BaseViewModel() {
     private val _loanListLoaded = MutableStateFlow(false)
     val loanListLoaded: StateFlow<Boolean> = _loanListLoaded
 
+    private val _plLoanListLoading = MutableStateFlow(false)
+    val plLoanListLoading: StateFlow<Boolean> = _plLoanListLoading
+
+    private val _plLoanListLoaded = MutableStateFlow(false)
+    val plLoanListLoaded: StateFlow<Boolean> = _plLoanListLoaded
+
+    private val _pfLoanListLoading = MutableStateFlow(false)
+    val pfLoanListLoading: StateFlow<Boolean> = _pfLoanListLoading
+
+    private val _pfLoanListLoaded = MutableStateFlow(false)
+    val pfLoanListLoaded: StateFlow<Boolean> = _pfLoanListLoaded
+
     private val _loanList = MutableStateFlow<CustomerLoanList?>(null)
     val loanList: StateFlow<CustomerLoanList?> = _loanList
+
+    private val _personalLoanList = MutableStateFlow<CustomerLoanList?>(null)
+    val personalLoanList: StateFlow<CustomerLoanList?> = _personalLoanList
+
+    private val _purchaseFinanceList  = MutableStateFlow<CustomerLoanList?>(null)
+    val purchaseFinanceList : StateFlow<CustomerLoanList?> = _purchaseFinanceList
 
     private var hasApiBeenCalled = false
 
@@ -105,7 +123,7 @@ class LoanAgreementViewModel : BaseViewModel() {
                     if (response.data?.size == 0) {
                         _loanListEmpty.value = true
                     } else {
-                        handleGetCustomerLoanListSuccess(response)
+                        handleGetCustomerLoanListSuccess(response,loanType)
                     }
                 }
             }
@@ -127,16 +145,31 @@ class LoanAgreementViewModel : BaseViewModel() {
         }
     }
 
-    private suspend fun handleGetCustomerLoanListSuccess(loanData: CustomerLoanList) {
+    private suspend fun handleGetCustomerLoanListSuccess(loanData: CustomerLoanList,
+                                                         loanType: String) {
         withContext(Dispatchers.Main) {
             if (loanData.statusCode?.toInt() == 206) {
                 _loanListLoaded.value = true
                 _loanList.value = null
             } else {
-                _loanList.value = loanData
-                _loanListLoaded.value = true
+                if(loanType == "PERSONAL_LOAN"){
+                    _personalLoanList.value = loanData
+                    _loanList.value = loanData
+                    _plLoanListLoaded.value=true
+                    _loanListLoaded.value = true
+                }else if(loanType == "PURCHASE_FINANCE"){
+                    _purchaseFinanceList.value = loanData
+                    _loanList.value = loanData
+                    _pfLoanListLoaded.value=true
+                    _loanListLoaded.value = true
+                }else {
+                    _loanList.value = loanData
+                    _loanListLoaded.value = true
+                }
             }
             _loanListLoading.value = false
+            _plLoanListLoading.value = false
+            _pfLoanListLoading.value = false
             _consentHandling.value = false
         }
     }
@@ -334,24 +367,38 @@ class LoanAgreementViewModel : BaseViewModel() {
         }
     }
 
-    fun completeLoanList(context: Context) {
-        if (hasApiBeenCalled) return
-        hasApiBeenCalled = true
+    private val calledLoanTypes = mutableSetOf<String>()
+
+    fun completeLoanList(context: Context, loanType:String) {
+//        if (hasApiBeenCalled) return
+//        hasApiBeenCalled = true
+        if (calledLoanTypes.contains(loanType)) return
+        calledLoanTypes.add(loanType)
+
         _loanListLoading.value = true
+        if(loanType == "PERSONAL_LOAN"){
+            _plLoanListLoading.value = true
+        }else if(loanType == "PURCHASE_FINANCE"){
+            _pfLoanListLoading.value = true
+        }
         viewModelScope.launch(Dispatchers.IO) {
-            handleCompleteLoanList(context)
+            handleCompleteLoanList(context,loanType)
         }
     }
 
     private suspend fun handleCompleteLoanList(
-        context: Context,
+        context: Context, loanType:String,
         checkForAccessToken: Boolean = true
     ) {
         kotlin.runCatching {
-            ApiRepository.completeLoanOrders()
+            if(loanType == "all"){
+                ApiRepository.completeLoanOrders()
+            }else {
+                ApiRepository.loanOrdersByLoanType(loanType)
+            }
         }.onSuccess { response ->
             response?.let {
-                handleGetCustomerLoanListSuccess(response)
+                handleGetCustomerLoanListSuccess(response,loanType)
             }
         }.onFailure { error ->
             // Session Management
@@ -361,7 +408,7 @@ class LoanAgreementViewModel : BaseViewModel() {
             ) {
                 // Get Access Token using RefreshToken
                 if (handleAuthGetAccessTokenApi()) {
-                    handleCompleteLoanList(context, false)
+                    handleCompleteLoanList(context, loanType,false)
                 } else {
                     _navigationToSignup.value = true
                 }
@@ -468,6 +515,8 @@ class LoanAgreementViewModel : BaseViewModel() {
             _checkingStatus.value = false
             _offerListLoading.value = false
             _loanListLoading.value = false
+            _plLoanListLoading.value = false
+            _pfLoanListLoading.value = false
             _consentHandling.value = false
             _gettingOrderById.value = false
             _updateProcessing.value = false

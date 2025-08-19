@@ -229,7 +229,11 @@ fun LoadingOfferCard(
         0 -> listOf(Color(0xFF4CAF50), Color(0xFF81C784), Color(0xFFB2FF59))
         1 -> listOf(Color(0xFFFF8A65), Color(0xFFFF7043), Color(0xFFD84315))
         2 -> listOf(Color(0xFF64B5F6), Color(0xFF42A5F5), Color(0xFF1976D2))
-        3 -> listOf(Color(0xFFFF8A80), Color(0xFFFF5252), Color(0xFF800000))
+        3 -> listOf(
+            Color(0xFFFFCC80), // light orange
+            Color(0xFFFFA726), // medium orange
+            Color(0xFFF57C00)  // deep orange
+        )
         else -> listOf(Color(0xFFF3D5B5), Color(0xFF8B5E34), Color(0xFF533101))
     }
     val gradient = Brush.linearGradient(colors = gradientColors)
@@ -289,21 +293,19 @@ fun LoadingOfferCard(
                 ){
                     Column(modifier = Modifier.alpha(0.1f).padding(8.dp)) {
                         Row {
-                            lender.maxLoanAmount?.let {
                                 HeaderWithValue(
                                     textHeader = stringResource(id = R.string.max_loan_amount),
-                                    textValue = it,
+                                    textValue =  lender.maxLoanAmount?:"₹500000.00",
                                     modifier = Modifier.weight(0.5f),
                                     headerStyle = normal10Text400,
                                     valueStyle = normal10Text400,
                                     start = 5.dp,
                                     end=5.dp
                                 )
-                            }
-                            lender.minLoanAmount?.let {
+
                                 HeaderWithValue(
                                     textHeader = stringResource(id = R.string.min_loan_amount),
-                                    textValue = it,
+                                    textValue =   lender.minLoanAmount?:"₹20000.00",
                                     modifier = Modifier.weight(0.5f),
                                     headerStyle = normal10Text400,
                                     valueStyle = normal10Text400,
@@ -311,14 +313,14 @@ fun LoadingOfferCard(
                                     end=5.dp
                                 )
                             }
-                        }
+
 
                         Spacer(Modifier.height(2.dp))
 
                         Row {
                             HeaderWithValue(
                                 textHeader = stringResource(id = R.string.interest),
-                                textValue = "${lender.minInterestRate} - ${lender.maxInterestRate}",
+                                textValue = "${lender.minInterestRate ?:"7%"} - ${lender.maxInterestRate?:"17%"}",
                                 modifier = Modifier.weight(0.5f),
                                 headerStyle = normal10Text400,
                                 valueStyle = normal10Text400,
@@ -328,7 +330,7 @@ fun LoadingOfferCard(
 
                             HeaderWithValue(
                                 textHeader = stringResource(id = R.string.tenure),
-                                textValue = "${lender.minTenure}",
+                                textValue = lender.minTenure?:"6 Months",
                                 modifier = Modifier.weight(0.5f),
                                 headerStyle = normal10Text400,
                                 valueStyle = normal10Text400,

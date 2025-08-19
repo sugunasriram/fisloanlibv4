@@ -7,6 +7,7 @@ import android.content.Intent
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
@@ -157,8 +158,8 @@ fun LoanDisbursementScreen(
                     android.util.Log.d("SSETRIGGER", "START")
                     if (fromFlow == "Purchase Finance") {
                         android.util.Log.d("SSETRIGGER", "INSIDE fromFlow")
-                        apiTriggered = true
                         loanAgreementViewModel.updateSSEData(sseData)
+                        apiTriggered = true
                     } else if (transactionId == sseTransactionId && actionType == "ACTION" && consent) {
                         MoveToConsentHandlerScreen(
                             sseData = sseData,
@@ -180,6 +181,11 @@ fun LoanDisbursementScreen(
             }
         }
     }
+    DisposableEffect(Unit) {
+        onDispose {
+            sseViewModel.stopListening()
+        }
+    }
 
     LaunchedEffect(apiTriggered) {
         if (apiTriggered) {
@@ -187,8 +193,8 @@ fun LoanDisbursementScreen(
             loanAgreementViewModel.updateConsentHandler(
                 updateConsentHandlerBody = UpdateConsentHandlerBody(
                     subType = "CONSENT_UPDATE",
-                    id = id,
-                    amount = "40000.0",
+                    id = sseDataForPf?.data?.data?.id?:sseDataForPf?.data?.data?.catalog?.id ?: "",
+                    amount = "",
                     consentStatus = "DELIVERED",
                     loanType = "PURCHASE_FINANCE"
                 ),
@@ -232,14 +238,10 @@ fun MoveToDashBoard(
                 ).let { requestData ->
                     loanAgreementViewModel.pfRetailSendDetails(
                         createSessionRequest = CreateSessionRequest(
-                            type = "FIS_RET_PF",
-                            statusCode = 200,
-                            status = true,
-                            data = CreateSessionRequestData(
-                            downPaymentAmount = requestData.downPaymentAmount,
-                            loanId = requestData.loanId
-                            ),
-                            error = null
+                            type = "RET",
+                            subType = "ORDER_DETAILS",
+                            id = requestData.loanId,
+                            message = null
                         ),
                         context = context
                     )

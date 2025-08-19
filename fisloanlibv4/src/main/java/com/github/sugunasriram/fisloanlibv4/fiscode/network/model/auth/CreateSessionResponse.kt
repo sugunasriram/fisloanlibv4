@@ -24,11 +24,9 @@ data class CreateSessionData(
 @Serializable
 data class CreateSessionRequest(
 	val type: String? = null,
-	val statusCode: Int,
-	val status: Boolean? = null,
-
-	val data: CreateSessionRequestData? = null,
-	val error: ErrorOject? = null
+	val subType: String? = null,
+	val id: String? = null,
+	val message: String? = null
 
 ): java.io.Serializable
 

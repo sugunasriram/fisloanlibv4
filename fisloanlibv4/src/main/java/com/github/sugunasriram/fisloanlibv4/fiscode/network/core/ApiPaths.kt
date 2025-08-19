@@ -98,6 +98,8 @@ class ApiPaths {
 
     val getCustomerLoanList = "loans/getCustomerLoanList"
 
+    val loanOrdersList = "loans/ordersList"
+
     val completeListOfOrders = "loans/completeListOfOrders"
 
     val getOrderStatus = "loans/getOrderStatus"

@@ -136,7 +136,7 @@ fun FormSubmissionWebScreen(
                 if (sseIDFromTokenManager == sseIdFromSSEData) {
                     lateNavigate = true
 
-                    val errorObj = sseData.data?.data?.data?.error
+                    val errorObj = sseData.data?.data?.error
                     if (errorObj != null) {
                         Log.d("FormSubmissionScreen", "Error: ${errorObj.message}")
                         errorMsg = errorObj.message
@@ -165,6 +165,7 @@ fun FormSubmissionWebScreen(
                                     rejectedLenders = formOffers?.rejectedLenders,
                                     offerResponse = formOffers?.offerResponse
                                 )
+                                Log.d("FormSubmissionScreen", "rejectedLenders: ${formOffers?.rejectedLenders}")
                                 val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
                                 val searchJson = json.encodeToString(
                                     SearchModel.serializer(),

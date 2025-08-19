@@ -222,7 +222,56 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
                                 bottomSheetState = bottomSheetState,
                                 coroutineScope = coroutineScope,
                                 registerViewModel = registerViewModel,
-                                onAcceptConsent = { showError = false },
+                                onAcceptConsent = { showError = false
+                                    CoroutineScope(Dispatchers.Main).launch {
+                                        TokenManager.save("downpaymentAmount", amount.toString())
+                                        webViewModel.setWebInProgress(true)
+                                        try {
+                                            webViewModel.getLenderStatusApi(
+                                                context = context,
+                                                loanType = "PURCHASE_FINANCE",
+                                                step = "FORM_SUBMISSION_REQUEST"
+                                            )
+
+                                            val lenderStatusModel = webViewModel.getLenderStatusResponse
+                                                .filterNotNull().first()
+
+                                            val lenderStatus = lenderStatusModel?.data?.response
+
+                                            if (lenderStatus.isNullOrEmpty()) {
+                                                showNoLoanOffersScreen = true
+                                                return@launch
+                                            }
+
+                                            val json = Json {
+                                                prettyPrint = true
+                                                ignoreUnknownKeys = true
+                                            }
+
+                                            val lenderStatusJson = json.encodeToString(
+                                                LenderStatusResponse.serializer(),
+                                                LenderStatusResponse(response = lenderStatus)
+                                            )
+
+                                            navigateToFormSubmissionWebScreen(navController, fromFlow, lenderStatusJson)
+
+                                            loadWebScreen(
+                                                fromFlow = fromFlow,
+                                                webViewModel = webViewModel,
+                                                context = context,
+                                                endUse = "PF flow",
+                                                purpose = "PF flow",
+                                                downPaymentAmount = amount.toString(),
+                                                productPrice = productPrice.toString()
+                                            )
+                                        } catch (e: Exception) {
+                                            Log.e("LenderStatusError", "Error processing lender status", e)
+                                            showNoLoanOffersScreen = true
+                                        } finally {
+                                            webViewModel.setWebInProgress(false)
+                                        }
+                                    }
+                                                  },
                                 startTimer = bottomSheetState.isVisible,
                                 showDialog = showDialog,
                                 timer = 5
@@ -269,6 +318,8 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
                                 } else {
                                     showError = false
                                     CoroutineScope(Dispatchers.Main).launch {
+                                        TokenManager.save("downpaymentAmount", amount.toString())
+
                                         webViewModel.setWebInProgress(true)
 
                                         try {
@@ -346,9 +397,9 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
         }
     }
 
-    if(showDialog.value){
-        ConsentDialogBox(showDialog)
-    }
+//    if(showDialog.value){
+//        ConsentDialogBox(showDialog)
+//    }
 }
 
 //@Composable

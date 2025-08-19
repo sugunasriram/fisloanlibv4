@@ -3,6 +3,7 @@ package com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.BlurMaskFilter
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
@@ -90,6 +91,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.components.ClickableHeaderVa
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.CurvedPrimaryButtonFull
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.CustomModalBottomSheet
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.FixedTopBottomScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.components.HeaderNextRowValue
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.HeaderValueInARow
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.HeaderValueWithTextBelow
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.HeaderWithValue
@@ -123,6 +125,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.errorRed
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.gray4E
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.grayA6
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.hintGray
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.lightishGray
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal12Text400
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal14Text400
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal14Text500
@@ -187,6 +190,14 @@ fun LoanOffersListDetailsScreen(
     )
     val offer = json.decodeFromString(OfferResponseItem.serializer(), responseItem)
     val pfOffer = json.decodeFromString(PfOfferResponseItem.serializer(), responseItem)
+
+    var downPaymentAmountValue by remember { mutableFloatStateOf(0.0f) }
+
+    LaunchedEffect(Unit) {
+        downPaymentAmountValue  = TokenManager.read("downpaymentAmount")?.toFloatOrNull() ?:
+                0.0F
+    }
+
     BackHandler {
         if (showButtonId == "0") {
             val currentTime = System.currentTimeMillis()
@@ -230,27 +241,28 @@ fun LoanOffersListDetailsScreen(
                 editLoanRequestViewModel = editLoanRequestViewModel,
                 context = context,
                 bottomSheetState = bottomSheetState,
+                downPaymentAmountValue = downPaymentAmountValue,
                 coroutineScope = coroutineScope
             )
         }
     }
 
-    if (isPfEdited) {
-        pfOffer.apply {
-            formUrl = pfOfferConfirmResponse?.data?.offerResponse?.fromURL
-        }
-        val pfOfferString = json.encodeToString(
-            PfOfferResponseItem.serializer(),
-            pfOffer
-        )
-        navigateToLoanOffersListDetailScreen(
-            navController = navController,
-            responseItem = pfOfferString,
-            id = id,
-            showButtonId = "0",
-            fromFlow = fromFlow
-        )
-    }
+//    if (isPfEdited) {
+//        pfOffer.apply {
+//            formUrl = pfOfferConfirmResponse?.data?.offerResponse?.fromURL
+//        }
+//        val pfOfferString = json.encodeToString(
+//            PfOfferResponseItem.serializer(),
+//            pfOffer
+//        )
+//        navigateToLoanOffersListDetailScreen(
+//            navController = navController,
+//            responseItem = pfOfferString,
+//            id = id,
+//            showButtonId = "0",
+//            fromFlow = fromFlow
+//        )
+//    }
 //    }
 }
 
@@ -273,6 +285,7 @@ fun LoanOfferListDetailView(
     showButtonId: String,
     context: Context,
     bottomSheetState: ModalBottomSheetState,
+    downPaymentAmountValue: Float = 0.0f,
     coroutineScope: CoroutineScope
 ) {
     var backPressedTime by remember { mutableLongStateOf(0L) }
@@ -296,6 +309,7 @@ fun LoanOfferListDetailView(
                     if (fromFlow == "Personal Loan") {
                         var loanAmountValue: String? = null
                         var loanTenure: String? = null
+                        var loanTenureDisplay: String? = null
                         var minAmount: String? = null
                         var mxLoanAmount: String? = null
                         var minTenure: String? = null
@@ -325,8 +339,19 @@ fun LoanOfferListDetailView(
 
                         offer.itemTags?.forEach { tagItem ->
                             tagItem?.tags?.forEach { tag ->
-                                if (tag.key.equals("LOAN_TERM", ignoreCase = true) || tag.key.equals("TERM", ignoreCase = true)) {
-                                    loanTenure = tag.value.lowercase().replace(" months", "")
+                                if (tag.key.equals("LOAN_TERM", ignoreCase = true)
+                                    || tag.key.equals("TERM", ignoreCase = true)) {
+                                    if (tag.value?.startsWith("P") == true) {
+                                        convertISODurationToReadable(
+                                            tag.value ?: ""
+                                        ).let { readableDuration ->
+                                            loanTenure = readableDuration.lowercase().replace(" months", "")
+                                            loanTenureDisplay = readableDuration
+                                        }
+                                    }
+                                    else {
+                                        loanTenure = tag.value.lowercase().replace(" months", "")
+                                    }
                                 }
                             }
                         }
@@ -366,29 +391,85 @@ fun LoanOfferListDetailView(
                             offerId = offerId ?: ""
                         )
                     } else {
-                        val maxAmount by remember { mutableFloatStateOf(442300.00f) }
-                        val minAmount by remember { mutableFloatStateOf(40000.00f) }
-                        val interest by remember { mutableStateOf("12 %") }
-                        val loanTenure by remember { mutableStateOf("5") }
+
+                        var loanTenure = "0"
+                        offer.itemTags?.forEach { tagItem ->
+                            tagItem?.tags?.forEach { tag ->
+                                if (tag.key.equals("LOAN_TERM", ignoreCase = true)
+                                    || tag.key.equals("TERM", ignoreCase = true)) {
+                                    if (tag.value?.startsWith("P") == true) {
+                                        convertISODurationToReadable(
+                                            tag.value ?: ""
+                                        ).let { readableDuration ->
+                                            loanTenure = readableDuration.lowercase().replace(" months", "")
+                                        }
+                                    }
+                                    else {
+                                        loanTenure = tag.value.lowercase().replace(" months", "")
+                                    }
+                                }
+                            }
+                        }
+
+                        offer.itemTags?.forEach itemTags@{ itemTag ->
+                            itemTag?.tags?.forEach { tag ->
+                                if (tag.key.contains("PRINCIPAL_AMOUNT", ignoreCase = true)) {
+                                    loanAmountValue = tag.value.replace("INR", "").trim()
+                                    return@itemTags
+                                }
+                            }
+                        }
+
+                        var minAmount = "0"
+                        // Get minAmount
+                        offer.itemTags?.forEach itemTag@{ itemTag ->
+                            itemTag?.tags?.forEach { tag ->
+                                if (tag.key.contains("MINIMUM_DOWNPAYMENT", ignoreCase = true)) {
+                                    minAmount = tag.value.replace("INR", "").trim()
+                                    return@itemTag
+                                }
+                            }
+                        }
+
+                        // Get maxAmount
+                        var maxAmount = loanAmountValue
+                        var interest = ""
+
+                        offer.id?.let {
+                            loanAmountValue.let loanAmount@{
+                                offer.itemTags?.forEach {
+                                    it?.tags?.forEach { tag ->
+                                        if (tag.key.equals("INTEREST_RATE", ignoreCase = true)
+                                        ) {
+                                            interest = tag.value
+                                            return@loanAmount
+                                        }
+                                    }
+                                }
+                            }
+
+                        }
+
+//                        val interest by remember { mutableStateOf("12 %") }
+//                        val loanTenure by remember { mutableStateOf("5") }
                         minLoanAmount = minAmount.toString()
                         loanAmountValue = maxAmount.toString()
                         DownPaymentBottomSheetContent(
-                            maxAmount = maxAmount,
-                            minAmount = minAmount,
+                            maxAmount = maxAmount.toFloatOrNull() ?: 0f,
+                            minAmount = minAmount.toFloatOrNull() ?: 0f,
                             interest = interest,
-                            onClose = { coroutineScope.launch { bottomSheetState.show() } },
+                            onClose = { coroutineScope.launch { bottomSheetState.hide() } },
                             onSubmit = { downPaymentAmount ->
-                                coroutineScope.launch {
-                                    TokenManager.save("downpaymentAmount", downPaymentAmount.toString())
-                                    bottomSheetState.show() }
+                                coroutineScope.launch { bottomSheetState.show() }
                                 checkAndMakeApiCall(
-                                    maxAmount - downPaymentAmount,
+                                    (maxAmount.toFloatOrNull() ?: 0f) - downPaymentAmount,
                                     context,
                                     editLoanRequestViewModel,
                                     loanTenure,
                                     id
                                 )
-                            }
+                            },
+                                    editLoanRequestViewModel = editLoanRequestViewModel,
                         )
                     }
                 }
@@ -426,7 +507,8 @@ fun LoanOfferListDetailView(
                             context = context
                         )
                     },
-                    secondaryButtonText = stringResource(R.string.edit_loan_request),
+                    secondaryButtonText = if (fromFlow == "Personal Loan") stringResource(R.string.edit_loan_request)
+                    else stringResource(R.string.edit_down_payment),
                     onSecondaryButtonClick = {
                         if (loanAmountValue.toDouble() <= minLoanAmount.toDouble()) {
                             CommonMethods().toastMessage(
@@ -444,7 +526,17 @@ fun LoanOfferListDetailView(
                     when (fromFlow) {
                         "Personal Loan" -> LoanCardInfo(offer = offer)
 //                        "Purchase Finance" -> LoanPfCardInfo(offer = pfOffer)
-                        else -> LoanGSTCardInfo(offer = offer)
+//                        else -> LoanGSTCardInfo(offer = offer)
+                        else -> {
+                            if (fromFlow == "Purchase Finance") {
+
+                                DownPaymentAmount(downPaymentAmountValue)
+                            }
+                            LoanGSTCardInfo(
+                                offer = offer
+                            )
+                        }
+
                     }
                     StartingText(
                         text = "Valid for: 11hr 48m",
@@ -463,6 +555,26 @@ fun LoanOfferListDetailView(
     }
 }
 
+@Composable
+fun DownPaymentAmount(downPaymentAmount: Float) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(lightishGray)
+    ) {
+        HeaderNextRowValue(
+            textHeader = stringResource(id = R.string.my_downpayment_amount),
+            textValue =
+            "₹ ${CommonMethods().formatWithCommas(downPaymentAmount.toInt())}",
+            textColorHeader = appBlack,
+            textColorValue = appBlack,
+            modifier = Modifier
+                .padding(start = 17.dp, top = 0.dp, end = 10.dp, bottom = 8.dp)
+                .weight(0.5f)
+
+        )
+    }
+}
 fun parseTenureToMonths(value: String?): String? {
     if (value == null) return null
     val cleaned = value.lowercase(Locale.ROOT).trim()
@@ -570,7 +682,7 @@ fun LoanCardInfo(offer: OfferResponseItem) {
             }
         }
     }
-    var loanNAmount = "-"
+    var loanNAmount = loanAmountValue
     var interestRate = "-"
     var tenure = "-"
     var installmentAmount = "-"
@@ -617,7 +729,16 @@ fun LoanCardInfo(offer: OfferResponseItem) {
 
                 tag.key.equals("loan_term", ignoreCase = true) ||
                     tag.key.equals("term", ignoreCase = true) -> {
-                    tenure = tag.value
+                    if (tag.value?.startsWith("P") == true) {
+                        convertISODurationToReadable(
+                            tag.value ?: ""
+                        ).let { readableDuration ->
+                            tenure = readableDuration
+                        }
+                    }
+                    else {
+                        tenure = tag.value.lowercase().replace(" months", "")
+                    }
                 }
 
                 tag.key.contains("INSTALLMENT_AMOUNT", ignoreCase = true) -> {
@@ -642,7 +763,7 @@ fun LoanCardInfo(offer: OfferResponseItem) {
         ) {
             HeaderWithValue(
                 textHeader = stringResource(id = R.string.loan_amount),
-                textValue =  CommonMethods().formatIndianDoubleCurrency(loanNAmount.toDouble()),
+                textValue =  loanNAmount,
                 headerColor = grayA6,
                 headerStyle = normal14Text400,
                 valueColor = appBlack,
@@ -671,7 +792,7 @@ fun LoanCardInfo(offer: OfferResponseItem) {
         ) {
             HeaderWithValue(
                 textHeader = stringResource(id = R.string.interest),
-                textValue = CommonMethods().formatIndianDoubleCurrency(interestAmount.toDouble()),
+                textValue = interestAmount,
                 headerColor = grayA6,
                 headerStyle = normal14Text400,
                 valueColor = appBlack,
@@ -753,7 +874,17 @@ fun LoanDetailsCard(offer: OfferResponseItem, context: Context, fromFlow: String
                             tag.key.contains("cool off", ignoreCase = true)
                         ) {
                             convertUTCToLocalDateTime(tag.value)
-                        } else if (tag.key == "PROCESSING_FEE" ||
+                        } else if (tag.key == "TERM" ||
+                            tag.key.lowercase().contains("TERM") ||
+                            tag.key.lowercase().contains("frequency") ||
+                            tag.key.lowercase().contains("validity")
+                        ) {
+                            if (tag.value?.startsWith("P") == true) {
+                                convertISODurationToReadable(tag.value ?: "")?:""
+                            } else {
+                                tag.value?.lowercase()?.replace(" months", "")?:""
+                            }
+                        }else if (tag.key == "PROCESSING_FEE" ||
                             tag.key.contains("AMOUNT")
                         ) {
                             tag.value.appendINRIfMissing()
@@ -936,6 +1067,98 @@ fun SuccessNavigation(
     }
 }
 
+//@Composable
+//fun LoanOfferListBottomSection(
+//    navController: NavHostController,
+//    context: Context,
+//    id: String,
+//    fromFlow: String,
+//    editLoanRequestViewModel: EditLoanRequestViewModel,
+//    showButtonId: String,
+//    offer: OfferResponseItem,
+//    pfOffer: PfOfferResponseItem,
+//    openSheet: (String, String, String, String) -> Unit
+//) {
+//    if (showButtonId == "0") {
+//        MoveToNextScreen(fromFlow, navController, offer, id)
+//    } else {
+//        /* Edit Loan Request */
+//        if (fromFlow == "Purchase Finance") {
+//            EditPfLoanRequest(
+//                pfOffer,
+//                openSheet = { maxAmount, minAmount, interest, loanTenure ->
+//                    openSheet(
+//                        maxAmount,
+//                        minAmount,
+//                        interest,
+//                        loanTenure
+//                    )
+//                }
+//            )
+//        } else {
+//            EditLoanRequest(context, offer, navController, id, fromFlow)
+//        }
+//        BottomSection(
+//            navController = navController,
+//            fromFlow = fromFlow,
+//            id = id,
+//            context = context,
+//            offer = offer,
+//            editLoanRequestViewModel = editLoanRequestViewModel
+//        )
+//    }
+//}
+
+@Composable
+fun BottomSection(
+    navController: NavHostController,
+    fromFlow: String,
+    id: String,
+    context: Context,
+    offer: OfferResponseItem,
+    editLoanRequestViewModel: EditLoanRequestViewModel
+) {
+    Row(
+        horizontalArrangement = Arrangement.Start,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 0.dp, bottom = 0.dp, start = 0.dp, end = 0.dp)
+    ) {
+        Spacer(modifier = Modifier.height(8.dp))
+
+        CurvedPrimaryButtonFull(
+            text = stringResource(id = R.string.go_back).uppercase(),
+            backgroundColor = appRed,
+            style = normal16Text400,
+            modifier = Modifier
+                .padding(start = 10.dp, end = 10.dp, top = 10.dp, bottom = 10.dp)
+                .weight(1f)
+        ) { navController.popBackStack() }
+
+        Spacer(modifier = Modifier.height(8.dp))
+        CurvedPrimaryButtonFull(
+            text = stringResource(id = R.string.accept).uppercase(),
+            style = normal16Text400,
+            modifier = Modifier
+                .padding(
+                    start = 10.dp,
+                    end = 10.dp,
+                    bottom = 10.dp,
+                    top = 10.dp
+                )
+                .weight(1f)
+        ) {
+            onAcceptClick(
+                offer = offer,
+                fromFlow = fromFlow,
+                editLoanRequestViewModel = editLoanRequestViewModel,
+                id = id,
+                context = context
+            )
+        }
+    }
+}
+
 @Composable
 fun EditPfLoanRequest(
     offer: PfOfferResponseItem,
@@ -951,18 +1174,18 @@ fun EditPfLoanRequest(
         offer.itemTags?.forEach itemTags@{ itemTag ->
             itemTag?.tags?.forEach { tag ->
                 if (tag.key.contains("PRINCIPAL_AMOUNT", ignoreCase = true)) {
-                    loanAmountValue = tag.value.replace(" INR", "")
+                    loanAmountValue = tag.value.replace("INR", "").trim()
                     return@itemTags
                 }
             }
         }
 
         var minAmount = "0"
-        // Get maxAmount
+        // Get minAmount
         offer.itemTags?.forEach itemTag@{ itemTag ->
             itemTag?.tags?.forEach { tag ->
                 if (tag.key.contains("MINIMUM_DOWNPAYMENT", ignoreCase = true)) {
-                    minAmount = tag.value.replace(" INR", "")
+                    minAmount = tag.value.replace("INR", "").trim()
                     return@itemTag
                 }
             }
@@ -970,9 +1193,10 @@ fun EditPfLoanRequest(
 
         // Get maxAmount
         var maxAmount = loanAmountValue
-        offer.itemPrice?.value?.let {
-            maxAmount = it
-        }
+
+//        offer.itemPrice?.value?.let {
+//            maxAmount = it
+//        }
 
         offer.id?.let {
             var interest = ""
@@ -999,6 +1223,8 @@ fun EditPfLoanRequest(
         }
     }
 }
+
+
 
 @Composable
 fun MoveToNextScreen(
@@ -1100,13 +1326,17 @@ fun onAcceptClick(
                         var loanTenure = "5"
                         offer.itemTags.forEach itemTags@{ itemTag ->
                             itemTag?.tags?.forEach { tag ->
-                                if (tag.key.contains(
-                                        "NUMBER_OF_INSTALLMENTS",
-                                        ignoreCase = true
-                                    )
-                                ) {
-                                    loanTenure = tag.value ?: ""
-                                    return@itemTags
+                                if (tag.key.contains("TERM", ignoreCase = true)) {
+                                    if (tag.value?.startsWith("P") == true) {
+                                        convertISODurationToReadable(
+                                            tag.value ?: ""
+                                        ).let { readableDuration ->
+                                            loanTenure = readableDuration
+                                        }
+                                    }
+                                    else {
+                                        loanTenure = tag.value.lowercase().replace(" months", "")
+                                    }
                                 }
                             }
                         }
@@ -1126,6 +1356,7 @@ fun onAcceptClick(
     }
 }
 
+
 private fun checkAndMakeApiCall(
     downPaymentAmount: Float,
     context: Context,
@@ -1133,6 +1364,8 @@ private fun checkAndMakeApiCall(
     loanTenure: String,
     id: String
 ) {
+    Log.d("res_H", downPaymentAmount.toString())
+    Log.d("res_H", loanTenure)
     if (downPaymentAmount == 0.0f) {
         Toast.makeText(
             context,
@@ -1161,7 +1394,6 @@ sealed class PfFlow(val status: String) {
 @Composable
 fun LoanGSTCardInfo(offer: OfferResponseItem) {
     // Get loan amount that user will get
-    var loanAmount = "-"
 
     offer.itemTags?.forEach itemTag@{ itemTags ->
         itemTags?.let {
@@ -1169,11 +1401,11 @@ fun LoanGSTCardInfo(offer: OfferResponseItem) {
                 itemTags.tags.forEach { itemTagsItem ->
                     if (itemTagsItem.key.lowercase(Locale.ROOT).contains("principal")) {
                         itemTagsItem.value.let { value ->
-                            loanAmount = value ?: ""
+                            loanAmountValue = value ?: ""
                         }
                     }
 
-                    if (itemTagsItem.key.lowercase(Locale.ROOT).contains("interest")) {
+                    if (itemTagsItem.key.lowercase(Locale.ROOT).contains("interest_amount")) {
                         itemTagsItem.value.let { value ->
                             interestAmount = value ?: ""
                         }
@@ -1182,7 +1414,26 @@ fun LoanGSTCardInfo(offer: OfferResponseItem) {
             }
         }
     }
+    offer.quoteBreakUp?.forEach { tag ->
+        if (tag?.title?.contains("PRINCIPAL", ignoreCase = true) == true) {
+            loanAmountValue = tag?.value
+                ?.replace("INR", "")
+                ?.trim() ?: ""
+            return@forEach
+        }
+    }
+    offer.quoteBreakUp?.forEach { tag ->
+        if (tag?.title?.contains("INTEREST", ignoreCase = true) == true) {
+            interestAmount = tag?.value
+                ?.replace("INR", "")
+                ?.trim() ?: ""
+            return@forEach
+        }
+    }
+
+
 //    LoanAmountInterest(offer)
+    var loanAmount = loanAmountValue
     var interestRate = "-"
     var tenure = "-"
     var installmentAmount = "-"
@@ -1204,25 +1455,31 @@ fun LoanGSTCardInfo(offer: OfferResponseItem) {
 
                 tag.key.equals("loan_term", ignoreCase = true) ||
                     tag.key.equals("term", ignoreCase = true) -> {
-                    tenure = tag.value
+                    if (tag.key.contains("TERM", ignoreCase = true)) {
+                        if (tag.value?.startsWith("P") == true) {
+                            convertISODurationToReadable(
+                                tag.value ?: ""
+                            ).let { readableDuration ->
+                                tenure = readableDuration
+                            }
+                        }
+                        else {
+                            tenure = tag.value.lowercase().replace(" months", "")
+                        }
+                    }
                 }
 
                 tag.key.contains("INSTALLMENT_AMOUNT", ignoreCase = true) -> {
                     installmentAmount = "${tag.value}"
                 }
-                tag.key.equals("interest", ignoreCase = true) ||
-                        tag.key.equals("interest_amount", ignoreCase = true) -> {
-                    interestAmount = tag.value
-                }
             }
         }
     }
-    offer?.quoteBreakUp?.forEach { tag ->
-        if (tag?.title?.contains("INTEREST", ignoreCase = true) == true ||
-            tag?.title?.contains("INTEREST_AMOUNT", ignoreCase = true) == true) {
-            interestAmount = tag?.value ?: ""
-        }
-    }
+//    offer?.quoteBreakUp?.forEach { tag ->
+//        if (tag?.title?.contains("INTEREST", ignoreCase = true) == true) {
+//            interestAmount = tag?.value ?: ""
+//        }
+//    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -1418,16 +1675,15 @@ fun EditLoanAmountSliderUI(
     onValueChanged: (Float) -> Unit
 ) {
     var sliderValue by remember { mutableFloatStateOf(loanAmount.toFloat()) }
-    val formattedLoanAmount = CommonMethods().formatIndianDoubleCurrency(loanAmount)
+    val displayValue = sliderValue.coerceIn(minAmount, maxAmount)
+    val formattedLoanAmount = CommonMethods().formatIndianDoubleCurrency(displayValue.toDouble())
     val formattedBegin = CommonMethods().formatIndianCurrency(minAmount.toInt())
     val formattedEnd = CommonMethods().formatIndianCurrency(maxAmount.toInt())
     var isError by remember { mutableStateOf(isValidAmount) }
     var inputText by remember {
         mutableStateOf(TextFieldValue(CommonMethods().formatIndianCurrency(loanAmount.toInt())))
     }
-//    var inputText by remember { mutableStateOf(CommonMethods().formatIndianCurrency(loanAmount.toInt())) }
-
-    val focusManager = LocalFocusManager.current
+     val focusManager = LocalFocusManager.current
 
     LaunchedEffect(loanAmount) {
         val formatted = CommonMethods().formatIndianCurrency(loanAmount.toInt())
@@ -1586,6 +1842,7 @@ fun EditLoanAmountSliderUI(
     }
 }
 
+
 @Composable
 fun EditLoanTenureSliderUI(
     tenure: Number,
@@ -1594,7 +1851,6 @@ fun EditLoanTenureSliderUI(
     onValueChanged: (Int) -> Unit
 ) {
     val adjustedMinTenure = if (tenure.toInt() < minTenure) tenure.toInt() else minTenure
-
     var sliderValue by remember { mutableFloatStateOf(tenure.toFloat()) }
     val formattedTenure = "${sliderValue.toInt()} Months"
 
@@ -1674,35 +1930,49 @@ fun DownPaymentBottomSheetContent(
     minAmount: Float,
     interest: String,
     onClose: () -> Unit,
-    onSubmit: (Float) -> Unit
+    onSubmit: (Float) -> Unit,
+    editLoanRequestViewModel : EditLoanRequestViewModel,
 ) {
-    var sliderValue by remember { mutableFloatStateOf(0.00f) }
+    var sliderValue by remember { mutableFloatStateOf(minAmount.toFloat()) }
+    val displayValue = sliderValue.coerceIn(minAmount, maxAmount)
+    var inputText by remember {
+        mutableStateOf(TextFieldValue(CommonMethods().formatWithCommas(minAmount.toInt())))
+    }
+    var isError by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
     val stopPercentage = 0.8f
     val stopValue = minAmount + (maxAmount - minAmount) * stopPercentage
 
-    Spacer(modifier = Modifier.height(30.dp))
+    LaunchedEffect(minAmount) {
+        val formatted = CommonMethods().formatIndianCurrency(minAmount.toInt())
+        if (formatted != inputText.text) {
+            inputText = TextFieldValue(
+                text = formatted,
+                selection = TextRange(formatted.length)
+            )
+        }
+    }
 
     Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(top = 10.dp)
+            .background(shape = RoundedCornerShape(40.dp), color = Color.White)
     ) {
         Text(
-            text = "Edit Down Payment Amount",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 5.dp),
-            textAlign = TextAlign.Center
+            text = stringResource(id = R.string.edit_loan_request),
+            style = bold20Text100,
+            color = appBlack,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
         )
 
+        HorizontalDivider(top = 5.dp, color = backgroundOrange)
         Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(start = 15.dp, end = 15.dp)
         ) {
-            Column {
                 Spacer(Modifier.height(60.dp))
                 Box {
                     Slider(
@@ -1710,7 +1980,16 @@ fun DownPaymentBottomSheetContent(
                         onValueChange = { newValue ->
                             sliderValue =
                                 CommonMethods().roundToNearestHundred(newValue * (maxAmount - minAmount) + minAmount)
+
+                            val formatted = formatCurrency(sliderValue.toInt().toString())
+                            inputText = TextFieldValue(
+                                text = formatted,
+                                selection = TextRange(formatted.length) // cursor at end
+                            )
+                            isError = false
+                            editLoanRequestViewModel.onDownpaymentAmountChanged(sliderValue.toString())
                         },
+
                         valueRange = 0f..1f,
                         modifier = Modifier.fillMaxWidth(),
                         colors = SliderDefaults.colors(
@@ -1764,49 +2043,94 @@ fun DownPaymentBottomSheetContent(
             }
 
             // Other code
-
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = CommonMethods().formatWithCommas(minAmount.toInt()))
-                Text(text = CommonMethods().formatWithCommas(maxAmount.toInt()))
+                Text(text = CommonMethods().formatIndianCurrency(minAmount.toInt()))
+                Text(text = CommonMethods().formatIndianCurrency(maxAmount.toInt()))
             }
 
             Spacer(Modifier.height(10.dp))
 
-            Box(
-                modifier = Modifier
-                    .padding(horizontal = 20.dp, vertical = 15.dp)
-                    .shadowWithBlueBackground(
-                        blurAmount = 15.dp,
-                        offsetX = 0.dp,
-                        offsetY = 5.dp,
-                        spread = 0.dp,
-                        shadowColor = Color(0xFFADD8E6)
-                    )
-                    .border(1.dp, Color.Blue, MaterialTheme.shapes.medium)
-                    .background(Color.White, MaterialTheme.shapes.medium)
-                    .padding(vertical = 10.dp, horizontal = 40.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "₹ ${CommonMethods().formatWithCommas(sliderValue.toInt())}",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+        OutlinedTextField(
+            value = inputText,
+            onValueChange = { newValue ->
+                val rawInput = newValue.text
+                val cursorPosition = newValue.selection.start
+                val (cleanInput, newCursor) = processRawInput(rawInput, cursorPosition)
+                val clampedInput = applyMaxLimit(cleanInput, maxAmount.toLong())
+                val parsedValue = clampedInput.toFloatOrNull()
+//                onUserInteraction()
+                if (parsedValue != null) {
+                    val formatted = formatCurrency(clampedInput)
 
+                    inputText =
+                        TextFieldValue(
+                            text = formatted,
+                            selection = TextRange(
+                                calculateFormattedCursorPosition(
+                                    cleanInput = cleanInput,
+                                    originalCursor = newCursor,
+                                    formattedValue = formatCurrency(cleanInput)
+                                )
+                            )
+                        )
+                    sliderValue = parsedValue
+                    editLoanRequestViewModel.onDownpaymentAmountChanged(parsedValue.toString())
+
+                    if (parsedValue > maxAmount || parsedValue < minAmount) {
+                        isError = true
+//                        onValidationChanged(false)
+                    } else {
+                        isError = false
+//                        onValidationChanged(true)
+                    }
+                } else {
+                    inputText = TextFieldValue("₹", TextRange(1))
+                    isError = true
+//                    onValidationChanged(false)
+                }
+            },
+            singleLine = true,
+            textStyle = bold20Text100.copy(textAlign = TextAlign.Center),
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+            isError = isError,
+            modifier = Modifier
+                .background(appWhite, shape = RoundedCornerShape(16.dp))
+                .fillMaxWidth(0.6f),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = appTheme,
+                unfocusedBorderColor = backgroundOrange,
+                cursorColor = cursorColor,
+                errorBorderColor = errorRed,
+                disabledBorderColor = appTheme
+            )
+        )
+
+        if (isError) {
             Text(
-                text = "Your Down payment Amount should be greater than or equal to min down payment specified by the lender",
-                fontSize = 14.sp,
-                color = Color.Gray,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 10.dp)
+                text = stringResource(R.string.please_enter_valid_loan_amount_within_limits),
+                style = normal12Text400,
+                color = errorRed,
+                modifier = Modifier.padding(top = 4.dp)
             )
         }
 
-        Spacer(modifier = Modifier.height(80.dp))
+            RegisterText(
+                text = "Your Down payment Amount should be greater than or equal to min down payment specified by the lender",
+               style = normal14Text500,
+                textColor = hintGray,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 10.dp, bottom = 16.dp)
+            )
+        }
 
         // Interest and Total Due Section
         Row(
@@ -1825,68 +2149,28 @@ fun DownPaymentBottomSheetContent(
         }
 
         Spacer(modifier = Modifier.height(40.dp))
-
         // Buttons Section
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            modifier = Modifier
+                .height(60.dp)
+                .fillMaxWidth()
+                .border(1.dp, appOrange),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Button(
-                onClick = { onClose() },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = Color.White,
-                    contentColor = Color.Red
-                )
-            ) {
-                Text(
-                    text = "Cancel",
-                    fontSize = 15.sp,
-                    modifier = Modifier.padding(vertical = 5.dp, horizontal = 10.dp)
-                )
-            }
-            Button(
-                onClick = { onSubmit(sliderValue) },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = appOrange,
-                    contentColor = Color.White
-                )
-            ) {
-                Text(
-                    text = "Submit",
-                    fontSize = 15.sp,
-                    modifier = Modifier.padding(vertical = 5.dp, horizontal = 10.dp)
-                )
-            }
-        }
+            BoxButton(
+                modifier = Modifier.weight(1f),
+                buttonText = stringResource(R.string.cancel),
+                textColor = appOrange,
+                backgroundColor = appWhite
+            ) {onClose() }
+
+            BoxButton(
+                modifier = Modifier.weight(1f),
+                buttonText = stringResource(R.string.submit)
+            ) { onSubmit(sliderValue) }
     }
 }
 
-fun Modifier.shadowWithBlueBackground(
-    offsetX: Dp = 0.dp,
-    offsetY: Dp = 0.dp,
-    blurAmount: Dp = 0.dp,
-    spread: Dp = 0.dp,
-    shadowColor: Color = Color.Black
-): Modifier {
-    return this.drawBehind {
-        drawIntoCanvas { canvas ->
-            val paint = Paint().asFrameworkPaint().apply {
-                color = shadowColor.toArgb()
-                maskFilter = BlurMaskFilter(
-                    blurAmount.toPx(),
-                    BlurMaskFilter.Blur.NORMAL
-                )
-            }
-            val spreadPx = spread.toPx()
-            val left = -spreadPx + offsetX.toPx()
-            val top = -spreadPx + offsetY.toPx()
-            val right = size.width + spreadPx + offsetX.toPx()
-            val bottom = size.height + spreadPx + offsetY.toPx()
-
-            canvas.drawRect(left, top, right, bottom, paint.asComposePaint())
-        }
-    }
-}
 
 @Composable
 fun DottedBoxWithDividers(
@@ -1925,18 +2209,16 @@ fun DottedBoxWithDividers(
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(horizontal = 40.dp, vertical = 25.dp)
+                modifier = Modifier.padding(horizontal = 50.dp, vertical = 20.dp)
             ) {
                 Text(
                     text = "INTEREST",
                     fontSize = 14.sp,
                     color = appOrange,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(bottom = 4.dp),
+                    modifier = Modifier.padding(bottom = 8.dp),
                     fontWeight = FontWeight.Bold
                 )
-
-                Spacer(Modifier.height(5.dp))
                 Row {
                     Text(
                         text = interestAmount,
@@ -1954,18 +2236,17 @@ fun DottedBoxWithDividers(
             }
 
             Column(
-                modifier = Modifier.padding(30.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(horizontal = 50.dp, vertical = 20.dp)
             ) {
                 Text(
                     text = "TOTAL DUE",
                     fontSize = 14.sp,
                     color = appOrange,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(bottom = 4.dp),
+                    modifier = Modifier.padding(bottom = 8.dp),
                     fontWeight = FontWeight.Bold
                 )
-                Spacer(Modifier.height(5.dp))
                 Text(
                     text = totalDue,
                     fontSize = 16.sp,
@@ -2125,14 +2406,6 @@ fun String.appendINRIfMissing(): String {
         "$this INR"
     } else {
         this
-    }
-}
-
-fun String.removeINRifExist(): String {
-    return if (!this.contains("INR")) {
-        this
-    } else {
-        this.split(" INR")[0]
     }
 }
 
@@ -2305,6 +2578,6 @@ fun LoanOffersListDetailsPfScreenPreview() {
 @Composable
 private fun PreviewBottomSheet() {
     Surface {
-        DownPaymentBottomSheetContent(442712.00f, 0.0f, "12 %", {}, {})
+//        DownPaymentBottomSheetContent(242712.00f, 0.0f, "12 %", {}, {})
     }
 }

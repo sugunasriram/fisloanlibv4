@@ -673,8 +673,11 @@ fun NavGraphBuilder.mobileNavigation(
                 }
             }
         }
-        composable(AppScreens.LoanStatusScreen.route) {
-            LoanStatusScreen(navController = navController)
+        composable("${AppScreens.LoanStatusScreen.route}/{loanType}") { backStack ->
+            val loanType = backStack.arguments?.getString("loanType")
+            if(loanType != null) {
+                LoanStatusScreen(navController = navController, loanType = loanType)
+            }
         }
 
         composable(AppScreens.PrePaymentScreen.route) {

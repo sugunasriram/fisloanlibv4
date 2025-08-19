@@ -241,6 +241,17 @@ object ApiRepository {
             }
         }
     }
+    suspend fun updateBankStatement(statements: List<String>): UpdateProfile? {
+        val requestBody = mapOf("statements" to statements)
+        return KtorClient.getInstance().use { httpClient ->
+            httpClient.post(ApiPaths().updateProfile) {
+                val accessToken = TokenManager.read("accessToken")
+                val bearerToken = "Bearer $accessToken"
+                header("Authorization", bearerToken)
+                body = requestBody
+            }
+        }
+    }
 
     suspend fun updateUserIncome(income: String): UpdateIncome? {
         val requestBody = mapOf("income" to income)
@@ -526,6 +537,18 @@ object ApiRepository {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
+            }
+        }
+    }
+
+    suspend fun loanOrdersByLoanType(loanType:String): CustomerLoanList? {
+        val requestBody = mapOf("loanType" to loanType)
+        return KtorClient.getInstance().use { httpClient ->
+            httpClient.post(ApiPaths().loanOrdersList) {
+                val accessToken = TokenManager.read("accessToken")
+                val bearerToken = "Bearer $accessToken"
+                header("Authorization", bearerToken)
+                body = requestBody
             }
         }
     }

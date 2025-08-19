@@ -82,7 +82,7 @@ fun PrePaymentScreen(navController: NavHostController) {
                             fromScreen = "PrePayment"
                         )
                     } else {
-                        loanAgreementViewModel.completeLoanList(context)
+                        loanAgreementViewModel.completeLoanList(context, "all")
                     }
                 }
             }

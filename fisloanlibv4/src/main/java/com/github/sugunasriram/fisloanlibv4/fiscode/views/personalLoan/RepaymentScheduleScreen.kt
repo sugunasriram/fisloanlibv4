@@ -1,6 +1,10 @@
 package com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.app.Activity
 import android.content.Context
+import android.os.Build
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -53,8 +57,11 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import com.github.sugunasriram.fisloanlibv4.R
+import com.github.sugunasriram.fisloanlibv4.fiscode.app.MainActivity.Companion.NOTIFICATION_PERMISSION_REQUEST_CODE
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.CenterProgress
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.CenterProgressFixedHeight
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.CurvedPrimaryButton
@@ -120,6 +127,7 @@ var amount_to_be_paid = ""
 var coolOffPeriodDate = ""
 var principal = ""
 var prepartPaymentCharges: String? = null
+const val NOTIFICATION_PERMISSION_REQUEST_CODE = 1003
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -333,7 +341,9 @@ fun RepaymentScheduleScreenHandle(
                                 bottomSheetState = paymentOptionBottomSheet, orderId = orderId,
                                 getOrderPaymentStatusViewModel = getOrderPaymentStatusViewModel,
                                 loanAgreementViewModel = loanAgreementViewModel,
-                                loanType = loanType, fromScreen = fromScreen
+                                loanType = loanType, fromScreen = fromScreen,
+                                checkingStatus=checkingStatus,
+                                orderPaymentListLoading=orderPaymentListLoading
                             )
                         }
                     }
@@ -409,7 +419,9 @@ fun RepaymentScheduleScreenHandle(
                                 bottomSheetState = paymentOptionBottomSheet, orderId = orderId,
                                 getOrderPaymentStatusViewModel = getOrderPaymentStatusViewModel,
                                 loanAgreementViewModel = loanAgreementViewModel,
-                                loanType = loanType, fromScreen = fromScreen
+                                loanType = loanType, fromScreen = fromScreen,
+                                checkingStatus=checkingStatus,
+                                orderPaymentListLoading=orderPaymentListLoading
                             )
                         }
                     }
@@ -441,7 +453,9 @@ fun RepaymentScheduleView(
     getOrderPaymentStatusViewModel: GetOrderPaymentStatusViewModel,
     loanAgreementViewModel: LoanAgreementViewModel,
     loanType: String,
-    fromScreen: String
+    fromScreen: String,
+    checkingStatus:Boolean,
+    orderPaymentListLoading:Boolean
 ) {
     val focusManager = LocalFocusManager.current
     val backGroundColor: Color = Color.White
@@ -453,13 +467,13 @@ fun RepaymentScheduleView(
         ?.any { fulfilment ->
             val status = fulfilment?.state?.descriptor?.code.orEmpty()
             status.contains("completed", ignoreCase = true) ||
-                    status.contains("closed", ignoreCase = true)
+                status.contains("closed", ignoreCase = true)
         } ?: false
     val isLoanInitiated = loanDetails.fulfillments
         ?.any { fulfilment ->
             val status = fulfilment?.state?.descriptor?.code.orEmpty()
             status.contains("INITIATED", ignoreCase = true) ||
-                    status.contains("SANCTIONED", ignoreCase = true)
+                status.contains("SANCTIONED", ignoreCase = true)
         } ?: false
     BackHandler {
         if (fromScreen == "Loan Summary") {
@@ -514,40 +528,49 @@ fun RepaymentScheduleView(
         tertiaryButtonText = stringResource(R.string.home),
         onTertiaryButtonClick = { navigateApplyByCategoryScreen(navController) }
     ) {
+        if(checkingStatus || orderPaymentListLoading){
+            CenterProgressFixedHeight(top=320.dp)
+        }else {
 //        Get Cool Off Period
-        loanDetails.itemTags?.forEach { itemTags ->
-            itemTags?.let {
-                it.tags.let { tags ->
-                    tags.forEach { tag ->
-                        if (tag.key.contains("cool_off", ignoreCase = true)) {
-                            coolOffPeriodDate = tag.value ?: ""
-                            return@forEach // Exit the loop after processing the first matching tag
+            loanDetails.itemTags?.forEach { itemTags ->
+                itemTags?.let {
+                    it.tags.let { tags ->
+                        tags.forEach { tag ->
+                            if (tag.key.contains("cool_off", ignoreCase = true)) {
+                                coolOffPeriodDate = tag.value ?: ""
+                                return@forEach // Exit the loop after processing the first matching tag
+                            }
                         }
                     }
                 }
             }
-        }
 
-        // PRINCIPAL
-        loanDetails.quoteBreakUp?.forEach { quoteBreakUp ->
-            quoteBreakUp?.let {
-                it.title?.let { title ->
-                    it.value?.let { description ->
-                        if (title.equals("PRINCIPAL", ignoreCase = true)) {
-                            principal = description
-                            return@forEach // Exit the loop after processing the first matching tag
+            // PRINCIPAL
+            loanDetails.quoteBreakUp?.forEach { quoteBreakUp ->
+                quoteBreakUp?.let {
+                    it.title?.let { title ->
+                        it.value?.let { description ->
+                            if (title.equals("PRINCIPAL", ignoreCase = true) ||
+                                title.lowercase().contains("PRINCIPAL", ignoreCase = true)) {
+                                principal = description
+                                return@forEach // Exit the loop after processing the first matching tag
+                            }
                         }
                     }
                 }
             }
+            CompleteLoanDetails(
+                loanDetails = loanDetails,
+                context = context,
+                orderPaymentListLoaded = orderPaymentListLoaded,
+                orderPaymentStatusList = orderPaymentStatusList,
+                checkOrderIssueResponse = checkOrderIssueResponse,
+                fromFlow = fromFlow,
+                navController = navController,
+                isLoanClosed = isLoanClosed,
+                isLoanInitiated = isLoanInitiated
+            )
         }
-        CompleteLoanDetails(
-            loanDetails = loanDetails, context = context,
-            orderPaymentListLoaded = orderPaymentListLoaded,
-            orderPaymentStatusList = orderPaymentStatusList,
-            checkOrderIssueResponse = checkOrderIssueResponse,
-            fromFlow = fromFlow, navController = navController, isLoanClosed = isLoanClosed, isLoanInitiated = isLoanInitiated
-        )
     }
 }
 
@@ -761,7 +784,8 @@ fun ApplicantDetails(loanDetails: OfferResponseItem, context: Context) {
                 OnlyReadAbleText(
                     textHeader = stringResource(id = R.string.loan_amount),
                     textColorHeader = slateGrayColor,
-                    textValue = CommonMethods().formatIndianDoubleCurrency(principal.takeIf { it.isNotEmpty() }?.toDoubleOrNull() ?: 0.0),
+//                    textValue = CommonMethods().formatIndianDoubleCurrency(principal.takeIf { it.isNotEmpty() }?.toDoubleOrNull() ?: 0.0),
+                    textValue = principal,
                     style = normal14Text400,
                     end = 5.dp,
                     start = 8.dp,
@@ -772,7 +796,7 @@ fun ApplicantDetails(loanDetails: OfferResponseItem, context: Context) {
                 loanDetails.itemPrice?.value?.let {
                     OnlyReadAbleText(
                         textHeader = stringResource(id = R.string.total_payable_amount),
-                        textValue = CommonMethods().formatIndianDoubleCurrency(it.toDouble()),
+                        textValue = it,
                         textColorHeader = slateGrayColor,
                         style = normal14Text400,
                         end = 5.dp,
@@ -794,9 +818,7 @@ fun ApplicantDetails(loanDetails: OfferResponseItem, context: Context) {
                                             tag.key.contains("cool off", ignoreCase = true)
                                         ) {
                                             convertUTCToLocalDateTime(tag.value)
-                                        } else if(tag.key.contains("amount", ignoreCase = true)){
-                                            CommonMethods().formatIndianDoubleCurrency(tag.value.takeIf { it.isNotEmpty() }?.toDoubleOrNull() ?: 0.0)
-                                        }else {
+                                        } else {
                                             tag.value
                                         }
 
@@ -821,9 +843,9 @@ fun ApplicantDetails(loanDetails: OfferResponseItem, context: Context) {
                                             onClick = { CommonMethods().openLink(context, displayValue) }
                                         )
                                     } else if ((
-                                                newTitle.equals("term", ignoreCase = true) ||
-                                                        newTitle.contains("frequency", ignoreCase = true)
-                                                ) &&
+                                        newTitle.equals("term", ignoreCase = true) ||
+                                            newTitle.contains("frequency", ignoreCase = true)
+                                        ) &&
                                         displayValue?.startsWith("P") == true
                                     ) {
                                         convertISODurationToReadable(displayValue ?: "").let {
@@ -912,7 +934,8 @@ fun LoanSummary(offer: OfferResponseItem) {
                         it.value?.let { description ->
                             OnlyReadAbleText(
                                 textHeader = newTitle,
-                                textValue = CommonMethods().formatIndianDoubleCurrency(description.takeIf{it.isNotEmpty()}?.toDoubleOrNull() ?: 0.0),
+//                                textValue = CommonMethods().formatIndianDoubleCurrency(description.takeIf{it.isNotEmpty()}?.toDoubleOrNull() ?: 0.0),
+                                textValue = description,
                                 style = normal14Text400,
                                 textColorHeader = slateGrayColor,
                                 end = 5.dp, start = 5.dp, top = 8.dp, bottom = 5.dp,
@@ -1182,14 +1205,16 @@ fun LoanAgreementDetailsCard(loanDocument: OfferResponseItem, context: Context) 
                 ) {
                     val fileName = loanPdfUrl.substringAfterLast("/").substringBefore("?").ifEmpty { "loan_agreement" }
                     CommonMethods().downloadPdf(context, loanPdfUrl, fileName,
-                        "$lenderName-LoanAgreement")
+                                "$lenderName-LoanAgreement")
                 }
             }
         }
     }
 }
+
 @Composable
 fun DownloadLoanDetailsCard(loanDocument: OfferResponseItem,payment: List<OrderPaymentStatusItem>, context: Context) {
+    val activity = context as Activity
     val lenderName = loanDocument.providerDescriptor?.name.orEmpty()
     loanDocument.documents?.forEach { document ->
         document?.url?.let { loanPdfUrl ->
@@ -1213,8 +1238,22 @@ fun DownloadLoanDetailsCard(loanDocument: OfferResponseItem,payment: List<OrderP
                     end = 15.dp,top=5.dp, bottom = 5.dp,
                     modifier = Modifier.padding(horizontal = 8.dp)
                 ) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        if (ContextCompat.checkSelfPermission(
+                                activity,
+                                Manifest.permission.POST_NOTIFICATIONS
+                            ) != PackageManager.PERMISSION_GRANTED
+                        ) {
+                            ActivityCompat.requestPermissions(
+                                activity,
+                                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                                NOTIFICATION_PERMISSION_REQUEST_CODE
+                            )
+                            return@CurvedPrimaryButton // Wait for the permission result before proceeding
+                        }
+                    }
                     CommonMethods().generatePdfAndNotify(context, loanDocument,payment, lenderName)
-                }
+                   }
             }
         }
     }

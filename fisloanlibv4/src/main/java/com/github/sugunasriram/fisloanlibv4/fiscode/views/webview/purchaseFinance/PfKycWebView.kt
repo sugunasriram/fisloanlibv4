@@ -8,6 +8,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.net.http.SslError
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -25,6 +26,7 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
@@ -61,6 +63,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.network.sse.SSEData
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.sse.SSEViewModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
+import kotlinx.coroutines.delay
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
@@ -91,24 +94,16 @@ fun PfKycWebViewScreen(
     var lateNavigate = false
     var errorMsg by remember { mutableStateOf<String?>(null) }
     val errorTitle = stringResource(id = R.string.kyc_failed)
+    val context = LocalContext.current
 
-    val handler = remember {
-        Handler(Looper.getMainLooper()).apply {
-            postDelayed({
-                if (sseEvents.isEmpty()) {
-                    if (!lateNavigate) {
-                        sseViewModel.stopListening()
-                        navigateToBankKycVerificationScreen(
-                            navController = navController,
-                            kycUrl = "No Need KYC URL",
-                            transactionId = transactionId,
-                            offerId = id,
-                            verificationStatus = decidedScreen,
-                            fromFlow = fromFlow
-                        )
-                    }
-                }
-            }, 3 * 60 * 1000)
+    LaunchedEffect(Unit) {
+        delay(3 * 60 * 1000L)
+        if (sseEvents.isEmpty() && !lateNavigate) {
+            Toast.makeText(
+                context,
+                "Waiting for lender response, please wait...",
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
@@ -119,10 +114,9 @@ fun PfKycWebViewScreen(
     // Handle the events and navigate based on the presence of events
     LaunchedEffect(sseEvents) {
         if (sseEvents.isNotEmpty()) {
-            handler.removeCallbacksAndMessages(null)
             try {
                 val sseData = json1.decodeFromString<SSEData>(sseEvents)
-                var sseTransactionId = sseData.data?.data?.data?.txn_id
+                var sseTransactionId = sseData.data?.data?.txnId
                 val formId = sseData.data?.data?.data?.form_id
 
                 Log.d(
@@ -241,7 +235,9 @@ fun ProceedWithKYCProcess(
                             settings.useWideViewPort = true
                             settings.setSupportMultipleWindows(true)
                             settings.javaScriptCanOpenWindowsAutomatically = true
-                            settings.safeBrowsingEnabled = true
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                settings.safeBrowsingEnabled = true
+                            }
 
 //                            WebView.setWebContentsDebuggingEnabled(true)
 
