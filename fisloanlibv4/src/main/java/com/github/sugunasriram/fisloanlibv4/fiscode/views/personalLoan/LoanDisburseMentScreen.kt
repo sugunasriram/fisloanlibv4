@@ -247,7 +247,7 @@ fun MoveToDashBoard(
                     )
                 }
                 coroutineScope.launch {
-                    delay(3000)
+                    delay(5000)
                 }
                 Log.d(
                     "LoanDisbursementScreen",

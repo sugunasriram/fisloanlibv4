@@ -780,12 +780,11 @@ class LoanAgreementViewModel : BaseViewModel() {
                 error.response.status.value == 401
             ) {
                 if (handleAuthGetAccessTokenApi()) {
-//                    handlePfOfferList(
-//                        loanType = loanType,
-//                        context = context,
-//                        checkForAccessToken =
-//                        false
-//                    )
+                    handlepfRetailSendDetails(
+                        createSessionRequest = createSessionRequest,
+                        context = context,
+                        checkForAccessToken = false
+                    )
                 } else {
                     _navigationToSignup.value = true
                 }
