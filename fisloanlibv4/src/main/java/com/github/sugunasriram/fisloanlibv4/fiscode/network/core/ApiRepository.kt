@@ -113,10 +113,14 @@ object ApiRepository {
     suspend fun createSession(createSessionRequest: CreateSessionRequest): CreateSessionResponse? {
         return KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().createSession) {
+                val accessToken = TokenManager.read("accessToken")
+                val bearerToken = "Bearer $accessToken"
+                header("Authorization", bearerToken)
                 body = createSessionRequest
             }
         }
     }
+
     // Auth Flow Api Repository
     suspend fun signup(profile: Profile): Signup? {
         return KtorClient.getInstance().use { httpClient ->
