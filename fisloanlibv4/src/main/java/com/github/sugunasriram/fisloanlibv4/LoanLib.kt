@@ -186,7 +186,8 @@ object LoanLib {
     ) : Serializable
 
     data class SessionDetails(
-        val sessionId: String = ""
+        val sessionId: String = "",
+        val loanId: String = ""
     ) : Serializable
 
     fun LaunchFISAppWithParams(
@@ -236,6 +237,25 @@ object LoanLib {
 //    }
 
     fun LaunchFISAppWithParamsAndCallback(
+        context: Context,
+        sessionDetails: SessionDetails ? = null,
+        callback: (LoanDetails) -> Unit
+    ) {
+//        Toast.makeText(context, "Launching FIS with Params", Toast.LENGTH_SHORT).show()
+
+        // Initialize the library
+        init(context)
+
+        val intent = Intent(context, MainActivity::class.java)
+        intent.putExtra("sessionDetails", sessionDetails)
+
+        LoanLib.callback = callback
+
+        // (context as Activity).startActivityForResult(intent, 2001)
+        context.startActivity(intent)
+    }
+
+    fun LaunchFISAppForLoanDetails(
         context: Context,
         sessionDetails: SessionDetails ? = null,
         callback: (LoanDetails) -> Unit

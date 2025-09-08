@@ -688,6 +688,7 @@ object ApiRepository {
     }
 
     suspend fun getOrderById(loanType: String, orderId: String): OrderByIdResponse? {
+        Log.d("Sugu loanType", loanType)
         val requestBody = mapOf("loanType" to loanType, "orderId" to orderId)
         return KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().getOrderById) {

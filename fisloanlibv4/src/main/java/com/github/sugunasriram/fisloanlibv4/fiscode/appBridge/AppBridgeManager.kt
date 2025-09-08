@@ -91,26 +91,54 @@ class AppBridgeManager(private val activity: ComponentActivity) {
 
 
                     if (!verifySessionInvoked) {
-                        verifySessionInvoked = true
-                        Log.d("fisloanone", "verifySession API : $sessionId")
+//                        verifySessionInvoked = true
+//                        Log.d("fisloanone", "verifySession API : $sessionId")
+//
+//                        viewModel.verifySessionApi(sessionId, context)
 
-                        viewModel.verifySessionApi(sessionId, context)
+                        val orderId = sessionDetails.loanId
+                        val fromFlow = "Purchase Finance"
+                        val fromScreen = "PURCHASE_FINANCE"
+
+                        val route = "${AppScreens.RepaymentScheduleScreen.route}/$orderId/$fromFlow/$fromScreen"
+
+                        Log.d("Sugu", "Navigating to: $route")
+                        navController.navigate(route)  {
+                            launchSingleTop = true
+                        }
                     }
 
                     when {
                         isVerifySessionChecking -> {
                             Log.d("AppBridgeManager", "VerifySession in Progress")
                             CenterProgress()
+
+
                         }
+
                         isVerifySessionSuccess && verifySessionResponse != null -> {
                             Log.d("AppBridgeManager", "VerifySession Done")
+                            // Safely read loanId from the response
+                            val loanId = verifySessionResponse?.data?.sessionData?.loanId
+
                             LaunchedEffect(Unit) {
-                                navController.navigate(AppScreens.DownPaymentScreen.route)
-                                navController.getBackStackEntry(AppScreens.DownPaymentScreen.route)
-                                    .savedStateHandle
+                                if (!loanId.isNullOrBlank()) {
+                                    // Case 1: loanId exists → go to DownPaymentScreen
+                                    navController.navigate(AppScreens.RepaymentScheduleScreen.route) {
+                                        launchSingleTop = true
+                                    }
+                                } else {
+                                    navController.navigate(AppScreens.DownPaymentScreen.route)
+                                    navController.getBackStackEntry(AppScreens.DownPaymentScreen.route)
+                                        .savedStateHandle
 //                                    .set("verifySessionResponse", verifySessionResponse)
-                                    .set("verifySessionResponse", Json.encodeToString<VerifySessionResponse?>(verifySessionResponse)
-                                    )
+                                        .set(
+                                            "verifySessionResponse",
+                                            Json.encodeToString<VerifySessionResponse?>(
+                                                verifySessionResponse
+                                            )
+                                        )
+                                }
                             }
                         }
                         verifySessionInvoked &&

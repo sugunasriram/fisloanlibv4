@@ -28,6 +28,7 @@ data class VerifySessionData(
 data class VerifySessionDetails(
 	val downPayment: Int,
 	val productId: String?,
+	val loanId: String?,
 	val merchantPAN: String?,
 	val merchantGST: String?,
 	val productBrand: String?,
