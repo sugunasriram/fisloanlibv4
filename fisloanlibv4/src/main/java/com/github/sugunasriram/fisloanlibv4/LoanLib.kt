@@ -208,6 +208,7 @@ object LoanLib {
     }
 
     data class LoanDetails(
+        val sessionId: String,
         val loanAmount: Double,
         val interestRate: Double,
         val tenure: Int,

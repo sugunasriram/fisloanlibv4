@@ -758,41 +758,42 @@ class LoanAgreementViewModel : BaseViewModel() {
     private val _pfRetailDetailsSending = MutableStateFlow(false)
     val pfRetailDetailsSending: StateFlow<Boolean> = _pfRetailDetailsSending
 
-    fun pfRetailSendDetails(createSessionRequest: CreateSessionRequest, context: Context) {
-        _pfRetailDetailsSending.value = true
-        viewModelScope.launch(Dispatchers.IO) {
-            handlepfRetailSendDetails(createSessionRequest = createSessionRequest, context = context)
-        }
-    }
+//    fun pfRetailSendDetails(createSessionRequest: CreateSessionRequest, context: Context) {
+//        _pfRetailDetailsSending.value = true
+//        viewModelScope.launch(Dispatchers.IO) {
+//            handlepfRetailSendDetails(createSessionRequest = createSessionRequest, context = context)
+//        }
+//    }
 
-    private suspend fun handlepfRetailSendDetails(
+    suspend fun pfRetailSendDetails(
         createSessionRequest: CreateSessionRequest,
         context: Context,
         checkForAccessToken: Boolean = true
-    ) {
-        kotlin.runCatching {
+    ): CreateSessionResponse? {
+        return try {
             ApiRepository.createSession(createSessionRequest = createSessionRequest)
-        }.onSuccess { response ->
-            handlepfRetailSendDetailsSuccess(response)
-        }.onFailure { error ->
+        } catch (error: Throwable) {
             if (checkForAccessToken &&
                 error is ResponseException &&
                 error.response.status.value == 401
             ) {
                 if (handleAuthGetAccessTokenApi()) {
-                    handlepfRetailSendDetails(
+                    pfRetailSendDetails(
                         createSessionRequest = createSessionRequest,
                         context = context,
                         checkForAccessToken = false
                     )
                 } else {
                     _navigationToSignup.value = true
+                    null
                 }
             } else {
                 handleFailure(error = error, context = context)
+                null
             }
         }
     }
+
 
     private suspend fun handlepfRetailSendDetailsSuccess(response: CreateSessionResponse?) {
         withContext(Dispatchers.Main) {

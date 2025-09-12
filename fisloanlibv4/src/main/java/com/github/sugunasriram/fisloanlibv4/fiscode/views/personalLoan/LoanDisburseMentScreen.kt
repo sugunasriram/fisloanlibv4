@@ -230,13 +230,43 @@ fun MoveToDashBoard(
         primaryButtonText = stringResource(R.string.home),
         onPrimaryButtonClick = {
             if (fromFlow == "Purchase Finance") {
+//                val downpaymentAmountVal = downpaymentAmountValue.value?.toIntOrNull() ?: 0
+//
+//                CreateSessionRequestData(
+//                    downPaymentAmount = downpaymentAmountValue.value,
+//                    loanId = sseData.data?.data?.id?.toString() ?: "0"
+//                ).let { requestData ->
+//                    loanAgreementViewModel.pfRetailSendDetails(
+//                        createSessionRequest = CreateSessionRequest(
+//                            type = "RET",
+//                            subType = "ORDER_DETAILS",
+//                            id = requestData.loanId,
+//                            message = null
+//                        ),
+//                        context = context
+//                    )
+//                }
+//                coroutineScope.launch {
+//                    delay(5000)
+//                }
+//                Log.d(
+//                    "LoanDisbursementScreen",
+//                    "Sugu downpaymentAmountVal: $downpaymentAmountVal, loanAmount: $loanAmount, " +
+//                            "interestRate: $interestRate, tenure: $tenure"
+//                )
+//                LoanLib.callback?.invoke(LoanLib.LoanDetails(interestRate = interestRate?.toDoubleOrNull() ?: 0.0,
+//                    loanAmount = loanAmount?.toDoubleOrNull() ?: 0.0,
+//                    tenure = tenure?.toInt()?:0, downpaymentAmount = downpaymentAmountVal))
+//                (context as? Activity)?.finish()
+
                 val downpaymentAmountVal = downpaymentAmountValue.value?.toIntOrNull() ?: 0
 
-                CreateSessionRequestData(
+                val requestData = CreateSessionRequestData(
                     downPaymentAmount = downpaymentAmountValue.value,
                     loanId = sseData.data?.data?.id?.toString() ?: "0"
-                ).let { requestData ->
-                    loanAgreementViewModel.pfRetailSendDetails(
+                )
+                coroutineScope.launch {
+                    val response = loanAgreementViewModel.pfRetailSendDetails(
                         createSessionRequest = CreateSessionRequest(
                             type = "RET",
                             subType = "ORDER_DETAILS",
@@ -245,19 +275,25 @@ fun MoveToDashBoard(
                         ),
                         context = context
                     )
+
+                    Log.d("LoanDisbursementScreen", "Got response: $response")
+                    // Safely extract sessionId
+                    val sessionId = response?.data?.id
+
+                    // Use response
+                    LoanLib.callback?.invoke(
+                        LoanLib.LoanDetails(
+                            sessionId = sessionId ?: "",
+                            interestRate = interestRate?.toDoubleOrNull() ?: 0.0,
+                            loanAmount = loanAmount?.toDoubleOrNull() ?: 0.0,
+                            tenure = tenure?.toInt() ?: 0,
+                            downpaymentAmount = downpaymentAmountVal
+                        )
+                    )
+
+                    (context as? Activity)?.finish()
                 }
-                coroutineScope.launch {
-                    delay(5000)
-                }
-                Log.d(
-                    "LoanDisbursementScreen",
-                    "Sugu downpaymentAmountVal: $downpaymentAmountVal, loanAmount: $loanAmount, " +
-                            "interestRate: $interestRate, tenure: $tenure"
-                )
-                LoanLib.callback?.invoke(LoanLib.LoanDetails(interestRate = interestRate?.toDoubleOrNull() ?: 0.0,
-                    loanAmount = loanAmount?.toDoubleOrNull() ?: 0.0,
-                    tenure = tenure?.toInt()?:0, downpaymentAmount = downpaymentAmountVal))
-                (context as? Activity)?.finish()
+
             } else {
                 navigateToLoanSummaryScreen(
                     navController = navController,
