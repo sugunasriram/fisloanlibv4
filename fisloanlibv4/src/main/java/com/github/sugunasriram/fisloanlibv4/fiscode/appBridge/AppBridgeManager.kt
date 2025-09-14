@@ -91,21 +91,21 @@ class AppBridgeManager(private val activity: ComponentActivity) {
 
 
                     if (!verifySessionInvoked) {
-//                        verifySessionInvoked = true
-//                        Log.d("fisloanone", "verifySession API : $sessionId")
+                        verifySessionInvoked = true
+                        Log.d("fisloanone", "verifySession API : $sessionId")
+
+                        viewModel.verifySessionApi(sessionId, context)
+
+//                        val orderId = sessionDetails.loanId
+//                        val fromFlow = "Purchase Finance"
+//                        val fromScreen = "PURCHASE_FINANCE"
 //
-//                        viewModel.verifySessionApi(sessionId, context)
-
-                        val orderId = sessionDetails.loanId
-                        val fromFlow = "Purchase Finance"
-                        val fromScreen = "PURCHASE_FINANCE"
-
-                        val route = "${AppScreens.RepaymentScheduleScreen.route}/$orderId/$fromFlow/$fromScreen"
-
-                        Log.d("Sugu", "Navigating to: $route")
-                        navController.navigate(route)  {
-                            launchSingleTop = true
-                        }
+//                        val route = "${AppScreens.RepaymentScheduleScreen.route}/$orderId/$fromFlow/$fromScreen"
+//
+//                        Log.d("Sugu", "Navigating to: $route")
+//                        navController.navigate(route)  {
+//                            launchSingleTop = true
+//                        }
                     }
 
                     when {
