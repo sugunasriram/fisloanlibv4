@@ -236,7 +236,7 @@ fun IssueDetails(
         } else if (response.data?.data?.details?.onIssue?.message?.issue?.updatedAt != null) {
             updatedDate = response.data.data.details.onIssue.message.issue.updatedAt
         } else if (response.data?.data?.details?.issueOpen?.message?.issue?.updatedAt != null) {
-            updatedDate = response?.data?.data?.details?.issueOpen?.message?.issue?.updatedAt
+            var updatedDate: String = response?.data?.data?.details?.issueOpen?.message?.issue?.updatedAt ?: ""
         } else {
             updatedDate = response.data?.data?.createdAt.toString()
         }
@@ -245,9 +245,10 @@ fun IssueDetails(
             response.data.data.summary?.id?.let { issueId ->
                 response.data.data.summary.status?.let { status ->
                     response.data.data.summary.orderId?.let { orderId ->
+                        val rawDate = response?.data?.data?.details?.issueOpen?.message?.issue?.updatedAt
                         IssueStatusCard(
                             createdDate = CommonMethods().displayFormattedDate(createdAt),
-                            updatedDate = CommonMethods().displayFormattedDate(updatedDate),
+                            updatedDate = CommonMethods().displayFormattedDate(rawDate ?: ""),
                             issueId = issueId,
                             status = status,
                             loanId = orderId

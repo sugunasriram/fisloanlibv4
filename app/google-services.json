@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "672997181399",
+    "project_id": "jtpl-fs",
+    "storage_bucket": "jtpl-fs.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:672997181399:android:81495d0b54d4d649fb6d92",
+        "android_client_info": {
+          "package_name": "com.jtechnoparks.fs"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAy8wrr2eP05jmqS8nyTHezP1JOtf7D25s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

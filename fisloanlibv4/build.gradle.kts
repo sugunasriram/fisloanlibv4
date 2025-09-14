@@ -1,29 +1,47 @@
 plugins {
+//    id("com.android.library")
+//    id("org.jetbrains.kotlin.android")
+//    id("maven-publish")
+//
+//    id("kotlinx-serialization")
+//    // KTLINT - Sugu11
+//    //id("org.jll  /eitschuh.gradle.ktlint") version "11.6.0"
+
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
-    id("maven-publish")
-
     id("kotlinx-serialization")
-    // KTLINT - Sugu11
-    //id("org.jll  /eitschuh.gradle.ktlint") version "11.6.0"
+//    id("com.google.gms.google-services")
+//    id("com.google.firebase.crashlytics")
+    id("org.jetbrains.kotlin.plugin.compose") // ✅ required since Kotlin 2.0
+    id("maven-publish") // ✅ needed for publishing
 }
 
 android {
     namespace = "com.github.sugunasriram.fisloanlibv4"
-    compileSdk = 34
+    compileSdk = 36
+
+//    signingConfigs {
+//        create("config") {
+//            keyAlias = "key0"
+//            keyPassword = "jtpl123"
+//            storeFile = file("release/fs-app-key.jks")
+//            storePassword = "jtpl123"
+//        }
+//    }
 
     defaultConfig {
-
 //        minSdk = 26
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 36
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
     }
-
+    lint {
+        lintOptions.disable("Typos", "VectorPath", "VectorRaster")
+    }
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -61,9 +79,10 @@ android {
         compose = true
         buildConfig = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.3"
-    }
+//    composeOptions {
+////        kotlinCompilerExtensionVersion = "1.4.3"
+//        kotlinCompilerExtensionVersion = "1.5.13"
+//    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
