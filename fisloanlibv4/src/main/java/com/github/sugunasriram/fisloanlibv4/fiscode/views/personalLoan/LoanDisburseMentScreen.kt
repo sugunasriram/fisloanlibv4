@@ -69,6 +69,10 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import java.text.DecimalFormat
+import java.time.Duration
+import java.time.Period
+import kotlin.math.max
 
 private val json1 = Json {
     prettyPrint = true
@@ -277,6 +281,10 @@ fun MoveToDashBoard(
                     )
 
                     Log.d("LoanDisbursementScreen", "Got response: $response")
+                    Log.d("LoanDisbursementScreen", "loanAmount: $loanAmount")
+                    Log.d("LoanDisbursementScreen", "interestRate: $interestRate")
+                    Log.d("LoanDisbursementScreen", "downpaymentAmount: $downpaymentAmountVal")
+                    Log.d("LoanDisbursementScreen", "tenure: $tenure")
                     // Safely extract sessionId
                     val sessionId = response?.data?.id
 
@@ -323,7 +331,6 @@ fun MoveToDashBoard(
         )
 
         if (totalDisburseAmount != null) {
-            loanAmount = totalDisburseAmount
             RegisterText(
                 text = totalDisburseAmount,
                 style = normal36Text700,
@@ -362,10 +369,72 @@ fun MoveToDashBoard(
             ) {
                 shareContent(context, loanDetailsStr)
             }
+            FillTenureAndInterestRate(loanDetails)
             LoanDisbursementCard(loanDetails)
         }
     }
 }
+
+
+private fun parseISOTermToMonths(term: String?): Int? {
+    if (term.isNullOrBlank()) return null
+    val t = term.trim().uppercase()
+
+    // Date-based: PnYnMnWnD (weeks optional)
+    val dateRegex = Regex("""^P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)W)?(?:(\d+)D)?$""")
+    dateRegex.matchEntire(t)?.let { m ->
+        val years  = m.groupValues[1].toIntOrNull() ?: 0
+        val months = m.groupValues[2].toIntOrNull() ?: 0
+        val weeks  = m.groupValues[3].toIntOrNull() ?: 0
+        val days   = m.groupValues[4].toIntOrNull() ?: 0
+        val monthsFromYears = years * 12
+        val daysTotal = weeks * 7 + days
+        val monthsFromDays = if (daysTotal > 0) maxOf(1, daysTotal / 30) else 0
+        return monthsFromYears + months + monthsFromDays
+    }
+
+    // Time-based: PTnHnMnS  -> approximate to months via days
+    val timeRegex = Regex("""^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?$""")
+    timeRegex.matchEntire(t)?.let { m ->
+        val h = m.groupValues[1].toIntOrNull() ?: 0
+        val min = m.groupValues[2].toIntOrNull() ?: 0
+        val s = m.groupValues[3].toDoubleOrNull() ?: 0.0
+        val totalSeconds = h * 3600 + min * 60 + s
+        val days = (totalSeconds / 86400.0).toInt()
+        return if (days > 0) maxOf(1, days / 30) else 0
+    }
+
+    // Plain number like "7" => months
+    t.filter { it.isDigit() }.toIntOrNull()?.let { return it }
+
+    return null
+}
+
+fun FillTenureAndInterestRate(loanDetail: Catalog){
+    val interestRateStr = findTagValue(loanDetail, "INTEREST_RATE")
+    val termStr = findTagValue(loanDetail, "TERM")
+    val interest = parsePercent(interestRateStr)
+
+    var months = parseISOTermToMonths(termStr)
+    if (months == null) {
+        val freq = parseISOTermToMonths(findTagValue(loanDetail, "REPAYMENT_FREQUENCY")) ?: 0
+        val nInst = findTagValue(loanDetail, "NUMBER_OF_INSTALLMENTS")?.filter { it.isDigit() }?.toIntOrNull() ?: 0
+        months = (freq * nInst).takeIf { it > 0 }
+    }
+
+    interestRate = interest.toString()
+    tenure = months?.toString()
+}
+
+private fun findTagValue(loanDetail: Catalog, key: String): String? =
+    loanDetail.item_tags.orEmpty()
+        .asSequence()
+        .mapNotNull { it.tags }
+        .mapNotNull { it[key] ?: it.entries.firstOrNull { e -> e.key.equals(key, true) }?.value }
+        .firstOrNull()
+
+private fun parsePercent(value: String?): Double? =
+    value?.replace(Regex("[^0-9.]"), "")?.toDoubleOrNull()
 
 @Composable
 fun MoveToConsentHandlerScreen(
@@ -399,6 +468,13 @@ fun shareContent(context: Context, content: String) {
 fun LoanDisbursementCard(loanDetail: Catalog?) {
     DisplayCard(cardColor = grayBackground, borderColor = grayD9) {
         loanDetail?.quote_breakup?.forEach { quoteBreakUp ->
+            val title = quoteBreakUp.title.orEmpty()
+            val rawValue = quoteBreakUp.value.orEmpty()
+
+            if ( title.contains("principal", ignoreCase = true)) {
+                loanAmount = rawValue
+            }
+
             quoteBreakUp.let {
                 it.title?.let { title ->
                     it.value?.let { description ->
