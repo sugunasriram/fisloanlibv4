@@ -112,8 +112,6 @@ class AppBridgeManager(private val activity: ComponentActivity) {
                         isVerifySessionChecking -> {
                             Log.d("AppBridgeManager", "VerifySession in Progress")
                             CenterProgress()
-
-
                         }
 
                         isVerifySessionSuccess && verifySessionResponse != null -> {

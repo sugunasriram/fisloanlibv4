@@ -161,7 +161,7 @@ android {
 //    }
 
     defaultConfig {
-        applicationId = "com.jtechnoparks.fs"
+        applicationId = "com.example.fisloanone"
         minSdk = 26
         targetSdk = 36
         // For V2 Release

@@ -110,17 +110,17 @@
 -dontwarn org.slf4j.impl.StaticLoggerBinder
 
 # Keep the LogIn and Token classes and their properties
--keep class com.jtechnoparks.fs.network.model.auth.LogIn { *; }
--keep class com.jtechnoparks.fs.network.model.auth.Token { *; }
+-keep class com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.LogIn { *; }
+-keep class com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.Token { *; }
 
--keep class com.jtechnoparks.fs.network.core.* { *; }
--keep class com.jtechnoparks.fs.network.core.*.* { *; }
+-keep class com.github.sugunasriram.fisloanlibv4.fiscode.network.core.* { *; }
+-keep class com.github.sugunasriram.fisloanlibv4.fiscode.network.core.*.* { *; }
 
--keep class com.jtechnoparks.fs.network.model.* { *; }
--keep class com.jtechnoparks.fs.network.model.*.* { *; }
+-keep class com.github.sugunasriram.fisloanlibv4.fiscode.network.model.* { *; }
+-keep class com.github.sugunasriram.fisloanlibv4.fiscode.network.model.*.* { *; }
 
--keep class com.jtechnoparks.fs.network.sse.* { *; }
--keep class com.jtechnoparks.fs.network.sse.*.* { *; }
+-keep class com.github.sugunasriram.fisloanlibv4.fiscode.network.sse.* { *; }
+-keep class com.github.sugunasriram.fisloanlibv4.fiscode.network.sse.*.* { *; }
 
 -keepclassmembers class * extends android.webkit.WebViewClient {
     public *;
