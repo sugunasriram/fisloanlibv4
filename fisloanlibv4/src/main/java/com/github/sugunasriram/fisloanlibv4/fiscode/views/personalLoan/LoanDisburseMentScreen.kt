@@ -64,14 +64,17 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan.LoanAgreementViewModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.webview.ConsentHandlerScreen
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import java.text.DecimalFormat
 import java.time.Duration
 import java.time.Period
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.max
 
 private val json1 = Json {
@@ -270,36 +273,72 @@ fun MoveToDashBoard(
                     loanId = sseData.data?.data?.id?.toString() ?: "0"
                 )
                 coroutineScope.launch {
-                    val response = loanAgreementViewModel.pfRetailSendDetails(
-                        createSessionRequest = CreateSessionRequest(
-                            type = "RET",
-                            subType = "ORDER_DETAILS",
-                            id = requestData.loanId,
-                            message = null
-                        ),
-                        context = context
-                    )
+                    val runId = System.currentTimeMillis()
+                    try {
+                        Log.d("Sugu", "[$runId] calling pfRetailSendDetails…")
+                        val response = loanAgreementViewModel.pfRetailSendDetails(
+                            createSessionRequest = CreateSessionRequest(
+                                type = "RET",
+                                subType = "ORDER_DETAILS",
+                                id = requestData.loanId,
+                                message = null
+                            ),
+                            context = context
+                        )
 
-                    Log.d("LoanDisbursementScreen", "Got response: $response")
-                    Log.d("LoanDisbursementScreen", "loanAmount: $loanAmount")
-                    Log.d("LoanDisbursementScreen", "interestRate: $interestRate")
-                    Log.d("LoanDisbursementScreen", "downpaymentAmount: $downpaymentAmountVal")
-                    Log.d("LoanDisbursementScreen", "tenure: $tenure")
-                    // Safely extract sessionId
-                    val sessionId = response?.data?.id
+                        Log.d("LoanDisbursementScreen", "Got response: $response")
+                        Log.d("LoanDisbursementScreen", "loanAmount: $loanAmount")
+                        Log.d("LoanDisbursementScreen", "interestRate: $interestRate")
+                        Log.d("LoanDisbursementScreen", "downpaymentAmount: $downpaymentAmountVal")
+                        Log.d("LoanDisbursementScreen", "tenure: $tenure")
+                        // Safely extract sessionId
+                        Log.d("LoanDisbursementScreen", "A: Got response: $response")
+                        Log.d("CreateSession", "A1: response class = ${response?.javaClass?.name}")
+                        Log.d("CreateSession", "A2: data.id = ${response?.data?.id}")
 
-                    // Use response
-                    LoanLib.callback?.invoke(
-                        LoanLib.LoanDetails(
-                            sessionId = sessionId ?: "",
+                        val sessionId = response?.data?.id?.trim().orEmpty()
+                        Log.d("CreateSession", "A3: sessionId='$sessionId'")
+
+
+                        Log.d("CreateSession", "A3: sessionId='$sessionId'")
+
+                        // Use response
+    //                    LoanLib.callback?.invoke(
+    //                        LoanLib.LoanDetails(
+    //                            sessionId = sessionId ?: "",
+    //                            interestRate = interestRate?.toDoubleOrNull() ?: 0.0,
+    //                            loanAmount = loanAmount?.toDoubleOrNull() ?: 0.0,
+    //                            tenure = tenure?.toInt() ?: 0,
+    //                            downpaymentAmount = downpaymentAmountVal
+    //                        )
+    //                    )
+
+    //                    (context as? Activity)?.finish()
+
+
+                        val details = LoanLib.LoanDetails(
+                            sessionId = sessionId,
                             interestRate = interestRate?.toDoubleOrNull() ?: 0.0,
                             loanAmount = loanAmount?.toDoubleOrNull() ?: 0.0,
-                            tenure = tenure?.toInt() ?: 0,
+                            tenure = tenure?.toIntOrNull() ?: 0,
                             downpaymentAmount = downpaymentAmountVal
                         )
-                    )
 
-                    (context as? Activity)?.finish()
+                        withContext(Dispatchers.Main) {
+                            if (sessionId.isNotEmpty()) {
+                                LoanLib.callback?.invoke(details)
+                                (context as? Activity)?.finish()
+                            } else {
+                                Log.w("LoanDisbursementScreen", "[$runId] Empty sessionId — not " +
+                                        "invoking callback")
+                            }
+                        }
+                    } catch (t: CancellationException) {
+                        Log.w("Sugu", "[$runId] cancelled", t)
+                        throw t
+                    } catch (t: Throwable) {
+                        Log.e("Sugu", "[$runId] failed", t)
+                    }
                 }
 
             } else {
