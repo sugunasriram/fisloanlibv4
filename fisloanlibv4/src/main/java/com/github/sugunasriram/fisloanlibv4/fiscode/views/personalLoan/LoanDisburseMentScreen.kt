@@ -145,6 +145,7 @@ fun LoanDisbursementScreen(
                 sseData = data,
                 loanAgreementViewModel = loanAgreementViewModel,
                 downpaymentAmountValue = downpaymentAmountValue,
+                pfCreateSessionInProgress = pfCreateSessionInProgress,
                 context = context
             )
         }
@@ -198,6 +199,7 @@ fun LoanDisbursementScreen(
                             sseData = sseData,
                             loanAgreementViewModel = loanAgreementViewModel,
                             downpaymentAmountValue = downpaymentAmountValue,
+                            pfCreateSessionInProgress = pfCreateSessionInProgress,
                             context = context
                         )
                     }
@@ -241,6 +243,7 @@ fun MoveToDashBoard(
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
     loanAgreementViewModel: LoanAgreementViewModel,
     downpaymentAmountValue: MutableState<String?> = mutableStateOf(null),
+    pfCreateSessionInProgress: Boolean,
     context: Context
 ) {
     var backPressedTime by remember { mutableLongStateOf(0L) }
@@ -431,6 +434,19 @@ fun MoveToDashBoard(
             FillTenureAndInterestRate(loanDetails)
             LoanDisbursementCard(loanDetails)
         }
+
+        if (pfCreateSessionInProgress) {
+            Log.d("Sugu test", "pfCreateSessionInProgress: showing loader")
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.4f)),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = appOrange)
+            }
+        }
+
     }
 }
 
@@ -597,6 +613,7 @@ fun MoveToDashBoardPreview() {
         fromFlow = "Purchase Finance",
         sseData = sseData,
         loanAgreementViewModel = LoanAgreementViewModel(),
+        pfCreateSessionInProgress = false,
         context = context
     )
 }
