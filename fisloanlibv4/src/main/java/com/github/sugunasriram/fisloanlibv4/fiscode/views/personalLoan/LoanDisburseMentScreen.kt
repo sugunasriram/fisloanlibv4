@@ -135,31 +135,6 @@ fun LoanDisbursementScreen(
         )
     }
 
-    if (pfCreateSessionInProgress){
-        Log.d("Sugu", "pfCreateSessionInProgress is true, showing loader")
-        Box(
-            Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.35f)),
-            contentAlignment = Alignment.Center
-        ) {
-            Surface(
-                shape = RoundedCornerShape(16.dp),
-                elevation = 8.dp
-            ) {
-                Column(
-                    Modifier
-                        .padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    CircularProgressIndicator()
-                    Spacer(Modifier.height(12.dp))
-                    Text("Please wait…")
-                }
-            }
-        }
-    }
-
     if (sseDataForPf != null) {
         android.util.Log.d("SSETRIGGER", "Inside  MoveToDashBoard")
         sseDataForPf?.let { data ->
@@ -189,7 +164,7 @@ fun LoanDisbursementScreen(
     var sseTransactionId = sseData?.data?.data?.txnId ?: sseData?.data?.data?.transactionId
         ?: sseData?.data?.data?.catalog?.txn_id
 
-    if (sseData == null || type == "INFO") {
+    if (sseData == null || type == "INFO"  || pfCreateSessionInProgress) {
         ProcessingAnimation(
             text = "Processing Please Wait...",
             image = R.raw.we_are_currently_processing_hour_glass

@@ -776,7 +776,7 @@ class LoanAgreementViewModel : BaseViewModel() {
     ): CreateSessionResponse? {
         return try {
             _pfCreateSessionInProgress.value = true
-            Log.d("Sugu", "_pfCreateSessionInProgress: $_pfCreateSessionInProgress")
+            Log.d("Sugu", "_pfCreateSessionInProgress: ${_pfCreateSessionInProgress.value}")
             ApiRepository.createSession(createSessionRequest = createSessionRequest)
         } catch (error: Throwable) {
             if (checkForAccessToken &&
@@ -790,17 +790,19 @@ class LoanAgreementViewModel : BaseViewModel() {
                         checkForAccessToken = false
                     )
                 } else {
-                    Log.d("Sugu", "_pfCreateSessionInProgress 1: $_pfCreateSessionInProgress")
 
                     _pfCreateSessionInProgress.value = false
                     _navigationToSignup.value = true
+                    Log.d("Sugu", "_pfCreateSessionInProgress 1: ${_pfCreateSessionInProgress.value}")
+
                     null
                 }
             } else {
-                Log.d("Sugu", "_pfCreateSessionInProgress 2 : $_pfCreateSessionInProgress")
 
                 _pfCreateSessionInProgress.value = false
                 handleFailure(error = error, context = context)
+                Log.d("Sugu", "_pfCreateSessionInProgress 2 : ${_pfCreateSessionInProgress.value}")
+
                 null
             }
         }
