@@ -765,12 +765,16 @@ class LoanAgreementViewModel : BaseViewModel() {
 //        }
 //    }
 
+    private val _pfCreateSessionInProgress = MutableStateFlow(false)
+    val pfCreateSessionInProgress: StateFlow<Boolean> = _pfCreateSessionInProgress
+
     suspend fun pfRetailSendDetails(
         createSessionRequest: CreateSessionRequest,
         context: Context,
         checkForAccessToken: Boolean = true
     ): CreateSessionResponse? {
         return try {
+            _pfCreateSessionInProgress.value = true
             ApiRepository.createSession(createSessionRequest = createSessionRequest)
         } catch (error: Throwable) {
             if (checkForAccessToken &&
@@ -784,10 +788,12 @@ class LoanAgreementViewModel : BaseViewModel() {
                         checkForAccessToken = false
                     )
                 } else {
+                    _pfCreateSessionInProgress.value = false
                     _navigationToSignup.value = true
                     null
                 }
             } else {
+                _pfCreateSessionInProgress.value = false
                 handleFailure(error = error, context = context)
                 null
             }

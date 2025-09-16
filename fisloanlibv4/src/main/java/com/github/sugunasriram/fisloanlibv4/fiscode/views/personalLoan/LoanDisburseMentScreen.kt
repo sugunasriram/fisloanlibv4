@@ -6,6 +6,17 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -17,6 +28,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -28,8 +42,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.github.sugunasriram.fisloanlibv4.LoanLib
 import com.github.sugunasriram.fisloanlibv4.R
+import com.github.sugunasriram.fisloanlibv4.fiscode.components.CenterProgress
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.DisplayCard
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.FixedTopBottomScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.components.LoaderAnimation
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.LoanDisburseAnimator
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.OnlyReadAbleText
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.ProcessingAnimation
@@ -96,6 +112,7 @@ fun LoanDisbursementScreen(
     val consentHandled by loanAgreementViewModel.consentHandled.collectAsState()
     val sseDataForPf by loanAgreementViewModel.sseData.collectAsState()
     var apiTriggered by remember { mutableStateOf(false) }
+    val pfCreateSessionInProgress by loanAgreementViewModel.pfCreateSessionInProgress.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -116,6 +133,30 @@ fun LoanDisbursementScreen(
             "LoanDisbursementScreen",
             "Sugu downpaymentAmountValue: ${downpaymentAmountValue.value}"
         )
+    }
+
+    if (pfCreateSessionInProgress){
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.35f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                elevation = 8.dp
+            ) {
+                Column(
+                    Modifier
+                        .padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator()
+                    Spacer(Modifier.height(12.dp))
+                    Text("Please wait…")
+                }
+            }
+        }
     }
 
     if (sseDataForPf != null) {
@@ -214,6 +255,7 @@ fun LoanDisbursementScreen(
 var loanAmount: String? = "0.0"
 var interestRate: String? = "0.0"
 var tenure: String? = "0"
+
 @Composable
 fun MoveToDashBoard(
     navController: NavHostController,
@@ -272,6 +314,7 @@ fun MoveToDashBoard(
                     downPaymentAmount = downpaymentAmountValue.value,
                     loanId = sseData.data?.data?.id?.toString() ?: "0"
                 )
+
                 coroutineScope.launch {
                     val runId = System.currentTimeMillis()
                     try {
@@ -285,6 +328,7 @@ fun MoveToDashBoard(
                             ),
                             context = context
                         )
+
 
                         Log.d("LoanDisbursementScreen", "Got response: $response")
                         Log.d("LoanDisbursementScreen", "loanAmount: $loanAmount")
