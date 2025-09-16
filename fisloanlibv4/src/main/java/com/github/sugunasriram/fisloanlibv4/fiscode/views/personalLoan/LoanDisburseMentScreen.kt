@@ -136,6 +136,7 @@ fun LoanDisbursementScreen(
     }
 
     if (pfCreateSessionInProgress){
+        Log.d("Sugu", "pfCreateSessionInProgress is true, showing loader")
         Box(
             Modifier
                 .fillMaxSize()

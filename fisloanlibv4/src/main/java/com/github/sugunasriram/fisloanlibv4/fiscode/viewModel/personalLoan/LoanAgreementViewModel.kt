@@ -1,6 +1,7 @@
 package com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -775,6 +776,7 @@ class LoanAgreementViewModel : BaseViewModel() {
     ): CreateSessionResponse? {
         return try {
             _pfCreateSessionInProgress.value = true
+            Log.d("Sugu", "_pfCreateSessionInProgress: $_pfCreateSessionInProgress")
             ApiRepository.createSession(createSessionRequest = createSessionRequest)
         } catch (error: Throwable) {
             if (checkForAccessToken &&
@@ -788,11 +790,15 @@ class LoanAgreementViewModel : BaseViewModel() {
                         checkForAccessToken = false
                     )
                 } else {
+                    Log.d("Sugu", "_pfCreateSessionInProgress 1: $_pfCreateSessionInProgress")
+
                     _pfCreateSessionInProgress.value = false
                     _navigationToSignup.value = true
                     null
                 }
             } else {
+                Log.d("Sugu", "_pfCreateSessionInProgress 2 : $_pfCreateSessionInProgress")
+
                 _pfCreateSessionInProgress.value = false
                 handleFailure(error = error, context = context)
                 null
