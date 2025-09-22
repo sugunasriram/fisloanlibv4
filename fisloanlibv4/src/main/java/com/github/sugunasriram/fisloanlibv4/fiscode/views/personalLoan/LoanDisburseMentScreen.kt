@@ -121,6 +121,7 @@ fun LoanDisbursementScreen(
 //    val sessionId by loanAgreementViewModel.sessionId.collectAsState("")
     val uiState by loanAgreementViewModel.createSessionState.collectAsStateWithLifecycle()
 
+    val hasFinished = remember { mutableStateOf(false) }
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -154,8 +155,8 @@ fun LoanDisbursementScreen(
     // One-shot side effect on SUCCESS
     LaunchedEffect(uiState) {
 //        val loanAmount = sseData.data?.data?.catalog?.item_price?.value  // or your fields
-        when (uiState) {
-            is LoanAgreementViewModel.CreateSessionUiState.Success -> {
+        if (uiState is LoanAgreementViewModel.CreateSessionUiState.Success && !hasFinished.value ) {
+            hasFinished.value = true
                 val downpaymentAmountVal = downpaymentAmountValue.value?.toIntOrNull() ?: 0
                 val loanTenureVal = loanTenureValue.value?.toIntOrNull() ?: 0
                 val sessionId = (uiState as LoanAgreementViewModel.CreateSessionUiState.Success).sessionId
@@ -168,8 +169,7 @@ fun LoanDisbursementScreen(
                 )
                 LoanLib.callback?.invoke(details)
                 (context as? Activity)?.finish()
-            }
-            else -> Unit
+
         }
     }
 
