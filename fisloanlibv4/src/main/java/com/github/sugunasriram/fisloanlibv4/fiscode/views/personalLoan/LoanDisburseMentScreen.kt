@@ -112,7 +112,8 @@ fun LoanDisbursementScreen(
 ) {
     var backPressedTime by remember { mutableLongStateOf(0L) }
     val context = LocalContext.current
-    val loanAgreementViewModel: LoanAgreementViewModel by lazy { LoanAgreementViewModel() }
+//    val loanAgreementViewModel: LoanAgreementViewModel by lazy { LoanAgreementViewModel() }
+    val loanAgreementViewModel: LoanAgreementViewModel = viewModel()
     val consentHandled by loanAgreementViewModel.consentHandled.collectAsState()
     val sseDataForPf by loanAgreementViewModel.sseData.collectAsState()
     var apiTriggered by remember { mutableStateOf(false) }

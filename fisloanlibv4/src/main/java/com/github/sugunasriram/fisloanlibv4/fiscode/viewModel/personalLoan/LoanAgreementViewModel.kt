@@ -900,6 +900,8 @@ class LoanAgreementViewModel : BaseViewModel() {
     fun createPfSession(loanId: String, context: Context) {
         viewModelScope.launch {
             _pfCreateSessionInProgress.value = true
+            Log.d("Sugu", "Starting session creation for loanId: $loanId, " +
+                    "pfCreateSessionInProgress:${_pfCreateSessionInProgress}")
             _createSessionState.value = CreateSessionUiState.Loading
             try {
                 val resp = withContext(Dispatchers.IO) {
@@ -926,6 +928,9 @@ class LoanAgreementViewModel : BaseViewModel() {
                 handleFailure(error = t, context = context)
                 _createSessionState.value = CreateSessionUiState.Error(t.message ?: "Unknown error")
             } finally {
+                Log.d("Sugu", "2 Starting session creation for loanId: $loanId, " +
+                        "pfCreateSessionInProgress:${_pfCreateSessionInProgress}")
+
                 _pfCreateSessionInProgress.value = false
             }
         }
