@@ -362,7 +362,7 @@ fun loadWebScreen(
                 tnc = "on",
                 endUse = "travel",
                 downpayment = downPaymentAmount,
-                loanTenure = pfloanTenure,
+                tenure = pfloanTenure,
                 merchantGst = "24AAHFC3011G1Z4",
                 merchantPan = "EGBQA2212D",
                 isFinancing = "on",
