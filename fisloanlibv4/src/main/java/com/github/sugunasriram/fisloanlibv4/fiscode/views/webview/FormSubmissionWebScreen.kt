@@ -56,6 +56,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.app.MainActivity
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.TopBar
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToBureauOffersScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFISExitScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFormRejectedScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.core.ApiPaths
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.SearchModel
@@ -189,7 +190,11 @@ fun FormSubmissionWebScreen(
         }
 
     var onAllActionsCompleted by remember { mutableStateOf(false) }
-    BackHandler { navigateApplyByCategoryScreen(navController) }
+    BackHandler {
+//        navigateApplyByCategoryScreen(navController)
+        navigateToFISExitScreen(navController, loanId="1234")
+
+    }
     Column(modifier = Modifier.fillMaxSize()) {
         TopBar(
             navController = navController,
@@ -222,8 +227,10 @@ fun FormSubmissionWebScreen(
                     }
                 }
 
+                val ctx = LocalContext.current;
+//                AndroidView(factory = { WebView(ctx) })
                 AndroidView(
-                    factory = { ctx ->
+                    factory = {
                         WebView(ctx).apply {
                             settings.setGeolocationEnabled(true)
                             // Sugu - need to test with other lender, commented for Lint

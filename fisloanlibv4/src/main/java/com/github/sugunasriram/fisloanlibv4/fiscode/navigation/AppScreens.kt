@@ -7,6 +7,7 @@ sealed class AppScreens(var route: String) {
     object OtpScreen : AppScreens("otp_screen")
     object UpdateProfileScreen : AppScreens("update_profile_screen")
     object ContactUsScreen : AppScreens("contact_us")
+    object FISExitCofirmationScreen : AppScreens("fis_exit_confirmation_screen")
     object ReportedIssuesScreen : AppScreens("reported_issues_screen")
     object LanguageSelectionScreen : AppScreens("language_selection_screen")
     object ApplyByCategoryScreen : AppScreens("apply_by_category_screen")

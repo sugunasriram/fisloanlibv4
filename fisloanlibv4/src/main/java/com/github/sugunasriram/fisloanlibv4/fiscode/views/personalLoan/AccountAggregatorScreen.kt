@@ -22,6 +22,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.components.LoanStatusTracker
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.StartingText
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.AppScreens
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFISExitScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToLoanProcessScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToSelectAccountAggregatorScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appBlack
@@ -106,7 +107,8 @@ fun onGoBackClick(navController: NavHostController, fromFlow: String, loanPurpos
             fromFlow = fromFlow
         )
     } else if (fromFlow.equals("Purchase Finance", ignoreCase = true)) {
-          navController.popBackStack()
+//          navController.popBackStack()
+        navigateToFISExitScreen(navController, loanId="1234")
     }
 }
 

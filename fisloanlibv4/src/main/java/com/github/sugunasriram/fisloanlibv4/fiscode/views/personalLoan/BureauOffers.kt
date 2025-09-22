@@ -99,6 +99,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import java.util.Locale
 import androidx.compose.material.Card
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFISExitScreen
 
 private val json = Json { prettyPrint = true }
 
@@ -132,7 +133,8 @@ fun BureauOffersScreen(
         }
     }
 
-    BackHandler { navigateApplyByCategoryScreen(navController) }
+//    BackHandler { navigateApplyByCategoryScreen(navController) }
+    BackHandler { navigateToFISExitScreen(navController, loanId="1234") }
 
     val webScreenLoading = webViewModel.webProgress.collectAsState()
     val webScreenLoaded = webViewModel.webViewLoaded.collectAsState()
@@ -327,6 +329,7 @@ fun loadWebScreen(
     endUse: String,
     purpose: String,
     downPaymentAmount: String = "",
+    pfloanTenure: String = "",
     productPrice: String = ""
 ) {
     if (fromFlow.equals("Personal Loan", ignoreCase = true)) {
@@ -359,6 +362,7 @@ fun loadWebScreen(
                 tnc = "on",
                 endUse = "travel",
                 downpayment = downPaymentAmount,
+                loanTenure = pfloanTenure,
                 merchantGst = "24AAHFC3011G1Z4",
                 merchantPan = "EGBQA2212D",
                 isFinancing = "on",

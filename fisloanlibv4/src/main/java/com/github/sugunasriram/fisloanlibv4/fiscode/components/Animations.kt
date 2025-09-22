@@ -57,6 +57,7 @@ import com.github.sugunasriram.fisloanlibv4.R
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateKycScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToBankDetailsScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFISExitScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToLoanAgreementScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToPfKycWebViewScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.LoanAgreement
@@ -227,7 +228,8 @@ fun AnimationLoader(
     val callback = remember {
         object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                navigateApplyByCategoryScreen(navController = navController)
+//                navigateApplyByCategoryScreen(navController = navController)
+                navigateToFISExitScreen(navController, loanId="1234")
             }
         }
     }
@@ -307,7 +309,8 @@ fun LoanAgreementAnimationLoader(
     val callback = remember {
         object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                navigateApplyByCategoryScreen(navController = navController)
+//                navigateApplyByCategoryScreen(navController = navController)
+                navigateToFISExitScreen(navController, loanId="1234")
             }
         }
     }
@@ -330,7 +333,8 @@ fun KycAnimation(
     responseItem: String,
     fromFlow: String
 ) {
-    BackHandler { navigateApplyByCategoryScreen(navController) }
+//    BackHandler { navigateApplyByCategoryScreen(navController) }
+    BackHandler { navigateToFISExitScreen(navController, loanId="1234") }
 
     LaunchedEffect(Unit) {
         delay(delayInMillis)
@@ -606,7 +610,8 @@ fun IncrementTimer(maxMinutes: Int = 5, navController: NavHostController) {
         }
         if (minutes >= maxMinutes) {
             Log.d("IncrementTimer", "Timer finished")
-            navigateApplyByCategoryScreen(navController)
+//            navigateApplyByCategoryScreen(navController)
+            navigateToFISExitScreen(navController, loanId="1234")
         }
     }
 

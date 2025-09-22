@@ -31,6 +31,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateTOUnexpec
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToBankDetailsScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToBankKycVerificationScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToDownPaymentScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFISExitScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToGstInvoiceDetailScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToGstInvoiceLoanOfferScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToGstInvoiceLoanScreen
@@ -63,7 +64,8 @@ fun LoanProcessScreen(
     fromFlow: String
 ) {
     BackHandler {
-        navigateApplyByCategoryScreen(navController)
+//        navigateApplyByCategoryScreen(navController)
+        navigateToFISExitScreen(navController, loanId="1234")
     }
     Log.d("test transactionId: ", transactionId)
 

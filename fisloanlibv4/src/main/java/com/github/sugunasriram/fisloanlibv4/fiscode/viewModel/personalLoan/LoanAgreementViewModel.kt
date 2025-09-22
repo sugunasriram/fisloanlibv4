@@ -27,9 +27,18 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.BaseViewModel
 import io.ktor.client.features.ResponseException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.collectLatest
+
+// For coroutines + the specific exception
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -766,54 +775,159 @@ class LoanAgreementViewModel : BaseViewModel() {
 //        }
 //    }
 
-    private val _pfCreateSessionInProgress = MutableStateFlow(false)
-    val pfCreateSessionInProgress: StateFlow<Boolean> = _pfCreateSessionInProgress
 
-    suspend fun pfRetailSendDetails(
-        createSessionRequest: CreateSessionRequest,
-        context: Context,
-        checkForAccessToken: Boolean = true
-    ): CreateSessionResponse? {
-        return try {
-            _pfCreateSessionInProgress.value = true
-            Log.d("Sugu", "_pfCreateSessionInProgress: ${_pfCreateSessionInProgress.value}")
-            ApiRepository.createSession(createSessionRequest = createSessionRequest)
-        } catch (error: Throwable) {
-            if (checkForAccessToken &&
-                error is ResponseException &&
-                error.response.status.value == 401
-            ) {
-                if (handleAuthGetAccessTokenApi()) {
-                    pfRetailSendDetails(
-                        createSessionRequest = createSessionRequest,
-                        context = context,
-                        checkForAccessToken = false
-                    )
-                } else {
+//        private val _pfCreateSessionInProgress = MutableStateFlow(false)
+//        val pfCreateSessionInProgress: StateFlow<Boolean> = _pfCreateSessionInProgress
+//
+//        private val _sessionId = MutableSharedFlow<String>(replay = 0)
+//        val sessionId: SharedFlow<String> = _sessionId
+//
+//        fun createSessionAndEmit(
+//            loanId: String,
+//            context: Context
+//        ) {
+//            viewModelScope.launch {
+//                _pfCreateSessionInProgress.value = true
+//                try {
+//                    val res = withContext(Dispatchers.IO) {
+//                        pfRetailSendDetails(
+//                            createSessionRequest = CreateSessionRequest(
+//                                type = "RET",
+//                                subType = "ORDER_DETAILS",
+//                                id = loanId
+//                            ),
+//                            context = context
+//                        )
+//                    }
+//                    val id = res?.data?.id?.trim().orEmpty()
+//                    if (id.isNotEmpty()) _sessionId.emit(id)
+//                    else Log.w("CreateSession", "Empty id from server")
+//                } catch (t: CancellationException) {
+//                    // Propagate if you want, but usually just log
+//                    Log.w("CreateSession", "Cancelled", t)
+//                } catch (t: Throwable) {
+//                    Log.e("CreateSession", "Failed", t)
+//                } finally {
+//                    _pfCreateSessionInProgress.value = false   // ✅ always hide loader
+//                }
+//            }
+//        }
+//
+//        // Your existing suspend, but ensure the loader is not left true on success.
+//        suspend fun pfRetailSendDetails(
+//            createSessionRequest: CreateSessionRequest,
+//            context: Context,
+//            checkForAccessToken: Boolean = true
+//        ): CreateSessionResponse? {
+//            return try {
+//                ApiRepository.createSession(createSessionRequest)
+//            } catch (error: Throwable) {
+//                if (checkForAccessToken &&
+//                    error is ResponseException &&
+//                    error.response.status.value == 401
+//                ) {
+//                    if (handleAuthGetAccessTokenApi()) {
+//                        pfRetailSendDetails(createSessionRequest, context, false)
+//                    } else {
+//                        _navigationToSignup.value = true
+//                        null
+//                    }
+//                } else {
+//                    handleFailure(error = error, context = context)
+//                    null
+//                }
+//            }
+//        }
 
-                    _pfCreateSessionInProgress.value = false
-                    _navigationToSignup.value = true
-                    Log.d("Sugu", "_pfCreateSessionInProgress 1: ${_pfCreateSessionInProgress.value}")
 
-                    null
-                }
-            } else {
+//    private val _pfCreateSessionInProgress = MutableStateFlow(false)
+//    val pfCreateSessionInProgress: StateFlow<Boolean> = _pfCreateSessionInProgress
 
-                _pfCreateSessionInProgress.value = false
-                handleFailure(error = error, context = context)
-                Log.d("Sugu", "_pfCreateSessionInProgress 2 : ${_pfCreateSessionInProgress.value}")
-
-                null
-            }
-        }
-    }
-
+//    suspend fun pfRetailSendDetails(
+//        createSessionRequest: CreateSessionRequest,
+//        context: Context,
+//        checkForAccessToken: Boolean = true
+//    ): CreateSessionResponse? {
+//        return try {
+//            _pfCreateSessionInProgress.value = true
+//            ApiRepository.createSession(createSessionRequest = createSessionRequest)
+//        } catch (error: Throwable) {
+//            if (checkForAccessToken &&
+//                error is ResponseException &&
+//                error.response.status.value == 401
+//            ) {
+//                if (handleAuthGetAccessTokenApi()) {
+//                    pfRetailSendDetails(
+//                        createSessionRequest = createSessionRequest,
+//                        context = context,
+//                        checkForAccessToken = false
+//                    )
+//                } else {
+//                    _pfCreateSessionInProgress.value = false
+//                    _navigationToSignup.value = true
+//                    null
+//                }
+//            } else {
+//                _pfCreateSessionInProgress.value = false
+//                handleFailure(error = error, context = context)
+//                null
+//            }
+//        }
+//    }
 
     private suspend fun handlepfRetailSendDetailsSuccess(response: CreateSessionResponse?) {
         withContext(Dispatchers.Main) {
 //            _pfOfferList.value = response
             _pfRetailDetailsSending.value = false
             _pfRetailDetailsSent.value = true
+        }
+    }
+
+    // UI state
+    sealed class CreateSessionUiState {
+        data object Idle : CreateSessionUiState()
+        data object Loading : CreateSessionUiState()
+        data class Success(val sessionId: String) : CreateSessionUiState()
+        data class Error(val message: String) : CreateSessionUiState()
+    }
+
+    private val _createSessionState = MutableStateFlow<CreateSessionUiState>(CreateSessionUiState.Idle)
+    val createSessionState: StateFlow<CreateSessionUiState> = _createSessionState
+
+    private val _pfCreateSessionInProgress = MutableStateFlow(false)
+    val pfCreateSessionInProgress: StateFlow<Boolean> = _pfCreateSessionInProgress
+
+    fun createPfSession(loanId: String, context: Context) {
+        viewModelScope.launch {
+            _pfCreateSessionInProgress.value = true
+            _createSessionState.value = CreateSessionUiState.Loading
+            try {
+                val resp = withContext(Dispatchers.IO) {
+                    ApiRepository.createSession(
+                        createSessionRequest = CreateSessionRequest(
+                            type = "RET",
+                            subType = "ORDER_DETAILS",
+                            id = loanId,
+                            message = null
+                        )
+                    )
+                }
+                delay(5000) //Sugu testing
+                val sessionId = resp?.data?.id?.trim().orEmpty()
+                if (sessionId.isNotEmpty()) {
+                    _createSessionState.value = CreateSessionUiState.Success(sessionId)
+                } else {
+                    _createSessionState.value = CreateSessionUiState.Error("Empty sessionId")
+                }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                // propagate cancellation; UI will leave anyway
+                throw e
+            } catch (t: Throwable) {
+                handleFailure(error = t, context = context)
+                _createSessionState.value = CreateSessionUiState.Error(t.message ?: "Unknown error")
+            } finally {
+                _pfCreateSessionInProgress.value = false
+            }
         }
     }
 

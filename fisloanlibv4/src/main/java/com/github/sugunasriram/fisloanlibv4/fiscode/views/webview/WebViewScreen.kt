@@ -43,6 +43,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCa
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateSignInPage
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToAAConsentApprovalScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToConsentSubmissionWebScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFISExitScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFormRejectedScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToLoanOffersListScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToWebViewFlowOneScreen
@@ -451,7 +452,8 @@ fun AAWebScreen(
             onBackClick = {
                 val currentTime = System.currentTimeMillis()
                 if (currentTime - backPressedTime < 3000) {
-                    navigateApplyByCategoryScreen(navController)
+//                    navigateApplyByCategoryScreen(navController)
+                    navigateToFISExitScreen(navController, loanId="1234")
                 } else {
                     CommonMethods().toastMessage(
                         context = context,

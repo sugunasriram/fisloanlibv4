@@ -31,6 +31,7 @@ import androidx.navigation.compose.rememberNavController
 import com.github.sugunasriram.fisloanlibv4.R
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateSignInPage
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFISExitScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.OrderPaymentStatusItem
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.OfferResponseItem
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.NegativeCommonScreen
@@ -257,13 +258,19 @@ class CommonMethods {
             navController = navController,
             errorText = stringResource(id = R.string.unable_to_connect),
             solutionText = stringResource(id = R.string.check_your_internet),
-            onClick = { navigateApplyByCategoryScreen(navController) }
+            onClick = {
+//                navigateApplyByCategoryScreen(navController)
+                navigateToFISExitScreen(navController, loanId="1234")
+            }
         )
     }
 
     @Composable
     fun ShowTimeOutErrorScreen(navController: NavHostController) {
-        RequestTimeOutScreen(navController, onClick = { navigateApplyByCategoryScreen(navController) })
+        RequestTimeOutScreen(navController, onClick = {
+        //    navigateApplyByCategoryScreen(navController)
+            navigateToFISExitScreen(navController, loanId="1234")
+        })
     }
 
     @Composable
@@ -272,13 +279,17 @@ class CommonMethods {
             navController = navController,
             errorText = stringResource(id = R.string.server_temporarily_unavailable),
             solutionText = stringResource(id = R.string.please_try_again_after_sometime),
-            onClick = { navigateApplyByCategoryScreen(navController) }
+//            onClick = { navigateApplyByCategoryScreen(navController) }
+            onClick = { navigateToFISExitScreen(navController, loanId="1234") }
         )
     }
 
     @Composable
     fun ShowUnexpectedErrorScreen(navController: NavHostController) {
-        UnexpectedErrorScreen(navController = navController, onClick = { navigateApplyByCategoryScreen(navController) })
+        UnexpectedErrorScreen(navController = navController,
+//            onClick = { navigateApplyByCategoryScreen(navController) }
+            onClick = { navigateToFISExitScreen(navController, loanId="1234") }
+        )
     }
 
     @Composable
@@ -293,7 +304,8 @@ class CommonMethods {
         UnexpectedErrorScreen(
             navController = navController,
             errorMsg = stringResource(id = R.string.middle_loan_error_message),
-            onClick = { navigateApplyByCategoryScreen(navController) }
+//            onClick = { navigateApplyByCategoryScreen(navController) }
+            onClick = { navigateToFISExitScreen(navController, loanId="1234") }
         )
 //        NoResponseFormLenders(navController = navController)
     }
@@ -309,7 +321,8 @@ class CommonMethods {
             errorMsgShow = errorMsgShow,
             errorText = errorMessage,
             errorMsg = stringResource(id = R.string.middle_loan_error_message),
-            onClick = { navigateApplyByCategoryScreen(navController) }
+//            onClick = { navigateApplyByCategoryScreen(navController) }
+            onClick = { navigateToFISExitScreen(navController, loanId="1234") }
         )
 //        NoResponseFormLenders(navController = navController)
     }
@@ -781,7 +794,10 @@ class CommonMethods {
 
             // oops-something went wrong
             unexpectedErrorScreen -> {
-                UnexpectedErrorScreen(navController = navController, onClick = { navigateApplyByCategoryScreen(navController = navController) })
+                UnexpectedErrorScreen(navController = navController,
+//                    onClick = { navigateApplyByCategoryScreen(navController = navController) }
+                    onClick = { navigateToFISExitScreen(navController, loanId="1234") }
+                )
             }
             // unAuthUser
             unAuthorizedUser -> {

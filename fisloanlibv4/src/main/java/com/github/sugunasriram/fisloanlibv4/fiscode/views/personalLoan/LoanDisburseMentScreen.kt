@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +38,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.startActivity
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -98,6 +100,8 @@ private val json1 = Json {
     ignoreUnknownKeys = true
 }
 
+var loanId = ""
+
 @SuppressLint("ResourceType")
 @Composable
 fun LoanDisbursementScreen(
@@ -113,10 +117,17 @@ fun LoanDisbursementScreen(
     val sseDataForPf by loanAgreementViewModel.sseData.collectAsState()
     var apiTriggered by remember { mutableStateOf(false) }
     val pfCreateSessionInProgress by loanAgreementViewModel.pfCreateSessionInProgress.collectAsState()
+//    val sessionId by loanAgreementViewModel.sessionId.collectAsState("")
+    val uiState by loanAgreementViewModel.createSessionState.collectAsStateWithLifecycle()
+
 
     val coroutineScope = rememberCoroutineScope()
 
-    BackHandler { navigateApplyByCategoryScreen(navController) }
+//    BackHandler { navigateApplyByCategoryScreen(navController) }
+    BackHandler {
+        loanAgreementViewModel.createPfSession(loanId, context)
+    }
+
 
     val sseViewModel: SSEViewModel = viewModel()
     val sseEvents by sseViewModel.events.collectAsState(initial = "")
@@ -125,14 +136,40 @@ fun LoanDisbursementScreen(
         sseViewModel.startListening(ApiPaths().sse)
     }
 
+
     val downpaymentAmountValue = remember { mutableStateOf<String?>(null) }
+    val loanTenureValue = remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
         downpaymentAmountValue.value = TokenManager.read("downpaymentAmount")
+        loanTenureValue.value = TokenManager.read("pfloanTenure")
         Log.d(
             "LoanDisbursementScreen",
-            "Sugu downpaymentAmountValue: ${downpaymentAmountValue.value}"
+            "Sugu downpaymentAmountValue: ${downpaymentAmountValue.value}, loanTure: " +
+                    "${loanTenureValue.value}"
         )
+    }
+
+    // One-shot side effect on SUCCESS
+    LaunchedEffect(uiState) {
+//        val loanAmount = sseData.data?.data?.catalog?.item_price?.value  // or your fields
+        when (uiState) {
+            is LoanAgreementViewModel.CreateSessionUiState.Success -> {
+                val downpaymentAmountVal = downpaymentAmountValue.value?.toIntOrNull() ?: 0
+                val loanTenureVal = loanTenureValue.value?.toIntOrNull() ?: 0
+                val sessionId = (uiState as LoanAgreementViewModel.CreateSessionUiState.Success).sessionId
+                val details = LoanLib.LoanDetails(
+                    sessionId = sessionId,
+                    interestRate = interestRate?.toDoubleOrNull() ?: 0.0,
+                    loanAmount =loanAmount?.toDoubleOrNull() ?: 0.0,
+                    tenure = loanTenureVal?.toInt()?:0,
+                    downpaymentAmount = downpaymentAmountVal
+                )
+                LoanLib.callback?.invoke(details)
+                (context as? Activity)?.finish()
+            }
+            else -> Unit
+        }
     }
 
     if (sseDataForPf != null) {
@@ -145,6 +182,7 @@ fun LoanDisbursementScreen(
                 sseData = data,
                 loanAgreementViewModel = loanAgreementViewModel,
                 downpaymentAmountValue = downpaymentAmountValue,
+                loanTenureValue = loanTenureValue,
                 pfCreateSessionInProgress = pfCreateSessionInProgress,
                 context = context
             )
@@ -199,6 +237,7 @@ fun LoanDisbursementScreen(
                             sseData = sseData,
                             loanAgreementViewModel = loanAgreementViewModel,
                             downpaymentAmountValue = downpaymentAmountValue,
+                            loanTenureValue = loanTenureValue,
                             pfCreateSessionInProgress = pfCreateSessionInProgress,
                             context = context
                         )
@@ -234,6 +273,286 @@ var loanAmount: String? = "0.0"
 var interestRate: String? = "0.0"
 var tenure: String? = "0"
 
+//@Composable
+//fun MoveToDashBoard(
+//    navController: NavHostController,
+//    id: String,
+//    fromFlow: String,
+//    sseData: SSEData,
+//    coroutineScope: CoroutineScope = rememberCoroutineScope(),
+//    loanAgreementViewModel: LoanAgreementViewModel,
+//    downpaymentAmountValue: MutableState<String?> = mutableStateOf(null),
+//    pfCreateSessionInProgress: Boolean,
+//    context: Context
+//) {
+//    var backPressedTime by remember { mutableLongStateOf(0L) }
+//    FixedTopBottomScreen(
+//        navController = navController,
+//        topBarBackgroundColor = appOrange,
+//        topBarText = stringResource(R.string.loan_status),
+//        showBackButton = true,
+//        onBackClick = { navigateApplyByCategoryScreen(navController) },
+//        showBottom = true,
+//        showSingleButton = true,
+//        primaryButtonText = stringResource(R.string.home),
+//        onPrimaryButtonClick = {
+//            if (fromFlow == "Purchase Finance") {
+////                val downpaymentAmountVal = downpaymentAmountValue.value?.toIntOrNull() ?: 0
+////
+////                CreateSessionRequestData(
+////                    downPaymentAmount = downpaymentAmountValue.value,
+////                    loanId = sseData.data?.data?.id?.toString() ?: "0"
+////                ).let { requestData ->
+////                    loanAgreementViewModel.pfRetailSendDetails(
+////                        createSessionRequest = CreateSessionRequest(
+////                            type = "RET",
+////                            subType = "ORDER_DETAILS",
+////                            id = requestData.loanId,
+////                            message = null
+////                        ),
+////                        context = context
+////                    )
+////                }
+////                coroutineScope.launch {
+////                    delay(5000)
+////                }
+////                Log.d(
+////                    "LoanDisbursementScreen",
+////                    "Sugu downpaymentAmountVal: $downpaymentAmountVal, loanAmount: $loanAmount, " +
+////                            "interestRate: $interestRate, tenure: $tenure"
+////                )
+////                LoanLib.callback?.invoke(LoanLib.LoanDetails(interestRate = interestRate?.toDoubleOrNull() ?: 0.0,
+////                    loanAmount = loanAmount?.toDoubleOrNull() ?: 0.0,
+////                    tenure = tenure?.toInt()?:0, downpaymentAmount = downpaymentAmountVal))
+////                (context as? Activity)?.finish()
+//
+//
+//                //2nd try
+////                val downpaymentAmountVal = downpaymentAmountValue.value?.toIntOrNull() ?: 0
+////
+////                val requestData = CreateSessionRequestData(
+////                    downPaymentAmount = downpaymentAmountValue.value,
+////                    loanId = sseData.data?.data?.id?.toString() ?: "0"
+////                )
+////
+////                coroutineScope.launch {
+////                    val runId = System.currentTimeMillis()
+////                    try {
+////                        Log.d("Sugu", "[$runId] calling pfRetailSendDetails…")
+////                        val response = loanAgreementViewModel.pfRetailSendDetails(
+////                            createSessionRequest = CreateSessionRequest(
+////                                type = "RET",
+////                                subType = "ORDER_DETAILS",
+////                                id = requestData.loanId,
+////                                message = null
+////                            ),
+////                            context = context
+////                        )
+////
+////
+////                        Log.d("LoanDisbursementScreen", "Got response: $response")
+////                        Log.d("LoanDisbursementScreen", "loanAmount: $loanAmount")
+////                        Log.d("LoanDisbursementScreen", "interestRate: $interestRate")
+////                        Log.d("LoanDisbursementScreen", "downpaymentAmount: $downpaymentAmountVal")
+////                        Log.d("LoanDisbursementScreen", "tenure: $tenure")
+////                        // Safely extract sessionId
+////                        Log.d("LoanDisbursementScreen", "A: Got response: $response")
+////                        Log.d("CreateSession", "A1: response class = ${response?.javaClass?.name}")
+////                        Log.d("CreateSession", "A2: data.id = ${response?.data?.id}")
+////
+////                        val sessionId = response?.data?.id?.trim().orEmpty()
+////                        Log.d("CreateSession", "A3: sessionId='$sessionId'")
+////
+////
+////                        Log.d("CreateSession", "A3: sessionId='$sessionId'")
+////
+////                        // Use response
+////    //                    LoanLib.callback?.invoke(
+////    //                        LoanLib.LoanDetails(
+////    //                            sessionId = sessionId ?: "",
+////    //                            interestRate = interestRate?.toDoubleOrNull() ?: 0.0,
+////    //                            loanAmount = loanAmount?.toDoubleOrNull() ?: 0.0,
+////    //                            tenure = tenure?.toInt() ?: 0,
+////    //                            downpaymentAmount = downpaymentAmountVal
+////    //                        )
+////    //                    )
+////
+////    //                    (context as? Activity)?.finish()
+////
+////
+////                        val details = LoanLib.LoanDetails(
+////                            sessionId = sessionId,
+////                            interestRate = interestRate?.toDoubleOrNull() ?: 0.0,
+////                            loanAmount = loanAmount?.toDoubleOrNull() ?: 0.0,
+////                            tenure = tenure?.toIntOrNull() ?: 0,
+////                            downpaymentAmount = downpaymentAmountVal
+////                        )
+////
+////                        withContext(Dispatchers.Main) {
+////                            if (sessionId.isNotEmpty()) {
+////                                LoanLib.callback?.invoke(details)
+////                                (context as? Activity)?.finish()
+////                            } else {
+////                                Log.w("LoanDisbursementScreen", "[$runId] Empty sessionId — not " +
+////                                        "invoking callback")
+////                            }
+////                        }
+////                    } catch (t: CancellationException) {
+////                        Log.w("Sugu", "[$runId] cancelled", t)
+////                        throw t
+////                    } catch (t: Throwable) {
+////                        Log.e("Sugu", "[$runId] failed", t)
+////                    }
+////                }
+//
+////
+//                val downpaymentAmountVal = downpaymentAmountValue.value?.toIntOrNull() ?: 0
+//                val requestData = CreateSessionRequestData(
+//                    downPaymentAmount = downpaymentAmountValue.value,
+//                    loanId = sseData.data?.data?.id?.toString() ?: "0"
+//                )
+//                coroutineScope.launch {
+//                    val runId = System.currentTimeMillis()
+//                    try {
+//                        Log.d("Sugu", "[$runId] calling pfRetailSendDetails…")
+//                        val response = loanAgreementViewModel.pfRetailSendDetails(
+//                            createSessionRequest = CreateSessionRequest(
+//                                type = "RET",
+//                                subType = "ORDER_DETAILS",
+//                                id = requestData.loanId,
+//                                message = null
+//                            ),
+//                            context = context
+//                        )
+//                        Log.d("LoanDisbursementScreen", "Got response: $response")
+//                        Log.d("LoanDisbursementScreen", "loanAmount: $loanAmount")
+//                        Log.d("LoanDisbursementScreen", "interestRate: $interestRate")
+//                        Log.d("LoanDisbursementScreen", "downpaymentAmount: $downpaymentAmountVal")
+//                        Log.d("LoanDisbursementScreen", "tenure: $tenure")
+//                        // Safely extract sessionId
+//                        Log.d("LoanDisbursementScreen", "A: Got response: $response")
+//                        Log.d("CreateSession", "A1: response class = ${response?.javaClass?.name}")
+//                        Log.d("CreateSession", "A2: data.id = ${response?.data?.id}")
+//
+//                        val sessionId = response?.data?.id?.trim().orEmpty()
+//                        Log.d("CreateSession", "A3: sessionId='$sessionId'")
+//
+//
+//                        Log.d("CreateSession", "A3: sessionId='$sessionId'")
+//
+//                        val details = LoanLib.LoanDetails(
+//                            sessionId = sessionId,
+//                            interestRate = interestRate?.toDoubleOrNull() ?: 0.0,
+//                            loanAmount = loanAmount?.toDoubleOrNull() ?: 0.0,
+//                            tenure = tenure?.toIntOrNull() ?: 0,
+//                            downpaymentAmount = downpaymentAmountVal
+//                        )
+//
+//                        withContext(Dispatchers.Main) {
+//                            if (sessionId.isNotEmpty()) {
+//                                LoanLib.callback?.invoke(details)
+//                                (context as? Activity)?.finish()
+//                            } else {
+//                                Log.w("LoanDisbursementScreen", "[$runId] Empty sessionId — not " +
+//                                        "invoking callback")
+//                            }
+//                        }
+//                    } catch (t: CancellationException) {
+//                        Log.w("Sugu", "[$runId] cancelled", t)
+//                        throw t
+//                    } catch (t: Throwable) {
+//                        Log.e("Sugu", "[$runId] failed", t)
+//                    }
+//                }
+//            } else {
+//                navigateToLoanSummaryScreen(
+//                    navController = navController,
+//                    id = id,
+//                    consentHandler = "1",
+//                    fromFlow = fromFlow
+//                )
+//            }
+//
+//        },
+//        backgroundColor = appWhite
+//    ) {
+//        LoanDisburseAnimator()
+////        val totalDisburseAmount = sseData.data?.data?.catalog?.item_price?.value
+//        val totalDisburseAmount = sseData.data?.data?.catalog?.quote_breakup
+//            ?.firstOrNull {
+//                val formattedTitle = it.title?.let { title -> CommonMethods().displayFormattedText(title) }
+//                formattedTitle.equals("Net Disbursed Amount", ignoreCase = true)
+//            }
+//            ?.value
+//        RegisterText(
+//            text = stringResource(id = R.string.loan_amount_is_approved),
+//            style = normal18Text700,
+//            textColor = appBlack,
+//            top = 20.dp,
+//            bottom = 20.dp
+//        )
+//
+//        if (totalDisburseAmount != null) {
+//            RegisterText(
+//                text = totalDisburseAmount,
+//                style = normal36Text700,
+//                textColor = appGreen,
+//                bottom = 20.dp
+//            )
+//        }
+//        RegisterText(
+//            text = stringResource(id = R.string.amount_disburse_time),
+//            style = normal16Text400,
+//            textColor = hintGray,
+//            start = 20.dp,
+//            end = 20.dp
+//        )
+//        val loanDetails = sseData.data?.data?.catalog
+//        if (loanDetails != null) {
+//            var loanDetailsStr = stringResource(id = R.string.loan_details) + "\n\n"
+//
+//            loanDetails.quote_breakup?.forEach { quoteBreakUp ->
+//                quoteBreakUp.let {
+//                    it.title?.let { title ->
+//                        it.value?.let { description ->
+//                            loanDetailsStr += title + " : " + description + "\n"
+//                        }
+//                    }
+//                }
+//            }
+//
+//            SpaceBetweenTextIcon(
+//                text = stringResource(id = R.string.loan_details).uppercase(),
+//                style = normal18Text700,
+//                textColor = appOrange,
+//                image = R.drawable.share,
+//                start = 24.dp,
+//                end = 24.dp
+//            ) {
+//                shareContent(context, loanDetailsStr)
+//            }
+//            FillTenureAndInterestRate(loanDetails)
+//            LoanDisbursementCard(loanDetails)
+//        }
+//
+//        if (pfCreateSessionInProgress) {
+//            Log.d("Sugu test", "pfCreateSessionInProgress: showing loader")
+//            Box(
+//                modifier = Modifier
+//                    .fillMaxSize()
+//                    .background(Color.Black.copy(alpha = 0.4f)),
+//                contentAlignment = Alignment.Center
+//            ) {
+//                CircularProgressIndicator(color = appOrange)
+//            }
+//        }
+//
+//    }
+//}
+
+
+@OptIn(ExperimentalFoundationApi::class)
+@SuppressLint("ResourceType")
 @Composable
 fun MoveToDashBoard(
     navController: NavHostController,
@@ -243,6 +562,7 @@ fun MoveToDashBoard(
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
     loanAgreementViewModel: LoanAgreementViewModel,
     downpaymentAmountValue: MutableState<String?> = mutableStateOf(null),
+    loanTenureValue: MutableState<String?> = mutableStateOf(null),
     pfCreateSessionInProgress: Boolean,
     context: Context
 ) {
@@ -252,118 +572,18 @@ fun MoveToDashBoard(
         topBarBackgroundColor = appOrange,
         topBarText = stringResource(R.string.loan_status),
         showBackButton = true,
-        onBackClick = { navigateApplyByCategoryScreen(navController) },
+//        onBackClick = { navigateApplyByCategoryScreen(navController) },
+        onBackClick = {
+            loanId = sseData.data?.data?.id?.toString().orEmpty()
+            loanAgreementViewModel.createPfSession(loanId, context) },
         showBottom = true,
         showSingleButton = true,
         primaryButtonText = stringResource(R.string.home),
         onPrimaryButtonClick = {
             if (fromFlow == "Purchase Finance") {
-//                val downpaymentAmountVal = downpaymentAmountValue.value?.toIntOrNull() ?: 0
-//
-//                CreateSessionRequestData(
-//                    downPaymentAmount = downpaymentAmountValue.value,
-//                    loanId = sseData.data?.data?.id?.toString() ?: "0"
-//                ).let { requestData ->
-//                    loanAgreementViewModel.pfRetailSendDetails(
-//                        createSessionRequest = CreateSessionRequest(
-//                            type = "RET",
-//                            subType = "ORDER_DETAILS",
-//                            id = requestData.loanId,
-//                            message = null
-//                        ),
-//                        context = context
-//                    )
-//                }
-//                coroutineScope.launch {
-//                    delay(5000)
-//                }
-//                Log.d(
-//                    "LoanDisbursementScreen",
-//                    "Sugu downpaymentAmountVal: $downpaymentAmountVal, loanAmount: $loanAmount, " +
-//                            "interestRate: $interestRate, tenure: $tenure"
-//                )
-//                LoanLib.callback?.invoke(LoanLib.LoanDetails(interestRate = interestRate?.toDoubleOrNull() ?: 0.0,
-//                    loanAmount = loanAmount?.toDoubleOrNull() ?: 0.0,
-//                    tenure = tenure?.toInt()?:0, downpaymentAmount = downpaymentAmountVal))
-//                (context as? Activity)?.finish()
 
-                val downpaymentAmountVal = downpaymentAmountValue.value?.toIntOrNull() ?: 0
-
-                val requestData = CreateSessionRequestData(
-                    downPaymentAmount = downpaymentAmountValue.value,
-                    loanId = sseData.data?.data?.id?.toString() ?: "0"
-                )
-
-                coroutineScope.launch {
-                    val runId = System.currentTimeMillis()
-                    try {
-                        Log.d("Sugu", "[$runId] calling pfRetailSendDetails…")
-                        val response = loanAgreementViewModel.pfRetailSendDetails(
-                            createSessionRequest = CreateSessionRequest(
-                                type = "RET",
-                                subType = "ORDER_DETAILS",
-                                id = requestData.loanId,
-                                message = null
-                            ),
-                            context = context
-                        )
-
-
-                        Log.d("LoanDisbursementScreen", "Got response: $response")
-                        Log.d("LoanDisbursementScreen", "loanAmount: $loanAmount")
-                        Log.d("LoanDisbursementScreen", "interestRate: $interestRate")
-                        Log.d("LoanDisbursementScreen", "downpaymentAmount: $downpaymentAmountVal")
-                        Log.d("LoanDisbursementScreen", "tenure: $tenure")
-                        // Safely extract sessionId
-                        Log.d("LoanDisbursementScreen", "A: Got response: $response")
-                        Log.d("CreateSession", "A1: response class = ${response?.javaClass?.name}")
-                        Log.d("CreateSession", "A2: data.id = ${response?.data?.id}")
-
-                        val sessionId = response?.data?.id?.trim().orEmpty()
-                        Log.d("CreateSession", "A3: sessionId='$sessionId'")
-
-
-                        Log.d("CreateSession", "A3: sessionId='$sessionId'")
-
-                        // Use response
-    //                    LoanLib.callback?.invoke(
-    //                        LoanLib.LoanDetails(
-    //                            sessionId = sessionId ?: "",
-    //                            interestRate = interestRate?.toDoubleOrNull() ?: 0.0,
-    //                            loanAmount = loanAmount?.toDoubleOrNull() ?: 0.0,
-    //                            tenure = tenure?.toInt() ?: 0,
-    //                            downpaymentAmount = downpaymentAmountVal
-    //                        )
-    //                    )
-
-    //                    (context as? Activity)?.finish()
-
-
-                        val details = LoanLib.LoanDetails(
-                            sessionId = sessionId,
-                            interestRate = interestRate?.toDoubleOrNull() ?: 0.0,
-                            loanAmount = loanAmount?.toDoubleOrNull() ?: 0.0,
-                            tenure = tenure?.toIntOrNull() ?: 0,
-                            downpaymentAmount = downpaymentAmountVal
-                        )
-
-                        withContext(Dispatchers.Main) {
-                            if (sessionId.isNotEmpty()) {
-                                LoanLib.callback?.invoke(details)
-                                (context as? Activity)?.finish()
-                            } else {
-                                Log.w("LoanDisbursementScreen", "[$runId] Empty sessionId — not " +
-                                        "invoking callback")
-                            }
-                        }
-                    } catch (t: CancellationException) {
-                        Log.w("Sugu", "[$runId] cancelled", t)
-                        throw t
-                    } catch (t: Throwable) {
-                        Log.e("Sugu", "[$runId] failed", t)
-                    }
-                }
-
+                loanId = sseData.data?.data?.id?.toString().orEmpty()
+                loanAgreementViewModel.createPfSession(loanId, context)
             } else {
                 navigateToLoanSummaryScreen(
                     navController = navController,
@@ -376,79 +596,85 @@ fun MoveToDashBoard(
         },
         backgroundColor = appWhite
     ) {
-        LoanDisburseAnimator()
-//        val totalDisburseAmount = sseData.data?.data?.catalog?.item_price?.value
-        val totalDisburseAmount = sseData.data?.data?.catalog?.quote_breakup
-            ?.firstOrNull {
-                val formattedTitle = it.title?.let { title -> CommonMethods().displayFormattedText(title) }
-                formattedTitle.equals("Net Disbursed Amount", ignoreCase = true)
-            }
-            ?.value
-        RegisterText(
-            text = stringResource(id = R.string.loan_amount_is_approved),
-            style = normal18Text700,
-            textColor = appBlack,
-            top = 20.dp,
-            bottom = 20.dp
-        )
+        if (pfCreateSessionInProgress) {
+//            Box(
+//                Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.4f)),
+//                contentAlignment = Alignment.Center
+//            ) { CircularProgressIndicator(color = appOrange)
+//
+//            }
+            ProcessingAnimation(
+                text = "Processing Please Wait...",
+                image = R.raw.we_are_currently_processing_hour_glass
+            )
 
-        if (totalDisburseAmount != null) {
+        }else {
+            LoanDisburseAnimator()
+//        val totalDisburseAmount = sseData.data?.data?.catalog?.item_price?.value
+            val totalDisburseAmount = sseData.data?.data?.catalog?.quote_breakup
+                ?.firstOrNull {
+                    val formattedTitle =
+                        it.title?.let { title -> CommonMethods().displayFormattedText(title) }
+                    formattedTitle.equals("Net Disbursed Amount", ignoreCase = true)
+                }
+                ?.value
             RegisterText(
-                text = totalDisburseAmount,
-                style = normal36Text700,
-                textColor = appGreen,
+                text = stringResource(id = R.string.loan_amount_is_approved),
+                style = normal18Text700,
+                textColor = appBlack,
+                top = 20.dp,
                 bottom = 20.dp
             )
-        }
-        RegisterText(
-            text = stringResource(id = R.string.amount_disburse_time),
-            style = normal16Text400,
-            textColor = hintGray,
-            start = 20.dp,
-            end = 20.dp
-        )
-        val loanDetails = sseData.data?.data?.catalog
-        if (loanDetails != null) {
-            var loanDetailsStr = stringResource(id = R.string.loan_details) + "\n\n"
 
-            loanDetails.quote_breakup?.forEach { quoteBreakUp ->
-                quoteBreakUp.let {
-                    it.title?.let { title ->
-                        it.value?.let { description ->
-                            loanDetailsStr += title + " : " + description + "\n"
+            if (totalDisburseAmount != null) {
+                RegisterText(
+                    text = totalDisburseAmount,
+                    style = normal36Text700,
+                    textColor = appGreen,
+                    bottom = 20.dp
+                )
+            }
+            RegisterText(
+                text = stringResource(id = R.string.amount_disburse_time),
+                style = normal16Text400,
+                textColor = hintGray,
+                start = 20.dp,
+                end = 20.dp
+            )
+            val loanDetails = sseData.data?.data?.catalog
+            if (loanDetails != null) {
+                var loanDetailsStr = stringResource(id = R.string.loan_details) + "\n\n"
+
+                loanDetails.quote_breakup?.forEach { quoteBreakUp ->
+                    quoteBreakUp.let {
+                        it.title?.let { title ->
+                            it.value?.let { description ->
+                                loanDetailsStr += title + " : " + description + "\n"
+                            }
                         }
                     }
                 }
-            }
 
-            SpaceBetweenTextIcon(
-                text = stringResource(id = R.string.loan_details).uppercase(),
-                style = normal18Text700,
-                textColor = appOrange,
-                image = R.drawable.share,
-                start = 24.dp,
-                end = 24.dp
-            ) {
-                shareContent(context, loanDetailsStr)
+                SpaceBetweenTextIcon(
+                    text = stringResource(id = R.string.loan_details).uppercase(),
+                    style = normal18Text700,
+                    textColor = appOrange,
+                    image = R.drawable.share,
+                    start = 24.dp,
+                    end = 24.dp
+                ) {
+                    shareContent(context, loanDetailsStr)
+                }
+                FillTenureAndInterestRate(loanDetails)
+                LoanDisbursementCard(loanDetails)
             }
-            FillTenureAndInterestRate(loanDetails)
-            LoanDisbursementCard(loanDetails)
         }
 
-        if (pfCreateSessionInProgress) {
-            Log.d("Sugu test", "pfCreateSessionInProgress: showing loader")
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.4f)),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(color = appOrange)
-            }
-        }
+
 
     }
 }
+
 
 
 private fun parseISOTermToMonths(term: String?): Int? {
@@ -613,7 +839,7 @@ fun MoveToDashBoardPreview() {
         fromFlow = "Purchase Finance",
         sseData = sseData,
         loanAgreementViewModel = LoanAgreementViewModel(),
-        pfCreateSessionInProgress = false,
+        pfCreateSessionInProgress = true,
         context = context
     )
 }

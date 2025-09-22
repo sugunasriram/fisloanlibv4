@@ -31,6 +31,7 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -58,6 +59,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.app.MainActivity
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.TopBar
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToAnimationLoader
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFISExitScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFormRejectedScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToLoanAgreementAnimationLoader
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToLoanAgreementScreen
@@ -76,6 +78,7 @@ private var uploadMessage: ValueCallback<Uri>? = null
 var mGeoLocationRequestOriginRepayment: String? = null
 var mGeoLocationCallbackRepayment: GeolocationPermissions.Callback? = null
 
+@RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun RepaymentWebScreen(
@@ -216,12 +219,14 @@ fun RepaymentWebScreen(
     }
 
     var onAllActionsCompleted by remember { mutableStateOf(false) }
-    BackHandler { navigateApplyByCategoryScreen(navController) }
+//    BackHandler { navigateApplyByCategoryScreen(navController) }
+    BackHandler { navigateToFISExitScreen(navController, loanId="1234") }
     Column(modifier = Modifier.fillMaxSize()) {
         TopBar(
             navController = navController,
             onBackClick = {
-                navigateApplyByCategoryScreen(navController)
+//                navigateApplyByCategoryScreen(navController)
+                navigateToFISExitScreen(navController, loanId="1234")
 //                navigateToBankDetailsScreen(
 //                navController = navController, id = id, fromFlow = fromFlow,
 //                closeCurrent = false)

@@ -13,13 +13,15 @@ import com.github.sugunasriram.fisloanlibv4.R
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.FixedTopBottomScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.StartingText
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFISExitScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appWhite
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.failureRed
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normalSerif32Text500
 
 @Composable
 fun KYCFailedScreen(navController: NavHostController) {
-    BackHandler { navigateApplyByCategoryScreen(navController) }
+//    BackHandler { navigateApplyByCategoryScreen(navController) }
+    BackHandler { navigateToFISExitScreen(navController, loanId="1234") }
     FixedTopBottomScreen(
         navController = navController,
         backgroundColor = appWhite,

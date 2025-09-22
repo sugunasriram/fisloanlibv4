@@ -43,6 +43,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.components.MultipleColorText
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.StartingText
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateSignInPage
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFISExitScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToLoanOffersListDetailScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.pf.PfOffer
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.pf.PfOfferResponseItem
@@ -74,7 +75,9 @@ fun PfLoanOfferScreen(
     BackHandler {
         val currentTime = System.currentTimeMillis()
         if (currentTime - backPressedTime < 2000) {
-            navigateApplyByCategoryScreen(navController)
+//            navigateApplyByCategoryScreen(navController)
+            navigateToFISExitScreen(navController, loanId="1234")
+
         } else {
             CommonMethods().toastMessage(
                 context = context,

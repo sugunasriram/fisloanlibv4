@@ -21,6 +21,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.views.auth.SignInScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.auth.SpalashScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.auth.UpdateProfileScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.authauth.ContactUsScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.FISExitCofirmationScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.documents.AboutUsScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.documents.PrivacyPolicyScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.documents.TermsConditionsScreen
@@ -107,7 +108,6 @@ fun NavGraphBuilder.mobileNavigation(
             }
         }
 
-//        composable(AppScreens.UpdateProfileScreen.route) {
         composable("${AppScreens.UpdateProfileScreen.route}/{fromFlow}") { backStackEntry ->
             val fromFlow = backStackEntry.arguments?.getString("fromFlow")
             if (fromFlow != null) {
@@ -120,6 +120,13 @@ fun NavGraphBuilder.mobileNavigation(
 
         composable(AppScreens.ContactUsScreen.route) {
             ContactUsScreen(navController = navController)
+        }
+
+        composable("${AppScreens.FISExitCofirmationScreen.route}/{loanId}") { backStack ->
+            val loanId = backStack.arguments?.getString("loanId")
+            if (loanId != null) {
+                FISExitCofirmationScreen(navController = navController, loanId = loanId)
+            }
         }
 
         composable(AppScreens.ReportedIssuesScreen.route) {

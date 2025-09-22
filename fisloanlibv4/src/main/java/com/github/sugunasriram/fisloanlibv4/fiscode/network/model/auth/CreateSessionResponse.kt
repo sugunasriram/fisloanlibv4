@@ -11,12 +11,13 @@ data class CreateSessionResponse(
 	val statusCode: Int,
 	val status: Boolean,
 	val message: String,
-	val data: data
+	@SerialName("data")
+	val data: CreateSessionData
 ) : java.io.Serializable
 
 
 @Serializable
-data class data(
+data class CreateSessionData(
 	val id: String
 ) : java.io.Serializable
 

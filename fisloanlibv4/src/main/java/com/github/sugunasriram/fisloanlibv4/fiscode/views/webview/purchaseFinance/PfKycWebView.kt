@@ -55,6 +55,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.components.TopBar
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToAnimationLoader
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToBankKycVerificationScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFISExitScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFormRejectedScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToLoanAgreementScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToLoanProcessScreen
@@ -185,7 +186,8 @@ fun ProceedWithKYCProcess(
     ) {
         TopBar(
             navController = navController,
-            onBackClick = { navigateApplyByCategoryScreen(navController) },
+//            onBackClick = { navigateApplyByCategoryScreen(navController) },
+            onBackClick = { navigateToFISExitScreen(navController, loanId="1234") },
             topBarText = "Kyc Verification"
         )
 //        WebViewTopBar(navController, title = "Kyc Verification")

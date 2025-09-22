@@ -800,4 +800,10 @@
     <string name="your_issue_has_been_submitted">Your issue has been submitted.</string>
     <string name="by_giving_your_cic_credit_information">By giving your CIC (Credit Information Company) consent, you\'re allowing us to securely access your credit report from credit bureaus like CIBIL or Experian.\nThis helps our partner lenders check your creditworthiness and offer the best loan options for you.\nDon’t worry—this doesn’t affect your credit score.</string>
     <string name="my_downpayment_amount">Down Payment Amount</string>
+    <string name="your_loan_in_progress">Your loan is in progress. Exiting now may cancel your
+        application. Do you want to continue?</string>
+    <string name="continue_">Continue</string>
+    <string name="abort">Abort</string>
+    <string name="exit_loan_process">Exit Loan Process?</string>
+
 </resources>

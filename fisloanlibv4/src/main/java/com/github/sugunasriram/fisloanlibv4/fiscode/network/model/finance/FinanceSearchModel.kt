@@ -35,6 +35,7 @@ data class FinanceSearchModel(
     val endUse: String? = null,
 
     val downpayment: String? = null,
+    val loanTenure: String? = null,
 
     val merchantBankAccountHolderName: String? = null,
 

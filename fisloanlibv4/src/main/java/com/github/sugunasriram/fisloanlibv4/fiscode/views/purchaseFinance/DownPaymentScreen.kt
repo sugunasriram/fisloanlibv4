@@ -21,12 +21,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -78,6 +80,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.components.RegisterText
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.TextInputLayout
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToBureauOffersScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFISExitScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFormSubmissionWebScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.Profile
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.VerifySessionResponse
@@ -123,6 +126,9 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlin.math.floor
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
+import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan.EditLoanRequestViewModel
+import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan.EditLoanRequestViewModelFactory
+import kotlin.text.toDouble
 
 
 var productName : String = "Samsung Galaxy S24 Ultra 5G"
@@ -171,6 +177,12 @@ val registerViewModel: RegisterViewModel = viewModel()
     var errorMsg by remember { mutableStateOf<String>("") }
     var showInValidAmountError by remember { mutableStateOf(false) }
 
+    val editLoanRequestViewModel: EditLoanRequestViewModel = viewModel(
+        factory = EditLoanRequestViewModelFactory("amount", "minAmount", "7")
+    )
+    val loanTenure by editLoanRequestViewModel.loanTenure.collectAsState(initial = 3)
+//    var isValidLoanTenure by remember { mutableStateOf(false) }
+
 //    val productName : String = "Samsung Galaxy S24 Ultra 5G"
 //    val productPrice : Long = 99000L
 //    val mrpPrice : Long = 110000L
@@ -191,7 +203,9 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
     }
 
     BackHandler {
-        navigateApplyByCategoryScreen(navController)
+//        navigateApplyByCategoryScreen(navController)
+        navigateToFISExitScreen(navController, loanId="1234")
+
     }
     var showNoLoanOffersScreen by remember { mutableStateOf(false) }
 
@@ -224,7 +238,11 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
                                 registerViewModel = registerViewModel,
                                 onAcceptConsent = { showError = false
                                     CoroutineScope(Dispatchers.Main).launch {
+                                        Log.d("DownPaymentScreen", "Sugu loanTenure 1: $loanTenure")
+
                                         TokenManager.save("downpaymentAmount", amount.toString())
+                                        TokenManager.save("pfloanTenure", loanTenure.toString())
+
                                         webViewModel.setWebInProgress(true)
                                         try {
                                             webViewModel.getLenderStatusApi(
@@ -262,6 +280,7 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
                                                 endUse = "PF flow",
                                                 purpose = "PF flow",
                                                 downPaymentAmount = amount.toString(),
+                                                pfloanTenure = loanTenure.toString(),
                                                 productPrice = productPrice.toString()
                                             )
                                         } catch (e: Exception) {
@@ -318,7 +337,9 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
                                 } else {
                                     showError = false
                                     CoroutineScope(Dispatchers.Main).launch {
+                                        Log.d("DownPaymentScreen", "Sugu loanTenure: $loanTenure")
                                         TokenManager.save("downpaymentAmount", amount.toString())
+                                        TokenManager.save("loanTenure", loanTenure.toString())
 
                                         webViewModel.setWebInProgress(true)
 
@@ -352,6 +373,7 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
                                             navigateToFormSubmissionWebScreen(navController, fromFlow, lenderStatusJson)
 
                                             TokenManager.save("downpaymentAmount", amount.toString())
+                                            TokenManager.save("pfloanTenure", loanTenure.toString())
 
                                             loadWebScreen(
                                                 fromFlow = fromFlow,
@@ -360,6 +382,7 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
                                                 endUse = "PF flow",
                                                 purpose = "PF flow",
                                                 downPaymentAmount = amount.toString(),
+                                                pfloanTenure = loanTenure.toString(),
                                                 productPrice = productPrice.toString()
                                             )
                                         } catch (e: Exception) {
@@ -388,7 +411,7 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
                                     onAmountChange = { amount = it },
                                     onValidationChanged = { showInValidAmountError = it } // <- sync state here
                                 )
-//                                PreferredTenureCard()
+                                PreferredTenureCard(editLoanRequestViewModel)
                             }
                         }
                     }
@@ -401,6 +424,25 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
 //        ConsentDialogBox(showDialog)
 //    }
 }
+
+@Composable
+private fun ConfirmExitDialog(
+    onAbort: () -> Unit,
+    onCancel: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onCancel,
+        title = { Text("Exit loan process?") },
+        text = { Text("Your loan is in progress. Exiting now may cancel your application. Do you want to abort?") },
+        confirmButton = {
+            TextButton(onClick = onAbort) { Text("Abort") }
+        },
+        dismissButton = {
+            TextButton(onClick = onCancel) { Text("Cancel") }
+        }
+    )
+}
+
 
 //@Composable
 //fun ProductDetailsCard(productName: String, productPrice: Long, mrpPrice: Long) {
@@ -849,7 +891,7 @@ fun DownPaymentDetailsCard(
 }
 
 @Composable
-fun PreferredTenureCard() {
+fun PreferredTenureCard(editLoanRequestViewModel : EditLoanRequestViewModel) {
     DownPaymentCard(
         cardHeader = stringResource(R.string.preferred_tenure),
         image = painterResource(R.drawable.tenure)
@@ -863,11 +905,11 @@ fun PreferredTenureCard() {
             style = normal16Text400
         )
         EditLoanTenureSliderUI(
-            tenure = 12,
+            tenure = 7,
             minTenure = 3,
             maxTenure = 36,
             onValueChanged = {
-//                editLoanRequestViewModel.onLoanTenureChanged(it.toString())
+                editLoanRequestViewModel.onLoanTenureChanged(it.toString())
             }
         )
         Spacer(modifier = Modifier.height(10.dp))

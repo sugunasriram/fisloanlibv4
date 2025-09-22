@@ -103,6 +103,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.components.SpaceBetweenTextI
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.StartingText
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateSignInPage
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFISExitScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToKycAnimation
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToLoanOffersListDetailScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToLoanProcessScreen
@@ -202,7 +203,8 @@ fun LoanOffersListDetailsScreen(
         if (showButtonId == "0") {
             val currentTime = System.currentTimeMillis()
             if (currentTime - backPressedTime < 2000) {
-                navigateApplyByCategoryScreen(navController)
+//                navigateApplyByCategoryScreen(navController)
+                navigateToFISExitScreen(navController, loanId="1234")
             } else {
                 CommonMethods().toastMessage(
                     context = context,
@@ -483,7 +485,8 @@ fun LoanOfferListDetailView(
                         if (showButtonId == "0") {
                             val currentTime = System.currentTimeMillis()
                             if (currentTime - backPressedTime < 2000) {
-                                navigateApplyByCategoryScreen(navController)
+//                                navigateApplyByCategoryScreen(navController)
+                                navigateToFISExitScreen(navController, loanId="1234")
                             } else {
                                 CommonMethods().toastMessage(
                                     context = context,

@@ -77,6 +77,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToBankKyc
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToBureauOffersScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToConsentSubmissionWebScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToDownPaymentScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFISExitScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFormRejectedScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFormSubmissionWebScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToGstInvoiceLoanScreen
@@ -1167,7 +1168,8 @@ fun PersonalDecidedFlow(
                     } else {
                         UnexpectedErrorScreen(
                             navController = navController,
-                            onClick = { navigateApplyByCategoryScreen(navController) })
+//                            onClick = { navigateApplyByCategoryScreen(navController) })
+                            onClick = { navigateToFISExitScreen(navController, loanId="1234") })
 //                        navigateToEMandateESignFailedScreen(navController,step)
                     }
                 }

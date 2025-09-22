@@ -76,8 +76,8 @@ class EditLoanRequestViewModel(maxAmount: String, minAmount: String, tenure: Str
         _downpaymentAmount.value = cleaned.toDoubleOrNull() ?: 0.0
     }
 
-    private val _loanTenure = MutableStateFlow(tenure.toIntOrNull())
-    val loanTenure: MutableStateFlow<Int?> = _loanTenure
+    private val _loanTenure = MutableStateFlow((tenure.toIntOrNull() ?: 7).coerceIn(3, 36))
+    val loanTenure: MutableStateFlow<Int> = _loanTenure
 
     private val _generalError: MutableLiveData<String?> = MutableLiveData("")
     val generalError: LiveData<String?> = _generalError

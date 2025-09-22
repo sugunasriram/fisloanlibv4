@@ -41,6 +41,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.components.TopBottomBarForNe
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.WrapBorderButton
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToBureauOffersScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFISExitScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appBlueTitle
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appWhite
@@ -137,7 +138,8 @@ fun PagesNotFoundPreview() {
 fun UnexpectedErrorScreen(
     navController: NavHostController,
     errorMsgShow: Boolean = true,
-    onClick: () -> Unit = { navigateApplyByCategoryScreen(navController = navController) },
+//    onClick: () -> Unit = { navigateApplyByCategoryScreen(navController = navController) },
+    onClick: () -> Unit = { navigateToFISExitScreen(navController, loanId="1234") },
     errorText: String = stringResource(id = R.string.we_are_working_on_it_please_try_again),
     errorMsg: String = stringResource(id = R.string.something_went_wrong)
 ) {
@@ -378,7 +380,8 @@ fun LoanNotApprovedScreen(
 ) {
     LaunchedEffect(Unit) {
         delay(5000)
-        navigateApplyByCategoryScreen(navController = navController)
+//        navigateApplyByCategoryScreen(navController = navController)
+        navigateToFISExitScreen(navController, loanId="1234")
     }
     Column(
         modifier = Modifier
@@ -423,12 +426,14 @@ fun FormRejectionScreen(
     navController: NavHostController,
     fromFlow: String,
     errorMsg: String? = null,
-    onClick: () -> Unit = { navigateApplyByCategoryScreen(navController = navController) },
+//    onClick: () -> Unit = { navigateApplyByCategoryScreen(navController = navController) },
+    onClick: () -> Unit = { navigateToFISExitScreen(navController, loanId="1234") },
     errorTitle: String = stringResource(id = R.string.kyc_failed)
 ) {
     LaunchedEffect(Unit) {
         delay(5000)
-        navigateApplyByCategoryScreen(navController = navController)
+//        navigateApplyByCategoryScreen(navController = navController)
+        navigateToFISExitScreen(navController, loanId="1234")
     }
 
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
@@ -480,7 +485,8 @@ fun FormRejectionScreen(
     val callback = remember {
         object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                navigateApplyByCategoryScreen(navController = navController)
+//                navigateApplyByCategoryScreen(navController = navController)
+                navigateToFISExitScreen(navController, loanId="1234")
             }
         }
     }
@@ -497,12 +503,11 @@ fun MiddleOfTheLoanScreen(
     message: String,
     displayOffer: Boolean = true,
     onGoBack: () -> Unit = {
-        navigateApplyByCategoryScreen(
-            navController =
-            navController
-        )
+//        navigateApplyByCategoryScreen(navController = navController)
+        navigateToFISExitScreen(navController, loanId="1234")
     },
-    onClick: () -> Unit = { navigateApplyByCategoryScreen(navController = navController) }
+//    onClick: () -> Unit = { navigateApplyByCategoryScreen(navController = navController) }
+    onClick: () -> Unit = { navigateToFISExitScreen(navController, loanId="1234") }
 ) {
     TopBar(navController = navController, showBackButton = true)
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
@@ -567,7 +572,8 @@ fun MiddleOfTheLoanScreen(
             val callback = remember {
                 object : OnBackPressedCallback(true) {
                     override fun handleOnBackPressed() {
-                        navigateApplyByCategoryScreen(navController = navController)
+//                        navigateApplyByCategoryScreen(navController = navController)
+                        navigateToFISExitScreen(navController, loanId="1234")
                     }
                 }
             }

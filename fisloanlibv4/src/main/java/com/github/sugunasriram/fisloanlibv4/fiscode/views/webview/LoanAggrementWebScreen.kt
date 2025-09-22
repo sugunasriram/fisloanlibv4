@@ -62,6 +62,7 @@ import com.github.sugunasriram.fisloanlibv4.R
 import com.github.sugunasriram.fisloanlibv4.fiscode.app.MainActivity
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.TopBar
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFISExitScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFormRejectedScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToLoanDisbursementScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.core.ApiPaths
@@ -190,11 +191,13 @@ fun LoanAgreementWebScreen(
         }
     }
 
-    BackHandler { navigateApplyByCategoryScreen(navController) }
+//    BackHandler { navigateApplyByCategoryScreen(navController) }
+    BackHandler { navigateToFISExitScreen(navController, loanId="1234") }
     Column(modifier = Modifier.fillMaxSize()) {
         TopBar(
             navController = navController,
-            onBackClick = { navigateApplyByCategoryScreen(navController) },
+//            onBackClick = { navigateApplyByCategoryScreen(navController) },
+            onBackClick = { navigateToFISExitScreen(navController, loanId="1234") },
             topBarText = stringResource(R.string.loan_agreement)
         )
 

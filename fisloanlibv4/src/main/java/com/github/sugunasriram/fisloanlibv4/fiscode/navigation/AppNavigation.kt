@@ -53,6 +53,18 @@ fun navigateToContactUsScreen(navController: NavHostController, closeCurrent: Bo
     }
 }
 
+fun navigateToFISExitScreen(
+    navController: NavHostController,
+    loanId: String,
+    closeCurrent: Boolean = false
+) {
+    val destinationUrl = "${AppScreens.FISExitCofirmationScreen.route}/$loanId"
+
+    navController.navigate(destinationUrl) {
+        shouldCloseCurrent(navController, closeCurrent)
+    }
+}
+
 
 fun navigateToReportedIssuesScreen(navController: NavHostController, closeCurrent: Boolean = false) {
     navController.navigate(AppScreens.ReportedIssuesScreen.route) {

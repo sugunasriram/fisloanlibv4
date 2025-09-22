@@ -20,6 +20,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.components.RegisterText
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.StartingText
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.TopBottomBarForNegativeScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFISExitScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appBlack
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.errorRed
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.hintGray
@@ -31,7 +32,8 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal36Text700
 @Composable
 fun NoLoanOffersAvailableScreen(
     navController: NavHostController,titleText:String=stringResource(R.string.no_loan_offers_available),
-    onClick: () -> Unit = { navigateApplyByCategoryScreen(navController = navController) }
+//    onClick: () -> Unit = { navigateApplyByCategoryScreen(navController = navController) }
+    onClick: () -> Unit = { navigateToFISExitScreen(navController, loanId="1234") }
 ) {
     TopBottomBarForNegativeScreen(showTop = false, showBottom = true, navController = navController) {
         StartingText(

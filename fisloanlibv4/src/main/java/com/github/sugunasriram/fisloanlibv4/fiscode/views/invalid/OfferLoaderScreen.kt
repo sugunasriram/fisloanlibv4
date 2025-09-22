@@ -54,6 +54,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.components.IncrementTimer
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.RegisterText
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.StartingText
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFISExitScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.LenderResponseData
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.LenderStatusResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.RejectedLenders
@@ -89,7 +90,8 @@ fun OfferLoaderScreen(
     } catch (e: Exception) {
         emptyList()
     }
-    BackHandler { navigateApplyByCategoryScreen(navController) }
+//    BackHandler { navigateApplyByCategoryScreen(navController) }
+    BackHandler { navigateToFISExitScreen(navController, loanId="1234") }
 
     Column(
         modifier = Modifier
