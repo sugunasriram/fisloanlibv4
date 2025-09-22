@@ -116,7 +116,7 @@ fun LoanDisbursementScreen(
     val consentHandled by loanAgreementViewModel.consentHandled.collectAsState()
     val sseDataForPf by loanAgreementViewModel.sseData.collectAsState()
     var apiTriggered by remember { mutableStateOf(false) }
-    val pfCreateSessionInProgress by loanAgreementViewModel.pfCreateSessionInProgress.collectAsState()
+    val pfCreateSessionInProgress by loanAgreementViewModel.pfCreateSessionInProgress.collectAsState(initial = false)
 //    val sessionId by loanAgreementViewModel.sessionId.collectAsState("")
     val uiState by loanAgreementViewModel.createSessionState.collectAsStateWithLifecycle()
 
@@ -567,48 +567,47 @@ fun MoveToDashBoard(
     context: Context
 ) {
     var backPressedTime by remember { mutableLongStateOf(0L) }
-    FixedTopBottomScreen(
-        navController = navController,
-        topBarBackgroundColor = appOrange,
-        topBarText = stringResource(R.string.loan_status),
-        showBackButton = true,
-//        onBackClick = { navigateApplyByCategoryScreen(navController) },
-        onBackClick = {
-            loanId = sseData.data?.data?.id?.toString().orEmpty()
-            loanAgreementViewModel.createPfSession(loanId, context) },
-        showBottom = true,
-        showSingleButton = true,
-        primaryButtonText = stringResource(R.string.home),
-        onPrimaryButtonClick = {
-            if (fromFlow == "Purchase Finance") {
 
+    val uiState by loanAgreementViewModel.createSessionState.collectAsStateWithLifecycle()
+
+// Show loader if pfCreateSessionInProgress is true
+    if (pfCreateSessionInProgress) {
+        ProcessingAnimation(
+            text = "Processing Please Wait...",
+            image = R.raw.we_are_currently_processing_hour_glass
+        )
+    } else {
+        FixedTopBottomScreen(
+            navController = navController,
+            topBarBackgroundColor = appOrange,
+            topBarText = stringResource(R.string.loan_status),
+            showBackButton = true,
+//        onBackClick = { navigateApplyByCategoryScreen(navController) },
+            onBackClick = {
                 loanId = sseData.data?.data?.id?.toString().orEmpty()
                 loanAgreementViewModel.createPfSession(loanId, context)
-            } else {
-                navigateToLoanSummaryScreen(
-                    navController = navController,
-                    id = id,
-                    consentHandler = "1",
-                    fromFlow = fromFlow
-                )
-            }
+            },
+            showBottom = true,
+            showSingleButton = true,
+            primaryButtonText = stringResource(R.string.home),
+            onPrimaryButtonClick = {
+                if (fromFlow == "Purchase Finance") {
 
-        },
-        backgroundColor = appWhite
-    ) {
-        if (pfCreateSessionInProgress) {
-//            Box(
-//                Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.4f)),
-//                contentAlignment = Alignment.Center
-//            ) { CircularProgressIndicator(color = appOrange)
-//
-//            }
-            ProcessingAnimation(
-                text = "Processing Please Wait...",
-                image = R.raw.we_are_currently_processing_hour_glass
-            )
+                    loanId = sseData.data?.data?.id?.toString().orEmpty()
+                    loanAgreementViewModel.createPfSession(loanId, context)
+                } else {
+                    navigateToLoanSummaryScreen(
+                        navController = navController,
+                        id = id,
+                        consentHandler = "1",
+                        fromFlow = fromFlow
+                    )
+                }
 
-        }else {
+            },
+            backgroundColor = appWhite
+        ) {
+            Log.d("Sugu test", "pfCreateSessionInProgress: $pfCreateSessionInProgress")
             LoanDisburseAnimator()
 //        val totalDisburseAmount = sseData.data?.data?.catalog?.item_price?.value
             val totalDisburseAmount = sseData.data?.data?.catalog?.quote_breakup
@@ -669,9 +668,6 @@ fun MoveToDashBoard(
                 LoanDisbursementCard(loanDetails)
             }
         }
-
-
-
     }
 }
 
