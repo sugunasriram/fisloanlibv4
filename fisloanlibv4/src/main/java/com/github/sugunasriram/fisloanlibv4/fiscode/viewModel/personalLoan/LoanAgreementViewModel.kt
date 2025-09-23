@@ -901,7 +901,7 @@ class LoanAgreementViewModel : BaseViewModel() {
         viewModelScope.launch {
             _pfCreateSessionInProgress.value = true
             Log.d("Sugu", "Starting session creation for loanId: $loanId, " +
-                    "pfCreateSessionInProgress:${_pfCreateSessionInProgress}")
+                    "pfCreateSessionInProgress:${_pfCreateSessionInProgress.value}")
             _createSessionState.value = CreateSessionUiState.Loading
             try {
                 val resp = withContext(Dispatchers.IO) {
@@ -914,7 +914,7 @@ class LoanAgreementViewModel : BaseViewModel() {
                         )
                     )
                 }
-                delay(5000) //Sugu testing
+                delay(3000) //Sugu testing
                 val sessionId = resp?.data?.id?.trim().orEmpty()
                 if (sessionId.isNotEmpty()) {
                     _createSessionState.value = CreateSessionUiState.Success(sessionId)
@@ -929,7 +929,7 @@ class LoanAgreementViewModel : BaseViewModel() {
                 _createSessionState.value = CreateSessionUiState.Error(t.message ?: "Unknown error")
             } finally {
                 Log.d("Sugu", "2 Starting session creation for loanId: $loanId, " +
-                        "pfCreateSessionInProgress:${_pfCreateSessionInProgress}")
+                        "pfCreateSessionInProgress:${_pfCreateSessionInProgress.value}")
 
                 _pfCreateSessionInProgress.value = false
             }
