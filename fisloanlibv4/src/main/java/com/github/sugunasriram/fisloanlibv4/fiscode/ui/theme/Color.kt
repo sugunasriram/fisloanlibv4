@@ -78,3 +78,6 @@ val failureRed = Color(0xFFFF4A4A)
 val newBlueColor = Color(0xFF0055CB)
 val newRedColor = Color(0xFFFE3535)
 val lightBlue = Color(0xFFE4F3FF)
+// ----Mutual Funds----
+val appTeal = Color(0xFF2B7A78)
+val backgroundTeal = Color(0xFF2B7A78).copy(alpha = 0.15f)

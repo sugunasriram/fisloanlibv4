@@ -1,6 +1,7 @@
 package com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.app.Activity
 import android.content.Context
@@ -8,6 +9,7 @@ import android.os.Build
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +24,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
@@ -46,6 +49,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -122,6 +126,10 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.util.Locale
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.CancelLoan
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.CancelLoanResponse
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.grayD6
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal28Text700
 
 var amount_to_be_paid = ""
 var coolOffPeriodDate = ""

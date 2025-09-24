@@ -45,6 +45,7 @@ import com.github.sugunasriram.fisloanlibv4.R
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appGreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appWhite
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.backgroundOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.lightishGrayColor
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal12Text400
 
@@ -65,7 +66,7 @@ fun CenterProgress(modifier: Modifier = Modifier, top: Dp = 0.dp) {
 }
 
 @Composable
-fun CenterProgressFixedHeight(modifier: Modifier = Modifier, top: Dp = 10.dp) {
+fun CenterProgressFixedHeight(modifier: Modifier = Modifier, top: Dp = 10.dp, size: Dp = 30.dp) {
     Column(
         modifier = modifier.padding(top = top).fillMaxWidth(),
         verticalArrangement = Arrangement.Center,
@@ -75,7 +76,7 @@ fun CenterProgressFixedHeight(modifier: Modifier = Modifier, top: Dp = 10.dp) {
             color = appOrange,
             modifier = Modifier
                 .padding(all = 8.dp)
-                .size(30.dp)
+                .size(size)
         )
     }
 }
@@ -93,7 +94,7 @@ fun PagerIndicator(currentPage: Int, pageCount: Int) {
                     .padding(horizontal = 4.dp)
                     .height(8.dp)
                     .clip(CircleShape)
-                    .background(if (currentPage == index) appOrange else Color.LightGray)
+                    .background(if (currentPage == index) backgroundOrange else Color.LightGray)
                     .then(
                         if (currentPage == index) Modifier.width(24.dp) else Modifier.size(8.dp)
                     )
@@ -116,7 +117,6 @@ fun LoanStatusTracker(
         "Setup" to "Repayment"
     )
 
-    val totalSteps = 6
     val visibleSteps = 3
 
     // Show only 3 steps based on current progress

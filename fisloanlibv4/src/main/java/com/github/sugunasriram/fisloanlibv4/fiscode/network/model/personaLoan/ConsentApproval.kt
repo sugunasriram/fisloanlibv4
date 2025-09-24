@@ -26,11 +26,13 @@ data class ConsentApprovalResponse(
 data class OfferResponse(
     val offerResponse: List<Offer?>? = null
 )
+
 @Serializable
 data class OffersWithRejections(
     val offers: List<Offer>? = null,
     val rejectedLenders: List<RejectedLenders>? = null,
 )
+
 @Serializable
 data class Offer(
     val offer: OfferResponseItem? = null,
@@ -47,6 +49,8 @@ data class Offer(
 data class OfferResponseItem(
     @SerialName("_id")
     val id: String? = null,
+    @SerialName("status")
+    val status: String? = null,
     @SerialName("form_id")
     val formId: String? = null,
     @SerialName("item_descriptor")

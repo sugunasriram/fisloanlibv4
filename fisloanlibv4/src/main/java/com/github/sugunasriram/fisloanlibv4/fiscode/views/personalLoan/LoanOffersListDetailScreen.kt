@@ -464,7 +464,8 @@ fun LoanOfferListDetailView(
                             onSubmit = { downPaymentAmount ->
                                 coroutineScope.launch { bottomSheetState.show() }
                                 checkAndMakeApiCall(
-                                    (maxAmount.toFloatOrNull() ?: 0f) - downPaymentAmount,
+//                                    (maxAmount.toFloatOrNull() ?: 0f) - downPaymentAmount,
+                                    downPaymentAmount,
                                     context,
                                     editLoanRequestViewModel,
                                     loanTenure,

@@ -240,7 +240,7 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
                                     CoroutineScope(Dispatchers.Main).launch {
                                         Log.d("DownPaymentScreen", "Sugu loanTenure 1: $loanTenure")
 
-                                        TokenManager.save("downpaymentAmount", amount.value.toString())
+                                        TokenManager.save("downpaymentAmount", amount.toString())
                                         TokenManager.save("pfloanTenure", loanTenure.toString())
 
                                         webViewModel.setWebInProgress(true)
@@ -279,7 +279,7 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
                                                 context = context,
                                                 endUse = "PF flow",
                                                 purpose = "PF flow",
-                                                downPaymentAmount = amount.value.toString(),
+                                                downPaymentAmount = amount.toString(),
                                                 pfloanTenure = loanTenure.toString(),
                                                 productPrice = productPrice.toString()
                                             )
@@ -372,8 +372,7 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
 
                                             navigateToFormSubmissionWebScreen(navController, fromFlow, lenderStatusJson)
 
-                                            TokenManager.save("downpaymentAmount", amount
-                                                .value.toString())
+                                            TokenManager.save("downpaymentAmount", amount.toString())
                                             TokenManager.save("pfloanTenure", loanTenure.toString())
 
                                             loadWebScreen(
@@ -382,7 +381,7 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
                                                 context = context,
                                                 endUse = "PF flow",
                                                 purpose = "PF flow",
-                                                downPaymentAmount = amount.value.toString(),
+                                                downPaymentAmount = amount.toString(),
                                                 pfloanTenure = loanTenure.toString(),
                                                 productPrice = productPrice.toString()
                                             )
