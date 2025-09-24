@@ -13,6 +13,8 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.BankAccou
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.BankDetail
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.BankDetailResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.BankList
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.CancelLoan
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.CancelLoanResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.CreateSessionRequest
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.CreateSessionResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.CustomerLoanList
@@ -531,6 +533,17 @@ object ApiRepository {
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
                 body = requestBody
+            }
+        }
+    }
+
+    suspend fun cancelLoan(cancelLoan: CancelLoan): CancelLoanResponse? {
+        return KtorClient.getInstance().use { httpClient ->
+            httpClient.post(ApiPaths().cancelLoan) {
+                val accessToken = TokenManager.read("accessToken")
+                val bearerToken = "Bearer $accessToken"
+                header("Authorization", bearerToken)
+                body = cancelLoan
             }
         }
     }
@@ -1057,9 +1070,4 @@ object ApiRepository {
             }
         }
     }
-
-
-
-
-
 }

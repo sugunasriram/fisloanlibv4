@@ -68,8 +68,6 @@ class SSEViewModel : BaseViewModel() {
         }
     }
 
-
-
 // java HttpsURLConnection SSE
 
 //    @OptIn(FlowPreview::class)
@@ -131,5 +129,4 @@ class SSEViewModel : BaseViewModel() {
 //        startListening(url)
 //    }
 //
-
 }

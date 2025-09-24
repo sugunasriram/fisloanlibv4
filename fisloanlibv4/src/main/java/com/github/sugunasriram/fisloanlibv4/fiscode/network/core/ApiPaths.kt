@@ -106,6 +106,8 @@ class ApiPaths {
 
     val getOrderById = "loans/getOrderById"
 
+    val cancelLoan = "lender/cancelLoan"
+
     // IGm Related Api Paths
     val issueImageUpload = "issues/issueImageUpload"
 
@@ -140,8 +142,7 @@ class ApiPaths {
 
     val contactUs = "static/contact-us"
 
-
-    //User Reported App issues
+    // User Reported App issues
     val userReportedIssueCreate = "user-reported-issue/create"
 
     val userReportedIssueFindUserId = "user-reported-issue/findByUserId"

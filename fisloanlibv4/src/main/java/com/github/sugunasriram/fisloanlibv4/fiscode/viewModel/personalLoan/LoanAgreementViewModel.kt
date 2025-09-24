@@ -41,6 +41,8 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.CancelLoan
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.CancelLoanResponse
 
 class LoanAgreementViewModel : BaseViewModel() {
 
@@ -107,6 +109,57 @@ class LoanAgreementViewModel : BaseViewModel() {
 
     private val _purchaseFinanceList  = MutableStateFlow<CustomerLoanList?>(null)
     val purchaseFinanceList : StateFlow<CustomerLoanList?> = _purchaseFinanceList
+
+    private val _pfLoanCancelling = MutableStateFlow(false)
+    val pfLoanCancelling: StateFlow<Boolean> = _pfLoanCancelling
+
+    private val _pfLoanCancelled = MutableStateFlow(false)
+    val pfLoanCancelled: StateFlow<Boolean> = _pfLoanCancelled
+
+    private val _pfLoanCancelResponse = MutableStateFlow<CancelLoanResponse?>(null)
+    val pfLoanCancelResponse: StateFlow<CancelLoanResponse?> = _pfLoanCancelResponse
+
+    fun cancelLoanRequest(cancelLoan: CancelLoan, context: Context) {
+        _pfLoanCancelling.value = true
+        viewModelScope.launch(Dispatchers.IO) {
+            handleCancelLoan(cancelLoan, context)
+        }
+    }
+    private suspend fun handleCancelLoan(
+        cancelLoan: CancelLoan,
+        context: Context,
+        checkForAccessToken: Boolean = true
+    ) {
+        kotlin.runCatching {
+            ApiRepository.cancelLoan(cancelLoan)
+        }.onSuccess { response ->
+            response?.let {
+                handleCancelLoanSuccess(response)
+            }
+        }.onFailure { error ->
+            // Session Management
+            if (checkForAccessToken &&
+                error is ResponseException &&
+                error.response.status.value == 401
+            ) {
+                // Get Access Token using RefreshToken
+                if (handleAuthGetAccessTokenApi()) {
+                    handleCancelLoan(cancelLoan, context, false)
+                } else {
+                    _navigationToSignup.value = true
+                }
+            } else {
+                handleFailure(error = error, context = context)
+            }
+        }
+    }
+    private suspend fun handleCancelLoanSuccess(response: CancelLoanResponse) {
+        withContext(Dispatchers.Main) {
+            _pfLoanCancelled.value = true
+            _pfLoanCancelling.value = false
+            _pfLoanCancelResponse.value = response
+        }
+    }
 
     private var hasApiBeenCalled = false
 
@@ -531,6 +584,7 @@ class LoanAgreementViewModel : BaseViewModel() {
             _gettingOrderById.value = false
             _updateProcessing.value = false
             _consentHandling.value = false
+            _pfLoanCancelling.value = false
         }
     }
 

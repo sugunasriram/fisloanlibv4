@@ -457,18 +457,45 @@ fun RepaymentScheduleView(
     checkingStatus:Boolean,
     orderPaymentListLoading:Boolean
 ) {
-    val focusManager = LocalFocusManager.current
-    val backGroundColor: Color = Color.White
-    val isLoanDisbursed = loanDetails.fulfillments
-        ?.any { fulfilment ->
-            fulfilment?.state?.descriptor?.code?.contains("Disbursed", ignoreCase = true) == true
-        } ?: false
-    val isLoanClosed = loanDetails.fulfillments
-        ?.any { fulfilment ->
-            val status = fulfilment?.state?.descriptor?.code.orEmpty()
-            status.contains("completed", ignoreCase = true) ||
-                status.contains("closed", ignoreCase = true)
-        } ?: false
+    var showLoanCancelPopUp by remember { mutableStateOf(false) }
+
+    val pfLoanCancelling by loanAgreementViewModel.pfLoanCancelling.collectAsState()
+    val pfLoanCancelled by loanAgreementViewModel.pfLoanCancelled.collectAsState()
+    var cancelReason by remember { mutableStateOf("") }
+    var cancelReasonError by remember { mutableStateOf(false) }
+
+//    val isLoanDisbursed = loanDetails.fulfillments
+//        ?.any { fulfilment ->
+//            fulfilment?.state?.descriptor?.code?.contains("Disbursed", ignoreCase = true) == true
+//        } ?: false
+
+    val isLoanDisbursed: Boolean = if (
+        loanDetails.status == null || loanDetails.status.equals("ACTIVE", ignoreCase = true)
+    ) {
+        loanDetails.fulfillments
+            ?.any { fulfilment ->
+                fulfilment?.state?.descriptor?.code?.contains("Disbursed", ignoreCase = true) == true
+            } ?: false
+    } else {
+        false
+    }
+//    val isLoanClosed = loanDetails.fulfillments
+//        ?.any { fulfilment ->
+//            val status = fulfilment?.state?.descriptor?.code.orEmpty()
+//            status.contains("completed", ignoreCase = true) ||
+//                status.contains("closed", ignoreCase = true)
+//        } ?: false
+    val isLoanClosed: Boolean =
+        if (loanDetails.status.equals("CANCELLED", ignoreCase = true)) {
+            true
+        } else {
+            loanDetails.fulfillments
+                ?.any { fulfilment ->
+                    val status = fulfilment?.state?.descriptor?.code.orEmpty()
+                    status.contains("completed", ignoreCase = true) ||
+                        status.contains("closed", ignoreCase = true)
+                } ?: false
+        }
     val isLoanInitiated = loanDetails.fulfillments
         ?.any { fulfilment ->
             val status = fulfilment?.state?.descriptor?.code.orEmpty()
@@ -558,6 +585,138 @@ fun RepaymentScheduleView(
                         }
                     }
                 }
+            }
+            // only if PF and Loan is disbursed
+            if (isLoanDisbursed && fromFlow == "LOAN") {
+                Spacer(modifier = Modifier.height(8.dp))
+                CurvedPrimaryButton(
+                    text = "Cancel Loan Request",
+                    textColor = appOrange,
+                    backgroundColor = appWhite,
+                    start = 80.dp,
+                    end = 80.dp
+                ) {
+                    val cancelLoan = CancelLoan(
+                        loanType = "PURCHASE_FINANCE",
+                        orderId = orderId,
+                        cancelType = "SOFT_CANCEL",
+                        cancelReason = "something"
+                    )
+                    loanAgreementViewModel.cancelLoanRequest(cancelLoan, context)
+                    showLoanCancelPopUp = true
+                }
+            }
+            if (showLoanCancelPopUp) {
+                AlertDialog(
+                    onDismissRequest = { showLoanCancelPopUp = false },
+                    confirmButton = {
+                        CurvedPrimaryButton(
+                            text = stringResource(id = R.string.yes),
+                            start = 15.dp,
+                            end = 15.dp,
+                            top = 5.dp,
+                            bottom = 5.dp,
+                            enabled = !pfLoanCancelling
+                        ) {
+                            if (cancelReason.isBlank()) {
+                                cancelReasonError = true
+                            } else {
+                                val cancelLoan = CancelLoan(
+                                    loanType = "PURCHASE_FINANCE",
+                                    orderId = orderId,
+                                    cancelType = "CONFIRM_CANCEL",
+                                    cancelReason = cancelReason
+                                )
+                                loanAgreementViewModel.cancelLoanRequest(cancelLoan, context)
+                                if (pfLoanCancelled && !pfLoanCancelling) {
+                                    loanAgreementViewModel.status(
+                                        loanType = loanType,
+                                        context = context,
+                                        orderId = orderId
+                                    )
+                                    getOrderPaymentStatusViewModel.getOrderPaymentStatus(
+                                        loanType = loanType,
+                                        loanId = orderId,
+                                        context = context
+                                    )
+                                }
+                                showLoanCancelPopUp = false
+                            }
+                        }
+                    },
+                    dismissButton = {
+                        CurvedPrimaryButton(
+                            text = stringResource(id = R.string.no),
+                            start = 15.dp,
+                            end = 15.dp,
+                            top = 5.dp,
+                            bottom = 5.dp,
+                            enabled = !pfLoanCancelling
+                        ) {
+                            showLoanCancelPopUp = false
+                        }
+                    },
+                    title = {
+                        Text(
+                            text = "Confirm Cancellation",
+                            style = normal28Text700,
+                            modifier = Modifier,
+                            color = appBlack
+                        )
+                    },
+                    text = {
+                        if (pfLoanCancelling && !pfLoanCancelled) CenterProgressFixedHeight(top = 0.dp, size = 20.dp)
+                        if (pfLoanCancelled && !pfLoanCancelling) {
+                            Column {
+                                Text(
+                                    "This action will stop your loan process. Do you want to continue?",
+                                    style = normal14Text700
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                OutlinedTextField(
+                                    value = cancelReason,
+                                    onValueChange = {
+                                        cancelReason = it
+                                        cancelReasonError = false
+                                    },
+                                    label = {
+                                        Text(
+                                            "Enter reason",
+                                            color = hintGray,
+                                            style = normal14Text400,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    },
+                                    singleLine = true,
+                                    isError = cancelReasonError,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(8.dp),
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                                    visualTransformation = VisualTransformation.None,
+                                    textStyle = normal14Text400,
+                                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                                        focusedBorderColor = appOrange,
+                                        unfocusedBorderColor = grayD6,
+                                        cursorColor = appOrange,
+                                        textColor = appBlack
+                                    )
+                                )
+                                if (cancelReasonError) {
+                                    Text(
+                                        text = "Reason is required",
+                                        color = errorRed,
+                                        style = normal12Text400,
+                                        modifier = Modifier.padding(start = 4.dp, top = 2.dp)
+                                    )
+                                }
+                            }
+                        }
+                    },
+                    modifier = Modifier
+                        .shadow(8.dp, shape = RoundedCornerShape(8.dp))
+                        .border(1.dp, appWhite, shape = RoundedCornerShape(8.dp))
+                )
             }
             CompleteLoanDetails(
                 loanDetails = loanDetails,
@@ -685,46 +844,44 @@ fun ApplicantDetails(loanDetails: OfferResponseItem, context: Context) {
         bottom = 10.dp,
         top = 10.dp
     ) {
-        loanDetails.fulfillments?.forEach { fulfilment ->
-            fulfilment?.customer?.let { customer ->
-                customer.person?.name?.let { name ->
-                    OnlyReadAbleText(
-                        textHeader = stringResource(id = R.string.applicant_name),
-                        textColorHeader = slateGrayColor,
-                        textValue = name,
-                        style = normal14Text400,
-                        end = 5.dp,
-                        start = 8.dp,
-                        top = 10.dp,
-                        bottom = 8.dp
-                    )
-                }
+        loanDetails.fulfillments?.firstOrNull()?.customer?.let { customer ->
+            customer.person?.name?.let { name ->
+                OnlyReadAbleText(
+                    textHeader = stringResource(id = R.string.applicant_name),
+                    textColorHeader = slateGrayColor,
+                    textValue = name,
+                    style = normal14Text400,
+                    end = 5.dp,
+                    start = 8.dp,
+                    top = 10.dp,
+                    bottom = 8.dp
+                )
+            }
 
-                customer.contact?.email?.let { email ->
-                    OnlyReadAbleText(
-                        textHeader = stringResource(id = R.string.applicant_email),
-                        textColorHeader = slateGrayColor,
-                        textValue = email.lowercase(),
-                        style = normal14Text400,
-                        end = 5.dp,
-                        start = 8.dp,
-                        top = 8.dp,
-                        bottom = 8.dp
-                    )
-                }
+            customer.contact?.email?.let { email ->
+                OnlyReadAbleText(
+                    textHeader = stringResource(id = R.string.applicant_email),
+                    textColorHeader = slateGrayColor,
+                    textValue = email.lowercase(),
+                    style = normal14Text400,
+                    end = 5.dp,
+                    start = 8.dp,
+                    top = 8.dp,
+                    bottom = 8.dp
+                )
+            }
 
-                customer.contact?.phone?.let { mobileNumber ->
-                    OnlyReadAbleText(
-                        textHeader = stringResource(id = R.string.mobile_number),
-                        textColorHeader = slateGrayColor,
-                        textValue = mobileNumber,
-                        style = normal14Text400,
-                        end = 5.dp,
-                        start = 8.dp,
-                        top = 8.dp,
-                        bottom = 8.dp
-                    )
-                }
+            customer.contact?.phone?.let { mobileNumber ->
+                OnlyReadAbleText(
+                    textHeader = stringResource(id = R.string.mobile_number),
+                    textColorHeader = slateGrayColor,
+                    textValue = mobileNumber,
+                    style = normal14Text400,
+                    end = 5.dp,
+                    start = 8.dp,
+                    top = 8.dp,
+                    bottom = 8.dp
+                )
             }
         }
     }
@@ -736,144 +893,169 @@ fun ApplicantDetails(loanDetails: OfferResponseItem, context: Context) {
         end = 10.dp,
         bottom = 10.dp
     ) {
-        val applicationId = loanDetails.itemId
-//        val applicationId = loanDetails.id
-        loanDetails.fulfillments?.forEach { fulfilment ->
-            fulfilment?.state?.let { state ->
-                state.descriptor?.code?.let { loanStatus ->
-                    OnlyReadAbleText(
-                        textHeader = stringResource(id = R.string.loan_status),
-                        textColorHeader = slateGrayColor,
-                        textValue = loanStatus,
-                        style = normal14Text400,
-                        end = 5.dp,
-                        start = 8.dp,
-                        top = 10.dp,
-                        bottom = 8.dp
-                    )
-                }
-            }
-            fulfilment?.customer?.let {
-                applicationId?.let {
-                    OnlyReadAbleText(
-                        textHeader = stringResource(id = R.string.loan_application_id),
-                        textColorHeader = slateGrayColor,
-                        textValue = applicationId,
-                        style = normal14Text400,
-                        end = 5.dp,
-                        start = 8.dp,
-                        top = 8.dp,
-                        bottom = 8.dp
-                    )
-                }
+//        val applicationId = loanDetails.itemId
+        val applicationId = loanDetails.id
 
-                loanDetails.itemDescriptor?.let { itemDescriptor ->
-                    itemDescriptor.name?.let { loanType ->
-                        OnlyReadAbleText(
-                            textHeader = stringResource(id = R.string.loan_type),
-                            textColorHeader = slateGrayColor,
-                            textValue = loanType,
-                            style = normal14Text400,
-                            end = 5.dp,
-                            start = 8.dp,
-                            top = 8.dp,
-                            bottom = 8.dp
-                        )
-                    }
-                }
+        val status = loanDetails.status
+
+        if (status == null || status.equals("ACTIVE", ignoreCase = true)) {
+            // ✅ take from fulfillments
+            loanDetails.fulfillments?.firstOrNull()?.state?.descriptor?.code?.let { loanStatus ->
                 OnlyReadAbleText(
-                    textHeader = stringResource(id = R.string.loan_amount),
+                    textHeader = stringResource(id = R.string.loan_status),
                     textColorHeader = slateGrayColor,
-//                    textValue = CommonMethods().formatIndianDoubleCurrency(principal.takeIf { it.isNotEmpty() }?.toDoubleOrNull() ?: 0.0),
-                    textValue = principal,
+                    textValue = loanStatus,
+                    style = normal14Text400,
+                    end = 5.dp,
+                    start = 8.dp,
+                    top = 10.dp,
+                    bottom = 8.dp
+                )
+            }
+        } else {
+            // ✅ show status directly
+            OnlyReadAbleText(
+                textHeader = stringResource(id = R.string.loan_status),
+                textColorHeader = slateGrayColor,
+                textValue = status,
+                style = normal14Text400,
+                end = 5.dp,
+                start = 8.dp,
+                top = 10.dp,
+                bottom = 8.dp
+            )
+        }
+//        loanDetails.fulfillments?.firstOrNull()?.state?.let { state ->
+//                state.descriptor?.code?.let { loanStatus ->
+//                    OnlyReadAbleText(
+//                        textHeader = stringResource(id = R.string.loan_status),
+//                        textColorHeader = slateGrayColor,
+//                        textValue = loanStatus,
+//                        style = normal14Text400,
+//                        end = 5.dp,
+//                        start = 8.dp,
+//                        top = 10.dp,
+//                        bottom = 8.dp
+//                    )
+//                }
+//            }
+
+        applicationId?.let {
+            OnlyReadAbleText(
+                textHeader = stringResource(id = R.string.loan_application_id),
+                textColorHeader = slateGrayColor,
+                textValue = applicationId,
+                style = normal14Text400,
+                end = 5.dp,
+                start = 8.dp,
+                top = 8.dp,
+                bottom = 8.dp
+            )
+        }
+
+        loanDetails.itemDescriptor?.let { itemDescriptor ->
+            itemDescriptor.name?.let { loanType ->
+                OnlyReadAbleText(
+                    textHeader = stringResource(id = R.string.loan_type),
+                    textColorHeader = slateGrayColor,
+                    textValue = loanType,
                     style = normal14Text400,
                     end = 5.dp,
                     start = 8.dp,
                     top = 8.dp,
                     bottom = 8.dp
                 )
+            }
+        }
+        OnlyReadAbleText(
+            textHeader = stringResource(id = R.string.loan_amount),
+            textColorHeader = slateGrayColor,
+//                    textValue = CommonMethods().formatIndianDoubleCurrency(principal.takeIf { it.isNotEmpty() }?.toDoubleOrNull() ?: 0.0),
+            textValue = principal,
+            style = normal14Text400,
+            end = 5.dp,
+            start = 8.dp,
+            top = 8.dp,
+            bottom = 8.dp
+        )
 
-                loanDetails.itemPrice?.value?.let {
-                    OnlyReadAbleText(
-                        textHeader = stringResource(id = R.string.total_payable_amount),
-                        textValue = it,
-                        textColorHeader = slateGrayColor,
-                        style = normal14Text400,
-                        end = 5.dp,
-                        start = 8.dp,
-                        top = 8.dp,
-                        bottom = 8.dp
-                    )
-                }
-                loanDetails.itemTags?.forEach { itemTags ->
-                    itemTags?.let {
-                        // Check if display is true
-                        if (it.display == true) {
-                            it.tags.let { tags ->
-                                tags.forEach { tag ->
-                                    val newTitle = CommonMethods().displayFormattedText(tag.key)
+        loanDetails.itemPrice?.value?.let {
+            OnlyReadAbleText(
+                textHeader = stringResource(id = R.string.total_payable_amount),
+                textValue = it,
+                textColorHeader = slateGrayColor,
+                style = normal14Text400,
+                end = 5.dp,
+                start = 8.dp,
+                top = 8.dp,
+                bottom = 8.dp
+            )
+        }
+        loanDetails.itemTags?.forEach { itemTags ->
+            itemTags?.let {
+                // Check if display is true
+                if (it.display == true) {
+                    it.tags.let { tags ->
+                        tags.forEach { tag ->
+                            val newTitle = CommonMethods().displayFormattedText(tag.key)
 
-                                    val displayValue =
-                                        if (tag.key.contains("cool_off", ignoreCase = true) ||
-                                            tag.key.contains("cool off", ignoreCase = true)
-                                        ) {
-                                            convertUTCToLocalDateTime(tag.value)
-                                        } else {
-                                            tag.value
-                                        }
-
-                                    if (newTitle.equals("Tnc Link", ignoreCase = true)) {
-                                        OnlyClickAbleText(
-                                            textHeader = newTitle,
-                                            textValue = displayValue,
-                                            textColorHeader = slateGrayColor,
-                                            style = normal14Text400,
-                                            bottom = 5.dp,
-                                            start = 6.dp,
-                                            onClick = { CommonMethods().openLink(context, displayValue) }
-                                        )
-                                    } else if (newTitle.equals("kfs Link", ignoreCase = true)) {
-                                        OnlyClickAbleText(
-                                            textHeader = newTitle,
-                                            textValue = displayValue,
-                                            textColorHeader = slateGrayColor,
-                                            style = normal14Text400,
-                                            bottom = 5.dp,
-                                            start = 6.dp,
-                                            onClick = { CommonMethods().openLink(context, displayValue) }
-                                        )
-                                    } else if ((
-                                        newTitle.equals("term", ignoreCase = true) ||
-                                            newTitle.contains("frequency", ignoreCase = true)
-                                        ) &&
-                                        displayValue?.startsWith("P") == true
-                                    ) {
-                                        convertISODurationToReadable(displayValue ?: "").let {
-                                                readableDuration ->
-                                            OnlyReadAbleText(
-                                                textHeader = newTitle,
-                                                textValue = readableDuration ?: "",
-                                                style = normal14Text400,
-                                                textColorHeader = slateGrayColor,
-                                                end = 5.dp,
-                                                start = 5.dp,
-                                                top = 8.dp,
-                                                bottom = 8.dp
-                                            )
-                                        }
-                                    } else {
-                                        OnlyReadAbleText(
-                                            textHeader = newTitle,
-                                            textValue = displayValue ?: "",
-                                            style = normal14Text400,
-                                            textColorHeader = slateGrayColor,
-                                            end = 5.dp,
-                                            start = 5.dp,
-                                            top = 8.dp,
-                                            bottom = 8.dp
-                                        )
-                                    }
+                            val displayValue =
+                                if (tag.key.contains("cool_off", ignoreCase = true) ||
+                                    tag.key.contains("cool off", ignoreCase = true)
+                                ) {
+                                    convertUTCToLocalDateTime(tag.value)
+                                } else {
+                                    tag.value
                                 }
+
+                            if (newTitle.equals("Tnc Link", ignoreCase = true)) {
+                                OnlyClickAbleText(
+                                    textHeader = newTitle,
+                                    textValue = displayValue,
+                                    style = normal14Text400,
+                                    bottom = 5.dp,
+                                    start = 6.dp,
+                                    onClick = { CommonMethods().openLink(context, displayValue) }
+                                )
+                            } else if (newTitle.equals("kfs Link", ignoreCase = true)) {
+                                OnlyClickAbleText(
+                                    textHeader = newTitle,
+                                    textValue = displayValue,
+                                    style = normal14Text400,
+                                    bottom = 5.dp,
+                                    start = 6.dp,
+                                    onClick = { CommonMethods().openLink(context, displayValue) }
+                                )
+                            } else if ((
+                                newTitle.equals("term", ignoreCase = true) ||
+                                    newTitle.contains("frequency", ignoreCase = true)
+                                ) &&
+                                displayValue?.startsWith("P") == true
+                            ) {
+                                convertISODurationToReadable(displayValue ?: "").let {
+                                        readableDuration ->
+                                    OnlyReadAbleText(
+                                        textHeader = newTitle,
+                                        textValue = readableDuration ?: "",
+                                        style = normal14Text400,
+                                        textColorHeader = slateGrayColor,
+                                        end = 5.dp,
+                                        start = 5.dp,
+                                        top = 8.dp,
+                                        bottom = 8.dp
+                                    )
+                                }
+                            } else {
+                                OnlyReadAbleText(
+                                    textHeader = newTitle,
+                                    textValue = displayValue ?: "",
+                                    style = normal14Text400,
+                                    textColorHeader = slateGrayColor,
+                                    end = 5.dp,
+                                    start = 5.dp,
+                                    top = 8.dp,
+                                    bottom = 8.dp
+                                )
                             }
                         }
                     }
@@ -1156,7 +1338,6 @@ fun GRODetailsCard(groTags: OfferResponseItem, context: Context) {
                     OnlyClickAbleText(
                         textHeader = newTitle,
                         textValue = value,
-                        textColorHeader = slateGrayColor,
                         style = normal14Text400,
                         end = 5.dp, start = 5.dp, top = 8.dp, bottom = 5.dp,
                         onClick = { CommonMethods().openLink(context, value) }
@@ -1181,8 +1362,9 @@ fun GRODetailsCard(groTags: OfferResponseItem, context: Context) {
 @Composable
 fun LoanAgreementDetailsCard(loanDocument: OfferResponseItem, context: Context) {
     val lenderName = loanDocument.providerDescriptor?.name.orEmpty()
-    loanDocument.documents?.forEach { document ->
-        document?.url?.let { loanPdfUrl ->
+    loanDocument.documents
+        ?.find { it?.descriptor?.name?.equals("Loan Agreement Document", ignoreCase = true) == true }
+        ?.url?.let { loanPdfUrl ->
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
@@ -1204,61 +1386,62 @@ fun LoanAgreementDetailsCard(loanDocument: OfferResponseItem, context: Context) 
                     modifier = Modifier.padding(horizontal = 8.dp)
                 ) {
                     val fileName = loanPdfUrl.substringAfterLast("/").substringBefore("?").ifEmpty { "loan_agreement" }
-                    CommonMethods().downloadPdf(context, loanPdfUrl, fileName,
-                                "$lenderName-LoanAgreement")
+                    CommonMethods().downloadPdf(
+                        context,
+                        loanPdfUrl,
+                        fileName,
+                        "$lenderName-LoanAgreement"
+                    )
                 }
             }
         }
-    }
 }
 
+@SuppressLint("SuspiciousIndentation")
 @Composable
-fun DownloadLoanDetailsCard(loanDocument: OfferResponseItem,payment: List<OrderPaymentStatusItem>, context: Context) {
+fun DownloadLoanDetailsCard(loanDocument: OfferResponseItem, payment: List<OrderPaymentStatusItem>, context: Context) {
     val activity = context as Activity
     val lenderName = loanDocument.providerDescriptor?.name.orEmpty()
-    loanDocument.documents?.forEach { document ->
-        document?.url?.let { loanPdfUrl ->
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth() .fillMaxWidth().padding( top = 5.dp, bottom = 5.dp)
-                    .background(color = Color.Transparent)
-            ) {
-                Text(
-                    text = stringResource(id = R.string.download_loan_details),
-                    style = normal16Text700,
-                    color = appBlack,
-                    modifier = Modifier.padding(start = 10.dp)
-                )
-                CurvedPrimaryButton(
-                    text = stringResource(id = R.string.download),
-                    style = normal14Text700,
-                    start = 15.dp,
-                    end = 15.dp,top=5.dp, bottom = 5.dp,
-                    modifier = Modifier.padding(horizontal = 8.dp)
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth().fillMaxWidth().padding(top = 5.dp, bottom = 5.dp)
+            .background(color = Color.Transparent)
+    ) {
+        Text(
+            text = stringResource(id = R.string.download_loan_details),
+            style = normal16Text700,
+            color = appBlack,
+            modifier = Modifier.padding(start = 10.dp)
+        )
+        CurvedPrimaryButton(
+            text = stringResource(id = R.string.download),
+            style = normal14Text700,
+            start = 15.dp,
+            end = 15.dp,
+            top = 5.dp,
+            bottom = 5.dp,
+            modifier = Modifier.padding(horizontal = 8.dp)
+        ) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (ContextCompat.checkSelfPermission(
+                        activity,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) != PackageManager.PERMISSION_GRANTED
                 ) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        if (ContextCompat.checkSelfPermission(
-                                activity,
-                                Manifest.permission.POST_NOTIFICATIONS
-                            ) != PackageManager.PERMISSION_GRANTED
-                        ) {
-                            ActivityCompat.requestPermissions(
-                                activity,
-                                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-                                NOTIFICATION_PERMISSION_REQUEST_CODE
-                            )
-                            return@CurvedPrimaryButton // Wait for the permission result before proceeding
-                        }
-                    }
-                    CommonMethods().generatePdfAndNotify(context, loanDocument,payment, lenderName)
-                   }
+                    ActivityCompat.requestPermissions(
+                        activity,
+                        arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                        NOTIFICATION_PERMISSION_REQUEST_CODE
+                    )
+                    return@CurvedPrimaryButton // Wait for the permission result before proceeding
+                }
             }
+            CommonMethods().generatePdfAndNotify(context, loanDocument, payment, lenderName)
         }
     }
 }
-
 
 @Composable
 fun CancellationTermsCard(loanDocument: OfferResponseItem, context: Context) {
@@ -1295,7 +1478,6 @@ fun CancellationTermsCard(loanDocument: OfferResponseItem, context: Context) {
                     OnlyClickAbleText(
                         textHeader = stringResource(id = R.string.privacy),
                         textValue = privacy,
-                        textColorHeader = slateGrayColor,
                         style = normal14Text400,
                         end = 5.dp, start = 5.dp, top = 8.dp, bottom = 10.dp,
                         onClick = { CommonMethods().openLink(context, privacy) }
@@ -1329,33 +1511,34 @@ fun ReportIssueCard(
         image = if (isReportIssueClicked) R.drawable.arrow_down else R.drawable.arrow_forward
     ) { isReportIssueClicked = !isReportIssueClicked }
     if (isReportIssueClicked) {
-        loanDetails.fulfillments?.forEach { fulfilment ->
-            fulfilment?.state?.let { state ->
-                state.descriptor?.code?.let { loanState ->
-                    loanDetails.id?.let { orderId ->
-                        loanDetails.providerId?.let { providerId ->
-                            if (summary == null) {
-                                navigateToCreateIssueScreen(
-                                    navController = navController,
-                                    orderId = orderId,
-                                    providerId = providerId,
-                                    orderState = loanState,
-                                    fromFlow = fromFlow
-                                )
-                            } else {
-                                navigateToIssueListScreen(
-                                    navController = navController,
-                                    orderId = orderId,
-                                    fromFlow = fromFlow,
-                                    providerId = providerId,
-                                    loanState = loanState,
-                                    fromScreen = "Loan Detail"
-                                )
-                            }
+//        loanDetails.fulfillments?.forEach { fulfilment ->
+//            fulfilment?.state?.let { state ->
+        loanDetails.fulfillments?.firstOrNull()?.state?.let { state ->
+            state.descriptor?.code?.let { loanState ->
+                loanDetails.id?.let { orderId ->
+                    loanDetails.providerId?.let { providerId ->
+                        if (summary == null) {
+                            navigateToCreateIssueScreen(
+                                navController = navController,
+                                orderId = orderId,
+                                providerId = providerId,
+                                orderState = loanState,
+                                fromFlow = fromFlow
+                            )
+                        } else {
+                            navigateToIssueListScreen(
+                                navController = navController,
+                                orderId = orderId,
+                                fromFlow = fromFlow,
+                                providerId = providerId,
+                                loanState = loanState,
+                                fromScreen = "Loan Detail"
+                            )
                         }
                     }
                 }
             }
+//            }
         }
     }
 }
@@ -1385,6 +1568,7 @@ fun PaymentOptionsPopUp(
     val updateProcessed by loanAgreementViewModel.updateProcessed.collectAsState()
     val updateProcessing by loanAgreementViewModel.updateProcessing.collectAsState()
     val updatedLoanAgreement by loanAgreementViewModel.updatedLoanAgreement.collectAsState()
+    val lenderName = loanDetails.providerDescriptor?.name.orEmpty().lowercase()
 
     if (updateProcessed) {
         PrePartPaymentResponseHandle(
@@ -1483,50 +1667,58 @@ fun PaymentOptionsPopUp(
 
                 // Conditional Text Field for Pre-Part Payment Amount
                 if (selectedOption == "PRE_PART_PAYMENT") {
-                    OutlinedTextField(
-                        value = prePartPaymentAmount,
-                        onValueChange = { input ->
-                            val filteredInput = input.filterIndexed { index, c ->
-                                c.isDigit() || (c == '.' && input.indexOf('.') == index)
-                            }
-                            val parts = filteredInput.split(".")
-                            val limitedInput = if (parts.size == 2) {
-                                "${parts[0]}.${parts[1].take(2)}"
-                            } else {
-                                filteredInput
-                            }
-                            // Convert to number for validation
-                            val inputAmount = limitedInput.toDoubleOrNull() ?: 0.0
-                            val maxAmount = loanDetails.itemPrice?.value?.toDoubleOrNull() ?: Double.MAX_VALUE
-
-                            // Update the value
-                            prePartPaymentAmount = limitedInput
-
-                            // Validation
-                            showError = inputAmount <= 0 || inputAmount > maxAmount
-                            if (showError) errorMsg = "Enter Valid Amount"
-                        },
-                        shape = RoundedCornerShape(8.dp),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        label = {
-                            Text(
-                                text = stringResource(id = R.string.enter_amount),
-                                color = hintGray,
-                                style = normal18Text400,
-                                textAlign = TextAlign.Center
-                            )
-                        },
-                        visualTransformation = VisualTransformation.None,
-                        textStyle = LocalTextStyle.current,
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor = appOrange,
-                            unfocusedBorderColor = lightGray,
-                            cursorColor = appOrange,
-                            textColor = appBlack
+                    if (lenderName == "p2pl") {
+                        CommonMethods().toastMessage(
+                            context = context,
+                            toastMsg = context.getString(R.string.feature_supported_in_future)
                         )
-                    )
+                    } else {
+                        OutlinedTextField(
+                            value = prePartPaymentAmount,
+                            onValueChange = { input ->
+                                val filteredInput = input.filterIndexed { index, c ->
+                                    c.isDigit() || (c == '.' && input.indexOf('.') == index)
+                                }
+                                val parts = filteredInput.split(".")
+                                val limitedInput = if (parts.size == 2) {
+                                    "${parts[0]}.${parts[1].take(2)}"
+                                } else {
+                                    filteredInput
+                                }
+                                // Convert to number for validation
+                                val inputAmount = limitedInput.toDoubleOrNull() ?: 0.0
+                                val maxAmount = loanDetails.itemPrice?.value?.toDoubleOrNull()
+                                    ?: Double.MAX_VALUE
+
+                                // Update the value
+                                prePartPaymentAmount = limitedInput
+
+                                // Validation
+                                showError = inputAmount <= 0 || inputAmount > maxAmount
+                                if (showError) errorMsg = "Enter Valid Amount"
+                            },
+                            shape = RoundedCornerShape(8.dp),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                            label = {
+                                Text(
+                                    text = stringResource(id = R.string.enter_amount),
+                                    color = hintGray,
+                                    style = normal18Text400,
+                                    textAlign = TextAlign.Center
+                                )
+                            },
+                            visualTransformation = VisualTransformation.None,
+                            textStyle = LocalTextStyle.current,
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                focusedBorderColor = appOrange,
+                                unfocusedBorderColor = grayD6,
+                                cursorColor = appOrange,
+                                textColor = appBlack
+                            )
+                        )
+                    }
                 }
                 if (showError) {
                     Text(
@@ -1620,7 +1812,6 @@ fun convertUTCToLocalDateTime(utcDateTime: String): String {
 
     return formatedStr
 }
-
 
 @Composable
 fun RepaymentBottomCommon(
@@ -2008,7 +2199,7 @@ fun PrePartPaymentResponseHandle(
         paymentStatusText = "Repayment of ₹$prePartPaymentAmount "
         if (!prepartPaymentCharges.isNullOrEmpty()) {
             paymentStatusText += " with prepayment charge of ₹$prepartPaymentCharges"
-        }else {
+        } else {
             Log.d("PrePaymentCharges", "prepartPaymentCharges is not found or empty")
         }
     } else if (selectedOption == "FORECLOSURE" || selectedOption == "MISSED_EMI_PAYMENT") {
@@ -2016,20 +2207,22 @@ fun PrePartPaymentResponseHandle(
     }
     updatedLoanAgreement?.data?.let agreement@{
         it.updatedObject?.let { updatedLoan ->
-            updatedLoan.payments?.forEach {
-                it?.let { payment ->
-                    payment.url?.let { paymentUrl ->
-                        navigateToPrePaymentWebViewScreen(
-                            navController = navController,
-                            orderId = orderId,
-                            headerText = paymentUrl,
-                            status = paymentStatusText,
-                            fromFlow = fromFlow,
-                            paymentOption = "Pre Part Payment"
-                        )
-                        return@agreement
-                    }
+            val matchingPayment = updatedLoan.payments
+                ?.firstOrNull { payment ->
+                    payment?.time?.label.equals(selectedOption, ignoreCase = true) &&
+                        !payment?.url.isNullOrEmpty()
                 }
+
+            matchingPayment?.url?.let { paymentUrl ->
+                navigateToPrePaymentWebViewScreen(
+                    navController = navController,
+                    orderId = orderId,
+                    headerText = paymentUrl,
+                    status = paymentStatusText,
+                    fromFlow = fromFlow,
+                    paymentOption = CommonMethods().displayFormattedText(selectedOption)
+                )
+                return@agreement
             }
         }
     }

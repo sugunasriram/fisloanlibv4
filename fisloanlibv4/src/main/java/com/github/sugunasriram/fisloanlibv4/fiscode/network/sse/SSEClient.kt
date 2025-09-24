@@ -62,6 +62,10 @@ class SSEClient(private val sseUrl: String, private val scope: CoroutineScope) {
     }
 
     private suspend fun runSse() {
+        var retryCount = 0
+        val maxRetries = 5
+        val baseDelay = 3000L
+
         while (scope.isActive) {
             val accessToken = TokenManager.read("accessToken")
             val bearerToken = "Bearer $accessToken"
@@ -73,14 +77,12 @@ class SSEClient(private val sseUrl: String, private val scope: CoroutineScope) {
 
             client = OkHttpClient.Builder()
                 .callTimeout(0, java.util.concurrent.TimeUnit.SECONDS) // no timeout
-                .readTimeout(0, java.util.concurrent.TimeUnit.SECONDS)  // avoid read timeout
+                .readTimeout(0, java.util.concurrent.TimeUnit.SECONDS) // avoid read timeout
                 .connectTimeout(0, java.util.concurrent.TimeUnit.SECONDS) // connection must be established in 10s
                 .retryOnConnectionFailure(true).build()
 
             val request = Request.Builder().url(sseUrl).addHeader("Authorization", bearerToken)
                 .addHeader("Accept", "text/event-stream").build()
-
-
 
             call = client.newCall(request)
 
@@ -90,7 +92,6 @@ class SSEClient(private val sseUrl: String, private val scope: CoroutineScope) {
                     if (response.code == 401) {
                         Log.d("SSE", "Got 401. Checking token...")
                         if (ApiRepository.handleAuthGetAccessTokenApi()) {
-
                             Log.d("SSEClient", "Token still exists. Restarting SSE...")
                             continue
                         } else {
@@ -129,14 +130,20 @@ class SSEClient(private val sseUrl: String, private val scope: CoroutineScope) {
                     Log.d("SSEClient SOCKET CLOSED", "Error: ${e.localizedMessage}")
                     break
                 } else {
-                    Log.d("SSEClient", "Unhandled exception: ${e.localizedMessage}. Stopping SSE.")
-                    break
+                    retryCount++
+                    val delayTime = baseDelay * (1 shl (retryCount - 1))
+                    Log.d("SSEClient", "Unhandled exception: ${e.localizedMessage}. Retry $retryCount/$maxRetries")
+                    if (retryCount >= maxRetries) {
+                        Log.e("SSEClient", "Max retries reached. Stopping SSE ")
+                        _events.value = "__SSE_FAILURE__"
+                        break
+                    }
+                    delay(delayTime)
+                    continue
                 }
             }
         }
     }
-
-
 
 // java HttpsURLConnection SSE
     private var isListening = false
@@ -230,5 +237,4 @@ class SSEClient(private val sseUrl: String, private val scope: CoroutineScope) {
             }
         }
     }
-
 }
