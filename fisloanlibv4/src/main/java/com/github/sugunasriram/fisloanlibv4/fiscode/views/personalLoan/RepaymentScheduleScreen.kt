@@ -586,7 +586,7 @@ fun RepaymentScheduleView(
                     it.title?.let { title ->
                         it.value?.let { description ->
                             if (title.equals("PRINCIPAL", ignoreCase = true) ||
-                                title.lowercase().contains("PRINCIPAL", ignoreCase = true)) {
+                                title.lowercase().contains("PRINCIPAL_", ignoreCase = true)) {
                                 principal = description
                                 return@forEach // Exit the loop after processing the first matching tag
                             }

@@ -195,12 +195,18 @@ fun LoanOffersListDetailsScreen(
     var downPaymentAmountValue by remember { mutableFloatStateOf(0.0f) }
 
     LaunchedEffect(Unit) {
-        downPaymentAmountValue  = TokenManager.read("downpaymentAmount")?.toFloatOrNull() ?:
-                0.0F
+        downPaymentAmountValue = TokenManager.read("downpaymentAmount")?.toFloatOrNull()
+            ?: 0.0F
     }
 
     BackHandler {
-        if (showButtonId == "0") {
+        if (isEditProcess) {
+            CommonMethods().toastMessage(
+                context = context,
+                toastMsg = "Updating Loan amount please wait..."
+            )
+        } else {
+//        if (showButtonId == "0") {
             val currentTime = System.currentTimeMillis()
             if (currentTime - backPressedTime < 2000) {
 //                navigateApplyByCategoryScreen(navController)
@@ -212,9 +218,10 @@ fun LoanOffersListDetailsScreen(
                 )
                 backPressedTime = currentTime
             }
-        } else {
-            navController.popBackStack()
         }
+//        } else {
+//            navController.popBackStack()
+//        }
     }
 
     when {
@@ -449,7 +456,6 @@ fun LoanOfferListDetailView(
                                     }
                                 }
                             }
-
                         }
 
 //                        val interest by remember { mutableStateOf("12 %") }
@@ -508,11 +514,15 @@ fun LoanOfferListDetailView(
                             fromFlow = fromFlow,
                             editLoanRequestViewModel = editLoanRequestViewModel,
                             id = id,
+                            downPaymentAmountValue = downPaymentAmountValue,
                             context = context
                         )
                     },
-                    secondaryButtonText = if (fromFlow == "Personal Loan") stringResource(R.string.edit_loan_request)
-                    else stringResource(R.string.edit_down_payment),
+                    secondaryButtonText = if (fromFlow == "Personal Loan") {
+                        stringResource(R.string.edit_loan_request)
+                    } else {
+                        stringResource(R.string.edit_down_payment)
+                    },
                     onSecondaryButtonClick = {
                         if (loanAmountValue.toDouble() <= minLoanAmount.toDouble()) {
                             CommonMethods().toastMessage(
@@ -533,7 +543,6 @@ fun LoanOfferListDetailView(
 //                        else -> LoanGSTCardInfo(offer = offer)
                         else -> {
                             if (fromFlow == "Purchase Finance") {
-
                                 DownPaymentAmount(downPaymentAmountValue)
                             }
                             LoanGSTCardInfo(
@@ -570,8 +579,6 @@ fun DownPaymentAmount(downPaymentAmount: Float) {
             textHeader = stringResource(id = R.string.my_downpayment_amount),
             textValue =
             "₹ ${CommonMethods().formatWithCommas(downPaymentAmount.toInt())}",
-            textColorHeader = appBlack,
-            textColorValue = appBlack,
             modifier = Modifier
                 .padding(start = 17.dp, top = 0.dp, end = 10.dp, bottom = 8.dp)
                 .weight(0.5f)
@@ -1295,6 +1302,7 @@ fun onAcceptClick(
     fromFlow: String,
     editLoanRequestViewModel: EditLoanRequestViewModel,
     id: String,
+    downPaymentAmountValue: Float = 0.0f,
     context: Context
 ) {
     offer.id?.let id@{ offerId ->
@@ -1345,11 +1353,15 @@ fun onAcceptClick(
                             }
                         }
                         editLoanRequestViewModel.updatePfApiFlow(PfFlow.Normal.status)
+
+                        //Here Initial DownPayment MUST be sent
+                        //Sugu - todo
                         editLoanRequestViewModel.pfInitiateOffer(
                             id = offerId,
                             loanType = "PURCHASE_FINANCE",
                             context = context,
-                            paymentAmount = loanAmountValue,
+//                            paymentAmount = loanAmountValue,
+                            paymentAmount = downPaymentAmountValue.toString(),
                             loanTenure
                         )
                         return@id
@@ -1654,7 +1666,7 @@ fun EditLoanAmountBottomSheetContent(
                                 id = id,
                                 offerId = offerId,
                                 loanType = "PERSONAL_LOAN"
-                            ),
+                            )
                         )
                     } else {
 //                    editLoanRequestViewModel.gstInitiateOffer(
@@ -1845,7 +1857,6 @@ fun EditLoanAmountSliderUI(
         }
     }
 }
-
 
 @Composable
 fun EditLoanTenureSliderUI(

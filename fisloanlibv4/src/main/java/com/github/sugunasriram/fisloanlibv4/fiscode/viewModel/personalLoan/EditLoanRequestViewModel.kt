@@ -416,6 +416,7 @@ class EditLoanRequestViewModel(maxAmount: String, minAmount: String, tenure: Str
                 _isEdited.value = true
                 _pfOfferConfirmResponse.value = response
             } else if (pfApiFlow == PfFlow.Edited.status) {
+                _isEdited.value = true
                 _isPfEdited.value = true
                 _pfOfferConfirmResponse.value = response
             }
