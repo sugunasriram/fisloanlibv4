@@ -806,4 +806,7 @@
     <string name="abort">Abort</string>
     <string name="exit_loan_process">Exit Loan Process?</string>
 
+    <string name="downpayment_amount_cannot_be_greater_than_loan_amount">Downpayment amount
+        cannot be greater than offered loan amount</string>
+
 </resources>

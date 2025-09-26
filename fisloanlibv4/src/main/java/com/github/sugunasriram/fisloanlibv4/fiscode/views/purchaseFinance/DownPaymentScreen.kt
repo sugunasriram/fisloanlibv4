@@ -242,6 +242,7 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
 
                                         TokenManager.save("downpaymentAmount", amount.toString())
                                         TokenManager.save("pfloanTenure", loanTenure.toString())
+                                        TokenManager.save("productPriceAmount", productPrice.toString())
 
                                         webViewModel.setWebInProgress(true)
                                         try {
@@ -340,6 +341,7 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
                                         Log.d("DownPaymentScreen", "Sugu loanTenure: $loanTenure")
                                         TokenManager.save("downpaymentAmount", amount.toString())
                                         TokenManager.save("loanTenure", loanTenure.toString())
+                                        TokenManager.save("productPriceAmount", productPrice.toString())
 
                                         webViewModel.setWebInProgress(true)
 
@@ -374,6 +376,7 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
 
                                             TokenManager.save("downpaymentAmount", amount.toString())
                                             TokenManager.save("pfloanTenure", loanTenure.toString())
+                                            TokenManager.save("productPriceAmount", productPrice.toString())
 
                                             loadWebScreen(
                                                 fromFlow = fromFlow,

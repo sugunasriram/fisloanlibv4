@@ -193,10 +193,11 @@ fun LoanOffersListDetailsScreen(
     val pfOffer = json.decodeFromString(PfOfferResponseItem.serializer(), responseItem)
 
     var downPaymentAmountValue by remember { mutableFloatStateOf(0.0f) }
+    var productPriceValue by remember { mutableFloatStateOf(0.0f) }
 
     LaunchedEffect(Unit) {
-        downPaymentAmountValue = TokenManager.read("downpaymentAmount")?.toFloatOrNull()
-            ?: 0.0F
+        downPaymentAmountValue = TokenManager.read("downpaymentAmount")?.toFloatOrNull() ?: 0.0F
+        productPriceValue = TokenManager.read("productPriceAmount")?.toFloatOrNull() ?: 0.0F
     }
 
     BackHandler {
@@ -251,6 +252,7 @@ fun LoanOffersListDetailsScreen(
                 context = context,
                 bottomSheetState = bottomSheetState,
                 downPaymentAmountValue = downPaymentAmountValue,
+                productPriceAmountValue = productPriceValue,
                 coroutineScope = coroutineScope
             )
         }
@@ -295,6 +297,7 @@ fun LoanOfferListDetailView(
     context: Context,
     bottomSheetState: ModalBottomSheetState,
     downPaymentAmountValue: Float = 0.0f,
+    productPriceAmountValue: Float= 0.0f,
     coroutineScope: CoroutineScope
 ) {
     var backPressedTime by remember { mutableLongStateOf(0L) }
@@ -400,7 +403,7 @@ fun LoanOfferListDetailView(
                             offerId = offerId ?: ""
                         )
                     } else {
-
+                        //For PF
                         var loanTenure = "0"
                         offer.itemTags?.forEach { tagItem ->
                             tagItem?.tags?.forEach { tag ->
@@ -441,7 +444,7 @@ fun LoanOfferListDetailView(
                         }
 
                         // Get maxAmount
-                        var maxAmount = loanAmountValue
+                        var maxAmount = productPriceAmountValue.toString()
                         var interest = ""
 
                         offer.id?.let {
@@ -461,16 +464,18 @@ fun LoanOfferListDetailView(
 //                        val interest by remember { mutableStateOf("12 %") }
 //                        val loanTenure by remember { mutableStateOf("5") }
                         minLoanAmount = minAmount.toString()
-                        loanAmountValue = maxAmount.toString()
+//                        loanAmountValue = maxAmount.toString()
                         DownPaymentBottomSheetContent(
                             maxAmount = maxAmount.toFloatOrNull() ?: 0f,
                             minAmount = minAmount.toFloatOrNull() ?: 0f,
+                            initialAmount = downPaymentAmountValue,
                             interest = interest,
                             onClose = { coroutineScope.launch { bottomSheetState.hide() } },
                             onSubmit = { downPaymentAmount ->
                                 coroutineScope.launch { bottomSheetState.show() }
                                 checkAndMakeApiCall(
 //                                    (maxAmount.toFloatOrNull() ?: 0f) - downPaymentAmount,
+                                    maxAmount.toFloatOrNull() ?: 0f,
                                     downPaymentAmount,
                                     context,
                                     editLoanRequestViewModel,
@@ -1372,8 +1377,8 @@ fun onAcceptClick(
     }
 }
 
-
 private fun checkAndMakeApiCall(
+    maxAmount: Float,
     downPaymentAmount: Float,
     context: Context,
     editLoanRequestViewModel: EditLoanRequestViewModel,
@@ -1388,7 +1393,14 @@ private fun checkAndMakeApiCall(
             context.getString(R.string.loan_amount_has_to_be_greater_than_0),
             Toast.LENGTH_LONG
         ).show()
-    } else {
+    } else if (downPaymentAmount > maxAmount) {
+        Toast.makeText(
+            context,
+            context.getString(R.string.downpayment_amount_cannot_be_greater_than_loan_amount),
+            Toast.LENGTH_LONG
+        ).show()
+    }
+    else {
         id.let { offerId ->
             editLoanRequestViewModel.updatePfApiFlow(PfFlow.Edited.status)
             editLoanRequestViewModel.pfInitiateOffer(
@@ -1943,29 +1955,46 @@ fun EditLoanTenureSliderUI(
 fun DownPaymentBottomSheetContent(
     maxAmount: Float,
     minAmount: Float,
+    initialAmount: Float? = null,
     interest: String,
     onClose: () -> Unit,
     onSubmit: (Float) -> Unit,
     editLoanRequestViewModel : EditLoanRequestViewModel,
 ) {
-    var sliderValue by remember { mutableFloatStateOf(minAmount.toFloat()) }
+    val preloaded = remember(initialAmount, minAmount, maxAmount) {
+        val raw = initialAmount ?: minAmount
+        val clamped = raw.coerceIn(minAmount, maxAmount)
+        CommonMethods().roundToNearestHundred(clamped)
+    }
+
+//    var sliderValue by remember { mutableFloatStateOf(minAmount.toFloat()) }
+    var sliderValue by remember { mutableFloatStateOf(preloaded) }
     val displayValue = sliderValue.coerceIn(minAmount, maxAmount)
     var inputText by remember {
-        mutableStateOf(TextFieldValue(CommonMethods().formatWithCommas(minAmount.toInt())))
+//        mutableStateOf(TextFieldValue(CommonMethods().formatWithCommas(minAmount.toInt())))
+        mutableStateOf(TextFieldValue(CommonMethods().formatWithCommas(displayValue.toInt())))
     }
     var isError by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
     val stopPercentage = 0.8f
     val stopValue = minAmount + (maxAmount - minAmount) * stopPercentage
+    val range = (maxAmount - minAmount).takeIf { it > 0f } ?: 1f   // avoid /0
 
-    LaunchedEffect(minAmount) {
-        val formatted = CommonMethods().formatIndianCurrency(minAmount.toInt())
-        if (formatted != inputText.text) {
-            inputText = TextFieldValue(
-                text = formatted,
-                selection = TextRange(formatted.length)
-            )
-        }
+//    LaunchedEffect(minAmount) {
+//        val formatted = CommonMethods().formatIndianCurrency(minAmount.toInt())
+//        if (formatted != inputText.text) {
+//            inputText = TextFieldValue(
+//                text = formatted,
+//                selection = TextRange(formatted.length)
+//            )
+//        }
+//    }
+    LaunchedEffect(preloaded) {
+        sliderValue = preloaded
+        val formatted = CommonMethods().formatIndianCurrency(preloaded.toInt())
+        inputText = TextFieldValue(text = formatted, selection = TextRange(formatted.length))
+        editLoanRequestViewModel.onDownpaymentAmountChanged(preloaded.toString())
+        isError = false
     }
 
     Column(
@@ -1976,7 +2005,7 @@ fun DownPaymentBottomSheetContent(
             .background(shape = RoundedCornerShape(40.dp), color = Color.White)
     ) {
         Text(
-            text = stringResource(id = R.string.edit_loan_request),
+            text = stringResource(id = R.string.edit_down_payment),
             style = bold20Text100,
             color = appBlack,
             textAlign = TextAlign.Center,
@@ -1988,85 +2017,86 @@ fun DownPaymentBottomSheetContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(start = 15.dp, end = 15.dp)
         ) {
-                Spacer(Modifier.height(60.dp))
-                Box {
-                    Slider(
-                        value = (sliderValue - minAmount) / (maxAmount - minAmount), // Normalize to 0f..1f
-                        onValueChange = { newValue ->
-                            sliderValue =
-                                CommonMethods().roundToNearestHundred(newValue * (maxAmount - minAmount) + minAmount)
+            Spacer(Modifier.height(60.dp))
+            Box {
+                Slider(
+//                    value = (sliderValue - minAmount) / (maxAmount - minAmount), // Normalize to 0f..1f
+                    value = (sliderValue - minAmount) / range,
+                    onValueChange = { newValue ->
+                        sliderValue =
+                            CommonMethods().roundToNearestHundred(newValue * (maxAmount - minAmount) + minAmount)
 
-                            val formatted = formatCurrency(sliderValue.toInt().toString())
-                            inputText = TextFieldValue(
-                                text = formatted,
-                                selection = TextRange(formatted.length) // cursor at end
-                            )
-                            isError = false
-                            editLoanRequestViewModel.onDownpaymentAmountChanged(sliderValue.toString())
-                        },
-
-                        valueRange = 0f..1f,
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = SliderDefaults.colors(
-                            thumbColor = appOrange,
-                            activeTrackColor = appOrange,
-                            inactiveTrackColor = Color.Gray
+                        val formatted = formatCurrency(sliderValue.toInt().toString())
+                        inputText = TextFieldValue(
+                            text = formatted,
+                            selection = TextRange(formatted.length) // cursor at end
                         )
+                        isError = false
+                        editLoanRequestViewModel.onDownpaymentAmountChanged(sliderValue.toString())
+                    },
+
+                    valueRange = 0f..1f,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = SliderDefaults.colors(
+                        thumbColor = appOrange,
+                        activeTrackColor = appOrange,
+                        inactiveTrackColor = Color.Gray
                     )
-                    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-                    val sliderWidth = screenWidth - 32.dp
-                    val thumbPosition =
-                        ((sliderValue - minAmount) / (maxAmount - minAmount)) * sliderWidth
+                )
+                val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+                val sliderWidth = screenWidth - 32.dp
+                val thumbPosition =
+                    ((sliderValue - minAmount) / (maxAmount - minAmount)) * sliderWidth
 
-                    val textWidth = 48.dp // Approximate width of the text
+                val textWidth = 48.dp // Approximate width of the text
 
-                    // Calculate the position where the text should stop (at 80% of the slider)
-                    val stopPosition =
-                        ((stopValue - minAmount) / (maxAmount - minAmount)) * sliderWidth
+                // Calculate the position where the text should stop (at 80% of the slider)
+                val stopPosition =
+                    ((stopValue - minAmount) / (maxAmount - minAmount)) * sliderWidth
 
-                    // Constrain the thumb position to stop at 80%
-                    val constrainedThumbPosition = thumbPosition.coerceAtMost(stopPosition)
+                // Constrain the thumb position to stop at 80%
+                val constrainedThumbPosition = thumbPosition.coerceAtMost(stopPosition)
 
-                    // Value Bubble (TextView)
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start,
+                // Value Bubble (TextView)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start,
+                    modifier = Modifier
+                        .offset(
+                            x = (constrainedThumbPosition - (textWidth / 2)), // 0 to 270
+                            y = (-30).dp
+                        )
+                ) {
+                    Box(
                         modifier = Modifier
-                            .offset(
-                                x = (constrainedThumbPosition - (textWidth / 2)), // 0 to 270
-                                y = (-30).dp
+                            .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
+                            .background(
+                                color = appOrange,
+                                shape = RoundedCornerShape(8.dp)
                             )
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .shadow(elevation = 4.dp, shape = RoundedCornerShape(8.dp))
-                                .background(
-                                    color = appOrange,
-                                    shape = RoundedCornerShape(8.dp)
-                                )
-                                .padding(horizontal = 20.dp, vertical = 10.dp)
+                            .padding(horizontal = 20.dp, vertical = 10.dp)
 
-                        ) {
-                            Text(
-                                text = "₹ ${ CommonMethods().formatWithCommas(sliderValue.toInt())}",
-                                fontSize = 12.sp,
-                                color = Color.White
-                            )
-                        }
+                    ) {
+                        Text(
+                            text = "₹ ${ CommonMethods().formatWithCommas(sliderValue.toInt())}",
+                            fontSize = 12.sp,
+                            color = Color.White
+                        )
                     }
                 }
             }
+        }
 
-            // Other code
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(text = CommonMethods().formatIndianCurrency(minAmount.toInt()))
-                Text(text = CommonMethods().formatIndianCurrency(maxAmount.toInt()))
-            }
+        // Other code
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(text = CommonMethods().formatIndianCurrency(minAmount.toInt()))
+            Text(text = CommonMethods().formatIndianCurrency(maxAmount.toInt()))
+        }
 
             Spacer(Modifier.height(10.dp))
 
@@ -2185,7 +2215,6 @@ fun DownPaymentBottomSheetContent(
             ) { onSubmit(sliderValue) }
     }
 }
-
 
 @Composable
 fun DottedBoxWithDividers(
