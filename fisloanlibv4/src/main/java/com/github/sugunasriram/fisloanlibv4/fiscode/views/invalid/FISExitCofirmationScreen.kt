@@ -88,6 +88,26 @@ fun FISExitCofirmationScreen(
         )
     }
 
+    // --- helper to perform the ABORT action (same as tapping the ABORT button) ---
+    fun triggerAbort() {
+        if (!inProgress) {
+            val sanitizedLoanId = loanId.takeUnless { it == "1234" }.orEmpty()
+            loanAgreementViewModel.createPfSession(sanitizedLoanId, context)
+        }
+    }
+
+    // Auto-trigger ABORT once if loanId == "1234"
+    val autoAborted = remember { mutableStateOf(false) }
+    val forceLoader = remember { mutableStateOf(false) }
+
+    LaunchedEffect(loanId) {
+        if (loanId == "1234" && !autoAborted.value) {
+            autoAborted.value = true
+            forceLoader.value = true
+            triggerAbort()
+        }
+    }
+
     // React to VM state changes
     LaunchedEffect(createState) {
         when (val s = createState) {
@@ -97,10 +117,7 @@ fun FISExitCofirmationScreen(
                 val downpaymentAmountVal = downpaymentAmountValue.value?.toIntOrNull() ?: 0
                 val loanTenureVal = loanTenureValue.value?.toIntOrNull() ?: 0
 
-                val tenureForCallback = if (loanAmount?.toDoubleOrNull()?:0.0 <= 0.0) 0
-                        else
-                    loanTenureVal
-
+                val tenureForCallback = if (loanAmount?.toDoubleOrNull() ?: 0.0 <= 0.0) 0 else loanTenureVal
 
                 val details = LoanLib.LoanDetails(
                     sessionId = sessionId,
@@ -113,7 +130,8 @@ fun FISExitCofirmationScreen(
                 (context as? Activity)?.finish()
             }
             is LoanAgreementViewModel.CreateSessionUiState.Error -> {
-                Toast.makeText(context, s.message ?: "Something went wrong", Toast.LENGTH_SHORT).show()
+//                Toast.makeText(context, s.message ?: "Something went wrong", Toast.LENGTH_SHORT).show()
+                Log.d("FISExitCofirmationScreen", s.message ?: "Something went wrong")
             }
             else -> Unit
         }
@@ -170,10 +188,7 @@ fun FISExitCofirmationScreen(
                 modifier = Modifier
                     .weight(1f)
                     .clip(RoundedCornerShape(12.dp))
-                    .clickable(enabled = !inProgress) {
-                        val sanitizedLoanId = loanId.takeUnless { it == "1234" }.orEmpty()
-                        loanAgreementViewModel.createPfSession(sanitizedLoanId, context)
-                    }
+                    .clickable(enabled = !inProgress) { triggerAbort() }
                     .padding(vertical = 14.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -183,17 +198,14 @@ fun FISExitCofirmationScreen(
                     ClickableText(
                         text = stringResource(id = R.string.abort),
                         style = normal20Text700
-                    ) {
-                        val sanitizedLoanId = loanId.takeUnless { it == "1234" }.orEmpty()
-                        loanAgreementViewModel.createPfSession(sanitizedLoanId, context)
-                    }
+                    ) { triggerAbort() }
                 }
             }
         }
     }
 
     // (Optional) full-screen dim overlay loader while inProgress
-    if (inProgress) {
+    if (inProgress || forceLoader.value) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -212,6 +224,7 @@ fun FISExitCofirmationScreen(
         }
     }
 }
+
 
 
 //@Preview
