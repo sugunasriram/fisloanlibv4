@@ -97,11 +97,16 @@ fun FISExitCofirmationScreen(
                 val downpaymentAmountVal = downpaymentAmountValue.value?.toIntOrNull() ?: 0
                 val loanTenureVal = loanTenureValue.value?.toIntOrNull() ?: 0
 
+                val tenureForCallback = if (loanAmount?.toDoubleOrNull()?:0.0 <= 0.0) 0
+                        else
+                    loanTenureVal
+
+
                 val details = LoanLib.LoanDetails(
                     sessionId = sessionId,
                     interestRate = interestRate?.toDoubleOrNull() ?: 0.0,
                     loanAmount =loanAmount?.toDoubleOrNull() ?: 0.0,
-                    tenure = loanTenureVal?.toInt()?:0,
+                    tenure = tenureForCallback,
                     downpaymentAmount = downpaymentAmountVal
                 )
                 LoanLib.callback?.invoke(details)
