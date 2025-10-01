@@ -137,75 +137,7 @@ fun FISExitCofirmationScreen(
         }
     }
 
-    TopBottomBarForNegativeScreen(showTop = false, showBottom = true, navController = navController) {
-        StartingText(
-            text = stringResource(R.string.exit_loan_process),
-            textColor = errorRed,
-            start = 30.dp, end = 30.dp, top = 60.dp, bottom = 15.dp,
-            style = normal36Text700,
-            alignment = Alignment.Center
-        )
-
-        Image(
-            painter = painterResource(id = R.drawable.error_no_loan_offers_available),
-            contentDescription = "loan Status",
-            contentScale = ContentScale.Fit,
-            modifier = Modifier.fillMaxWidth().size(250.dp)
-        )
-
-        RegisterText(
-            text = stringResource(id = R.string.your_loan_in_progress),
-            style = normal14Text700,
-            textColor = hintGray,
-            top = 10.dp, bottom = 25.dp
-        )
-
-        // --- Buttons in one row ---
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // CONTINUE (stay)
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(RoundedCornerShape(12.dp))
-                    .clickable(enabled = !inProgress) { onContinueClick() }
-                    .padding(vertical = 14.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                ClickableText(
-                    text = stringResource(id = R.string.continue_),
-                    style = normal20Text700
-                ) { if (!inProgress) onContinueClick() }
-            }
-
-            // ABORT (leave) -> call createPfSession; UI will navigate on Success
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(RoundedCornerShape(12.dp))
-                    .clickable(enabled = !inProgress) { triggerAbort() }
-                    .padding(vertical = 14.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                if (inProgress) {
-                    CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.size(22.dp))
-                } else {
-                    ClickableText(
-                        text = stringResource(id = R.string.abort),
-                        style = normal20Text700
-                    ) { triggerAbort() }
-                }
-            }
-        }
-    }
-
-    // (Optional) full-screen dim overlay loader while inProgress
-    if (inProgress || forceLoader.value) {
+    if (forceLoader.value) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -220,6 +152,101 @@ fun FISExitCofirmationScreen(
                     style = normal14Text700,
                     color = appBlack
                 )
+            }
+        }
+    }
+    else {
+        TopBottomBarForNegativeScreen(
+            showTop = false,
+            showBottom = true,
+            navController = navController
+        ) {
+            StartingText(
+                text = stringResource(R.string.exit_loan_process),
+                textColor = errorRed,
+                start = 30.dp, end = 30.dp, top = 60.dp, bottom = 15.dp,
+                style = normal36Text700,
+                alignment = Alignment.Center
+            )
+
+            Image(
+                painter = painterResource(id = R.drawable.error_no_loan_offers_available),
+                contentDescription = "loan Status",
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.fillMaxWidth().size(250.dp)
+            )
+
+            RegisterText(
+                text = stringResource(id = R.string.your_loan_in_progress),
+                style = normal14Text700,
+                textColor = hintGray,
+                top = 10.dp, bottom = 25.dp
+            )
+
+            // --- Buttons in one row ---
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // CONTINUE (stay)
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable(enabled = !inProgress) { onContinueClick() }
+                        .padding(vertical = 14.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    ClickableText(
+                        text = stringResource(id = R.string.continue_),
+                        style = normal20Text700
+                    ) { if (!inProgress) onContinueClick() }
+                }
+
+                // ABORT (leave) -> call createPfSession; UI will navigate on Success
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable(enabled = !inProgress) { triggerAbort() }
+                        .padding(vertical = 14.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (inProgress) {
+                        CircularProgressIndicator(
+                            strokeWidth = 2.dp,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    } else {
+                        ClickableText(
+                            text = stringResource(id = R.string.abort),
+                            style = normal20Text700
+                        ) { triggerAbort() }
+                    }
+                }
+            }
+        }
+
+        // (Optional) full-screen dim overlay loader while inProgress
+        if (inProgress) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.25f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CircularProgressIndicator()
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        text = stringResource(id = R.string.processing_please_wait),
+                        style = normal14Text700,
+                        color = appBlack
+                    )
+                }
             }
         }
     }

@@ -102,7 +102,8 @@ fun PrePaymentStatusScreen(
 
             if (showButton) {
                 ClickableTextWithIcon(
-                    text = stringResource(id = R.string.retry),
+//                    text = stringResource(id = R.string.retry),
+                    text = stringResource(id = R.string.go_back),
                     image = R.drawable.refresh_icon
                 ) { onClick() }
             }

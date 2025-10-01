@@ -70,7 +70,8 @@ fun NegativeCommonScreen(
     onClick: () -> Unit,
     solutionText: String = stringResource(id = R.string.please_try_again_after_sometime),
     errorImage: Painter = painterResource(id = R.drawable.error_404_image),
-    buttonText: String = stringResource(id = R.string.retry),
+//    buttonText: String = stringResource(id = R.string.retry),
+    buttonText: String = stringResource(id = R.string.go_back),
     errorTextTop: Dp = 50.dp
 
 ) {
@@ -184,7 +185,8 @@ fun UnexpectedErrorScreen(
             bottom = 80.dp
         )
         ClickableTextWithIcon(
-            text = stringResource(id = R.string.retry),
+//            text = stringResource(id = R.string.retry),
+            text = stringResource(id = R.string.go_back),
             image = R.drawable.refresh_orange_icon,
             color = appOrange
         ) { onClick() }
@@ -247,7 +249,8 @@ fun RequestTimeOutScreen(navController: NavHostController, onClick: () -> Unit) 
                         style = normal20Text500,
                         imageStart = 25.dp,
                         imageEnd = 25.dp,
-                        text = stringResource(id = R.string.retry),
+//                        text = stringResource(id = R.string.retry),
+                        text = stringResource(id = R.string.go_back),
                         image = R.drawable.refresh_icon
                     ) { onClick() }
                 }
@@ -474,7 +477,8 @@ fun FormRejectionScreen(
             )
 
             ClickableTextWithIcon(
-                text = stringResource(id = R.string.retry),
+//                text = stringResource(id = R.string.retry),
+                text = stringResource(id = R.string.go_back),
                 image = R.drawable.refresh_icon
             ) {
                 onClick()
