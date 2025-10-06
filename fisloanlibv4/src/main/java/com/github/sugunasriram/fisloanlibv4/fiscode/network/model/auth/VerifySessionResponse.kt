@@ -45,5 +45,9 @@ data class VerifySessionDetails(
 	val productSymbol: String?,
 	val productQuantity: String?,
 	val productModel: String?,
-	val productSellingPrice: String?
+	val productSellingPrice: String?,
+	val deliveryCharges: String? = null,
+	val tax: String? = null,
+	val otherCharges: String? = null,
+	val cartAmount: String?
 ) : java.io.Serializable

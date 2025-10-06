@@ -402,9 +402,20 @@ fun LoanDetailCard(navController: NavHostController, offer: OfferResponseItem, f
                             Spacer(Modifier.height(15.dp))
 
                             Row {
+                                //Sugu ToDo
+                                var loanTenure = "-"
+                                if (tenure?.startsWith("P") == true) {
+                                    convertISODurationToReadable(
+                                        tenure ?: ""
+                                    ).let { readableDuration ->
+                                        loanTenure = readableDuration
+                                    }
+                                }else{
+                                    loanTenure= tenure
+                                }
                                 HeaderWithValue(
                                     textHeader = stringResource(id = R.string.tenure),
-                                    textValue = tenure,
+                                    textValue = loanTenure,
                                     modifier = Modifier.weight(0.5f)
                                 )
                                 HeaderWithValue(

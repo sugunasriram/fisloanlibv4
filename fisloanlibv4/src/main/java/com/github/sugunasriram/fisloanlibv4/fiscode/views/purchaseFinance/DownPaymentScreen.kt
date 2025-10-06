@@ -77,6 +77,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.components.HorizontalDivider
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.OnlyReadAbleText
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.ProcessingAnimation
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.RegisterText
+import com.github.sugunasriram.fisloanlibv4.fiscode.components.StartingText
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.TextInputLayout
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToBureauOffersScreen
@@ -91,6 +92,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appGray
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appWhite
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.backgroundOrange
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.bold16Text400
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.bold20Text100
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.errorRed
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal12Text400
@@ -99,6 +101,9 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal14Text700
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal16Text400
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal16Text700
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal20Text700
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.primaryOrange
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.semiBold20Text500
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.slateGrayColor
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.auth.RegisterViewModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan.PersonalLoanViewModel
@@ -120,15 +125,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
-import kotlin.math.floor
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan.EditLoanRequestViewModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan.EditLoanRequestViewModelFactory
-import kotlin.text.toDouble
+import com.github.sugunasriram.fisloanlibv4.fiscode.views.igm.HorizontalDashedLine
+import kotlinx.serialization.decodeFromString
 
 
 var productName : String = "Samsung Galaxy S24 Ultra 5G"
@@ -709,7 +712,96 @@ fun ProductDetailsCard(verifySessionResponse: VerifySessionResponse) {
 //                    style = normal14Text700.copy(textDecoration = TextDecoration.Underline),
 //                    modifier = Modifier.clickable { Log.d("DownPaymentScreen", "more details") }
 //                )
+
+
+
             }
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
+            Spacer(modifier = Modifier.height(16.dp))
+            OnlyReadAbleText(
+                textHeader = "Product Price:",
+                style = normal16Text400,
+                textColorHeader = slateGrayColor,
+                textValue = verifySessionResponse.data.sessionData.productSellingPrice?.toLongOrNull()?.let {
+                    "₹$it"
+                } ?: "NA",
+                textColorValue = appBlack,
+                textValueAlignment = TextAlign.End,
+                top = 5.dp,
+                bottom = 2.dp
+            )
+
+            OnlyReadAbleText(
+                textHeader = "Delivery Charges:",
+                style = normal16Text400,
+                textColorHeader = slateGrayColor,
+                textValue = verifySessionResponse.data.sessionData.deliveryCharges?.toLongOrNull()?.let {
+                    "₹$it"
+                } ?: "NA",
+                textColorValue = appBlack,
+                textValueAlignment = TextAlign.End,
+                top = 1.dp,
+                bottom = 1.dp
+            )
+
+            OnlyReadAbleText(
+                textHeader = "Tax:",
+                style = normal16Text400,
+                textColorHeader = slateGrayColor,
+                textValue = verifySessionResponse.data.sessionData.tax?.toLongOrNull()?.let {
+                    "₹$it"
+                } ?: "NA",
+                textColorValue = appBlack,
+                textValueAlignment = TextAlign.End,
+                top = 1.dp,
+                bottom = 1.dp
+            )
+
+            OnlyReadAbleText(
+                textHeader = "Other Charges:",
+                style = normal16Text400,
+                textColorHeader = slateGrayColor,
+                textValue = verifySessionResponse.data.sessionData.otherCharges?.toLongOrNull()?.let {
+                    "₹$it"
+                } ?: "NA",
+                textColorValue = appBlack,
+                textValueAlignment = TextAlign.End,
+                top = 1.dp,
+                bottom = 1.dp
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            HorizontalDashedLine(color = primaryOrange)
+            Spacer(modifier = Modifier.height(4.dp))
+
+            verifySessionResponse.data.sessionData.cartAmount?.toLongOrNull()?.let {
+                productPrice = it
+                maxAmount = it
+                amount = it / 3
+            }
+
+            OnlyReadAbleText(
+                textHeader = "Total Amount:",
+                style = bold16Text400,
+                textColorHeader = slateGrayColor,
+                textValue = verifySessionResponse.data.sessionData.cartAmount?.toLongOrNull()?.let {
+                    "₹$it"
+                } ?: "NA",
+                textColorValue = appBlack,
+                textValueAlignment = TextAlign.End,
+                top = 5.dp,
+                bottom = 5.dp
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
         }
     }
 }
@@ -1211,5 +1303,63 @@ fun CompanyConsentContent(
                 .padding(6.dp),
             tint = appOrange
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DownPaymentScreenPreview() {
+        var verifySessionResponse1 = "{\n" +
+            "    \"statusCode\": 201,\n" +
+            "    \"status\": true,\n" +
+            "    \"message\": \"Session Retrived Successfully\",\n" +
+            "    \"data\": {\n" +
+            "        \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOnsidXNlcklkIjoiZTgxOTM1MGUtYWZhNS01ZmU0LWExZTEtNmNhYjZiNDk4NzZjIiwibW9iaWxlTnVtYmVyIjoiOTYxMTkwOTAxNSIsIm1vYmlsZUNvdW50cnlDb2RlIjoiKzkxIn0sInJvbGUiOiJVU0VSIiwiaWF0IjoxNzUxMDE2NzA0LCJleHAiOjE3NTE2MjE1MDR9.WpYrU6AvEsubAarJyna2rkHFWGK3oM208RPxORKBPfk\",\n" +
+            "        \"sessionId\": \"83f29f24-704d-529f-a3b4-4a5560cd2c70\",\n" +
+            "        \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOnsidXNlcklkIjoiZTgxOTM1MGUtYWZhNS01ZmU0LWExZTEtNmNhYjZiNDk4NzZjIiwibW9iaWxlTnVtYmVyIjoiOTYxMTkwOTAxNSIsIm1vYmlsZUNvdW50cnlDb2RlIjoiKzkxIn0sInJvbGUiOiJVU0VSIiwiaWF0IjoxNzUxNDQyNDUxLCJleHAiOjE3NTE0NDI2MzF9.ziPqEqA9eFr_Co-B1b6mwYMKgzgTjjrFR8lYeUIilME\",\n" +
+            "        \"sseId\": \"a41bb04e18a5545395ba6cba4e34607c\",\n" +
+            "        \"securityKey\": \"110e5c0419135e22814945c143ab9fda\",\n" +
+            "        \"sessionData\": {\n" +
+            "            \"downPayment\": 0,\n" +
+            "            \"productId\": \"2a9a7100-bf22-5858-83f3-62e65c2e3a8c\",\n" +
+            "            \"loanId\": \"2a9a7100-bf22-5858-83f3-62e65c2e3a8c\",\n" +
+            "            \"merchantPAN\": null,\n" +
+            "            \"merchantBankAccount\": null,\n" +
+            "            \"merchantGST\": null,\n" +
+            "            \"merchantAccountHolderName\": null,\n" +
+            "            \"merchantIfscCode\": null,\n" +
+            "            \"productBrand\": null,\n" +
+            "            \"productCategory\": \"Mobile Phone\",\n" +
+            "            \"productSKUID\": \"47af53c0-0add-5c49-9365-8f42fafa18fe\",\n" +
+            "            \"productReturnWindow\": \"P7D\",\n" +
+            "            \"productModel\": null,\n" +
+            "            \"productSellingPrice\": \"90000\",\n" +
+            "            \"productCancellable\": true,\n" +
+            "            \"productReturnable\": true,\n" +
+            "            \"productName\": \"VRIDDHI\",\n" +
+            "            \"productMrpPrice\": \"100000\",\n" +
+                "            \"deliveryCharges\": \"100\",\n" +
+                "            \"tax\": \"150\",\n" +
+                "            \"otherCharges\": \"50\",\n" +
+                "            \"cartAmount\": \"90300\",\n" +
+            "            \"productSymbol\": \"https://storage.googleapis.com/nslive/62bab198-9391-5be4-b672-e78a6a299a1f/raw/1742808735478_1742808733756.png\",\n" +
+            "            \"productQuantity\": \"1\"\n" +
+            "        },\n" +
+            "        \"sessionType\": \"FIS_PF\"\n" +
+            "    }\n" +
+            "}"
+
+    Log.d("DownPaymentScreenPreview", "Verify Session Response JSON: $verifySessionResponse1")
+
+    val verifySessionResponseObj = Json {
+        ignoreUnknownKeys = true // skips unknown JSON keys safely
+    }.decodeFromString<VerifySessionResponse>(verifySessionResponse1)
+
+    Log.d("DownPaymentScreenPreview", "Parsed VerifySessionResponse Object: $verifySessionResponseObj")
+
+//    DownPaymentScreen(navController = rememberNavController(), verifySessionResponse = verifySessionResponseObj)
+    // Only show product details part for preview
+    Column(modifier = Modifier.background(Color.White)) {
+        ProductDetailsCard(verifySessionResponseObj)
     }
 }
