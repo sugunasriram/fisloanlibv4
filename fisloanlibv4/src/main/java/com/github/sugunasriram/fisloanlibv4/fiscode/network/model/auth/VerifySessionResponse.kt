@@ -27,8 +27,8 @@ data class VerifySessionData(
 @Serializable
 data class VerifySessionDetails(
 	val downPayment: Int,
+	val cartAmount: String?,
 	val productId: String?,
-	val loanId: String? = null,
 	val merchantPAN: String?,
 	val merchantGST: String?,
 	val productBrand: String?,
@@ -43,11 +43,39 @@ data class VerifySessionDetails(
 	val productName: String?,
 	val productMrpPrice: String?,
 	val productSymbol: String?,
-	val productQuantity: String?,
+	val productQuantity: Int,
 	val productModel: String?,
 	val productSellingPrice: String?,
 	val deliveryCharges: String? = null,
 	val tax: String? = null,
-	val otherCharges: String? = null,
-	val cartAmount: String?
+	@SerialName("otherCharges")
+	val otherCharges: List<OtherCharge>? = null
+) : java.io.Serializable
+
+
+@Serializable
+data class OtherCharge(
+	@SerialName("item_id")
+	val itemId: String?,
+
+	@SerialName("title")
+	val title: String?,
+
+	@SerialName("title_type")
+	val titleType: String?,
+
+	@SerialName("price")
+	val price: Price?,
+
+	@SerialName("items")
+	val items: String?
+) : java.io.Serializable
+
+@Serializable
+data class Price(
+	@SerialName("currency")
+	val currency: String?,
+
+	@SerialName("value")
+	val value: String?
 ) : java.io.Serializable

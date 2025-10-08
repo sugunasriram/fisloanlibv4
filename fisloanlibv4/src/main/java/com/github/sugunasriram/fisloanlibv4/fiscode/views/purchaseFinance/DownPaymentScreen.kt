@@ -725,57 +725,75 @@ fun ProductDetailsCard(verifySessionResponse: VerifySessionResponse) {
             horizontalAlignment = Alignment.Start
         ) {
             Spacer(modifier = Modifier.height(16.dp))
-            OnlyReadAbleText(
-                textHeader = "Product Price:",
-                style = normal16Text400,
-                textColorHeader = slateGrayColor,
-                textValue = verifySessionResponse.data.sessionData.productSellingPrice?.toLongOrNull()?.let {
-                    "₹$it"
-                } ?: "NA",
-                textColorValue = appBlack,
-                textValueAlignment = TextAlign.End,
-                top = 5.dp,
-                bottom = 2.dp
-            )
 
+//            OnlyReadAbleText(
+//                textHeader = "Product Price:",
+//                style = normal16Text400,
+//                textColorHeader = slateGrayColor,
+//                textValue = verifySessionResponse.data.sessionData.productSellingPrice?.toLongOrNull()?.let {
+//                    "₹$it"
+//                } ?: "NA",
+//                textColorValue = appBlack,
+//                textValueAlignment = TextAlign.End,
+//                top = 5.dp,
+//                bottom = 2.dp
+//            )
+//
+//            OnlyReadAbleText(
+//                textHeader = "Delivery Charges:",
+//                style = normal16Text400,
+//                textColorHeader = slateGrayColor,
+//                textValue = verifySessionResponse.data.sessionData.deliveryCharges?.toLongOrNull()?.let {
+//                    "₹$it"
+//                } ?: "NA",
+//                textColorValue = appBlack,
+//                textValueAlignment = TextAlign.End,
+//                top = 1.dp,
+//                bottom = 1.dp
+//            )
+//
+//            OnlyReadAbleText(
+//                textHeader = "Tax:",
+//                style = normal16Text400,
+//                textColorHeader = slateGrayColor,
+//                textValue = verifySessionResponse.data.sessionData.tax?.toLongOrNull()?.let {
+//                    "₹$it"
+//                } ?: "NA",
+//                textColorValue = appBlack,
+//                textValueAlignment = TextAlign.End,
+//                top = 1.dp,
+//                bottom = 1.dp
+//            )
+//
+//            OnlyReadAbleText(
+//                textHeader = "Other Charges:",
+//                style = normal16Text400,
+//                textColorHeader = slateGrayColor,
+//                textValue = verifySessionResponse.data.sessionData.otherCharges?.toLongOrNull()?.let {
+//                    "₹$it"
+//                } ?: "NA",
+//                textColorValue = appBlack,
+//                textValueAlignment = TextAlign.End,
+//                top = 1.dp,
+//                bottom = 1.dp
+//            )
+
+        verifySessionResponse.data.sessionData.otherCharges?.forEach { charge ->
             OnlyReadAbleText(
-                textHeader = "Delivery Charges:",
+                textHeader = "${charge.title ?: "NA"}:",
                 style = normal16Text400,
                 textColorHeader = slateGrayColor,
-                textValue = verifySessionResponse.data.sessionData.deliveryCharges?.toLongOrNull()?.let {
-                    "₹$it"
+                textValue = charge.price?.value?.let { value ->
+//                    val currency = charge.price.currency ?: ""
+//                    "$currency$value"
+                    "₹$value"
                 } ?: "NA",
                 textColorValue = appBlack,
                 textValueAlignment = TextAlign.End,
                 top = 1.dp,
                 bottom = 1.dp
             )
-
-            OnlyReadAbleText(
-                textHeader = "Tax:",
-                style = normal16Text400,
-                textColorHeader = slateGrayColor,
-                textValue = verifySessionResponse.data.sessionData.tax?.toLongOrNull()?.let {
-                    "₹$it"
-                } ?: "NA",
-                textColorValue = appBlack,
-                textValueAlignment = TextAlign.End,
-                top = 1.dp,
-                bottom = 1.dp
-            )
-
-            OnlyReadAbleText(
-                textHeader = "Other Charges:",
-                style = normal16Text400,
-                textColorHeader = slateGrayColor,
-                textValue = verifySessionResponse.data.sessionData.otherCharges?.toLongOrNull()?.let {
-                    "₹$it"
-                } ?: "NA",
-                textColorValue = appBlack,
-                textValueAlignment = TextAlign.End,
-                top = 1.dp,
-                bottom = 1.dp
-            )
+        }
 
             Spacer(modifier = Modifier.height(4.dp))
 
