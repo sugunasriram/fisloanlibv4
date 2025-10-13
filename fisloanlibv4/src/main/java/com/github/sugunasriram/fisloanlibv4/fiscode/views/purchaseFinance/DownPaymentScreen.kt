@@ -871,26 +871,27 @@ fun PFPersonalDetailsCard(profile: Profile) {
             profile.panNumber?.let { panNumber ->
                 OnlyReadAbleText(
                     textHeader = stringResource(id = R.string.pan_number),
-                    textValue = "",
+                    textValue = panNumber,
                     bottom = 0.dp,
                     start = 10.dp,
                     showImage = true,
                     image = painterResource(R.drawable.pan_number)
                 )
-                TextInputLayout(
-                    textFieldVal = TextFieldValue(text = panNumber),
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Next,
-                        keyboardType = KeyboardType.Number
-                    ),
-                    onTextChanged = { },
-                    style = normal16Text700,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 30.dp, end = 30.dp, bottom = 5.dp),
-//                       .focusRequester(incomeFocus),
-                    readOnly = true
-                )
+                //Sugu - don't remove this, we may need to edit PAN in future
+//                TextInputLayout(
+//                    textFieldVal = TextFieldValue(text = panNumber),
+//                    keyboardOptions = KeyboardOptions(
+//                        imeAction = ImeAction.Next,
+//                        keyboardType = KeyboardType.Number
+//                    ),
+//                    onTextChanged = { },
+//                    style = normal16Text700,
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(start = 30.dp, end = 30.dp, bottom = 5.dp),
+////                       .focusRequester(incomeFocus),
+//                    readOnly = true
+//                )
                 Spacer(modifier = Modifier.height(10.dp))
             }
         }

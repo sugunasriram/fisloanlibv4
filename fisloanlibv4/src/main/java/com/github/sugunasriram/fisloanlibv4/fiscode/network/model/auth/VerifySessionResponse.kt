@@ -44,7 +44,7 @@ data class VerifySessionDetails(
 	val productName: String?,
 	val productMrpPrice: String?,
 	val productSymbol: String?,
-	val productQuantity: Int,
+	val productQuantity: Int? = null,
 	val productModel: String?,
 	val productSellingPrice: String?,
 	val deliveryCharges: String? = null,
