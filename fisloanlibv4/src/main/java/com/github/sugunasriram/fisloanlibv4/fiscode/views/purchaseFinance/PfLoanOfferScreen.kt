@@ -107,7 +107,8 @@ fun PfLoanOfferScreen(
                 onBackClick = {
                     val currentTime = System.currentTimeMillis()
                     if (currentTime - backPressedTime < 2000) {
-                        navigateApplyByCategoryScreen(navController)
+//                        navigateApplyByCategoryScreen(navController)
+                        navigateToFISExitScreen(navController, loanId="1234")
                     } else {
                         CommonMethods().toastMessage(
                             context = context,

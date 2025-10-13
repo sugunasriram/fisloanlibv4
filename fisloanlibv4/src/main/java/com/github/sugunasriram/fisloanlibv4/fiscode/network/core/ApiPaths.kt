@@ -74,6 +74,7 @@ class ApiPaths {
 //    val sse = "https://stagingondcfs.jtechnoparks.in/staging-jt-bap/api/v1/sse"
 
     // ONDC Flow Api paths
+    val deleteUser = "users/delete"
     val search = "lender/search"
 
     val formSubmission = "lender/formSubmissionRequest"

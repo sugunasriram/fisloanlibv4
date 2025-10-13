@@ -37,6 +37,7 @@ data class VerifySessionDetails(
 	val merchantAccountHolderName: String?,
 	val productCategory: String?,
 	val productSKUID: String?,
+	val productIMEI: String? = null,
 	val productReturnWindow: String?,
 	val productCancellable: Boolean,
 	val productReturnable: Boolean,

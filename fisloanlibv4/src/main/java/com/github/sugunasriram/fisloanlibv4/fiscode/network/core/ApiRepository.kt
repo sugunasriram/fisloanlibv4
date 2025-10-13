@@ -45,6 +45,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.document.Conta
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.document.PrivacyPolicyResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.document.TermsConditionResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.finance.FinanceSearchModel
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.finance.PFDeleteUserBodyModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.finance.PFSearchBodyModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.gst.GstConsentResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.gst.GstInvoice
@@ -70,6 +71,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.igm.IssueSubCa
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.igm.OrderIssueResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.ConsentApprovalRequest
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.ConsentApprovalResponse
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.DeleteUserResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.GetLenderStatusModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.LoanSearchResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.OrderByIdResponse
@@ -468,6 +470,13 @@ object ApiRepository {
         }
     }
 
+    suspend fun pFDeleteUserApi(deleteUserBodyModel: PFDeleteUserBodyModel): DeleteUserResponse? {
+        return KtorClient.getInstance().use { httpClient ->
+            httpClient.post(ApiPaths().deleteUser) {
+                body = deleteUserBodyModel
+            }
+        }
+    }
     suspend fun pFSearchApi(searchBodyModel: PFSearchBodyModel): LoanSearchResponse? {
         return KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().search) {

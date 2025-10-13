@@ -7,7 +7,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.core.ApiRepository
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.core.ApiRepository.handleAuthGetAccessTokenApi
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.finance.PFDeleteUserBodyModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.finance.PFSearchBodyModel
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.DeleteUserResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.LoanSearchResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.BaseViewModel
@@ -126,4 +128,84 @@ class PurchaseFinanceViewModel : BaseViewModel() {
             _searchInProgress.value = false
         }
     }
+
+
+
+
+//    private val _deleteApiInProgress = MutableStateFlow(false)
+//    val deleteApiInProgress: StateFlow<Boolean> = _deleteApiInProgress
+//
+//    private val _deleteApiLoaded = MutableStateFlow(false)
+//    val deleteApiLoaded: StateFlow<Boolean> = _deleteApiLoaded
+//
+//    //private val _pFSearchResponse = MutableStateFlow<LoanSearchResponse?>(null)
+//    //val pFSearchResponse: StateFlow<LoanSearchResponse?> = _pFSearchResponse
+//
+//    fun pFDeleteUser(context: Context, deleteUserBodyModel: PFDeleteUserBodyModel) {
+//        _deleteApiInProgress.value = true
+//        viewModelScope.launch(Dispatchers.IO) {
+//            handlePFDeleteUserApi(context, deleteUserBodyModel)
+//        }
+//    }
+//
+//    private suspend fun handlePFDeleteUserApi(
+//        context: Context,
+//        deleteUserBodyModel: PFDeleteUserBodyModel,
+//        checkForAccessToken: Boolean = true
+//    ) {
+//        kotlin.runCatching {
+//            ApiRepository.pFDeleteUserApi(deleteUserBodyModel)
+//        }.onSuccess { response ->
+//            response?.let {
+//                Log.d("res_H-search-pf", response.toString())
+//                handleDeleteUserApiSuccess(response)
+//            }
+//        }.onFailure { error ->
+//            Log.d("res_H-search-pf", error.toString())
+//            if (checkForAccessToken &&
+//                error is ResponseException &&
+//                error.response.status.value == 401
+//            ) {
+//                // Get Access Token using RefreshToken
+//                if (handleAuthGetAccessTokenApi()) {
+//                    handlePFDeleteUserApi(context, deleteUserBodyModel, false)
+//                } else {
+//                    _navigationToSignIn.value = true
+//                }
+//            } else {
+//                handleDeleteUserFailure(error, context, isFormSearch = true)
+//            }
+//        }
+//    }
+//
+//    private suspend fun handleDeleteUserApiSuccess(response: DeleteUserResponse) {
+//        withContext(Dispatchers.Main) {
+//            _deleteApiLoaded.value = true
+//            _deleteApiInProgress.value = false
+////            _pFSearchResponse.value = response
+//        }
+//    }
+//
+//    private suspend fun handleDeleteUserFailure(error: Throwable, context: Context, isFormSearch: Boolean = false) {
+//        withContext(Dispatchers.Main) {
+//            if (error is ResponseException) {
+//                CommonMethods().handleResponseException(
+//                    error = error, context = context, updateErrorMessage = ::updateErrorMessage,
+//                    _showServerIssueScreen = _showServerIssueScreen, _middleLoan = _middleLoan,
+//                    _unAuthorizedUser = _unAuthorizedUser, _unexpectedError = _unexpectedError,
+//                    _showLoader = _showLoader, isFormSearch = isFormSearch
+//
+//                )
+//            } else {
+//                CommonMethods().handleGeneralException(
+//                    error = error,
+//                    _showInternetScreen = _showInternetScreen,
+//                    _showTimeOutScreen = _showTimeOutScreen,
+//                    _unexpectedError = _unexpectedError
+//                )
+//            }
+//
+//            _deleteApiInProgress.value = false
+//        }
+//    }
 }

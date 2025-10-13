@@ -951,14 +951,18 @@ class LoanAgreementViewModel : BaseViewModel() {
     private val _pfCreateSessionInProgress = MutableStateFlow(false)
     val pfCreateSessionInProgress: StateFlow<Boolean> = _pfCreateSessionInProgress
 
-    fun createPfSession(loanId: String, context: Context) {
+    fun createPfSession(
+        loanId: String,
+        context: Context,
+        checkForAccessToken: Boolean = true   // 👈 optional flag to avoid infinite loops
+    ) {
         viewModelScope.launch {
             _pfCreateSessionInProgress.value = true
-            Log.d("Sugu", "Starting session creation for loanId: $loanId, " +
-                    "pfCreateSessionInProgress:${_pfCreateSessionInProgress.value}")
             _createSessionState.value = CreateSessionUiState.Loading
-            try {
-                val resp = withContext(Dispatchers.IO) {
+            Log.d("Sugu", "Starting session creation for loanId: $loanId, pfCreateSessionInProgress:${_pfCreateSessionInProgress.value}")
+
+            runCatching {
+                withContext(Dispatchers.IO) {
                     ApiRepository.createSession(
                         createSessionRequest = CreateSessionRequest(
                             type = "RET",
@@ -968,27 +972,47 @@ class LoanAgreementViewModel : BaseViewModel() {
                         )
                     )
                 }
-                delay(3000) //Sugu testing
-                val sessionId = resp?.data?.id?.trim().orEmpty()
-                if (sessionId.isNotEmpty()) {
-                    _createSessionState.value = CreateSessionUiState.Success(sessionId)
-                } else {
-                    _createSessionState.value = CreateSessionUiState.Error("Empty sessionId")
-                }
-            } catch (e: kotlinx.coroutines.CancellationException) {
-                // propagate cancellation; UI will leave anyway
-                throw e
-            } catch (t: Throwable) {
-                handleFailure(error = t, context = context)
-                _createSessionState.value = CreateSessionUiState.Error(t.message ?: "Unknown error")
-            } finally {
-                Log.d("Sugu", "2 Starting session creation for loanId: $loanId, " +
-                        "pfCreateSessionInProgress:${_pfCreateSessionInProgress.value}")
-
-                _pfCreateSessionInProgress.value = false
             }
+                .onSuccess { resp ->
+                    val sessionId = resp?.data?.id?.trim().orEmpty()
+                    if (sessionId.isNotEmpty()) {
+                        _createSessionState.value = CreateSessionUiState.Success(sessionId)
+                    } else {
+                        _createSessionState.value = CreateSessionUiState.Error("Empty sessionId")
+                    }
+                }
+                .onFailure { error ->
+                    Log.e("Sugu", "Session creation failed: ${error.message}", error)
+
+                    // 👇 check if it's 401 and retry
+                    if (checkForAccessToken &&
+                        error is io.ktor.client.features.ResponseException &&
+                        error.response.status.value == 401
+                    ) {
+                        Log.d("Sugu", "Received 401. Trying to refresh access token...")
+                        val refreshed = handleAuthGetAccessTokenApi()
+
+                        if (refreshed) {
+                            Log.d("Sugu", "Access token refreshed. Retrying createPfSession...")
+                            createPfSession(loanId, context, checkForAccessToken = false) // 👈 retry once without looping infinitely
+                        } else {
+                            Log.d("Sugu", "Token refresh failed. Redirecting to sign-in.")
+                            _createSessionState.value = CreateSessionUiState.Error("Unauthorized")
+                            _navigationToSignup.value = true
+                        }
+                    } else {
+                        // Handle other errors normally
+                        handleFailure(error = error, context = context)
+                        _createSessionState.value = CreateSessionUiState.Error(error.message ?: "Unknown error")
+                    }
+                }
+                .also {
+                    _pfCreateSessionInProgress.value = false
+                    Log.d("Sugu", "Session creation done for loanId: $loanId, pfCreateSessionInProgress:${_pfCreateSessionInProgress.value}")
+                }
         }
     }
+
 
 
 }

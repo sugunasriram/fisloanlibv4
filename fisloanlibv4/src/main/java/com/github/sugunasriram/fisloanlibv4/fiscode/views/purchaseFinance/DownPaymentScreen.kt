@@ -43,8 +43,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -56,17 +54,14 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
 import com.github.sugunasriram.fisloanlibv4.R
-import com.github.sugunasriram.fisloanlibv4.fiscode.components.CenterProgress
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.ClickableText
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.CurvedPrimaryButton
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.CustomModalBottomSheet
@@ -77,10 +72,8 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.components.HorizontalDivider
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.OnlyReadAbleText
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.ProcessingAnimation
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.RegisterText
-import com.github.sugunasriram.fisloanlibv4.fiscode.components.StartingText
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.TextInputLayout
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
-import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToBureauOffersScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFISExitScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFormSubmissionWebScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.Profile
@@ -88,7 +81,6 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.VerifySes
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.finance.PFSearchBodyModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.LenderStatusResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appBlack
-import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appGray
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appWhite
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.backgroundOrange
@@ -102,16 +94,17 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal16Text400
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal16Text700
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal20Text700
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.primaryOrange
-import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.semiBold20Text500
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.slateGrayColor
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
+import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.auth.RegisterViewModel
-import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan.PersonalLoanViewModel
+import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan.EditLoanRequestViewModel
+import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan.EditLoanRequestViewModelFactory
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan.WebViewModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.purchaseFinance.PurchaseFinanceViewModel
+import com.github.sugunasriram.fisloanlibv4.fiscode.views.igm.HorizontalDashedLine
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.NoLoanOffersAvailableScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.CompanyConsentContent
-import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.ConsentDialogBox
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.EditLoanTenureSliderUI
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.HtmlText
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.applyMaxLimit
@@ -120,25 +113,27 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.formatCur
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.loadWebScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.processRawInput
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
-import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
-import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan.EditLoanRequestViewModel
-import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan.EditLoanRequestViewModelFactory
-import com.github.sugunasriram.fisloanlibv4.fiscode.views.igm.HorizontalDashedLine
 import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.finance.MerchantDetails
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.finance.PFDeleteUserBodyModel
 
 
 var productName : String = "Samsung Galaxy S24 Ultra 5G"
 var productPrice : Long = 99000L
 var mrpPrice : Long = 110000L
 var maxAmount = 99000L
-var amount = maxAmount / 3
+var pfProductIMEI = "359881030314356"
+var pfProductSKUId = "12345678"
+var pfProductBrand = "Tata"
+var pfProductCategory = "Electronics Purchase Finance"
+//var amount = maxAmount / 3
+var userMobileNumber = ""
 
 @SuppressLint("ResourceType")
 @OptIn(ExperimentalMaterialApi::class)
@@ -184,6 +179,9 @@ val registerViewModel: RegisterViewModel = viewModel()
         factory = EditLoanRequestViewModelFactory("amount", "minAmount", "7")
     )
     val loanTenure by editLoanRequestViewModel.loanTenure.collectAsState(initial = 3)
+
+    var amount by remember { mutableStateOf(0L) }
+
 //    var isValidLoanTenure by remember { mutableStateOf(false) }
 
 //    val productName : String = "Samsung Galaxy S24 Ultra 5G"
@@ -193,6 +191,21 @@ val registerViewModel: RegisterViewModel = viewModel()
 //    val amount = remember { androidx.compose.runtime.mutableLongStateOf(maxAmount / 3) }
 
     val fromFlow = "Purchase Finance"
+
+    // ---  state for Delete API loading ---
+//    val deleteApiInProgress by purchaseFinanceViewModel.deleteApiInProgress.collectAsState()
+//    var apiError by remember { mutableStateOf<String?>(null) }
+
+    // ⏳ Call users/delete API on screen entry
+//    LaunchedEffect(Unit) {
+//        purchaseFinanceViewModel.pFDeleteUser(
+//            context = context,
+//            deleteUserBodyModel = PFDeleteUserBodyModel(
+//                loanType = "PURCHASE_FINANCE",
+//                mobileNumber = "on"
+//            )
+//        )
+//    }
 
 Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
     LaunchedEffect(Unit) {
@@ -212,6 +225,8 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
     }
     var showNoLoanOffersScreen by remember { mutableStateOf(false) }
 
+    var merchantDetails = MerchantDetails()
+
 //    if (showNoLoanOffersScreen || showNoLenderResponse) {
 //        NoLoanOffersAvailableScreen(navController, titleText = stringResource(R.string.no_lenders_available))
 //        return
@@ -225,7 +240,7 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
         showNoLenderResponse -> NoLoanOffersAvailableScreen(navController)
 //        lenderStatusProgress -> CenterProgress()
         else -> {
-            if (searchInProgress || inProgress ) {
+            if (/*deleteApiInProgress  ||*/ searchInProgress || inProgress ) {
                 ProcessingAnimation(text = "Processing Please Wait...", image = R.raw.we_are_currently_processing_hour_glass)
             } else {
                 if (!isCompleted ) {
@@ -285,7 +300,16 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
                                                 purpose = "PF flow",
                                                 downPaymentAmount = amount.toString(),
                                                 pfloanTenure = loanTenure.toString(),
-                                                productPrice = productPrice.toString()
+                                                productPrice = productPrice.toString(),
+                                                pfMerchantGst = merchantDetails.gst,
+                                                pfMerchantPan = merchantDetails.pan,
+                                                pfMerchantBankAccountNumber = merchantDetails.bankAccountNumber,
+                                                pfMerchantIfscCode = merchantDetails.ifscCode,
+                                                pfMerchantBankAccountHolderName = merchantDetails.accountHolderName,
+                                                pfProductCategory = pfProductCategory,
+                                                pfProductBrand = pfProductBrand,
+                                                pfProductIMEI = pfProductIMEI,
+                                                pfProductSKUID = pfProductSKUId
                                             )
                                         } catch (e: Exception) {
                                             Log.e("LenderStatusError", "Error processing lender status", e)
@@ -297,7 +321,7 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
                                                   },
                                 startTimer = bottomSheetState.isVisible,
                                 showDialog = showDialog,
-                                timer = 5
+                                timer = 7
                             )
                         }
                     ) {
@@ -389,7 +413,17 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
                                                 purpose = "PF flow",
                                                 downPaymentAmount = amount.toString(),
                                                 pfloanTenure = loanTenure.toString(),
-                                                productPrice = productPrice.toString()
+                                                productPrice = productPrice.toString(),
+                                                pfMerchantGst = merchantDetails.gst,
+                                                pfMerchantPan = merchantDetails.pan,
+                                                pfMerchantBankAccountNumber = merchantDetails.bankAccountNumber,
+                                                pfMerchantIfscCode = merchantDetails.ifscCode,
+                                                pfMerchantBankAccountHolderName = merchantDetails
+                                                    .accountHolderName,
+                                                pfProductCategory = pfProductCategory,
+                                                pfProductBrand = pfProductBrand,
+                                                pfProductIMEI = pfProductIMEI,
+                                                pfProductSKUID = pfProductSKUId
                                             )
                                         } catch (e: Exception) {
                                             Log.e("LenderStatusError", "Error processing lender status", e)
@@ -408,7 +442,11 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
                                     .background(backgroundOrange)
                             ) {
 //                                ProductDetailsCard(productName, productPrice, mrpPrice)
-                                ProductDetailsCard(verifySessionResponse)
+                                ProductDetailsCard(verifySessionResponse,
+                                    amount = amount,
+                                    onAmountChange = { amount = it } ,  // ✅ pass setter
+                                    merchantDetails = merchantDetails
+                                     )
                                 userDetails?.data?.let { PFPersonalDetailsCard(profile = it) }
                                 DownPaymentDetailsCard(
                                     amount = amount,
@@ -541,8 +579,14 @@ private fun ConfirmExitDialog(
 //    }
 //}
 
+
 @Composable
-fun ProductDetailsCard(verifySessionResponse: VerifySessionResponse) {
+fun ProductDetailsCard(
+    verifySessionResponse: VerifySessionResponse,
+    amount: Long,
+    onAmountChange: (Long) -> Unit,
+    merchantDetails: MerchantDetails
+){
 
     val fullProductName = buildString {
         append("")
@@ -557,6 +601,51 @@ fun ProductDetailsCard(verifySessionResponse: VerifySessionResponse) {
         }
     }
 
+    val imageUrl = verifySessionResponse.data.sessionData.productSymbol
+    val sellingPrice = verifySessionResponse.data.sessionData.productSellingPrice?.toLongOrNull()
+    val totalAmount = verifySessionResponse.data.sessionData.cartAmount?.toLongOrNull()
+
+    merchantDetails.gst = verifySessionResponse.data.sessionData.merchantGST?:"24AAHFC3011G1Z4"
+    merchantDetails.pan = verifySessionResponse.data.sessionData.merchantPAN?:"AAHFC3011G"
+    merchantDetails.bankAccountNumber = verifySessionResponse.data.sessionData.merchantBankAccount?:"639695357641006"
+    merchantDetails.ifscCode = verifySessionResponse.data.sessionData.merchantIfscCode?:"HDFC0006396"
+    merchantDetails.accountHolderName = verifySessionResponse.data.sessionData
+        .merchantAccountHolderName?:"SURESH KULKARNI"
+
+    //productIMEI
+    verifySessionResponse.data.sessionData.productIMEI?.let { pdtIMEI ->
+        if (pdtIMEI.isNotEmpty()) {
+            pfProductIMEI = pdtIMEI
+        }
+    }
+
+    verifySessionResponse.data.sessionData.productSKUID?.let { sku ->
+        if (sku.isNotEmpty()) {
+            pfProductSKUId = sku
+        }
+    }
+    verifySessionResponse.data.sessionData.productBrand?.let { brand ->
+        if (brand.isNotEmpty()) {
+            pfProductBrand = brand
+        }
+    }
+//    verifySessionResponse.data.sessionData.productCategory?.let { category ->
+//        if (category.isNotEmpty()) {
+//            pfProductCategory = category }
+//    }
+
+    // ✅ Trigger price updates once when values change
+    LaunchedEffect(sellingPrice, totalAmount) {
+        if (totalAmount != null) {
+            productPrice = totalAmount
+            maxAmount = totalAmount
+            onAmountChange(totalAmount / 3)
+        } else if (sellingPrice != null) {
+            productPrice = sellingPrice
+            maxAmount = sellingPrice
+            onAmountChange(sellingPrice / 3)
+        }
+    }
 
     DownPaymentCard(
         cardHeader = stringResource(R.string.product_details)
@@ -568,16 +657,7 @@ fun ProductDetailsCard(verifySessionResponse: VerifySessionResponse) {
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.Top
         ) {
-//            Image(
-//                painter = painterResource(id = R.drawable.phone_image),
-//                contentDescription = "Product Image",
-//                modifier = Modifier
-//                    .weight(0.3f)
-//                    .height(150.dp)
-//            )
-
-
-            verifySessionResponse.data.sessionData.productSymbol.let { imageUrl ->
+            imageUrl.let { imageUrl ->
                 Log.d("DownPaymentScreen", "Image URL: $imageUrl")
                 val imagePainter = rememberAsyncImagePainter(
                     model = ImageRequest.Builder(LocalContext.current)
@@ -625,44 +705,16 @@ fun ProductDetailsCard(verifySessionResponse: VerifySessionResponse) {
                 )
                 RegisterText(
 //                    text = "Product price: ₹99,000",
-                    text = verifySessionResponse.data.sessionData.productSellingPrice?.toLongOrNull()?.let {
-                        productPrice = it
-                        maxAmount = it
-                        amount = it / 3
-                        "Product Price: ₹$it" } ?: "Product Price: NA",
+                    text = sellingPrice?.let {
+//                        productPrice = it
+//                        maxAmount = it
+//                        onAmountChange(it / 3)
+                        "Product Price: ₹$it"
+                    } ?: "Product Price: NA",
                     style = normal14Text700,
                     textAlign = TextAlign.Start,
                     boxAlign = Alignment.TopStart
                 )
-//                Row(
-//                    modifier = Modifier.fillMaxWidth(),
-//                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-//                ) {
-//                    ClickableText(
-//                        text = stringResource(id = R.string.cancellable),
-//                        top = 0.dp,
-//                        roundedCornerShape = 18.dp,
-//                        textColor = appBlack,
-//                        borderColor = appOrange,
-//                        backgroundColor = appWhite,
-//                        style = normal14Text400,
-//                        horizontalPadding = 26.dp,
-//                        verticalPadding = 5.dp,
-//                    ) {
-//                        Log.d("DownPayment", "Cancellable")
-//                    }
-//                    ClickableText(
-//                        text = stringResource(id = R.string.returnable),
-//                        top = 0.dp,
-//                        roundedCornerShape = 18.dp,
-//                        textColor = appBlack,
-//                        borderColor = appOrange,
-//                        backgroundColor = appWhite,
-//                        style = normal14Text400,
-//                        horizontalPadding = 26.dp,
-//                        verticalPadding = 5.dp,
-//                    ) { Log.d("DownPaymentScreen", "Returnable") }
-//                }
 
                 val sessionData = verifySessionResponse.data.sessionData
                 val isCancellable = sessionData.productCancellable == true
@@ -706,15 +758,6 @@ fun ProductDetailsCard(verifySessionResponse: VerifySessionResponse) {
 
 
                 }
-//                RegisterText(
-//                    text = stringResource(R.string.more_details),
-//                    textColor = appOrange,
-//                    style = normal14Text700.copy(textDecoration = TextDecoration.Underline),
-//                    modifier = Modifier.clickable { Log.d("DownPaymentScreen", "more details") }
-//                )
-
-
-
             }
         }
 
@@ -725,58 +768,6 @@ fun ProductDetailsCard(verifySessionResponse: VerifySessionResponse) {
             horizontalAlignment = Alignment.Start
         ) {
             Spacer(modifier = Modifier.height(16.dp))
-
-//            OnlyReadAbleText(
-//                textHeader = "Product Price:",
-//                style = normal16Text400,
-//                textColorHeader = slateGrayColor,
-//                textValue = verifySessionResponse.data.sessionData.productSellingPrice?.toLongOrNull()?.let {
-//                    "₹$it"
-//                } ?: "NA",
-//                textColorValue = appBlack,
-//                textValueAlignment = TextAlign.End,
-//                top = 5.dp,
-//                bottom = 2.dp
-//            )
-//
-//            OnlyReadAbleText(
-//                textHeader = "Delivery Charges:",
-//                style = normal16Text400,
-//                textColorHeader = slateGrayColor,
-//                textValue = verifySessionResponse.data.sessionData.deliveryCharges?.toLongOrNull()?.let {
-//                    "₹$it"
-//                } ?: "NA",
-//                textColorValue = appBlack,
-//                textValueAlignment = TextAlign.End,
-//                top = 1.dp,
-//                bottom = 1.dp
-//            )
-//
-//            OnlyReadAbleText(
-//                textHeader = "Tax:",
-//                style = normal16Text400,
-//                textColorHeader = slateGrayColor,
-//                textValue = verifySessionResponse.data.sessionData.tax?.toLongOrNull()?.let {
-//                    "₹$it"
-//                } ?: "NA",
-//                textColorValue = appBlack,
-//                textValueAlignment = TextAlign.End,
-//                top = 1.dp,
-//                bottom = 1.dp
-//            )
-//
-//            OnlyReadAbleText(
-//                textHeader = "Other Charges:",
-//                style = normal16Text400,
-//                textColorHeader = slateGrayColor,
-//                textValue = verifySessionResponse.data.sessionData.otherCharges?.toLongOrNull()?.let {
-//                    "₹$it"
-//                } ?: "NA",
-//                textColorValue = appBlack,
-//                textValueAlignment = TextAlign.End,
-//                top = 1.dp,
-//                bottom = 1.dp
-//            )
 
         verifySessionResponse.data.sessionData.otherCharges?.forEach { charge ->
             OnlyReadAbleText(
@@ -800,11 +791,11 @@ fun ProductDetailsCard(verifySessionResponse: VerifySessionResponse) {
             HorizontalDashedLine(color = primaryOrange)
             Spacer(modifier = Modifier.height(4.dp))
 
-            verifySessionResponse.data.sessionData.cartAmount?.toLongOrNull()?.let {
-                productPrice = it
-                maxAmount = it
-                amount = it / 3
-            }
+//            totalAmount?.let {
+//                productPrice = it
+//                maxAmount = it
+//                onAmountChange(it / 3)
+//            }
 
             OnlyReadAbleText(
                 textHeader = "Total Amount:",
@@ -853,6 +844,7 @@ fun PFPersonalDetailsCard(profile: Profile) {
             }
 
             profile.mobileNumber?.let { mobileNumber ->
+                userMobileNumber = mobileNumber.trim()
                 OnlyReadAbleText(
                     textHeader = stringResource(id = R.string.contact_number),
                     textValue = mobileNumber,
@@ -914,9 +906,20 @@ fun DownPaymentDetailsCard(
     onAmountChange: (Long) -> Unit,
     onValidationChanged: (Boolean) -> Unit
 ) {
-    var inputText by remember {
-        mutableStateOf(TextFieldValue(CommonMethods().formatIndianCurrency(amount.toInt())))
+//    var inputText by remember {
+//        mutableStateOf(TextFieldValue(CommonMethods().formatIndianCurrency(amount.toInt())))
+//    }
+
+    val formattedAmount = CommonMethods().formatIndianCurrency(amount.toInt())
+    var inputText by remember(amount) {
+        mutableStateOf(
+            TextFieldValue(
+                text = formattedAmount,
+                selection = TextRange(formattedAmount.length)
+            )
+        )
     }
+
     var isError by remember { mutableStateOf(showInValidAmountError) }
 
     LaunchedEffect(amount) {
@@ -942,6 +945,42 @@ fun DownPaymentDetailsCard(
         )
         OutlinedTextField(
             value = inputText,
+//            onValueChange = { newValue ->
+//                val rawInput = newValue.text
+//                val cursorPosition = newValue.selection.start
+//                val (cleanInput, newCursor) = processRawInput(rawInput, cursorPosition)
+//                val parsedValue = cleanInput.toLongOrNull()
+//
+//                if (parsedValue != null) {
+//                    val limitedValue = applyMaxLimit(cleanInput,maxAmount).toLongOrNull() ?: 0L
+//                    val formatted = formatCurrency(limitedValue.toString())
+//
+//
+//                    if (limitedValue in 0..maxAmount) {
+//                        isError = false
+//                        onAmountChange(limitedValue)
+//                        onValidationChanged(false)
+//
+//                        inputText = TextFieldValue(
+//                            text = formatted,
+//                            selection = TextRange(
+//                                calculateFormattedCursorPosition(
+//                                    cleanInput = cleanInput,
+//                                    originalCursor = newCursor,
+//                                    formattedValue = formatted
+//                                )
+//                            )
+//                        )
+//
+//                    } else {
+//                        isError = true
+//                        onValidationChanged(true)
+//                    }
+//                } else {
+//                    inputText = TextFieldValue("₹", TextRange(1))
+//                    isError = true
+//                }
+//            },
             onValueChange = { newValue ->
                 val rawInput = newValue.text
                 val cursorPosition = newValue.selection.start
@@ -949,13 +988,12 @@ fun DownPaymentDetailsCard(
                 val parsedValue = cleanInput.toLongOrNull()
 
                 if (parsedValue != null) {
-                    val limitedValue = applyMaxLimit(cleanInput,maxAmount).toLongOrNull() ?: 0L
+                    val limitedValue = applyMaxLimit(cleanInput, maxAmount).toLongOrNull() ?: 0L
                     val formatted = formatCurrency(limitedValue.toString())
-
 
                     if (limitedValue in 0..maxAmount) {
                         isError = false
-                        onAmountChange(limitedValue)
+                        onAmountChange(limitedValue)   // updates parent amount
                         onValidationChanged(false)
 
                         inputText = TextFieldValue(
@@ -968,7 +1006,6 @@ fun DownPaymentDetailsCard(
                                 )
                             )
                         )
-
                     } else {
                         isError = true
                         onValidationChanged(true)
@@ -978,7 +1015,7 @@ fun DownPaymentDetailsCard(
                     isError = true
                 }
             },
-            shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(16.dp),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             textStyle = normal20Text700.copy(textAlign = TextAlign.Center),
             singleLine = true,
@@ -1378,6 +1415,6 @@ fun DownPaymentScreenPreview() {
 //    DownPaymentScreen(navController = rememberNavController(), verifySessionResponse = verifySessionResponseObj)
     // Only show product details part for preview
     Column(modifier = Modifier.background(Color.White)) {
-        ProductDetailsCard(verifySessionResponseObj)
+        ProductDetailsCard(verifySessionResponseObj, amount = 3000, onAmountChange = {}, merchantDetails = MerchantDetails())
     }
 }

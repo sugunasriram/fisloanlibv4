@@ -330,7 +330,16 @@ fun loadWebScreen(
     purpose: String,
     downPaymentAmount: String = "",
     pfloanTenure: String = "",
-    productPrice: String = ""
+    productPrice: String = "",
+    pfMerchantGst:String? = "",
+    pfMerchantPan:String? = "",
+    pfMerchantBankAccountNumber:String? = "",
+    pfMerchantIfscCode:String? = "",
+    pfMerchantBankAccountHolderName:String? = "",
+    pfProductCategory:String? = "",
+    pfProductIMEI:String? = "",
+    pfProductBrand:String? = "",
+    pfProductSKUID:String? = ""
 ) {
     if (fromFlow.equals("Personal Loan", ignoreCase = true)) {
         webViewModel.formSubmissionApi(
@@ -363,15 +372,16 @@ fun loadWebScreen(
                 endUse = "travel",
                 downpayment = downPaymentAmount,
                 tenure = pfloanTenure,
-                merchantGst = "24AAHFC3011G1Z4",
-                merchantPan = "EGBQA2212D",
+                merchantGst = pfMerchantGst,
+                merchantPan = pfMerchantPan,
                 isFinancing = "on",
-                merchantBankAccountNumber = "639695357641006",
-                merchantIfscCode = "XRSY0YPV5SW",
-                merchantBankAccountHolderName = "mohan",
-                productCategory = "Electronics Purchase Finance",
-                productBrand = "style",
-                productSKUID = "12345678",
+                merchantBankAccountNumber = pfMerchantBankAccountNumber,
+                merchantIfscCode = pfMerchantIfscCode,
+                merchantBankAccountHolderName = pfMerchantBankAccountHolderName,
+                productCategory = pfProductCategory,
+                productBrand = pfProductBrand,
+                productSKUID = pfProductSKUID,
+                productIMEI = pfProductIMEI,
                 productPrice = productPrice
             ),
             context = context

@@ -78,6 +78,11 @@ fun FISExitCofirmationScreen(
 
     val downpaymentAmountValue = remember { mutableStateOf<String?>(null) }
     val loanTenureValue = remember { mutableStateOf<String?>(null) }
+
+    val autoAborted = remember { mutableStateOf(false) }
+    val forceLoader = remember { mutableStateOf(false) }
+
+    // Load values
     LaunchedEffect(Unit) {
         downpaymentAmountValue.value = TokenManager.read("downpaymentAmount")
         loanTenureValue.value = TokenManager.read("pfloanTenure")
@@ -96,12 +101,9 @@ fun FISExitCofirmationScreen(
         }
     }
 
-    // Auto-trigger ABORT once if loanId == "1234"
-    val autoAborted = remember { mutableStateOf(false) }
-    val forceLoader = remember { mutableStateOf(false) }
-
+    // Auto abort for loanId = 4321
     LaunchedEffect(loanId) {
-        if (loanId == "1234" && !autoAborted.value) {
+        if (loanId == "4321" && !autoAborted.value) {
             autoAborted.value = true
             forceLoader.value = true
             triggerAbort()
@@ -112,29 +114,20 @@ fun FISExitCofirmationScreen(
     LaunchedEffect(createState) {
         when (val s = createState) {
             is LoanAgreementViewModel.CreateSessionUiState.Success -> {
-                onAbortSuccessNavigate() // navigate away after session created
-                val sessionId = (createState as LoanAgreementViewModel.CreateSessionUiState.Success).sessionId
+                onAbortSuccessNavigate()
+                val sessionId = s.sessionId
                 val downpaymentAmountVal = downpaymentAmountValue.value?.toIntOrNull() ?: 0
                 val loanTenureVal = loanTenureValue.value?.toIntOrNull() ?: 0
 
-                val tenureForCallback = if (loanAmount?.toDoubleOrNull() ?: 0.0 <= 0.0) 0 else loanTenureVal
-
-                // --- NEW: zero-out when loanId == "1234" ---
-                val isDummyLoan          = (loanId == "1234")
-
-                val finalLoanAmount      = if (isDummyLoan) 0.0
-                else loanAmount?.toDoubleOrNull() ?: 0.0
-
-                val finalInterestRate    = if (isDummyLoan) 0.0
-                else interestRate?.toDoubleOrNull() ?: 0.0
-
-                val finalTenure          = if (isDummyLoan) 0
-                else loanTenureVal
+                val isDummyLoan = (loanId == "1234")
+                val finalLoanAmount = if (isDummyLoan) 0.0 else loanAmount?.toDoubleOrNull() ?: 0.0
+                val finalInterestRate = if (isDummyLoan) 0.0 else interestRate?.toDoubleOrNull() ?: 0.0
+                val finalTenure = if (isDummyLoan) 0 else loanTenureVal
 
                 val details = LoanLib.LoanDetails(
                     sessionId = sessionId,
                     interestRate = finalInterestRate,
-                    loanAmount =finalLoanAmount,
+                    loanAmount = finalLoanAmount,
                     tenure = finalTenure,
                     downpaymentAmount = downpaymentAmountVal
                 )

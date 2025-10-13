@@ -180,12 +180,13 @@ fun ApplyByCategoryScreen(navController: NavHostController) {
 //        middleLoan -> CommonMethods().ShowMiddleLoanErrorScreen(navController)
         middleLoan -> MiddleOfTheLoanScreen(navController, errorMessage)
         else -> {
-            SelectingFlow(
-                checkingStatus = checkingStatus, navController = navController, context = context,
-                userStatus = userStatus, userStatusViewModel = userStatusViewModel,
-                checked = checked, showLoader = showLoader, errorMessage = errorMessage,
-                userDetails = userDetails, userDetailsAPILoading = userDetailsAPILoading
-            )
+            navigateToFISExitScreen(navController, loanId="1234")
+//            SelectingFlow(
+//                checkingStatus = checkingStatus, navController = navController, context = context,
+//                userStatus = userStatus, userStatusViewModel = userStatusViewModel,
+//                checked = checked, showLoader = showLoader, errorMessage = errorMessage,
+//                userDetails = userDetails, userDetailsAPILoading = userDetailsAPILoading
+//            )
         }
     }
 }

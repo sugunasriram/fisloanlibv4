@@ -2,6 +2,12 @@ package com.github.sugunasriram.fisloanlibv4.fiscode.network.model.finance
 
 import kotlinx.serialization.Serializable
 
+
+@Serializable
+data class PFDeleteUserBodyModel(
+    val loanType: String? = null,
+    val mobileNumber: String? = null
+)
 @Serializable
 data class PFSearchBodyModel(
     val loanType: String? = null,
@@ -39,5 +45,14 @@ data class FinanceSearchModel(
 
     val merchantBankAccountHolderName: String? = null,
 
-    val productPrice: String? = null
+    val productPrice: String? = null,
+    val productIMEI: String? = null
+)
+
+data class MerchantDetails(
+    var gst: String? = null,
+    var pan: String? = null,
+    var bankAccountNumber: String? = null,
+    var ifscCode: String? = null,
+    var accountHolderName: String? = null
 )
