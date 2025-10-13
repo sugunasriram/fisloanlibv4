@@ -27,7 +27,7 @@ data class VerifySessionData(
 @Serializable
 data class VerifySessionDetails(
 	val downPayment: Int,
-	val cartAmount: String?,
+	val cartAmount: String? = null,
 	val productId: String?,
 	val merchantPAN: String?,
 	val merchantGST: String?,

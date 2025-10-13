@@ -1409,6 +1409,8 @@ fun DownPaymentScreenPreview() {
 
     val verifySessionResponseObj = Json {
         ignoreUnknownKeys = true // skips unknown JSON keys safely
+        coerceInputValues = true
+        isLenient = true
     }.decodeFromString<VerifySessionResponse>(verifySessionResponse1)
 
     Log.d("DownPaymentScreenPreview", "Parsed VerifySessionResponse Object: $verifySessionResponseObj")
