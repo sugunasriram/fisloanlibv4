@@ -93,7 +93,8 @@ fun LoaderAnimation(
         currentText = updatedText
         currentImage = updatedImage
     }
-    BackHandler { navigateApplyByCategoryScreen(navController) }
+//    BackHandler { navigateApplyByCategoryScreen(navController) }
+    BackHandler { navigateToFISExitScreen(navController, loanId="1234") }
 
     val compositionResult: LottieCompositionResult = rememberLottieComposition(
         spec = LottieCompositionSpec.RawRes(currentImage)
@@ -611,7 +612,7 @@ fun IncrementTimer(maxMinutes: Int = 5, navController: NavHostController) {
         if (minutes >= maxMinutes) {
             Log.d("IncrementTimer", "Timer finished")
 //            navigateApplyByCategoryScreen(navController)
-            navigateToFISExitScreen(navController, loanId="1234")
+            navigateToFISExitScreen(navController, loanId="4321")
         }
     }
 

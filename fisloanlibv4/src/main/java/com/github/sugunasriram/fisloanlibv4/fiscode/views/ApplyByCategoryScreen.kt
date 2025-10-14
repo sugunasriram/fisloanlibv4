@@ -180,7 +180,7 @@ fun ApplyByCategoryScreen(navController: NavHostController) {
 //        middleLoan -> CommonMethods().ShowMiddleLoanErrorScreen(navController)
         middleLoan -> MiddleOfTheLoanScreen(navController, errorMessage)
         else -> {
-            navigateToFISExitScreen(navController, loanId="1234")
+            navigateToFISExitScreen(navController, loanId="4321")
 //            SelectingFlow(
 //                checkingStatus = checkingStatus, navController = navController, context = context,
 //                userStatus = userStatus, userStatusViewModel = userStatusViewModel,
@@ -1170,7 +1170,7 @@ fun PersonalDecidedFlow(
                         UnexpectedErrorScreen(
                             navController = navController,
 //                            onClick = { navigateApplyByCategoryScreen(navController) })
-                            onClick = { navigateToFISExitScreen(navController, loanId="1234") })
+                            onClick = { navigateToFISExitScreen(navController, loanId="4321") })
 //                        navigateToEMandateESignFailedScreen(navController,step)
                     }
                 }

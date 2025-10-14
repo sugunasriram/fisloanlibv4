@@ -33,7 +33,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal36Text700
 fun NoLoanOffersAvailableScreen(
     navController: NavHostController,titleText:String=stringResource(R.string.no_loan_offers_available),
 //    onClick: () -> Unit = { navigateApplyByCategoryScreen(navController = navController) }
-    onClick: () -> Unit = { navigateToFISExitScreen(navController, loanId="1234") }
+    onClick: () -> Unit = { navigateToFISExitScreen(navController, loanId="4321") }
 ) {
     TopBottomBarForNegativeScreen(showTop = false, showBottom = true, navController = navController) {
         StartingText(

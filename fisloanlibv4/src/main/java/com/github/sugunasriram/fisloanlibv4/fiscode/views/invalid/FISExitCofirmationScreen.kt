@@ -119,7 +119,7 @@ fun FISExitCofirmationScreen(
                 val downpaymentAmountVal = downpaymentAmountValue.value?.toIntOrNull() ?: 0
                 val loanTenureVal = loanTenureValue.value?.toIntOrNull() ?: 0
 
-                val isDummyLoan = (loanId == "1234")
+                val isDummyLoan = (loanId == "1234" || loanId == "4321")
                 val finalLoanAmount = if (isDummyLoan) 0.0 else loanAmount?.toDoubleOrNull() ?: 0.0
                 val finalInterestRate = if (isDummyLoan) 0.0 else interestRate?.toDoubleOrNull() ?: 0.0
                 val finalTenure = if (isDummyLoan) 0 else loanTenureVal

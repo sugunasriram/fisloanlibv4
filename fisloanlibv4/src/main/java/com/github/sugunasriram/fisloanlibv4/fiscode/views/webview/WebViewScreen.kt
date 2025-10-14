@@ -104,7 +104,8 @@ fun SearchWebViewScreen(
     BackHandler {
         val currentTime = System.currentTimeMillis()
         if (currentTime - backPressedTime < 3000) {
-            navigateApplyByCategoryScreen(navController)
+//            navigateApplyByCategoryScreen(navController)
+            navigateToFISExitScreen(navController, loanId="1234")
         } else {
             CommonMethods().toastMessage(
                 context = context,
@@ -524,7 +525,8 @@ fun AAWebScreen(
                                     url?.let {
 //                                        if (it == BuildConfig.CONSENT_CALLBACK_REDIRECT_URL) {
                                         if (it == "https://stagingondcfs.jtechnoparks.in/jt-bap/api/v1/finvu/consent-callback") {
-                                            navigateApplyByCategoryScreen(navController)
+//                                            navigateApplyByCategoryScreen(navController)
+                                            navigateToFISExitScreen(navController, loanId="1234")
                                             return true
                                         }
                                         Log.d("SearchWebViewScreen", "urlToOpen: $it")

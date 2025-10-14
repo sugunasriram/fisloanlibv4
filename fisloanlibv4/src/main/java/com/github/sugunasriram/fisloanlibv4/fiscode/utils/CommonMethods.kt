@@ -260,7 +260,7 @@ class CommonMethods {
             solutionText = stringResource(id = R.string.check_your_internet),
             onClick = {
 //                navigateApplyByCategoryScreen(navController)
-                navigateToFISExitScreen(navController, loanId="1234")
+                navigateToFISExitScreen(navController, loanId="4321")
             }
         )
     }
@@ -269,7 +269,7 @@ class CommonMethods {
     fun ShowTimeOutErrorScreen(navController: NavHostController) {
         RequestTimeOutScreen(navController, onClick = {
         //    navigateApplyByCategoryScreen(navController)
-            navigateToFISExitScreen(navController, loanId="1234")
+            navigateToFISExitScreen(navController, loanId="4321")
         })
     }
 
@@ -280,7 +280,7 @@ class CommonMethods {
             errorText = stringResource(id = R.string.server_temporarily_unavailable),
             solutionText = stringResource(id = R.string.please_try_again_after_sometime),
 //            onClick = { navigateApplyByCategoryScreen(navController) }
-            onClick = { navigateToFISExitScreen(navController, loanId="1234") }
+            onClick = { navigateToFISExitScreen(navController, loanId="4321") }
         )
     }
 
@@ -288,7 +288,7 @@ class CommonMethods {
     fun ShowUnexpectedErrorScreen(navController: NavHostController) {
         UnexpectedErrorScreen(navController = navController,
 //            onClick = { navigateApplyByCategoryScreen(navController) }
-            onClick = { navigateToFISExitScreen(navController, loanId="1234") }
+            onClick = { navigateToFISExitScreen(navController, loanId="4321") }
         )
     }
 
@@ -305,7 +305,7 @@ class CommonMethods {
             navController = navController,
             errorMsg = stringResource(id = R.string.middle_loan_error_message),
 //            onClick = { navigateApplyByCategoryScreen(navController) }
-            onClick = { navigateToFISExitScreen(navController, loanId="1234") }
+            onClick = { navigateToFISExitScreen(navController, loanId="4321") }
         )
 //        NoResponseFormLenders(navController = navController)
     }
@@ -322,7 +322,7 @@ class CommonMethods {
             errorText = errorMessage,
             errorMsg = stringResource(id = R.string.middle_loan_error_message),
 //            onClick = { navigateApplyByCategoryScreen(navController) }
-            onClick = { navigateToFISExitScreen(navController, loanId="1234") }
+            onClick = { navigateToFISExitScreen(navController, loanId="4321") }
         )
 //        NoResponseFormLenders(navController = navController)
     }
@@ -796,7 +796,7 @@ class CommonMethods {
             unexpectedErrorScreen -> {
                 UnexpectedErrorScreen(navController = navController,
 //                    onClick = { navigateApplyByCategoryScreen(navController = navController) }
-                    onClick = { navigateToFISExitScreen(navController, loanId="1234") }
+                    onClick = { navigateToFISExitScreen(navController, loanId="4321") }
                 )
             }
             // unAuthUser

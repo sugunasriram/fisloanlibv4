@@ -578,6 +578,8 @@ fun MoveToDashBoard(
             image = R.raw.we_are_currently_processing_hour_glass
         )
     } else {
+        loanId = sseData.data?.data?.id?.toString().orEmpty()
+
         FixedTopBottomScreen(
             navController = navController,
             topBarBackgroundColor = appOrange,
@@ -585,7 +587,7 @@ fun MoveToDashBoard(
             showBackButton = true,
 //        onBackClick = { navigateApplyByCategoryScreen(navController) },
             onBackClick = {
-                loanId = sseData.data?.data?.id?.toString().orEmpty()
+//                loanId = sseData.data?.data?.id?.toString().orEmpty()
                 loanAgreementViewModel.createPfSession(loanId, context)
             },
             showBottom = true,

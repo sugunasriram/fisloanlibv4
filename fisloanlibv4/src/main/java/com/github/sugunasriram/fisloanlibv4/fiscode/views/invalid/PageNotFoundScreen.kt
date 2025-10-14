@@ -140,7 +140,7 @@ fun UnexpectedErrorScreen(
     navController: NavHostController,
     errorMsgShow: Boolean = true,
 //    onClick: () -> Unit = { navigateApplyByCategoryScreen(navController = navController) },
-    onClick: () -> Unit = { navigateToFISExitScreen(navController, loanId="1234") },
+    onClick: () -> Unit = { navigateToFISExitScreen(navController, loanId="4321") },
     errorText: String = stringResource(id = R.string.we_are_working_on_it_please_try_again),
     errorMsg: String = stringResource(id = R.string.something_went_wrong)
 ) {
@@ -384,7 +384,7 @@ fun LoanNotApprovedScreen(
     LaunchedEffect(Unit) {
         delay(5000)
 //        navigateApplyByCategoryScreen(navController = navController)
-        navigateToFISExitScreen(navController, loanId="1234")
+        navigateToFISExitScreen(navController, loanId="4321")
     }
     Column(
         modifier = Modifier
@@ -430,7 +430,7 @@ fun FormRejectionScreen(
     fromFlow: String,
     errorMsg: String? = null,
 //    onClick: () -> Unit = { navigateApplyByCategoryScreen(navController = navController) },
-    onClick: () -> Unit = { navigateToFISExitScreen(navController, loanId="1234") },
+    onClick: () -> Unit = { navigateToFISExitScreen(navController, loanId="4321") },
     errorTitle: String = stringResource(id = R.string.kyc_failed)
 ) {
     LaunchedEffect(Unit) {
@@ -490,7 +490,7 @@ fun FormRejectionScreen(
         object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
 //                navigateApplyByCategoryScreen(navController = navController)
-                navigateToFISExitScreen(navController, loanId="1234")
+                navigateToFISExitScreen(navController, loanId="4321")
             }
         }
     }
@@ -508,10 +508,10 @@ fun MiddleOfTheLoanScreen(
     displayOffer: Boolean = true,
     onGoBack: () -> Unit = {
 //        navigateApplyByCategoryScreen(navController = navController)
-        navigateToFISExitScreen(navController, loanId="1234")
+        navigateToFISExitScreen(navController, loanId="4321")
     },
 //    onClick: () -> Unit = { navigateApplyByCategoryScreen(navController = navController) }
-    onClick: () -> Unit = { navigateToFISExitScreen(navController, loanId="1234") }
+    onClick: () -> Unit = { navigateToFISExitScreen(navController, loanId="4321") }
 ) {
     TopBar(navController = navController, showBackButton = true)
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
@@ -577,7 +577,7 @@ fun MiddleOfTheLoanScreen(
                 object : OnBackPressedCallback(true) {
                     override fun handleOnBackPressed() {
 //                        navigateApplyByCategoryScreen(navController = navController)
-                        navigateToFISExitScreen(navController, loanId="1234")
+                        navigateToFISExitScreen(navController, loanId="4321")
                     }
                 }
             }

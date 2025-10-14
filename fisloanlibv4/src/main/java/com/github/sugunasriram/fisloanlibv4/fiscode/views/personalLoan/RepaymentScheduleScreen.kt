@@ -1301,7 +1301,7 @@ fun PaymentHistoryCard(payment: List<OrderPaymentStatusItem?>?) {
                     }
                 payment?.params?.amount?.let { amount ->
                     val newTextHeader =
-                        CommonMethods().displayFormattedText(payment.time?.label ?: "")
+                        CommonMethods().displayFormattedText(payment.time?.label ?: "Down Payment")
 
                     HeaderValueWithTextBelow(
                         textHeader = newTextHeader,

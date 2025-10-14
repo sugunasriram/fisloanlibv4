@@ -172,7 +172,8 @@ fun BureauOffersScreen(
         navigationToSignIn -> navigateSignInPage(navController)
         showInternetScreen -> CommonMethods().ShowInternetErrorScreen(navController)
         showTimeOutScreen -> RequestTimeOutScreen(navController) {
-            navigateApplyByCategoryScreen(navController)
+//            navigateApplyByCategoryScreen(navController)
+            navigateToFISExitScreen(navController, loanId="4321")
         }
 
         showServerIssueScreen -> CommonMethods().ShowServerIssueErrorScreen(navController)
@@ -240,7 +241,9 @@ fun BureauOffersScreen(
                                 topBarBackgroundColor = appOrange,
                                 topBarText = stringResource(R.string.bureau_offers),
                                 showBackButton = true,
-                                onBackClick = { navigateApplyByCategoryScreen(navController) },
+//                                onBackClick = { navigateApplyByCategoryScreen(navController) },
+                                onBackClick = { navigateToFISExitScreen(navController, loanId="1234")
+                                },
                                 showBottom = effectiveSearchResponse?.data?.url != null,
                                 showGetMoreOffersButton = true,
                                 primaryButtonText = stringResource(R.string.get_more_offers),

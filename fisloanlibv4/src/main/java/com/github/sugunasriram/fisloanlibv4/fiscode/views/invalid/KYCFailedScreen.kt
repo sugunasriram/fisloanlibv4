@@ -21,12 +21,13 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normalSerif32Text50
 @Composable
 fun KYCFailedScreen(navController: NavHostController) {
 //    BackHandler { navigateApplyByCategoryScreen(navController) }
-    BackHandler { navigateToFISExitScreen(navController, loanId="1234") }
+    BackHandler { navigateToFISExitScreen(navController, loanId="4321") }
     FixedTopBottomScreen(
         navController = navController,
         backgroundColor = appWhite,
         showBackButton = true,
-        onBackClick = { navController.popBackStack() },
+//        onBackClick = { navController.popBackStack() },
+        onBackClick = { navigateToFISExitScreen(navController, loanId="4321") },
         topBarBackgroundColor = appWhite
     ) {
         StartingText(

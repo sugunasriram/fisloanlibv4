@@ -963,11 +963,12 @@ class LoanAgreementViewModel : BaseViewModel() {
 
             runCatching {
                 withContext(Dispatchers.IO) {
+                    val sessionLoanId = if (loanId == "1234" || loanId == "4321") "" else loanId
                     ApiRepository.createSession(
                         createSessionRequest = CreateSessionRequest(
                             type = "RET",
                             subType = "ORDER_DETAILS",
-                            id = loanId,
+                            id = sessionLoanId,
                             message = null
                         )
                     )
@@ -986,7 +987,7 @@ class LoanAgreementViewModel : BaseViewModel() {
 
                     // 👇 check if it's 401 and retry
                     if (checkForAccessToken &&
-                        error is io.ktor.client.features.ResponseException &&
+                        error is ResponseException &&
                         error.response.status.value == 401
                     ) {
                         Log.d("Sugu", "Received 401. Trying to refresh access token...")

@@ -61,6 +61,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.components.FixedTopBottomScr
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.HorizontalDivider
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateSignInPage
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFISExitScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.Offer
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.OffersWithRejections
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appBlack
@@ -114,7 +115,9 @@ fun LoanOffersListScreen(navController: NavHostController, offerItem: String, fr
         initialValue = ModalBottomSheetValue.Hidden,
         skipHalfExpanded = true
     )
-    BackHandler { navigateApplyByCategoryScreen(navController) }
+//    BackHandler { navigateApplyByCategoryScreen(navController) }
+    BackHandler {             navigateToFISExitScreen(navController, loanId="1234")
+    }
 
     val loanAgreementViewModel: LoanAgreementViewModel = viewModel()
     val navigationToSignIn by loanAgreementViewModel.navigationToSignIn.collectAsState()
@@ -147,7 +150,9 @@ fun LoanOffersListScreen(navController: NavHostController, offerItem: String, fr
                 topBarText = stringResource(R.string.loan_offer),
                 showBackButton = true,
                 backgroundColor = appWhite,
-                onBackClick = { navigateApplyByCategoryScreen(navController) }
+//                onBackClick = { navigateApplyByCategoryScreen(navController) }
+                onBackClick = {             navigateToFISExitScreen(navController, loanId="1234")
+                }
             ) {
                 TabRow(
                     selectedTabIndex = selectedTabIndex,
