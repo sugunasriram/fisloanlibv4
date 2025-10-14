@@ -989,10 +989,11 @@ fun DownPaymentDetailsCard(
                 val parsedValue = cleanInput.toLongOrNull()
 
                 if (parsedValue != null) {
-                    val limitedValue = applyMaxLimit(cleanInput, maxAmount).toLongOrNull() ?: 0L
+                    val limitedValue = applyMaxLimit(cleanInput, maxAmount - 10).toLongOrNull()
+                        ?: 0L
                     val formatted = formatCurrency(limitedValue.toString())
 
-                    if (limitedValue in 0..maxAmount) {
+                    if (limitedValue in 0..maxAmount - 10) {
                         isError = false
                         onAmountChange(limitedValue)   // updates parent amount
                         onValidationChanged(false)
