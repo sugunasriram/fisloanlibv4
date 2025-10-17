@@ -84,6 +84,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.components.TextDescriptionWi
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateSignInPage
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToCreateIssueScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFISExitScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToIssueListScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToPrePaymentWebViewScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.StatusResponse
@@ -518,7 +519,9 @@ fun RepaymentScheduleView(
         } else if (fromScreen == "PrePayment") {
             navController.popBackStack()
         } else {
-            navigateApplyByCategoryScreen(navController)
+            //Sugu todo
+//            navigateApplyByCategoryScreen(navController)
+            navigateToFISExitScreen(navController, loanId="4321")
         }
     }
     FixedTopBottomScreen(
@@ -536,7 +539,10 @@ fun RepaymentScheduleView(
             } else if (fromScreen == "PrePayment") {
                 navController.popBackStack()
             } else {
-                navigateApplyByCategoryScreen(navController)
+                //Sugu todo
+//                navigateApplyByCategoryScreen(navController)
+                navigateToFISExitScreen(navController, loanId="4321")
+
             }
         },
         showBottom = true,
@@ -561,7 +567,8 @@ fun RepaymentScheduleView(
             )
         },
         tertiaryButtonText = stringResource(R.string.home),
-        onTertiaryButtonClick = { navigateApplyByCategoryScreen(navController) }
+//        onTertiaryButtonClick = { navigateApplyByCategoryScreen(navController) }
+        onTertiaryButtonClick = {             navigateToFISExitScreen(navController, loanId="4321") }
     ) {
         if(checkingStatus || orderPaymentListLoading){
             CenterProgressFixedHeight(top=320.dp)

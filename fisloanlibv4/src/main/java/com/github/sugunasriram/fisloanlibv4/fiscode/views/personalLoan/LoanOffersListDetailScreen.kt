@@ -1964,7 +1964,8 @@ fun DownPaymentBottomSheetContent(
     val preloaded = remember(initialAmount, minAmount, maxAmount) {
         val raw = initialAmount ?: minAmount
         val clamped = raw.coerceIn(minAmount, maxAmount)
-        CommonMethods().roundToNearestHundred(clamped)
+//        CommonMethods().roundToNearestHundred(clamped)
+        clamped
     }
 
 //    var sliderValue by remember { mutableFloatStateOf(minAmount.toFloat()) }
