@@ -35,6 +35,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
@@ -197,7 +198,99 @@ fun ApplyByCategoryScreen(navController: NavHostController,
     }
 }
 
-@SuppressLint("CoroutineCreationDuringComposition")
+//@SuppressLint("CoroutineCreationDuringComposition")
+//@Composable
+//fun SelectingFlow(
+//    checkingStatus: Boolean,
+//    navController: NavHostController,
+//    userStatus: UserStatus?,
+//    userStatusViewModel: UserStatusViewModel,
+//    context: Context,
+//    checked: Boolean,
+//    showLoader: Boolean,
+//    errorMessage: String,
+//    userDetails: ProfileResponse?,
+//    userDetailsAPILoading: Boolean,
+//    userDetailsAPICompleted: Boolean,
+//    verifySessionResponse :VerifySessionResponse?
+//) {
+//    val scope = rememberCoroutineScope()
+//    var setFlow by remember { mutableStateOf("") }
+//    var triggerApi by remember { mutableStateOf(true) }
+//    triggerApi = showLoader
+//    var apiCalled by remember { mutableStateOf(true) }
+//
+//    if (checkingStatus || userDetailsAPILoading) {
+//        CenterProgress()
+//    } else if (triggerApi) {
+//        if (userStatus?.data?.data != null || userStatus?.data?.url != null) {
+//            PurchaseDecidedFlow(
+//                context = context,
+//                status = userStatus,
+//                navController = navController,
+//                fromFlow = setFlow,
+//                verifySessionResponse = verifySessionResponse
+//            )
+//        } else {
+//            if (apiCalled) {
+//                scope.launch {
+//                    delay(60000)
+//                    userStatusViewModel.getUserStatus(loanType = "PURCHASE_FINANCE", context =
+//                        context)
+//                    apiCalled = false
+//                }
+//            }
+//
+//            UnexpectedErrorScreen(
+//                navController = navController,
+//                errorMsgShow = false,
+//                errorText = stringResource(id = R.string.request_is_still),
+//                errorMsg = stringResource(id = R.string.middle_loan_error_message),
+//                onClick = {
+//                    userStatusViewModel.getUserStatus(
+//                        loanType = "PERSONAL_LOAN",
+//                        context = context
+//                    )
+//                }
+//            )
+//        }
+//    } else {
+//        if (checked) {
+//
+//            PurchaseDecidedFlow(
+//                context = context,
+//                status = userStatus,
+//                navController = navController,
+//                fromFlow = setFlow,
+//                verifySessionResponse = verifySessionResponse
+//            )
+//        } else {
+//                    val requiredFields = listOf(
+//                        userDetails?.data?.firstName,
+//                        userDetails?.data?.lastName,
+//                        userDetails?.data?.email,
+//                        userDetails?.data?.dob,
+//                        userDetails?.data?.panNumber,
+//                        userDetails?.data?.gender,
+//                        userDetails?.data?.employmentType
+//                    )
+//
+//                    if (requiredFields.any { it.isNullOrEmpty() } && userDetailsAPICompleted) {
+//                        navigateToUpdateProfileScreen(navController, fromFlow = "Purchase Finance")
+//                        CommonMethods().toastMessage(
+//                            context,
+//                            context.getString(R.string.please_update_your_profile_to_proceed)
+//                        )
+//                    } else {
+//                        userStatusViewModel.getUserStatus(
+//                            loanType = "PURCHASE_FINANCE",
+//                            context = context
+//                        )
+//                    }
+//        }
+//    }
+//}
+
 @Composable
 fun SelectingFlow(
     checkingStatus: Boolean,
@@ -205,41 +298,85 @@ fun SelectingFlow(
     userStatus: UserStatus?,
     userStatusViewModel: UserStatusViewModel,
     context: Context,
-    checked: Boolean,
+    checked: Boolean, // currently not used in this streamlined flow
     showLoader: Boolean,
     errorMessage: String,
     userDetails: ProfileResponse?,
     userDetailsAPILoading: Boolean,
     userDetailsAPICompleted: Boolean,
-    verifySessionResponse :VerifySessionResponse?
+    verifySessionResponse: VerifySessionResponse?
 ) {
-    val scope = rememberCoroutineScope()
-    var setFlow by remember { mutableStateOf("") }
-    var triggerApi by remember { mutableStateOf(true) }
-    triggerApi = showLoader
-    var apiCalled by remember { mutableStateOf(true) }
-
+    // 0) If either the status check or user-details API is still loading, show progress and exit.
     if (checkingStatus || userDetailsAPILoading) {
         CenterProgress()
-    } else if (triggerApi) {
-        if (userStatus?.data?.data != null || userStatus?.data?.url != null) {
+        return
+    }
+
+    // 1) After loading: compute whether the profile is incomplete
+    val hasMissingProfile = remember(userDetails) {
+        listOf(
+            userDetails?.data?.firstName,
+            userDetails?.data?.lastName,
+            userDetails?.data?.email,
+            userDetails?.data?.dob,
+            userDetails?.data?.panNumber,
+            userDetails?.data?.gender,
+            userDetails?.data?.employmentType
+        ).any { it.isNullOrBlank() }
+    }
+
+    // 2) Fire one-time side-effects based on the result of (1)
+    val didRouteProfile = rememberSaveable { mutableStateOf(false) }
+    val didFetchStatus = rememberSaveable { mutableStateOf(false) }
+
+    // 2a) Navigate to Update Profile once the user-details API is completed and profile is missing
+    LaunchedEffect(userDetailsAPICompleted, hasMissingProfile) {
+        if (userDetailsAPICompleted && hasMissingProfile && !didRouteProfile.value) {
+            didRouteProfile.value = true
+            navigateToUpdateProfileScreen(navController, fromFlow = "Purchase Finance")
+            CommonMethods().toastMessage(
+                context,
+                context.getString(R.string.please_update_your_profile_to_proceed)
+            )
+        }
+    }
+
+    // 2b) If profile is complete, fetch user status exactly once
+    LaunchedEffect(userDetailsAPICompleted, hasMissingProfile) {
+        if (userDetailsAPICompleted && !hasMissingProfile && !didFetchStatus.value) {
+            didFetchStatus.value = true
+            userStatusViewModel.getUserStatus(
+                loanType = "PURCHASE_FINANCE",
+                context = context
+            )
+        }
+    }
+
+    // 3) Render according to current state
+    when {
+        // We're about to navigate to Update Profile — keep a lightweight spinner to avoid a blank frame
+        hasMissingProfile -> {
+            CenterProgress()
+        }
+
+        // If status is ready (data or url present), proceed to the decided flow
+        (userStatus?.data?.data != null || userStatus?.data?.url != null) -> {
             PurchaseDecidedFlow(
                 context = context,
                 status = userStatus,
                 navController = navController,
-                fromFlow = setFlow,
+                fromFlow = "", // or "Purchase Finance" if you want to tag the source
                 verifySessionResponse = verifySessionResponse
             )
-        } else {
-            if (apiCalled) {
-                scope.launch {
-                    delay(60000)
-                    userStatusViewModel.getUserStatus(loanType = "PURCHASE_FINANCE", context =
-                        context)
-                    apiCalled = false
-                }
-            }
+        }
 
+        // Still waiting on the status fetch? Show progress (use either flag you maintain)
+        showLoader || checkingStatus -> {
+            CenterProgress()
+        }
+
+        // Otherwise, show a friendly error with a retry
+        else -> {
             UnexpectedErrorScreen(
                 navController = navController,
                 errorMsgShow = false,
@@ -247,55 +384,11 @@ fun SelectingFlow(
                 errorMsg = stringResource(id = R.string.middle_loan_error_message),
                 onClick = {
                     userStatusViewModel.getUserStatus(
-                        loanType = "PERSONAL_LOAN",
+                        loanType = "PURCHASE_FINANCE",
                         context = context
                     )
                 }
             )
-        }
-    } else {
-        if (checked) {
-
-            PurchaseDecidedFlow(
-                context = context,
-                status = userStatus,
-                navController = navController,
-                fromFlow = setFlow,
-                verifySessionResponse = verifySessionResponse
-            )
-        } else {
-//            LoanSelectionScreen(
-//                navController = navController,
-//                userDetails = userDetails,
-//                context = context,
-//                onLoanSelected = { loanType ->
-
-
-//                    setFlow = loanType
-                    val requiredFields = listOf(
-                        userDetails?.data?.firstName,
-                        userDetails?.data?.lastName,
-                        userDetails?.data?.email,
-                        userDetails?.data?.dob,
-                        userDetails?.data?.panNumber,
-                        userDetails?.data?.gender,
-                        userDetails?.data?.employmentType
-                    )
-
-                    if (requiredFields.any { it.isNullOrEmpty() } && userDetailsAPICompleted) {
-                        navigateToUpdateProfileScreen(navController, fromFlow = "Purchase Finance")
-                        CommonMethods().toastMessage(
-                            context,
-                            context.getString(R.string.please_update_your_profile_to_proceed)
-                        )
-                    } else {
-                        userStatusViewModel.getUserStatus(
-                            loanType = "PURCHASE_FINANCE",
-                            context = context
-                        )
-                    }
-//                }
-//            )
         }
     }
 }
@@ -517,1032 +610,6 @@ fun CarouselContent(images: List<Int>) {
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewLoanSelectionScreen() {
-    val fakeNavController = rememberNavController()
-
-    LoanSelectionScreen(
-        navController = fakeNavController,
-        userDetails = null,
-        onLoanSelected = {},
-        context = LocalContext.current
-    )
-}
-
-@Composable
-fun LoanSelectionScreen(
-    navController: NavHostController,
-    userDetails: ProfileResponse? = null,
-    onLoanSelected: (String) -> Unit,
-    context: Context
-) {
-    ScreenWithHamburger(
-        isSelfScrollable = false,
-        navController = navController,
-        topBarText = ""
-    ) {
-        CarouselContent(
-            images = listOf(
-                R.drawable.dashboard_card,
-                R.drawable.dashboard_card_1,
-                R.drawable.dashboard_card_2,
-                R.drawable.dashboard_card_3,
-            )
-        )
-
-        val cardGradients = mapOf(
-            "Personal Loan" to listOf(Color(0xFFffecb3), Color(0xFFFFFFFF)),
-            "Purchase Finance" to listOf(Color(0xFFB4E2A5), Color(0xFFFFFFFF)),
-            "GST" to listOf(Color(0xFFFFFFFF), Color(0xFF64B5F6))
-        )
-        val personalLoanGradient = cardGradients["Personal Loan"] ?: listOf(Color.Gray)
-        val purchaseFinanceGradient = cardGradients["Purchase Finance"] ?: listOf(Color.Gray)
-        val gstGradient = cardGradients["GST"] ?: listOf(Color.Gray)
-
-        HeaderCard(
-            start = 5.dp,
-            end = 5.dp,
-            top = 10.dp,
-            bottomStart = 16.dp,
-            bottomEnd = 16.dp,
-            topStart = 16.dp,
-            topEnd = 16.dp,
-            bottom = 20.dp,
-            cardColor = cardWhite,
-            borderColor = grayD6
-        ) {
-
-            RegisterText(
-                text = stringResource(R.string.loan_types),
-                style = bold20Text100,
-                textColor = appBlack,
-                boxAlign = Alignment.TopCenter,
-                top = 10.dp,
-                bottom = 10.dp
-            )
-
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Box(
-                    modifier = Modifier
-                        .padding(start = 10.dp, end = 10.dp, bottom = 0.dp)
-                        .wrapContentHeight()
-                ) {
-                    FullWidthRoundShapedElevatedCard(
-                        onClick = { onLoanSelected("Personal Loan") },
-                        gradientColors = personalLoanGradient,
-                        bottomPadding = 10.dp,
-                        start = 8.dp,
-                        end = 8.dp,
-                        bottom = 10.dp,
-                        top = 0.dp
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 8.dp, end = 8.dp, top = 0.dp, bottom = 0.dp) //
-                                // Allow space for protruding image + full text
-                                .defaultMinSize(minHeight = 100.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Spacer(modifier = Modifier.width(100.dp)) // Reserve space for image
-
-                            Column(
-                                modifier = Modifier
-                                    .padding(start = 4.dp)
-                                    .fillMaxWidth(),
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.personal_loan),
-                                    style = bold20Text100,
-                                    color = Color.Black
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = stringResource(R.string.need_quick_cash),
-                                    style = normal12Text400Ht15,
-                                    color = Color.Black
-                                )
-                            }
-                        }
-                    }
-
-                    Image(
-                        painter = painterResource(id = R.drawable.indian_rupee_money_bag),
-                        contentDescription = null,
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier
-                            .align(Alignment.TopStart)
-                            .offset(y = (-25).dp) // Protrude upward
-                            .height(130.dp)       // Same as or larger than card
-                            .width(120.dp)
-                            .clickable {
-                                onLoanSelected("Personal Loan")
-                            }
-                    )
-                }
-
-                Box(modifier = Modifier.padding(start = 10.dp, end = 8.dp, bottom = 10.dp)
-                ) {
-                    FullWidthRoundShapedElevatedCard(
-                    onClick = {
-//                        CommonMethods().toastMessage(
-//                            context = context,
-//                            toastMsg = context.getString(R.string.feature_supported_in_future)
-//                        )
-                        onLoanSelected("Purchase Finance")
-                    },
-                    gradientColors = purchaseFinanceGradient,
-                    bottomPadding = 10.dp,
-                    start = 8.dp,
-                    end = 8.dp,
-                    bottom = 0.dp
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(IntrinsicSize.Min)
-                            .padding(2.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight()
-                                .padding(start = 6.dp),
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Text(
-                                text = stringResource(R.string.purchase_finance),
-                                style = bold20Text100,
-                                color = Color.Black
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = stringResource(R.string.want_to_buy),
-                                style = normal12Text400Ht15,
-                                color = Color.Black
-                            )
-                        }
-                    }
-                }
-                    Image(
-                        painter = painterResource(id = R.drawable.purchase_finance),
-                        contentDescription = null,
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.padding(bottom = 4.dp)
-                            .size(width = 120.dp, height = 110.dp)
-                            .align(Alignment.BottomEnd)
-                            .offset(x = (2).dp)
-                            .clickable {
-//                                CommonMethods().toastMessage(
-//                                    context = context,
-//                                    toastMsg = context.getString(R.string.feature_supported_in_future)
-//                                )
-                                onLoanSelected("Purchase Finance")
-                            }
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .padding(start = 10.dp, end = 8.dp, bottom = 8.dp)
-                ) {
-                    FullWidthRoundShapedElevatedCard(
-                        onClick = {
-                            CommonMethods().toastMessage(
-                                context = context,
-                                toastMsg = context.getString(R.string.feature_supported_in_future)
-                            )
-//                            onLoanSelected("Invoice Loan")
-                        },
-                        gradientColors = gstGradient,
-                        bottomPadding = 10.dp,
-                        start = 8.dp, // give space inside card from image
-                        end = 8.dp,
-                        bottom = 10.dp
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(IntrinsicSize.Min)
-                                .padding(2.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Spacer(modifier = Modifier.width(50.dp)) // placeholder for protruding image
-                            Column(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .fillMaxHeight()
-                                    .padding(start = 36.dp),
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.gst_loan),
-                                    style = bold20Text100,
-                                    color = Color.Black
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = stringResource(R.string.running_a_business),
-                                    style = normal12Text400Ht15,
-                                    color = Color.Black
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = stringResource(R.string.coming_soon_dots),
-                                    style = normal12Text400Ht15,
-                                    modifier = Modifier.padding(horizontal = 25.dp),
-                                    color = Color.Red
-                                )
-                            }
-                        }
-                    }
-
-                    Image(
-                        painter = painterResource(id = R.drawable.gst_logo),
-                        contentDescription = null,
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier
-                            .size(width = 110.dp, height = 100.dp)
-                            .align(Alignment.CenterStart)
-                            .offset(x = (-10).dp) // protrude outside the card
-                            .clickable {
-                                CommonMethods().toastMessage(
-                                    context = context,
-                                    toastMsg = context.getString(R.string.feature_supported_in_future)
-                                )
-                            }
-                    )
-                }
-            }
-        }
-
-        VoiceRecorderButton(navController, onClick = {
-            CommonMethods().toastMessage(
-                context = context,
-                toastMsg = context.getString(R.string.feature_supported_in_future)
-            )
-        })
-        RegisterText(
-            text = stringResource(R.string.tell_us_what_you_are_looking_for),
-            style = normal14Text400,
-            textColor = hintGray,
-            boxAlign = Alignment.Center,
-            top = 5.dp,
-            bottom = 10.dp
-        )
-    }
-}
-
-@SuppressLint("ResourceType", "CoroutineCreationDuringComposition")
-@Composable
-fun PersonalDecidedFlow(
-    context: Context,
-    status: UserStatus?,
-    navController: NavHostController,
-    fromFlow: String
-) {
-    val personalLoanViewModel: PersonalLoanViewModel = viewModel()
-    val searchInProgress by personalLoanViewModel.searchInProgress.collectAsState()
-    val searchLoaded by personalLoanViewModel.searchLoaded.collectAsState()
-    val webViewModel: WebViewModel = viewModel()
-    val lenderStatusProgress by webViewModel.lenderStatusProgress.collectAsState()
-    val lenderStatusLoaded by webViewModel.lenderStatusLoaded.collectAsState()
-    val lenderStatusResponse by webViewModel.getLenderStatusResponse.collectAsState()
-    val showInternetScreen by webViewModel.showInternetScreen.observeAsState(false)
-    val showTimeOutScreen by webViewModel.showTimeOutScreen.observeAsState(false)
-    val showServerIssueScreen by webViewModel.showServerIssueScreen.observeAsState(false)
-    val unexpectedErrorScreen by webViewModel.unexpectedError.observeAsState(false)
-    val unAuthorizedUser by webViewModel.unAuthorizedUser.observeAsState(false)
-    val middleLoan by webViewModel.middleLoan.observeAsState(false)
-    val errorMessage by webViewModel.errorMessage.collectAsState()
-    val navigationToSignIn by webViewModel.navigationToSignIn.collectAsState()
-
-    LaunchedEffect(status?.data) {
-        if (status?.data == null || status.data.data?.any { it == null } == true) {
-            Log.d("test status: ", "null")
-            personalLoanViewModel.personalLoanSearch(
-                context = context,
-                searchBodyModel = SearchBodyModel(
-                    loanType = "PERSONAL_LOAN",
-                    endUse = "travel",
-                    bureauConsent = "on"
-                )
-            )
-        }
-    }
-    if (status?.data == null || status.data.data?.any { it == null } == true) {
-        Log.d("test status: ", "null")
-        if (searchInProgress) {
-            CenterProgress()
-        } else if (searchLoaded) {
-            navigateToPersonaLoanScreen(navController = navController, fromFlow = "Personal Loan")
-        }
-    } else if (status.data.data?.lastOrNull()?.step.equals(
-            "loan_select_form_submission_PENDING", true
-        ) ||
-        status.data.data?.lastOrNull()?.step.equals("loan_select_form_submission_REJECTED", true)
-    ) {
-        navigateToFormRejectedScreen(
-            navController = navController,
-            errorTitle = stringResource(id = R.string.kyc_failed),
-            fromFlow = fromFlow,
-            errorMsg =
-            if (status?.data?.data?.lastOrNull()?.step.equals(
-                    "loan_select_form_submission_PENDING",
-                    true
-                )
-            ) {
-                stringResource(id = R.string.form_submission_pending)
-            } else {
-                stringResource(id = R.string.form_submission_rejected)
-            }
-        )
-    } else if (status.data.data?.lastOrNull()?.step.equals(
-            "emandate_form_submission_PENDING",
-            true
-        ) ||
-        status.data.data?.lastOrNull()?.step.equals("emandate_form_submission_REJECTED", true)
-    ) {
-        navigateToFormRejectedScreen(
-            navController = navController,
-//            errorTitle = stringResource(id = R.string.emandate_failed),
-            errorTitle = "emandate_form_submission_REJECTED",
-            fromFlow = fromFlow,
-            errorMsg = if (status?.data?.data?.lastOrNull()?.step.equals(
-                    "emandate_form_submission_PENDING",
-                    true
-                )
-            ) {
-                stringResource(id = R.string.form_submission_pending)
-            } else {
-                stringResource(id = R.string.form_submission_rejected)
-            }
-        )
-    } else if (status.data.data?.lastOrNull()?.step.equals(
-            "account_information_form_submission_failed",
-            true
-        )
-    ) {
-        navigateToFormRejectedScreen(
-            navController = navController,
-            errorTitle = stringResource(id = R.string.repayment_failed),
-            fromFlow = fromFlow,
-            errorMsg = stringResource(id = R.string.form_submission_rejected_or_pending)
-        )
-    } else if (status.data.data?.lastOrNull()?.step.equals(
-            "loan_agreement_form_submission_failed",
-            true
-        )
-    ) {
-        navigateToFormRejectedScreen(
-            navController = navController,
-            errorTitle = stringResource(id = R.string.loan_agreement_failed),
-            fromFlow = fromFlow,
-            errorMsg = stringResource(id = R.string.form_submission_rejected_or_pending)
-        )
-    } else if (status.data.data?.firstOrNull()?.step.equals("form_submission_request", true)) {
-        LaunchedEffect(Unit) {
-            webViewModel.getLenderStatusApi(
-                context = context,
-                loanType = "PERSONAL_LOAN",
-                step = "FORM_SUBMISSION_REQUEST"
-            )
-        }
-        when {
-            navigationToSignIn -> navigateSignInPage(navController)
-            showInternetScreen -> CommonMethods().ShowInternetErrorScreen(navController)
-            showTimeOutScreen -> CommonMethods().ShowTimeOutErrorScreen(navController)
-            showServerIssueScreen -> CommonMethods().ShowServerIssueErrorScreen(navController)
-            unexpectedErrorScreen -> CommonMethods().ShowUnexpectedErrorScreen(navController)
-            unAuthorizedUser -> CommonMethods().ShowUnAuthorizedErrorScreen(navController)
-            middleLoan -> MiddleOfTheLoanScreen(navController, errorMessage)
-            lenderStatusProgress -> CenterProgress()
-            lenderStatusLoaded -> {
-                val lenderStatus = lenderStatusResponse?.data?.response
-                if (lenderStatus.isNullOrEmpty()) {
-                    NoLoanOffersAvailableScreen(
-                        navController,
-                        titleText = stringResource(R.string.no_lenders_available)
-                    )
-                } else {
-                    LaunchedEffect(lenderStatus) {
-                        try {
-                            val json = Json {
-                                prettyPrint = true
-                                ignoreUnknownKeys = true
-                            }
-
-                            val lenderStatusJson = json.encodeToString(
-                                LenderStatusResponse.serializer(),
-                                LenderStatusResponse(response = lenderStatus)
-                            )
-
-                            navigateToFormSubmissionWebScreen(
-                                navController,
-                                fromFlow,
-                                lenderStatusJson
-                            )
-                        } catch (e: Exception) {
-                            Log.e("JsonError", "Failed to serialize lender status", e)
-                        }
-                    }
-                }
-            }
-        }
-    } else if (status.data.data?.firstOrNull()?.step.equals("consent_request_sent", true)) {
-        LaunchedEffect(Unit) {
-            webViewModel.getLenderStatusApi(
-                context = context,
-                loanType = "PERSONAL_LOAN",
-                step = "CONSENT_SELECT"
-            )
-        }
-        when {
-            navigationToSignIn -> navigateSignInPage(navController)
-            showInternetScreen -> CommonMethods().ShowInternetErrorScreen(navController)
-            showTimeOutScreen -> CommonMethods().ShowTimeOutErrorScreen(navController)
-            showServerIssueScreen -> CommonMethods().ShowServerIssueErrorScreen(navController)
-            unexpectedErrorScreen -> CommonMethods().ShowUnexpectedErrorScreen(navController)
-            unAuthorizedUser -> CommonMethods().ShowUnAuthorizedErrorScreen(navController)
-            middleLoan -> MiddleOfTheLoanScreen(navController, errorMessage)
-            lenderStatusProgress -> CenterProgress()
-            lenderStatusLoaded -> {
-                val lenderStatus = lenderStatusResponse?.data?.response
-                if (lenderStatus.isNullOrEmpty()) {
-                    NoLoanOffersAvailableScreen(
-                        navController,
-                        titleText = stringResource(R.string.no_lenders_available)
-                    )
-                } else {
-                    LaunchedEffect(lenderStatus) {
-                        try {
-                            val json = Json {
-                                prettyPrint = true
-                                ignoreUnknownKeys = true
-                            }
-
-                            val lenderStatusJson = json.encodeToString(
-                                LenderStatusResponse.serializer(),
-                                LenderStatusResponse(response = lenderStatus)
-                            )
-                            navigateToConsentSubmissionWebScreen(
-                                navController,
-                                fromFlow,
-                                lenderStatusJson
-                            )
-                        } catch (e: Exception) {
-                            Log.e("JsonError", "Failed to serialize lender status", e)
-                        }
-                    }
-                }
-            }
-        }
-
-    } else if (status.data.data?.firstOrNull()?.step.equals("search", true)) {
-        if (status.data.data?.any { !it?.data.isNullOrEmpty() } == true) {
-            navigateToPersonaLoanScreen(navController = navController, fromFlow = "Personal Loan")
-        }
-        val offerList =
-            status.data.data?.lastOrNull()?.offerResponse?.flatMap { offerResponseItem ->
-                offerResponseItem?.data?.map { data ->
-                    Offer(
-                        data.offer,
-                        data.id,
-                        data.bureauConsent
-                    )
-                } ?: emptyList()
-            }
-        val searchResponse = SearchResponseModel(
-            id = status.data.data?.lastOrNull()?.id,
-            url = status.data.data?.lastOrNull()?.url?.takeIf { it.isNotBlank() },
-            transactionId = status.data.txnId,
-            consentResponse = status.data.data?.firstOrNull()?.consentResponse,
-            rejectedLenders = status.data.data?.firstOrNull()?.rejectedLenders,
-            offerResponse = offerList
-        )
-
-        if (offerList.isNullOrEmpty()) {
-            val searchModel = SearchModel(
-                data = searchResponse,
-                status = true,
-                statusCode = 200
-            )
-            NavigateToWebView(
-                context = context,
-                searchModel = searchModel,
-                gstSearchResponse = null,
-                fromFlow = fromFlow,
-                navController = navController,
-                searchResponse = searchModel
-            )
-        } else {
-            val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
-            val searchJson = json.encodeToString(
-                SearchModel.serializer(),
-                SearchModel(data = searchResponse, status = true, statusCode = 200)
-            )
-            navigateToBureauOffersScreen(
-                navController,
-                stringResource(R.string.getUerFlow),
-                fromFlow,
-                searchJson
-            )
-        }
-    } else {
-        if (status.data.url != null) {
-            LaunchedEffect(Unit) {
-                webViewModel.getLenderStatusApi(
-                    context = context,
-                    loanType = "PERSONAL_LOAN",
-                    step = "CONSENT_SELECT"
-                )
-            }
-            when {
-                navigationToSignIn -> navigateSignInPage(navController)
-                showInternetScreen -> CommonMethods().ShowInternetErrorScreen(navController)
-                showTimeOutScreen -> CommonMethods().ShowTimeOutErrorScreen(navController)
-                showServerIssueScreen -> CommonMethods().ShowServerIssueErrorScreen(navController)
-                unexpectedErrorScreen -> CommonMethods().ShowUnexpectedErrorScreen(navController)
-                unAuthorizedUser -> CommonMethods().ShowUnAuthorizedErrorScreen(navController)
-                middleLoan -> MiddleOfTheLoanScreen(navController, errorMessage)
-                lenderStatusProgress -> CenterProgress()
-                lenderStatusLoaded -> {
-                    val lenderStatus = lenderStatusResponse?.data?.response
-                    if (lenderStatus.isNullOrEmpty()) {
-                        NoLoanOffersAvailableScreen(
-                            navController,
-                            titleText = stringResource(R.string.no_lenders_available)
-                        )
-                    } else {
-                        LaunchedEffect(lenderStatus) {
-                            val json = Json {
-                                prettyPrint = true
-                                ignoreUnknownKeys = true
-                            }
-                            val lenderStatusJson = json.encodeToString(
-                                LenderStatusResponse.serializer(),
-                                LenderStatusResponse(response = lenderStatus)
-                            )
-
-                            val transactionId = status.data.data?.get(0)?.data?.get(0)?.txnId
-                            val searchId = status.data.id
-                            val webUrl = status.data.url
-
-                            if (!transactionId.isNullOrBlank() && !searchId.isNullOrBlank() && !webUrl.isNullOrBlank()) {
-
-                                navigateToWebViewFlowOneScreen(
-                                    navController = navController,
-                                    purpose = context.getString(R.string.getUerFlow),
-                                    fromFlow = fromFlow,
-                                    id = searchId,
-                                    transactionId = transactionId,
-                                    url = webUrl,
-                                    lenderStatusData = lenderStatusJson
-                                )
-
-                            }
-                        }
-                    }
-                }
-            }
-
-//            status.data.url.let { webUrl ->
-//                val transactionId = status?.data?.data?.get(0)?.data?.get(0)?.txnId
-//                transactionId.let { transactionId ->
-//                    transactionId?.let { Log.d("test transactionId: ", it) }
-//                    status.data.id?.let { searchId ->
-//                        transactionId?.let {
-//                            navigateToWebViewFlowOneScreen(
-//                                navController = navController,
-//                                purpose = stringResource(R.string.getUerFlow),
-//                                fromFlow = fromFlow,
-//                                id = searchId,
-//                                transactionId = transactionId,
-//                                url = webUrl,
-//                                lenderStatusData = ""
-//                            )
-//                        }
-//                    }
-//                }
-//            }
-        } else {
-            val transactionId = status.data.txnId
-            val rejectedLenders = status.data.data?.firstOrNull()?.rejectedLenders
-            transactionId?.let { Log.d("test transactionId: ", it) }
-            status.data.data?.forEach { data ->
-                data?.step?.let { step ->
-                    if (step.equals("consent_select", true)) {
-                        val offerList = data.offerResponse
-                            ?.flatMap { offerResponseItem ->
-                                offerResponseItem?.data?.map { d ->
-                                    Offer(d.offer, d.id, d.bureauConsent)
-                                } ?: emptyList()
-                            }
-                        val rejectedList = rejectedLenders?.map {
-                            RejectedLenders(
-                                name = it?.name,
-                                image = it?.image,
-                                reason = it?.reason,
-                                minLoanAmount = it?.minLoanAmount,
-                                maxLoanAmount = it?.maxLoanAmount,
-                                maxInterestRate = it?.maxInterestRate,
-                                minInterestRate = it?.minInterestRate
-                            )
-                        }
-                        val combined = OffersWithRejections(
-                            offers = offerList,
-                            rejectedLenders = rejectedList
-                        )
-
-                        val json = Json { ignoreUnknownKeys = true; prettyPrint = true }
-                        val jsonString = json.encodeToString(combined)
-                        navigateToLoanOffersListScreen(navController, jsonString, fromFlow)
-                    } else if (step.equals("loan_select", true)) {
-                        status.data.data.forEach { item ->
-                            item?.data?.forEach { item2 ->
-                                item2?.fromUrl?.let { kycUrl ->
-                                    item2.id?.let { id ->
-                                        transactionId?.let { transactionId ->
-                                            Log.d("UserStatus-kycUrl ", kycUrl)
-                                            transactionId?.let { Log.d("test transactionId: ", it) }
-                                            navigateToKycAnimation(
-                                                navController,
-                                                transactionId,
-                                                id,
-                                                kycUrl,
-                                                fromFlow = fromFlow
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    } else if (step.equals(
-                            "loan_select_form_submission_APPROVED",
-                            ignoreCase = true
-                        )
-                    ) {
-                        status.data.data.forEach { userItem ->
-                            userItem?.id?.let { id ->
-                                transactionId?.let { transactionId ->
-                                    navigateToBankDetailsScreen(
-                                        navController = navController,
-                                        id = id,
-                                        fromFlow = fromFlow,
-                                        closeCurrent = false
-                                    )
-//                                    navigateToLoanProcessScreen(
-//                                        responseItem = "No need ResponseItem",
-//                                        transactionId = transactionId,
-//                                        offerId = id,
-//                                        navController = navController, statusId = 4,
-//                                        fromFlow = fromFlow
-//                                    )
-                                }
-                            }
-                        }
-                    } else if (step.equals("emandate_approved", true)) {
-                        status.data.data.forEach { userItem ->
-                            userItem?.data?.forEach { item ->
-                                item?.fromUrl?.let { enachUrl ->
-                                    Log.d("UserStatus_emandate", enachUrl)
-                                    userItem.id?.let { id ->
-                                        transactionId?.let { transactionId ->
-                                            navigateToRepaymentScreen(
-                                                navController,
-                                                transactionId,
-                                                enachUrl,
-                                                id,
-                                                fromFlow
-                                            )
-//                                            navigateToLoanProcessScreen(
-//                                                navController = navController,
-//                                                transactionId = transactionId,
-//                                                statusId = 5,
-//                                                responseItem = enachUrl, offerId = id,
-//                                                fromFlow = fromFlow
-//                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    } else if (step.equals("loan_agreement_approved", true)) {
-                        status.data.data.forEach { userItem ->
-                            userItem?.data?.forEach { item ->
-                                item?.fromUrl?.let { loanAgreementUrl ->
-                                    Log.d("UserStatus_loanAg", loanAgreementUrl)
-                                    userItem.id?.let { id ->
-                                        transactionId?.let { transactionId ->
-                                            if (loanAgreementUrl.equals(
-                                                    "No need ResponseItem",
-                                                    ignoreCase = true
-                                                ) || loanAgreementUrl.contains(
-                                                    "No need ResponseItem",
-                                                    ignoreCase = true
-                                                )
-                                            ) {
-                                                navigateTOUnexpectedErrorScreen(navController, true)
-                                            } else {
-                                                navigateToLoanAgreementAnimationLoader(
-                                                    navController= navController,
-                                                    transactionId=transactionId,
-                                                    id=id,
-                                                    fromFlow = fromFlow,
-                                                    formUrl=loanAgreementUrl,
-                                                )
-//                                                navigateToLoanAgreementScreen(
-//                                                    navController,
-//                                                    transactionId,
-//                                                    id,
-//                                                    loanAgreementUrl,
-//                                                    fromFlow = fromFlow
-//                                                )
-                                            }
-//                                            navigateToLoanProcessScreen(
-//                                                transactionId = transactionId,
-//                                                offerId = id, responseItem = loanAgreementUrl,
-//                                                navController = navController, statusId = 6,
-//                                                fromFlow = fromFlow
-//                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        UnexpectedErrorScreen(
-                            navController = navController,
-//                            onClick = { navigateApplyByCategoryScreen(navController) })
-                            onClick = { navigateToFISExitScreen(navController, loanId="4321") })
-//                        navigateToEMandateESignFailedScreen(navController,step)
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun InvoiceDecidedFlow(
-    context: Context,
-    status: UserStatus?,
-    navController: NavHostController,
-    fromFlow: String
-) {
-    if (status?.data == null) {
-        navigateToGstInvoiceLoanScreen(navController = navController, fromFlow = "Invoice Loan")
-    } else if (status?.data?.data?.lastOrNull()?.step.equals(
-            "individual_ekyc_form_submission_failed",
-            true
-        ) ||
-        status?.data?.data?.lastOrNull()?.step.equals("entity_ekyc_form_submission_failed", true)
-    ) {
-        navigateToFormRejectedScreen(
-            navController = navController,
-            errorTitle = stringResource(id = R.string.kyc_failed),
-            fromFlow = fromFlow,
-            errorMsg = stringResource(id = R.string.form_submission_rejected_or_pending)
-        )
-    } else if (status?.data?.data?.lastOrNull()?.step.equals(
-            "emandate_form_submission_failed",
-            true
-        )
-    ) {
-        navigateToFormRejectedScreen(
-            navController = navController,
-            errorTitle = stringResource(id = R.string.emandate_failed),
-            fromFlow = fromFlow,
-            errorMsg = stringResource(id = R.string.form_submission_rejected_or_pending)
-        )
-    } else if (status?.data?.data?.lastOrNull()?.step.equals(
-            "account_information_form_submission_failed",
-            true
-        )
-    ) {
-        navigateToFormRejectedScreen(
-            navController = navController,
-            errorTitle = stringResource(id = R.string.repayment_failed),
-            fromFlow = fromFlow,
-            errorMsg = stringResource(id = R.string.form_submission_rejected_or_pending)
-        )
-    } else if (status?.data?.data?.lastOrNull()?.step.equals(
-            "loan_agreement_form_submission_failed",
-            true
-        )
-    ) {
-        navigateToFormRejectedScreen(
-            navController = navController,
-            errorTitle = stringResource(id = R.string.loan_agreement_failed),
-            fromFlow = fromFlow,
-            errorMsg = stringResource(id = R.string.form_submission_rejected_or_pending)
-        )
-    } else if (status?.data?.data?.lastOrNull()?.step.equals("search", true)) {
-        val searchResponseData = GstSearchData(
-            id = status?.data?.data?.lastOrNull()?.id,
-            url = status?.data?.data?.lastOrNull()?.url ?: "",
-            transactionId = status?.data?.txnId
-        )
-
-        // Create an instance of SearchModel
-        val searchResponse = GstSearchResponse(
-            data = searchResponseData,
-            status = true,
-            statusCode = 200
-        )
-        NavigateToWebView(
-            context = context,
-            searchResponse = null,
-            gstSearchResponse = searchResponse,
-            fromFlow = fromFlow,
-            navController = navController,
-            searchModel = null
-        )
-    } else {
-        if (status.data.url != null) {
-            status.data.url.let { webUrl ->
-                val transactionId = status?.data?.data?.get(0)?.data?.get(0)?.txnId
-                transactionId.let { transactionId ->
-                    transactionId?.let { Log.d("test transactionId: ", it) }
-
-                    status.data.id?.let { searchId ->
-                        transactionId?.let {
-                            navigateToWebViewFlowOneScreen(
-                                navController = navController,
-                                purpose = stringResource(R.string.getUerFlow),
-                                fromFlow = fromFlow,
-                                id = searchId,
-                                transactionId = transactionId,
-                                url = webUrl,
-                                lenderStatusData = ""
-                            )
-//                            SearchWebView(
-//                                navController = navController, urlToOpen = webUrl,
-//                                searchId = searchId, transactionId = it, fromFlow = fromFlow,
-//                                pageContent = {}
-//                            )
-                        }
-                    }
-                }
-            }
-        } else {
-            val transactionId = status?.data?.txnId
-
-            transactionId?.let { Log.d("test transactionId: ", it) }
-
-            status.data.data?.forEach { data ->
-                data?.step?.let { step ->
-                    if (step.equals("consent_select", true)) { // verified
-                        transactionId?.let {
-                            data?.data?.let { userItem ->
-                                userItem?.let {
-//                                    val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
-//                                    val nonNullUserList = userItem.filterNotNull()
-//                                    val offerDetail = json.encodeToString(ListSerializer(UserStatusItem.serializer()), nonNullUserList)
-                                    navigateToLoanProcessScreen(
-                                        navController = navController,
-                                        transactionId = transactionId,
-                                        statusId = 20,
-                                        responseItem = "Not required",
-                                        offerId = "1234",
-                                        fromFlow = "Invoice Loan"
-                                    )
-                                }
-                            }
-                        }
-                    } else if (step.equals("offer_select", true)) {
-                        status.data.data.forEach { item ->
-                            item?.data?.forEach { item2 ->
-                                item2?.fromUrl?.let { kycUrl ->
-                                    item2.id?.let { id ->
-                                        transactionId?.let { transactionId ->
-                                            transactionId?.let { Log.d("test transactionId: ", it) }
-
-//                                            navigateToLoanProcessScreen(
-//                                                navController = navController,
-//                                                transactionId = transactionId,
-//                                                statusId = 3,
-//                                                offerId = id, fromFlow = fromFlow,
-//                                                responseItem = kycUrl
-//                                            )
-                                            navigateToLoanProcessScreen(
-                                                navController = navController,
-                                                statusId = 13,
-                                                responseItem = kycUrl,
-                                                offerId = id,
-                                                fromFlow = fromFlow,
-                                                transactionId = transactionId
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    } else if (step.equals("offer_confirm", true)) { // verified
-                        status.data.data.forEach { userItem ->
-                            userItem?.data?.forEach { item ->
-                                item?.fromUrl?.let { loanAgreementUrl ->
-                                    userItem.id?.let { id ->
-                                        transactionId?.let { transactionId ->
-                                            navigateToLoanProcessScreen(
-                                                transactionId = transactionId,
-                                                offerId = id,
-                                                responseItem = loanAgreementUrl,
-                                                navController = navController,
-                                                statusId = 13,
-                                                fromFlow = fromFlow
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    } else if (step.equals("loan_approved", true)) { // Verified
-                        status.data.data.forEach { userItem ->
-                            userItem?.data?.forEach { item ->
-                                item?.fromUrl?.let { verificationUrl ->
-                                    userItem.id?.let { id ->
-                                        transactionId?.let { transactionId ->
-                                            navigateToBankKycVerificationScreen(
-                                                navController = navController,
-                                                kycUrl = verificationUrl,
-                                                transactionId = transactionId,
-                                                offerId = id,
-                                                verificationStatus = "2",
-                                                fromFlow = fromFlow
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    } else if (step.equals("entity_ekyc_after_form_submission", true)) {
-                        status.data.data.forEach { userItem ->
-                            userItem?.data?.forEach { item ->
-                                userItem.id?.let { id ->
-                                    transactionId?.let { transactionId ->
-                                        navigateToLoanProcessScreen(
-                                            transactionId = transactionId,
-                                            offerId = id,
-                                            responseItem = "No Need",
-                                            navController = navController,
-                                            statusId = 14,
-                                            fromFlow = fromFlow
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    } else if (step.equals("account_information_approved", true)) { // verified
-                        status.data.data.forEach { userItem ->
-                            userItem?.data?.forEach { item ->
-                                item?.fromUrl?.let { enachUrl ->
-                                    userItem.id?.let { id ->
-                                        transactionId?.let { transactionId ->
-                                            navigateToLoanProcessScreen(
-                                                navController = navController,
-                                                transactionId = transactionId,
-                                                statusId = 5,
-                                                responseItem = enachUrl,
-                                                offerId = id,
-                                                fromFlow = fromFlow
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    } else if (step.equals("loan_agreement_approved", true)) { // verified
-                        status.data.data.forEach { userItem ->
-                            userItem?.data?.forEach { item ->
-                                item?.fromUrl?.let { loanAgreementUrl ->
-                                    userItem.id?.let { id ->
-                                        transactionId?.let { transactionId ->
-                                            navigateToLoanProcessScreen(
-                                                transactionId = transactionId,
-                                                offerId = id,
-                                                responseItem = loanAgreementUrl,
-                                                navController = navController,
-                                                statusId = 16,
-                                                fromFlow = fromFlow
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
 
 @Composable
 fun PurchaseDecidedFlow(
