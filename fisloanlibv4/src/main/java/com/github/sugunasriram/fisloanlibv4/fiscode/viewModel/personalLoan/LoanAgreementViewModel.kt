@@ -1004,7 +1004,7 @@ class LoanAgreementViewModel : BaseViewModel() {
                     } else {
                         // Handle other errors normally
                         handleFailure(error = error, context = context)
-                        _createSessionState.value = CreateSessionUiState.Error(error.message ?: "Unknown error")
+                        //_createSessionState.value = CreateSessionUiState.Error(error.message ?: "Unknown error")
                     }
                 }
                 .also {

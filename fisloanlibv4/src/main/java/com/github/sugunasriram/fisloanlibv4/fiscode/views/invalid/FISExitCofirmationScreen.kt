@@ -53,11 +53,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.sugunasriram.fisloanlibv4.LoanLib
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.finance.PFDeleteUserBodyModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appBlack
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
+import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.purchaseFinance.PurchaseFinanceViewModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.interestRate
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.loanAmount
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.tenure
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -82,6 +87,9 @@ fun FISExitCofirmationScreen(
     val autoAborted = remember { mutableStateOf(false) }
     val forceLoader = remember { mutableStateOf(false) }
 
+    val purchaseFinanceViewModel: PurchaseFinanceViewModel = viewModel()
+
+
     // Load values
     LaunchedEffect(Unit) {
         downpaymentAmountValue.value = TokenManager.read("downpaymentAmount")
@@ -98,6 +106,17 @@ fun FISExitCofirmationScreen(
         if (!inProgress) {
             val sanitizedLoanId = loanId.takeUnless { it == "1234" }.orEmpty()
             loanAgreementViewModel.createPfSession(sanitizedLoanId, context)
+
+            CoroutineScope(Dispatchers.Main).launch {
+                val mobileNumber = TokenManager.read("mobileNumber")
+                purchaseFinanceViewModel.pFDeleteUser(
+                    context = context,
+                    deleteUserBodyModel = PFDeleteUserBodyModel(
+                        loanType = "PURCHASE_FINANCE",
+                        mobileNumber = mobileNumber
+                    ),
+                )
+            }
         }
     }
 
