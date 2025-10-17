@@ -2,6 +2,7 @@ package com.github.sugunasriram.fisloanlibv4.fiscode.appBridge
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -33,7 +36,6 @@ class AppBridgeManager(private val activity: ComponentActivity) {
 
     var updateCompleted = mutableStateOf(false)
     var showDialog = mutableStateOf(true)
-    var verifySessionInvoked = false
     private val context: Context = activity.applicationContext
 
     @Composable
@@ -54,6 +56,9 @@ class AppBridgeManager(private val activity: ComponentActivity) {
         val showServerIssueScreen by viewModel.showServerIssueScreen.observeAsState(false)
         val unexpectedErrorScreen by viewModel.unexpectedError.observeAsState(false)
         val unAuthorizedUser by viewModel.unAuthorizedUser.observeAsState(false)
+
+        var verifySessionInvoked by remember { mutableStateOf(false) }
+
 
         // Log received data
 //        personalDetails?.let { Log.d("AppBridge", "Received personalDetails: $it") }
@@ -122,6 +127,7 @@ class AppBridgeManager(private val activity: ComponentActivity) {
 //                            val loanId = verifySessionResponse?.data?.sessionData?.loanId
 
                             LaunchedEffect(Unit) {
+                                val fromFlow = "Purchase Finance"
                                 if (!loanId.isNullOrBlank()) {
                                     Log.d("Sugu 1", "Navigating to RepaymentScheduleScreen with " +
                                             "loanId: $loanId")
@@ -135,88 +141,133 @@ class AppBridgeManager(private val activity: ComponentActivity) {
                                         launchSingleTop = true
                                     }
                                 } else {
-                                    navController.navigate(AppScreens.DownPaymentScreen.route)
-                                    navController.getBackStackEntry(AppScreens.DownPaymentScreen.route)
-                                        .savedStateHandle
-//                                    .set("verifySessionResponse", verifySessionResponse)
-                                        .set(
-                                            "verifySessionResponse",
-                                            Json.encodeToString<VerifySessionResponse?>(
-                                                verifySessionResponse
-                                            )
-                                        )
+                                    val  verifySessionResponsStr = Json
+                                        .encodeToString<VerifySessionResponse?>(
+                                        verifySessionResponse
+                                    )
+
+                                    Log.d("AppBridgeManager", "Navigating to ApplyByCategoryScreen with " +
+                                            "verifySessionResponse: $verifySessionResponsStr")
+
+                                    val encodedVerifySessionResponse = Uri.encode(verifySessionResponsStr, "UTF-8")
+//                                    navController.navigate(AppScreens.DownPaymentScreen.route)
+                                    val route = "${AppScreens.ApplyByCategoryScreen
+                                        .route}/$fromFlow?encodedVerifySessionResponse=$encodedVerifySessionResponse"
+
+                                    navController.navigate(route)
+//                                    navController.getBackStackEntry(AppScreens.DownPaymentScreen.route)
+//                                        .savedStateHandle
+////                                    .set("verifySessionResponse", verifySessionResponse)
+//                                        .set(
+//                                            "verifySessionResponse",
+//                                            Json.encodeToString<VerifySessionResponse?>(
+//                                                verifySessionResponse
+//                                            )
+//                                        )
                                 }
                             }
                         }
-//                        verifySessionInvoked &&
-//                                !isVerifySessionChecking &&
-//                                !isVerifySessionSuccess &&
-//                                verifySessionResponse == null -> {
-//                            // We are here only if API is finished and failed → use mock or error
-//                            Log.d("AppBridgeManager", "Failed to get verifySessionResponse, using mock data")
-//
-//                            if (loanId != null) {
-//                                LaunchedEffect(Unit) {
-//                                    Log.d("Sugu 2", "Navigating to RepaymentScheduleScreen with " +
-//                                            "loanId: $loanId")
-//                                    val fromFlow = "Purchase Finance"
-//                                    val fromScreen = "PURCHASE_FINANCE"
-//
-//                                    val route = "${AppScreens.RepaymentScheduleScreen.route}/$loanId/$fromFlow/$fromScreen"
-//
-//                                    Log.d("Sugu", "Navigating to: $route")
-//                                    navController.navigate(route)  {
-//                                        launchSingleTop = true
-//                                    }
-//                                }
-//                            }else {
-//                                Log.d(
-//                                    "Sugu", "verifySessionInvoked : " +
-//                                            "$verifySessionInvoked, isVerifySessionChecking : " +
-//                                            "$isVerifySessionChecking, " + "isVerifySessionSuccess : $isVerifySessionSuccess, "
-//                                )
-//                                var verifySessionResponse1 = "{\n" +
-//                                        "    \"statusCode\": 201,\n" +
-//                                        "    \"status\": true,\n" +
-//                                        "    \"message\": \"Session Retrived Successfully\",\n" +
-//                                        "    \"data\": {\n" +
-//                                        "        \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOnsidXNlcklkIjoiZTgxOTM1MGUtYWZhNS01ZmU0LWExZTEtNmNhYjZiNDk4NzZjIiwibW9iaWxlTnVtYmVyIjoiOTYxMTkwOTAxNSIsIm1vYmlsZUNvdW50cnlDb2RlIjoiKzkxIn0sInJvbGUiOiJVU0VSIiwiaWF0IjoxNzUxMDE2NzA0LCJleHAiOjE3NTE2MjE1MDR9.WpYrU6AvEsubAarJyna2rkHFWGK3oM208RPxORKBPfk\",\n" +
-//                                        "        \"sessionId\": \"83f29f24-704d-529f-a3b4-4a5560cd2c70\",\n" +
-//                                        "        \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOnsidXNlcklkIjoiZTgxOTM1MGUtYWZhNS01ZmU0LWExZTEtNmNhYjZiNDk4NzZjIiwibW9iaWxlTnVtYmVyIjoiOTYxMTkwOTAxNSIsIm1vYmlsZUNvdW50cnlDb2RlIjoiKzkxIn0sInJvbGUiOiJVU0VSIiwiaWF0IjoxNzUxNDQyNDUxLCJleHAiOjE3NTE0NDI2MzF9.ziPqEqA9eFr_Co-B1b6mwYMKgzgTjjrFR8lYeUIilME\",\n" +
-//                                        "        \"sseId\": \"a41bb04e18a5545395ba6cba4e34607c\",\n" +
-//                                        "        \"securityKey\": \"110e5c0419135e22814945c143ab9fda\",\n" +
-//                                        "        \"sessionData\": {\n" +
-//                                        "            \"downPayment\": 0,\n" +
-//                                        "            \"productId\": \"2a9a7100-bf22-5858-83f3-62e65c2e3a8c\",\n" +
-//                                        "            \"merchantPAN\": null,\n" +
-//                                        "            \"merchantBankAccount\": null,\n" +
-//                                        "            \"merchantGST\": null,\n" +
-//                                        "            \"merchantAccountHolderName\": null,\n" +
-//                                        "            \"merchantIfscCode\": null,\n" +
-//                                        "            \"productBrand\": null,\n" +
-//                                        "            \"productCategory\": \"Mobile Phone\",\n" +
-//                                        "            \"productSKUID\": \"47af53c0-0add-5c49-9365-8f42fafa18fe\",\n" +
-//                                        "            \"productReturnWindow\": \"P7D\",\n" +
-//                                        "            \"productModel\": null,\n" +
-//                                        "            \"productSellingPrice\": \"90000\",\n" +
-//                                        "            \"productCancellable\": true,\n" +
-//                                        "            \"productReturnable\": true,\n" +
-//                                        "            \"productName\": \"VRIDDHI\",\n" +
-//                                        "            \"productMrpPrice\": \"100000\",\n" +
-//                                        "            \"productSymbol\": \"https://storage.googleapis.com/nslive/62bab198-9391-5be4-b672-e78a6a299a1f/raw/1742808735478_1742808733756.png\",\n" +
-//                                        "            \"productQuantity\": \"1\"\n" +
-//                                        "        },\n" +
-//                                        "        \"sessionType\": \"FIS_PF\"\n" +
-//                                        "    }\n" +
-//                                        "}"
-//                                LaunchedEffect(Unit) {
+                        verifySessionInvoked &&
+                                !isVerifySessionChecking &&
+                                !isVerifySessionSuccess &&
+                                verifySessionResponse == null -> {
+                            // We are here only if API is finished and failed → use mock or error
+                            Log.d("AppBridgeManager", "Failed to get verifySessionResponse, using mock data")
+
+                            val fromFlow = "Purchase Finance"
+
+                            if (!loanId.isNullOrBlank()) {
+                                LaunchedEffect(Unit) {
+                                    Log.d("Sugu 2", "Navigating to RepaymentScheduleScreen with " +
+                                            "loanId: $loanId")
+                                    val fromFlow = "Purchase Finance"
+                                    val fromScreen = "PURCHASE_FINANCE"
+
+                                    val route = "${AppScreens.RepaymentScheduleScreen.route}/$loanId/$fromFlow/$fromScreen"
+
+                                    Log.d("Sugu", "Navigating to: $route")
+                                    navController.navigate(route)  {
+                                        launchSingleTop = true
+                                    }
+                                }
+                            }else {
+                                Log.d(
+                                    "Sugu", "verifySessionInvoked : " +
+                                            "$verifySessionInvoked, isVerifySessionChecking : " +
+                                            "$isVerifySessionChecking, " + "isVerifySessionSuccess : $isVerifySessionSuccess, "
+                                )
+                                var verifySessionResponse1 = "{\n" +
+                                        "    \"statusCode\": 201,\n" +
+                                        "    \"status\": true,\n" +
+                                        "    \"message\": \"Session Retrived Successfully\",\n" +
+                                        "    \"data\": {\n" +
+                                        "        \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOnsidXNlcklkIjoiZTgxOTM1MGUtYWZhNS01ZmU0LWExZTEtNmNhYjZiNDk4NzZjIiwibW9iaWxlTnVtYmVyIjoiOTYxMTkwOTAxNSIsIm1vYmlsZUNvdW50cnlDb2RlIjoiKzkxIn0sInJvbGUiOiJVU0VSIiwiaWF0IjoxNzUxMDE2NzA0LCJleHAiOjE3NTE2MjE1MDR9.WpYrU6AvEsubAarJyna2rkHFWGK3oM208RPxORKBPfk\",\n" +
+                                        "        \"sessionId\": \"83f29f24-704d-529f-a3b4-4a5560cd2c70\",\n" +
+                                        "        \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOnsidXNlcklkIjoiZTgxOTM1MGUtYWZhNS01ZmU0LWExZTEtNmNhYjZiNDk4NzZjIiwibW9iaWxlTnVtYmVyIjoiOTYxMTkwOTAxNSIsIm1vYmlsZUNvdW50cnlDb2RlIjoiKzkxIn0sInJvbGUiOiJVU0VSIiwiaWF0IjoxNzUxNDQyNDUxLCJleHAiOjE3NTE0NDI2MzF9.ziPqEqA9eFr_Co-B1b6mwYMKgzgTjjrFR8lYeUIilME\",\n" +
+                                        "        \"sseId\": \"a41bb04e18a5545395ba6cba4e34607c\",\n" +
+                                        "        \"securityKey\": \"110e5c0419135e22814945c143ab9fda\",\n" +
+                                        "        \"sessionData\": {\n" +
+                                        "            \"downPayment\": 0,\n" +
+                                        "            \"productId\": \"2a9a7100-bf22-5858-83f3-62e65c2e3a8c\",\n" +
+                                        "            \"merchantPAN\": null,\n" +
+                                        "            \"merchantBankAccount\": null,\n" +
+                                        "            \"merchantGST\": null,\n" +
+                                        "            \"merchantAccountHolderName\": null,\n" +
+                                        "            \"merchantIfscCode\": null,\n" +
+                                        "            \"productBrand\": null,\n" +
+                                        "            \"productCategory\": \"Mobile Phone\",\n" +
+                                        "            \"productSKUID\": \"47af53c0-0add-5c49-9365-8f42fafa18fe\",\n" +
+                                        "            \"productReturnWindow\": \"P7D\",\n" +
+                                        "            \"productModel\": null,\n" +
+                                        "            \"productSellingPrice\": \"90000\",\n" +
+                                        "            \"productCancellable\": true,\n" +
+                                        "            \"productReturnable\": true,\n" +
+                                        "            \"productName\": \"VRIDDHI\",\n" +
+                                        "            \"productMrpPrice\": \"100000\",\n" +
+                                        "            \"productSymbol\": \"https://storage.googleapis.com/nslive/62bab198-9391-5be4-b672-e78a6a299a1f/raw/1742808735478_1742808733756.png\",\n" +
+                                        "            \"productQuantity\": \"1\"\n" +
+                                        "        },\n" +
+                                        "        \"sessionType\": \"FIS_PF\"\n" +
+                                        "    }\n" +
+                                        "}"
+                                LaunchedEffect(Unit) {
+//                                    val  verifySessionResponsStr = Json
+//                                        .encodeToString<VerifySessionResponse?>(
+//                                            verifySessionResponse
+//                                        )
 //                                    navController.navigate(AppScreens.DownPaymentScreen.route)
-//                                    navController.getBackStackEntry(AppScreens.DownPaymentScreen.route)
+
+//
+//                                    val encodedVerifySessionResponse = Uri.encode(verifySessionResponse1, "UTF-8")
+//                                    val route = "${AppScreens.ApplyByCategoryScreen.route}/$fromFlow/$encodedVerifySessionResponse"
+//                                    navController.navigate(route)
+
+                                    Log.d("AppBridgeManager", "Navigating to " +
+                                            "ApplyByCategoryScreen with mock " +
+                                            "verifySessionResponse: $verifySessionResponse1")
+
+                                    val encodedVerifySessionResponse = Uri.encode(verifySessionResponse1, "UTF-8")
+//                                    navController.navigate(AppScreens.DownPaymentScreen.route)
+                                    val route = "${AppScreens.ApplyByCategoryScreen
+                                        .route}/$fromFlow?encodedVerifySessionResponse=$encodedVerifySessionResponse"
+
+                                    navController.navigate(route)
+
+
+//                                    navController.navigate(AppScreens.ApplyByCategoryScreen.route)
+//                                    navController.getBackStackEntry(AppScreens.ApplyByCategoryScreen.route)
 //                                        .savedStateHandle
 //                                        .set("verifySessionResponse", verifySessionResponse1)
-//                                }
-//                            }
-//                        }
+
+
+//                                    navController.currentBackStackEntry
+//                                        ?.savedStateHandle
+//                                        ?.set("verifySessionResponse", verifySessionResponse1)
+//
+//                                    navController.navigate(AppScreens.ApplyByCategoryScreen.route)
+                                }
+                            }
+                        }
                     }
                 } ?: run {
                     if (updateCompleted.value) {

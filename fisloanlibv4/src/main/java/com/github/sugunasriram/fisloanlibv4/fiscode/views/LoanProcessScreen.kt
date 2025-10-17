@@ -1464,71 +1464,74 @@ fun LoanProcessScreen(
             }
         }
 
-        18 -> {
-            FixedTopBottomScreen(
-                navController = navController,
-                showBackButton = false,
-                isSelfScrollable = false,
-                primaryButtonText = stringResource(id = R.string.next),
-                onPrimaryButtonClick = {
-                    navigateToDownPaymentScreen(navController = navController, fromFlow = fromFlow)
-                }
-            ) {
-                StartingText(
-                    text = stringResource(id = R.string.loan_process),
-                    textColor = appBlueTitle,
-                    start = 30.dp,
-                    end = 30.dp,
-                    top = 10.dp,
-                    bottom = 5.dp,
-                    style = normal32Text700
-                )
-
-                StartingText(
-                    text = stringResource(id = R.string.one_time_register),
-                    start = 30.dp,
-                    end = 30.dp,
-                    bottom = 5.dp,
-                    style = normal14Text400,
-                    textAlign = TextAlign.Start
-                )
-                StatusCard(
-                    cardText = stringResource(id = R.string.purchase_finance),
-                    image = if (!loanProcess) R.drawable.one_image_black else R.drawable.one_image_blue,
-                    processDone = true,
-                    consentData = false,
-                    showGstData = true,
-                    subHeadText = stringResource(id = R.string.basic_detail),
-                    subHeadText2 = stringResource(id = R.string.enter_down_payment_details)
-                )
-                StatusCard(
-                    cardText = stringResource(id = R.string.select_loan),
-                    image = if (loanProcess) R.drawable.two_image_black else R.drawable.two_image_blue,
-                    processDone = false
-                )
-                StatusCard(
-                    cardText = stringResource(id = R.string.complete_kyc),
-                    image = if (loanProcess) R.drawable.three_image_black else R.drawable.three_image_blue,
-                    processDone = false,
-                    showSubText = false
-                )
-                StatusCard(
-                    cardText = stringResource(id = R.string.set_up_repayment),
-                    image = if (loanProcess) R.drawable.five_image_black else R.drawable.five_image_blue,
-                    processDone = false
-                )
-                StatusCard(
-                    cardText = stringResource(id = R.string.loan_agreement),
-                    image = if (loanProcess) R.drawable.six_image_black else R.drawable.four_image_blue,
-                    processDone = false
-                )
-                StatusCard(
-                    cardText = stringResource(id = R.string.loan_disbursed),
-                    image = if (loanProcess) R.drawable.black_rupee_symbol else R.drawable.blue_rupee_symbol,
-                    processDone = false
-                )
-            }
-        }
+        //Sugu - don't remove
+        //commented to check if its required in SuperApp flow
+//        18 -> {
+//            FixedTopBottomScreen(
+//                navController = navController,
+//                showBackButton = false,
+//                isSelfScrollable = false,
+//                primaryButtonText = stringResource(id = R.string.next),
+//                onPrimaryButtonClick = {
+//                    navigateToDownPaymentScreen(navController = navController, fromFlow =
+//                        fromFlow, verifySessionResponse = null)
+//                }
+//            ) {
+//                StartingText(
+//                    text = stringResource(id = R.string.loan_process),
+//                    textColor = appBlueTitle,
+//                    start = 30.dp,
+//                    end = 30.dp,
+//                    top = 10.dp,
+//                    bottom = 5.dp,
+//                    style = normal32Text700
+//                )
+//
+//                StartingText(
+//                    text = stringResource(id = R.string.one_time_register),
+//                    start = 30.dp,
+//                    end = 30.dp,
+//                    bottom = 5.dp,
+//                    style = normal14Text400,
+//                    textAlign = TextAlign.Start
+//                )
+//                StatusCard(
+//                    cardText = stringResource(id = R.string.purchase_finance),
+//                    image = if (!loanProcess) R.drawable.one_image_black else R.drawable.one_image_blue,
+//                    processDone = true,
+//                    consentData = false,
+//                    showGstData = true,
+//                    subHeadText = stringResource(id = R.string.basic_detail),
+//                    subHeadText2 = stringResource(id = R.string.enter_down_payment_details)
+//                )
+//                StatusCard(
+//                    cardText = stringResource(id = R.string.select_loan),
+//                    image = if (loanProcess) R.drawable.two_image_black else R.drawable.two_image_blue,
+//                    processDone = false
+//                )
+//                StatusCard(
+//                    cardText = stringResource(id = R.string.complete_kyc),
+//                    image = if (loanProcess) R.drawable.three_image_black else R.drawable.three_image_blue,
+//                    processDone = false,
+//                    showSubText = false
+//                )
+//                StatusCard(
+//                    cardText = stringResource(id = R.string.set_up_repayment),
+//                    image = if (loanProcess) R.drawable.five_image_black else R.drawable.five_image_blue,
+//                    processDone = false
+//                )
+//                StatusCard(
+//                    cardText = stringResource(id = R.string.loan_agreement),
+//                    image = if (loanProcess) R.drawable.six_image_black else R.drawable.four_image_blue,
+//                    processDone = false
+//                )
+//                StatusCard(
+//                    cardText = stringResource(id = R.string.loan_disbursed),
+//                    image = if (loanProcess) R.drawable.black_rupee_symbol else R.drawable.blue_rupee_symbol,
+//                    processDone = false
+//                )
+//            }
+//        }
 
         19 -> {
             FixedTopBottomScreen(

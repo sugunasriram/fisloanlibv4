@@ -3,6 +3,9 @@ package com.github.sugunasriram.fisloanlibv4.fiscode.navigation
 import android.net.Uri
 import android.util.Log
 import androidx.navigation.NavHostController
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.VerifySessionResponse
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 fun shouldCloseCurrent(navController: NavHostController, closeCurrent: Boolean) {
     if (closeCurrent) {
@@ -41,7 +44,9 @@ fun navigateToLanguageScreen(navController: NavHostController, closeCurrent: Boo
 }
 
 fun navigateApplyByCategoryScreen(navController: NavHostController, closeCurrent: Boolean = true) {
-    navController.navigate(AppScreens.ApplyByCategoryScreen.route) {
+    val fromFlow = "Purchase Finance"
+    val destinationUrl = "${AppScreens.ApplyByCategoryScreen.route}/$fromFlow"
+    navController.navigate(destinationUrl) {
         shouldCloseCurrent(navController, closeCurrent)
     }
 }
@@ -813,19 +818,60 @@ fun navigateToIssueDetailScreen(
 }
 
 // Purchase Finance
+//fun navigateToDownPaymentScreen(
+//    navController: NavHostController,
+//    fromFlow: String,
+//    verifySessionResponse: VerifySessionResponse?,
+//    closeCurrent: Boolean = false
+//) {
+//    if (fromFlow.isEmpty()) {
+//        Log.e("navigateToDownPaymentScreen", "fromFlow is empty")
+//    }
+//    Log.e("navigateToDownPaymentScreen fromFlow", "${fromFlow}")
+//    navController.navigate("${AppScreens.DownPaymentScreen.route}/Purchase Finance/$verifySessionResponse") {
+//        shouldCloseCurrent(navController, closeCurrent)
+//    }
+//}
+
+
+//Fix2
 fun navigateToDownPaymentScreen(
     navController: NavHostController,
     fromFlow: String,
+    verifySessionResponse: VerifySessionResponse?,
     closeCurrent: Boolean = false
 ) {
     if (fromFlow.isEmpty()) {
         Log.e("navigateToDownPaymentScreen", "fromFlow is empty")
+        return
     }
-    Log.e("navigateToDownPaymentScreen fromFlow", "${fromFlow}")
-    navController.navigate("${AppScreens.DownPaymentScreen.route}/Purchase Finance") {
+
+    Log.e("navigateToDownPaymentScreen Sugu", "verifySessionResponse: $verifySessionResponse")
+
+    val encodedResponse = verifySessionResponse?.let {
+
+        val  verifySessionResponsStr = Json
+            .encodeToString<VerifySessionResponse?>(
+                it
+            )
+        // Convert to JSON and URI encode
+//        Uri.encode(Json.encodeToString(it))
+        Uri.encode(verifySessionResponsStr)
+    }
+
+    val destinationUrl = if (encodedResponse != null) {
+        "${AppScreens.DownPaymentScreen.route}/$fromFlow?encodedVerifySessionResponse=$encodedResponse"
+    } else {
+        "${AppScreens.DownPaymentScreen.route}/$fromFlow"
+    }
+
+    Log.d("navigateToDownPaymentScreen", "Navigating to: $destinationUrl")
+
+    navController.navigate(destinationUrl) {
         shouldCloseCurrent(navController, closeCurrent)
     }
 }
+
 
 fun navigateToPfLoanOfferListScreen(
     navController: NavHostController,

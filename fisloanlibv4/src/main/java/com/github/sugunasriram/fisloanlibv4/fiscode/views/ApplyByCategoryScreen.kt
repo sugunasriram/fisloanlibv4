@@ -95,6 +95,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToUpdateP
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToWebViewFlowOneScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.UserStatus
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.ProfileResponse
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.VerifySessionResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.finance.PFSearchBodyModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.gst.GstSearchData
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.gst.GstSearchResponse
@@ -137,11 +138,13 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 @Composable
-fun ApplyByCategoryScreen(navController: NavHostController) {
+fun ApplyByCategoryScreen(navController: NavHostController,
+                          verifySessionResponse: VerifySessionResponse?) {
     val userStatusViewModel: UserStatusViewModel = viewModel()
     val registerViewModel: RegisterViewModel = viewModel()
 
@@ -162,6 +165,7 @@ fun ApplyByCategoryScreen(navController: NavHostController) {
     val userDetails by registerViewModel.getUserResponse.collectAsState()
 
     val userDetailsAPILoading by registerViewModel.inProgress.collectAsState()
+    val userDetailsAPICompleted by registerViewModel.isCompleted.collectAsState()
 
     val activity = LocalContext.current as? Activity
     val context = LocalContext.current
@@ -180,13 +184,15 @@ fun ApplyByCategoryScreen(navController: NavHostController) {
 //        middleLoan -> CommonMethods().ShowMiddleLoanErrorScreen(navController)
         middleLoan -> MiddleOfTheLoanScreen(navController, errorMessage)
         else -> {
-            navigateToFISExitScreen(navController, loanId="4321")
-//            SelectingFlow(
-//                checkingStatus = checkingStatus, navController = navController, context = context,
-//                userStatus = userStatus, userStatusViewModel = userStatusViewModel,
-//                checked = checked, showLoader = showLoader, errorMessage = errorMessage,
-//                userDetails = userDetails, userDetailsAPILoading = userDetailsAPILoading
-//            )
+            Log.d("ApplyByCategoryScreen Sugu", "verifySessionResponse: $verifySessionResponse")
+            SelectingFlow(
+                checkingStatus = checkingStatus, navController = navController, context = context,
+                userStatus = userStatus, userStatusViewModel = userStatusViewModel,
+                checked = checked, showLoader = showLoader, errorMessage = errorMessage,
+                userDetails = userDetails, userDetailsAPILoading = userDetailsAPILoading,
+                userDetailsAPICompleted  = userDetailsAPICompleted,
+                verifySessionResponse = verifySessionResponse
+            )
         }
     }
 }
@@ -203,7 +209,9 @@ fun SelectingFlow(
     showLoader: Boolean,
     errorMessage: String,
     userDetails: ProfileResponse?,
-    userDetailsAPILoading: Boolean
+    userDetailsAPILoading: Boolean,
+    userDetailsAPICompleted: Boolean,
+    verifySessionResponse :VerifySessionResponse?
 ) {
     val scope = rememberCoroutineScope()
     var setFlow by remember { mutableStateOf("") }
@@ -211,43 +219,23 @@ fun SelectingFlow(
     triggerApi = showLoader
     var apiCalled by remember { mutableStateOf(true) }
 
-    if (checkingStatus) {
+    if (checkingStatus || userDetailsAPILoading) {
         CenterProgress()
     } else if (triggerApi) {
         if (userStatus?.data?.data != null || userStatus?.data?.url != null) {
-            when {
-                setFlow.equals("Personal Loan", ignoreCase = true) -> {
-                    PersonalDecidedFlow(
-                        context = context,
-                        status = userStatus,
-                        navController = navController,
-                        fromFlow = setFlow
-                    )
-                }
-
-                setFlow.equals("Invoice Loan", ignoreCase = true) -> {
-                    InvoiceDecidedFlow(
-                        context = context,
-                        status = userStatus,
-                        navController = navController,
-                        fromFlow = setFlow
-                    )
-                }
-
-                setFlow.equals("Purchase Finance", ignoreCase = true) -> {
-                    PurchaseDecidedFlow(
-                        context = context,
-                        status = userStatus,
-                        navController = navController,
-                        fromFlow = setFlow
-                    )
-                }
-            }
+            PurchaseDecidedFlow(
+                context = context,
+                status = userStatus,
+                navController = navController,
+                fromFlow = setFlow,
+                verifySessionResponse = verifySessionResponse
+            )
         } else {
             if (apiCalled) {
                 scope.launch {
                     delay(60000)
-                    userStatusViewModel.getUserStatus(loanType = "PERSONAL_LOAN", context = context)
+                    userStatusViewModel.getUserStatus(loanType = "PURCHASE_FINANCE", context =
+                        context)
                     apiCalled = false
                 }
             }
@@ -267,41 +255,23 @@ fun SelectingFlow(
         }
     } else {
         if (checked) {
-            when {
-                setFlow.equals("Personal Loan", ignoreCase = true) -> {
-                    PersonalDecidedFlow(
-                        context = context,
-                        status = userStatus,
-                        navController = navController,
-                        fromFlow = setFlow
-                    )
-                }
 
-                setFlow.equals("Invoice Loan", ignoreCase = true) -> {
-                    InvoiceDecidedFlow(
-                        context = context,
-                        status = userStatus,
-                        navController = navController,
-                        fromFlow = setFlow
-                    )
-                }
-
-                setFlow.equals("Purchase Finance", ignoreCase = true) -> {
-                    PurchaseDecidedFlow(
-                        context = context,
-                        status = userStatus,
-                        navController = navController,
-                        fromFlow = setFlow
-                    )
-                }
-            }
-        } else {
-            LoanSelectionScreen(
-                navController = navController,
-                userDetails = userDetails,
+            PurchaseDecidedFlow(
                 context = context,
-                onLoanSelected = { loanType ->
-                    setFlow = loanType
+                status = userStatus,
+                navController = navController,
+                fromFlow = setFlow,
+                verifySessionResponse = verifySessionResponse
+            )
+        } else {
+//            LoanSelectionScreen(
+//                navController = navController,
+//                userDetails = userDetails,
+//                context = context,
+//                onLoanSelected = { loanType ->
+
+
+//                    setFlow = loanType
                     val requiredFields = listOf(
                         userDetails?.data?.firstName,
                         userDetails?.data?.lastName,
@@ -311,61 +281,201 @@ fun SelectingFlow(
                         userDetails?.data?.gender,
                         userDetails?.data?.employmentType
                     )
-                    when (loanType) {
-                        "Invoice Loan" -> {
-                            if (requiredFields.any { it.isNullOrEmpty() } && !userDetailsAPILoading) {
-                                navigateToUpdateProfileScreen(navController, fromFlow = loanType)
-                                CommonMethods().toastMessage(
-                                    context,
-                                    context.getString(R.string.please_update_your_profile_to_proceed)
-                                )
-                            } else if (userDetails?.data?.udyamNumber.isNullOrEmpty()) {
-                                navigateToUpdateProfileScreen(navController, fromFlow = loanType)
-                                CommonMethods().toastMessage(context, "Update UDYAM number")
-                            } else {
-                                userStatusViewModel.getUserStatus(
-                                    loanType = "INVOICE_BASED_LOAN",
-                                    context = context
-                                )
-                            }
-                        }
 
-                        "Personal Loan" -> {
-                            if (requiredFields.any { it.isNullOrEmpty() } && !userDetailsAPILoading) {
-                                navigateToUpdateProfileScreen(navController, fromFlow = loanType)
-                                CommonMethods().toastMessage(
-                                    context,
-                                    context.getString(R.string.please_update_your_profile_to_proceed)
-                                )
-                            } else {
-                                userStatusViewModel.getUserStatus(
-                                    loanType = "PERSONAL_LOAN",
-                                    context = context
-                                )
-                            }
-                        }
-
-                        "Purchase Finance" -> {
-
-                            if (requiredFields.any { it.isNullOrEmpty() } && !userDetailsAPILoading) {
-                                navigateToUpdateProfileScreen(navController, fromFlow = loanType)
-                                CommonMethods().toastMessage(
-                                    context,
-                                    context.getString(R.string.please_update_your_profile_to_proceed)
-                                )
-                            } else {
-                                userStatusViewModel.getUserStatus(
-                                    loanType = "PURCHASE_FINANCE",
-                                    context = context
-                                )
-                            }
-                        }
+                    if (requiredFields.any { it.isNullOrEmpty() } && userDetailsAPICompleted) {
+                        navigateToUpdateProfileScreen(navController, fromFlow = "Purchase Finance")
+                        CommonMethods().toastMessage(
+                            context,
+                            context.getString(R.string.please_update_your_profile_to_proceed)
+                        )
+                    } else {
+                        userStatusViewModel.getUserStatus(
+                            loanType = "PURCHASE_FINANCE",
+                            context = context
+                        )
                     }
-                }
-            )
+//                }
+//            )
         }
     }
 }
+
+
+//@SuppressLint("CoroutineCreationDuringComposition")
+//@Composable
+//fun SelectingFlow(
+//    checkingStatus: Boolean,
+//    navController: NavHostController,
+//    userStatus: UserStatus?,
+//    userStatusViewModel: UserStatusViewModel,
+//    context: Context,
+//    checked: Boolean,
+//    showLoader: Boolean,
+//    errorMessage: String,
+//    userDetails: ProfileResponse?,
+//    userDetailsAPILoading: Boolean
+//) {
+//    val scope = rememberCoroutineScope()
+//    var setFlow by remember { mutableStateOf("") }
+//    var triggerApi by remember { mutableStateOf(true) }
+//    triggerApi = showLoader
+//    var apiCalled by remember { mutableStateOf(true) }
+//
+//    if (checkingStatus) {
+//        CenterProgress()
+//    } else if (triggerApi) {
+//        if (userStatus?.data?.data != null || userStatus?.data?.url != null) {
+//            when {
+//                setFlow.equals("Personal Loan", ignoreCase = true) -> {
+//                    PersonalDecidedFlow(
+//                        context = context,
+//                        status = userStatus,
+//                        navController = navController,
+//                        fromFlow = setFlow
+//                    )
+//                }
+//
+//                setFlow.equals("Invoice Loan", ignoreCase = true) -> {
+//                    InvoiceDecidedFlow(
+//                        context = context,
+//                        status = userStatus,
+//                        navController = navController,
+//                        fromFlow = setFlow
+//                    )
+//                }
+//
+//                setFlow.equals("Purchase Finance", ignoreCase = true) -> {
+//                    PurchaseDecidedFlow(
+//                        context = context,
+//                        status = userStatus,
+//                        navController = navController,
+//                        fromFlow = setFlow
+//                    )
+//                }
+//            }
+//        } else {
+//            if (apiCalled) {
+//                scope.launch {
+//                    delay(60000)
+//                    userStatusViewModel.getUserStatus(loanType = "PERSONAL_LOAN", context = context)
+//                    apiCalled = false
+//                }
+//            }
+//
+//            UnexpectedErrorScreen(
+//                navController = navController,
+//                errorMsgShow = false,
+//                errorText = stringResource(id = R.string.request_is_still),
+//                errorMsg = stringResource(id = R.string.middle_loan_error_message),
+//                onClick = {
+//                    userStatusViewModel.getUserStatus(
+//                        loanType = "PERSONAL_LOAN",
+//                        context = context
+//                    )
+//                }
+//            )
+//        }
+//    } else {
+//        if (checked) {
+//            when {
+//                setFlow.equals("Personal Loan", ignoreCase = true) -> {
+//                    PersonalDecidedFlow(
+//                        context = context,
+//                        status = userStatus,
+//                        navController = navController,
+//                        fromFlow = setFlow
+//                    )
+//                }
+//
+//                setFlow.equals("Invoice Loan", ignoreCase = true) -> {
+//                    InvoiceDecidedFlow(
+//                        context = context,
+//                        status = userStatus,
+//                        navController = navController,
+//                        fromFlow = setFlow
+//                    )
+//                }
+//
+//                setFlow.equals("Purchase Finance", ignoreCase = true) -> {
+//                    PurchaseDecidedFlow(
+//                        context = context,
+//                        status = userStatus,
+//                        navController = navController,
+//                        fromFlow = setFlow
+//                    )
+//                }
+//            }
+//        } else {
+//            LoanSelectionScreen(
+//                navController = navController,
+//                userDetails = userDetails,
+//                context = context,
+//                onLoanSelected = { loanType ->
+//                    setFlow = loanType
+//                    val requiredFields = listOf(
+//                        userDetails?.data?.firstName,
+//                        userDetails?.data?.lastName,
+//                        userDetails?.data?.email,
+//                        userDetails?.data?.dob,
+//                        userDetails?.data?.panNumber,
+//                        userDetails?.data?.gender,
+//                        userDetails?.data?.employmentType
+//                    )
+//                    when (loanType) {
+//                        "Invoice Loan" -> {
+//                            if (requiredFields.any { it.isNullOrEmpty() } && !userDetailsAPILoading) {
+//                                navigateToUpdateProfileScreen(navController, fromFlow = loanType)
+//                                CommonMethods().toastMessage(
+//                                    context,
+//                                    context.getString(R.string.please_update_your_profile_to_proceed)
+//                                )
+//                            } else if (userDetails?.data?.udyamNumber.isNullOrEmpty()) {
+//                                navigateToUpdateProfileScreen(navController, fromFlow = loanType)
+//                                CommonMethods().toastMessage(context, "Update UDYAM number")
+//                            } else {
+//                                userStatusViewModel.getUserStatus(
+//                                    loanType = "INVOICE_BASED_LOAN",
+//                                    context = context
+//                                )
+//                            }
+//                        }
+//
+//                        "Personal Loan" -> {
+//                            if (requiredFields.any { it.isNullOrEmpty() } && !userDetailsAPILoading) {
+//                                navigateToUpdateProfileScreen(navController, fromFlow = loanType)
+//                                CommonMethods().toastMessage(
+//                                    context,
+//                                    context.getString(R.string.please_update_your_profile_to_proceed)
+//                                )
+//                            } else {
+//                                userStatusViewModel.getUserStatus(
+//                                    loanType = "PERSONAL_LOAN",
+//                                    context = context
+//                                )
+//                            }
+//                        }
+//
+//                        "Purchase Finance" -> {
+//
+//                            if (requiredFields.any { it.isNullOrEmpty() } && !userDetailsAPILoading) {
+//                                navigateToUpdateProfileScreen(navController, fromFlow = loanType)
+//                                CommonMethods().toastMessage(
+//                                    context,
+//                                    context.getString(R.string.please_update_your_profile_to_proceed)
+//                                )
+//                            } else {
+//                                userStatusViewModel.getUserStatus(
+//                                    loanType = "PURCHASE_FINANCE",
+//                                    context = context
+//                                )
+//                            }
+//                        }
+//                    }
+//                }
+//            )
+//        }
+//    }
+//}
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
@@ -1439,7 +1549,8 @@ fun PurchaseDecidedFlow(
     context: Context,
     status: UserStatus?,
     navController: NavHostController,
-    fromFlow: String
+    fromFlow: String,
+    verifySessionResponse: VerifySessionResponse?
 ) {
     val purchaseFinanceViewModel: PurchaseFinanceViewModel = viewModel()
     val searchInProgress by purchaseFinanceViewModel.searchInProgress.collectAsState()
@@ -1469,12 +1580,18 @@ fun PurchaseDecidedFlow(
             )
         }
     }
+
+    val fromFlow = "Purchase Finance"
+
+
     if (status?.data == null || status.data.data?.any { it == null } == true) {
         Log.d("test status: ", "null")
         if (searchInProgress) {
             CenterProgress()
         } else if (searchLoaded) {
-            navigateToDownPaymentScreen(navController = navController, fromFlow = fromFlow)
+            navigateToDownPaymentScreen(navController = navController,
+                fromFlow= fromFlow,
+                verifySessionResponse = verifySessionResponse)
         }
     } else if (status.data.data?.lastOrNull()?.step.equals(
             "loan_select_form_submission_failed",
@@ -1521,7 +1638,10 @@ fun PurchaseDecidedFlow(
             errorMsg = stringResource(id = R.string.form_submission_rejected_or_pending)
         )
     } else if (status.data.data?.firstOrNull()?.step.equals("pre_initial_search", true)) {
-        navigateToDownPaymentScreen(navController = navController, fromFlow = fromFlow)
+        Log.d("Sugu", "pre_initial_search")
+        Log.d("Sugu", "verifySessionResponse : $verifySessionResponse")
+        navigateToDownPaymentScreen(navController = navController, fromFlow = fromFlow,
+            verifySessionResponse=verifySessionResponse)
     } else if (status.data.data?.firstOrNull()?.step.equals("form_submission_request", true)) {
         LaunchedEffect(Unit) {
             webViewModel.getLenderStatusApi(
@@ -1623,7 +1743,8 @@ fun PurchaseDecidedFlow(
     } else if (status.data.data?.lastOrNull()?.step.equals("search", true)) {
         Log.d("res_H", "saerch")
         if (status.data.data?.any { !it?.data.isNullOrEmpty() } == true) {
-            navigateToDownPaymentScreen(navController = navController, fromFlow = fromFlow)
+            navigateToDownPaymentScreen(navController = navController, fromFlow = fromFlow,
+                verifySessionResponse=verifySessionResponse)
         }
         val offerList =
             status.data.data?.lastOrNull()?.offerResponse?.flatMap { offerResponseItem ->
@@ -1845,5 +1966,47 @@ fun PurchaseDecidedFlow(
 @Preview(showBackground = true)
 @Composable
 fun ApplyByCategoryScreenPreview() {
-    ApplyByCategoryScreen(navController = NavHostController(LocalContext.current))
+                                    var verifySessionResponse1 = "{\n" +
+                                        "    \"statusCode\": 201,\n" +
+                                        "    \"status\": true,\n" +
+                                        "    \"message\": \"Session Retrived Successfully\",\n" +
+                                        "    \"data\": {\n" +
+                                        "        \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOnsidXNlcklkIjoiZTgxOTM1MGUtYWZhNS01ZmU0LWExZTEtNmNhYjZiNDk4NzZjIiwibW9iaWxlTnVtYmVyIjoiOTYxMTkwOTAxNSIsIm1vYmlsZUNvdW50cnlDb2RlIjoiKzkxIn0sInJvbGUiOiJVU0VSIiwiaWF0IjoxNzUxMDE2NzA0LCJleHAiOjE3NTE2MjE1MDR9.WpYrU6AvEsubAarJyna2rkHFWGK3oM208RPxORKBPfk\",\n" +
+                                        "        \"sessionId\": \"83f29f24-704d-529f-a3b4-4a5560cd2c70\",\n" +
+                                        "        \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOnsidXNlcklkIjoiZTgxOTM1MGUtYWZhNS01ZmU0LWExZTEtNmNhYjZiNDk4NzZjIiwibW9iaWxlTnVtYmVyIjoiOTYxMTkwOTAxNSIsIm1vYmlsZUNvdW50cnlDb2RlIjoiKzkxIn0sInJvbGUiOiJVU0VSIiwiaWF0IjoxNzUxNDQyNDUxLCJleHAiOjE3NTE0NDI2MzF9.ziPqEqA9eFr_Co-B1b6mwYMKgzgTjjrFR8lYeUIilME\",\n" +
+                                        "        \"sseId\": \"a41bb04e18a5545395ba6cba4e34607c\",\n" +
+                                        "        \"securityKey\": \"110e5c0419135e22814945c143ab9fda\",\n" +
+                                        "        \"sessionData\": {\n" +
+                                        "            \"downPayment\": 0,\n" +
+                                        "            \"productId\": \"2a9a7100-bf22-5858-83f3-62e65c2e3a8c\",\n" +
+                                        "            \"merchantPAN\": null,\n" +
+                                        "            \"merchantBankAccount\": null,\n" +
+                                        "            \"merchantGST\": null,\n" +
+                                        "            \"merchantAccountHolderName\": null,\n" +
+                                        "            \"merchantIfscCode\": null,\n" +
+                                        "            \"productBrand\": null,\n" +
+                                        "            \"productCategory\": \"Mobile Phone\",\n" +
+                                        "            \"productSKUID\": \"47af53c0-0add-5c49-9365-8f42fafa18fe\",\n" +
+                                        "            \"productReturnWindow\": \"P7D\",\n" +
+                                        "            \"productModel\": null,\n" +
+                                        "            \"productSellingPrice\": \"90000\",\n" +
+                                        "            \"productCancellable\": true,\n" +
+                                        "            \"productReturnable\": true,\n" +
+                                        "            \"productName\": \"VRIDDHI\",\n" +
+                                        "            \"productMrpPrice\": \"100000\",\n" +
+                                        "            \"productSymbol\": \"https://storage.googleapis.com/nslive/62bab198-9391-5be4-b672-e78a6a299a1f/raw/1742808735478_1742808733756.png\",\n" +
+                                        "            \"productQuantity\": \"1\"\n" +
+                                        "        },\n" +
+                                        "        \"sessionType\": \"FIS_PF\"\n" +
+                                        "    }\n" +
+                                        "}"
+
+    val verifySessionResponseObj = Json {
+        ignoreUnknownKeys = true // skips unknown JSON keys safely
+        coerceInputValues = true
+        isLenient = true
+    }.decodeFromString<VerifySessionResponse>(verifySessionResponse1)
+
+    ApplyByCategoryScreen(navController = NavHostController(LocalContext.current),
+        verifySessionResponse = verifySessionResponseObj)
 }

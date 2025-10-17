@@ -465,8 +465,14 @@ fun LoanOfferListDetailView(
 //                        val loanTenure by remember { mutableStateOf("5") }
                         minLoanAmount = minAmount.toString()
 //                        loanAmountValue = maxAmount.toString()
+
+                        val adjustedMaxAmount = (maxAmount.toFloatOrNull() ?: 0f).let {
+                            if (it > 0f) it - 10f else 0f
+                        }
+
                         DownPaymentBottomSheetContent(
-                            maxAmount = maxAmount.toFloatOrNull() ?: 0f,
+//                            maxAmount = maxAmount.toFloatOrNull() ?: 0f,
+                            maxAmount = adjustedMaxAmount,
                             minAmount = minAmount.toFloatOrNull() ?: 0f,
                             initialAmount = downPaymentAmountValue,
                             interest = interest,
@@ -1387,13 +1393,7 @@ private fun checkAndMakeApiCall(
 ) {
     Log.d("res_H", downPaymentAmount.toString())
     Log.d("res_H", loanTenure)
-    if (downPaymentAmount == 0.0f) {
-        Toast.makeText(
-            context,
-            context.getString(R.string.loan_amount_has_to_be_greater_than_0),
-            Toast.LENGTH_LONG
-        ).show()
-    } else if (downPaymentAmount > maxAmount) {
+    if (downPaymentAmount > maxAmount) {
         Toast.makeText(
             context,
             context.getString(R.string.downpayment_amount_cannot_be_greater_than_loan_amount),
@@ -2169,7 +2169,7 @@ fun DownPaymentBottomSheetContent(
         }
 
             RegisterText(
-                text = "Your Down payment Amount should be greater than or equal to min down payment specified by the lender",
+                text = "Your down payment amount must be at least the minimum specified by the lender and cannot exceed Price - 10",
                style = normal14Text500,
                 textColor = hintGray,
                 textAlign = TextAlign.Center,

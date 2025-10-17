@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.AnimationLoader
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.KycAnimation
@@ -137,9 +138,113 @@ fun NavGraphBuilder.mobileNavigation(
             LanguageSelectionScreen(navController = navController)
         }
 
-        composable(AppScreens.ApplyByCategoryScreen.route) {
-            ApplyByCategoryScreen(navController = navController)
+//        composable(AppScreens.ApplyByCategoryScreen.route) {
+//            ApplyByCategoryScreen(navController = navController)
+//        }
+//        composable(AppScreens.ApplyByCategoryScreen.route) { backStackEntry ->
+//            val json = navController.previousBackStackEntry
+//                ?.savedStateHandle
+//                ?.get<String>("verifySessionResponse")
+//
+//            Log.e("Sugu ApplyByCategoryScreen", "verifySessionResponse JSON: $json")
+//            val verifySessionResponse = json?.let {
+//                Json.decodeFromString<VerifySessionResponse>(it)
+//            }
+//
+//            if (verifySessionResponse != null) {
+//                ApplyByCategoryScreen(
+//                    navController = navController,
+//                    verifySessionResponse = verifySessionResponse
+//                )
+//            } else {
+//                Log.e("Sugu ApplyByCategoryScreen", "Missing session data")
+//            }
+//        }
+
+        //Working one
+//        composable("${AppScreens.ApplyByCategoryScreen.route}/{fromFlow}/{encodedVerifySessionResponse}") { backStackEntry ->
+//            val fromFlow = backStackEntry.arguments?.getString("fromFlow")
+//            val encodedVerifySessionResponse = backStackEntry.arguments?.getString("encodedVerifySessionResponse")
+//            if (encodedVerifySessionResponse != null && fromFlow != null) {
+//                val verifySessionResponse = encodedVerifySessionResponse?.let {
+//                    Json.decodeFromString<VerifySessionResponse>(it)
+//                }
+//
+//                if (verifySessionResponse != null) {
+//                    ApplyByCategoryScreen(
+//                        navController = navController,
+//                        verifySessionResponse = verifySessionResponse
+//                    )
+//                } else {
+//                    Log.e("Sugu ApplyByCategoryScreen", "Missing session data")
+//                }
+//
+//            }else{
+//                ApplyByCategoryScreen(
+//                    navController = navController,
+//                    verifySessionResponse = null
+//                )
+//            }
+//        }
+
+        //Fix2
+        composable(
+            route = "${AppScreens.ApplyByCategoryScreen.route}/{fromFlow}?encodedVerifySessionResponse={encodedVerifySessionResponse}",
+            arguments = listOf(
+                navArgument("fromFlow") { nullable = false },
+                navArgument("encodedVerifySessionResponse") { nullable = true }
+            )
+        ) { backStackEntry ->
+            val fromFlow = backStackEntry.arguments?.getString("fromFlow")
+            val encoded = backStackEntry.arguments?.getString("encodedVerifySessionResponse")
+
+            val verifySessionResponse = encoded?.let {
+                Json.decodeFromString<VerifySessionResponse>(it)
+            }
+
+            ApplyByCategoryScreen(
+                navController = navController,
+                verifySessionResponse = verifySessionResponse
+            )
         }
+
+        composable(
+            route = "${AppScreens.DownPaymentScreen.route}/{fromFlow}?encodedVerifySessionResponse={encodedVerifySessionResponse}",
+            arguments = listOf(
+                navArgument("fromFlow") { nullable = false },
+                navArgument("encodedVerifySessionResponse") { nullable = true }
+            )
+        ) { backStackEntry ->
+            val fromFlow = backStackEntry.arguments?.getString("fromFlow")
+            val encoded = backStackEntry.arguments?.getString("encodedVerifySessionResponse")
+
+            val verifySessionResponse = encoded?.let {
+                Json.decodeFromString<VerifySessionResponse>(it)
+            }
+
+            if (verifySessionResponse != null) {
+                DownPaymentScreen(
+                    navController = navController,
+                    verifySessionResponse = verifySessionResponse
+                )
+            }
+        }
+
+
+
+//        composable(AppScreens.DownPaymentScreen.route) { backStackEntry ->
+//            val json = backStackEntry.savedStateHandle.get<String>("verifySessionResponse")
+//            val verifySessionResponse = json?.let {
+//                Json.decodeFromString<VerifySessionResponse?>(it)
+//            }
+//
+//            if (verifySessionResponse != null) {
+//                DownPaymentScreen(navController = navController, verifySessionResponse = verifySessionResponse)
+//            } else {
+//                Log.e("Sugu", "Missing session data")
+//            }
+//        }
+
 
         // Personal Loan Screens
         composable("${AppScreens.PersonalLoanScreen.route}/{fromFlow}") { backStack ->

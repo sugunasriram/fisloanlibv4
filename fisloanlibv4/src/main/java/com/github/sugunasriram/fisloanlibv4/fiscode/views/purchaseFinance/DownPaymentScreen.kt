@@ -76,6 +76,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.components.TextInputLayout
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFISExitScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFormSubmissionWebScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToUpdateProfileScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.Profile
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.VerifySessionResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.finance.PFSearchBodyModel
@@ -122,6 +123,12 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.finance.MerchantDetails
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.finance.PFDeleteUserBodyModel
+import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.UserStatusViewModel
+import com.github.sugunasriram.fisloanlibv4.fiscode.views.InvoiceDecidedFlow
+import com.github.sugunasriram.fisloanlibv4.fiscode.views.LoanSelectionScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.views.PersonalDecidedFlow
+import com.github.sugunasriram.fisloanlibv4.fiscode.views.PurchaseDecidedFlow
+import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.UnexpectedErrorScreen
 
 
 var productName : String = "Samsung Galaxy S24 Ultra 5G"
@@ -192,30 +199,20 @@ val registerViewModel: RegisterViewModel = viewModel()
 
     val fromFlow = "Purchase Finance"
 
-    // ---  state for Delete API loading ---
-//    val deleteApiInProgress by purchaseFinanceViewModel.deleteApiInProgress.collectAsState()
-//    var apiError by remember { mutableStateOf<String?>(null) }
 
-    // ⏳ Call users/delete API on screen entry
+Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
 //    LaunchedEffect(Unit) {
-//        purchaseFinanceViewModel.pFDeleteUser(
+//        purchaseFinanceViewModel.pFSearch(
 //            context = context,
-//            deleteUserBodyModel = PFDeleteUserBodyModel(
+//            searchBodyModel = PFSearchBodyModel(
 //                loanType = "PURCHASE_FINANCE",
-//                mobileNumber = "on"
+//                bureauConsent = "on"
 //            )
 //        )
 //    }
 
-Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
     LaunchedEffect(Unit) {
-        purchaseFinanceViewModel.pFSearch(
-            context = context,
-            searchBodyModel = PFSearchBodyModel(
-                loanType = "PURCHASE_FINANCE",
-                bureauConsent = "on"
-            )
-        )
+        registerViewModel.getUserDetail(context, navController)
     }
 
     BackHandler {
@@ -226,6 +223,15 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
     var showNoLoanOffersScreen by remember { mutableStateOf(false) }
 
     var merchantDetails = MerchantDetails()
+
+    val userStatusViewModel: UserStatusViewModel = viewModel()
+    val checkingStatus by userStatusViewModel.checkingStatus.collectAsState()
+    val checked by userStatusViewModel.checked.collectAsState()
+    val userStatus by userStatusViewModel.userStatus.collectAsState()
+    val showLoader by userStatusViewModel.showLoader.observeAsState(false)
+    var apiCalled by remember { mutableStateOf(true) }
+
+
 
 //    if (showNoLoanOffersScreen || showNoLenderResponse) {
 //        NoLoanOffersAvailableScreen(navController, titleText = stringResource(R.string.no_lenders_available))
@@ -240,234 +246,223 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
         showNoLenderResponse -> NoLoanOffersAvailableScreen(navController)
 //        lenderStatusProgress -> CenterProgress()
         else -> {
-            if (/*deleteApiInProgress  ||*/ searchInProgress || inProgress ) {
-                ProcessingAnimation(text = "Processing Please Wait...", image = R.raw.we_are_currently_processing_hour_glass)
-            } else {
-                if (!isCompleted ) {
-                    registerViewModel.getUserDetail(context, navController)
-                } else if (searchLoaded){
-                    CustomModalBottomSheet(
-                        bottomSheetState = bottomSheetState,
-                        sheetBackgroundColor = Color.Transparent,
-                        sheetContent = {
-                            CompanyConsentContent(
-                                bottomSheetState = bottomSheetState,
-                                coroutineScope = coroutineScope,
-                                registerViewModel = registerViewModel,
-                                onAcceptConsent = { showError = false
-                                    CoroutineScope(Dispatchers.Main).launch {
-                                        Log.d("DownPaymentScreen", "Sugu loanTenure 1: $loanTenure")
+                CustomModalBottomSheet(
+                    bottomSheetState = bottomSheetState,
+                    sheetBackgroundColor = Color.Transparent,
+                    sheetContent = {
+                        CompanyConsentContent(
+                            bottomSheetState = bottomSheetState,
+                            coroutineScope = coroutineScope,
+                            registerViewModel = registerViewModel,
+                            onAcceptConsent = { showError = false
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    Log.d("DownPaymentScreen", "Sugu loanTenure 1: $loanTenure")
+
+                                    TokenManager.save("downpaymentAmount", amount.toString())
+                                    TokenManager.save("pfloanTenure", loanTenure.toString())
+                                    TokenManager.save("productPriceAmount", productPrice.toString())
+
+                                    webViewModel.setWebInProgress(true)
+                                    try {
+                                        webViewModel.getLenderStatusApi(
+                                            context = context,
+                                            loanType = "PURCHASE_FINANCE",
+                                            step = "FORM_SUBMISSION_REQUEST"
+                                        )
+
+                                        val lenderStatusModel = webViewModel.getLenderStatusResponse
+                                            .filterNotNull().first()
+
+                                        val lenderStatus = lenderStatusModel?.data?.response
+
+                                        if (lenderStatus.isNullOrEmpty()) {
+                                            showNoLoanOffersScreen = true
+                                            return@launch
+                                        }
+
+                                        val json = Json {
+                                            prettyPrint = true
+                                            ignoreUnknownKeys = true
+                                        }
+
+                                        val lenderStatusJson = json.encodeToString(
+                                            LenderStatusResponse.serializer(),
+                                            LenderStatusResponse(response = lenderStatus)
+                                        )
+
+                                        navigateToFormSubmissionWebScreen(navController, fromFlow, lenderStatusJson)
+
+                                        loadWebScreen(
+                                            fromFlow = fromFlow,
+                                            webViewModel = webViewModel,
+                                            context = context,
+                                            endUse = "PF flow",
+                                            purpose = "PF flow",
+                                            downPaymentAmount = amount.toString(),
+                                            pfloanTenure = loanTenure.toString(),
+                                            productPrice = productPrice.toString(),
+                                            pfMerchantGst = merchantDetails.gst,
+                                            pfMerchantPan = merchantDetails.pan,
+                                            pfMerchantBankAccountNumber = merchantDetails.bankAccountNumber,
+                                            pfMerchantIfscCode = merchantDetails.ifscCode,
+                                            pfMerchantBankAccountHolderName = merchantDetails.accountHolderName,
+                                            pfProductCategory = pfProductCategory,
+                                            pfProductBrand = pfProductBrand,
+                                            pfProductIMEI = pfProductIMEI,
+                                            pfProductSKUID = pfProductSKUId
+                                        )
+                                    } catch (e: Exception) {
+                                        Log.e("LenderStatusError", "Error processing lender status", e)
+                                        showNoLoanOffersScreen = true
+                                    } finally {
+                                        webViewModel.setWebInProgress(false)
+                                    }
+                                }
+                                              },
+                            startTimer = bottomSheetState.isVisible,
+                            showDialog = showDialog,
+                            timer = 7
+                        )
+                    }
+                ) {
+                    FixedTopBottomScreen(
+                        navController = navController,
+                        backgroundColor = appWhite,
+                        contentStart = 0.dp,
+                        contentEnd = 0.dp,
+                        topBarBackgroundColor = appOrange,
+                        topBarText = stringResource(R.string.down_payment_screen),
+                        showBackButton = true,
+                        onBackClick = { navigateApplyByCategoryScreen(navController) },
+                        showBottom = true,
+                        showCheckBox = true,
+                        checkboxState = checkboxState,
+                        onCheckBoxChange = { isChecked ->
+                            if (isChecked) {
+                                coroutineScope.launch {
+                                    focusManager.clearFocus()
+                                    keyboardController?.hide()
+                                    bottomSheetState.show()
+                                }
+                            } else {
+                                registerViewModel.onCheckBoxDetailChanged(false)
+                                showError = !checkboxState
+                            }
+//
+                        },
+                        checkBoxText = stringResource(R.string.i_understand_and_agree_to_buyer_app_terms_and_conditions),
+                        showErrorMsg = showError,
+                        errorMsg = errorMsg,
+                        showSingleButton = true,
+                        primaryButtonText = stringResource(R.string.submit),
+                        onPrimaryButtonClick = {
+                            if (!checkboxState) {
+                                showError = true
+                                errorMsg = context.getString(R.string.please_agree_buyer_App_terms)
+                            } else if (showInValidAmountError) {
+                                showError = true
+                                errorMsg = context.getString(R.string.please_enter_valid_downpayment_amount)
+                            } else {
+                                showError = false
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    Log.d("DownPaymentScreen", "Sugu loanTenure: $loanTenure")
+                                    TokenManager.save("downpaymentAmount", amount.toString())
+                                    TokenManager.save("loanTenure", loanTenure.toString())
+                                    TokenManager.save("productPriceAmount", productPrice.toString())
+
+                                    webViewModel.setWebInProgress(true)
+
+                                    try {
+                                        webViewModel.getLenderStatusApi(
+                                            context = context,
+                                            loanType = "PURCHASE_FINANCE",
+                                            step = "FORM_SUBMISSION_REQUEST"
+                                        )
+
+                                        val lenderStatusModel = webViewModel.getLenderStatusResponse
+                                            .filterNotNull().first()
+
+                                        val lenderStatus = lenderStatusModel?.data?.response
+
+                                        if (lenderStatus.isNullOrEmpty()) {
+                                            showNoLoanOffersScreen = true
+                                            return@launch
+                                        }
+
+                                        val json = Json {
+                                            prettyPrint = true
+                                            ignoreUnknownKeys = true
+                                        }
+
+                                        val lenderStatusJson = json.encodeToString(
+                                            LenderStatusResponse.serializer(),
+                                            LenderStatusResponse(response = lenderStatus)
+                                        )
+
+                                        navigateToFormSubmissionWebScreen(navController, fromFlow, lenderStatusJson)
 
                                         TokenManager.save("downpaymentAmount", amount.toString())
                                         TokenManager.save("pfloanTenure", loanTenure.toString())
                                         TokenManager.save("productPriceAmount", productPrice.toString())
 
-                                        webViewModel.setWebInProgress(true)
-                                        try {
-                                            webViewModel.getLenderStatusApi(
-                                                context = context,
-                                                loanType = "PURCHASE_FINANCE",
-                                                step = "FORM_SUBMISSION_REQUEST"
-                                            )
-
-                                            val lenderStatusModel = webViewModel.getLenderStatusResponse
-                                                .filterNotNull().first()
-
-                                            val lenderStatus = lenderStatusModel?.data?.response
-
-                                            if (lenderStatus.isNullOrEmpty()) {
-                                                showNoLoanOffersScreen = true
-                                                return@launch
-                                            }
-
-                                            val json = Json {
-                                                prettyPrint = true
-                                                ignoreUnknownKeys = true
-                                            }
-
-                                            val lenderStatusJson = json.encodeToString(
-                                                LenderStatusResponse.serializer(),
-                                                LenderStatusResponse(response = lenderStatus)
-                                            )
-
-                                            navigateToFormSubmissionWebScreen(navController, fromFlow, lenderStatusJson)
-
-                                            loadWebScreen(
-                                                fromFlow = fromFlow,
-                                                webViewModel = webViewModel,
-                                                context = context,
-                                                endUse = "PF flow",
-                                                purpose = "PF flow",
-                                                downPaymentAmount = amount.toString(),
-                                                pfloanTenure = loanTenure.toString(),
-                                                productPrice = productPrice.toString(),
-                                                pfMerchantGst = merchantDetails.gst,
-                                                pfMerchantPan = merchantDetails.pan,
-                                                pfMerchantBankAccountNumber = merchantDetails.bankAccountNumber,
-                                                pfMerchantIfscCode = merchantDetails.ifscCode,
-                                                pfMerchantBankAccountHolderName = merchantDetails.accountHolderName,
-                                                pfProductCategory = pfProductCategory,
-                                                pfProductBrand = pfProductBrand,
-                                                pfProductIMEI = pfProductIMEI,
-                                                pfProductSKUID = pfProductSKUId
-                                            )
-                                        } catch (e: Exception) {
-                                            Log.e("LenderStatusError", "Error processing lender status", e)
-                                            showNoLoanOffersScreen = true
-                                        } finally {
-                                            webViewModel.setWebInProgress(false)
-                                        }
+                                        loadWebScreen(
+                                            fromFlow = fromFlow,
+                                            webViewModel = webViewModel,
+                                            context = context,
+                                            endUse = "PF flow",
+                                            purpose = "PF flow",
+                                            downPaymentAmount = amount.toString(),
+                                            pfloanTenure = loanTenure.toString(),
+                                            productPrice = productPrice.toString(),
+                                            pfMerchantGst = merchantDetails.gst,
+                                            pfMerchantPan = merchantDetails.pan,
+                                            pfMerchantBankAccountNumber = merchantDetails.bankAccountNumber,
+                                            pfMerchantIfscCode = merchantDetails.ifscCode,
+                                            pfMerchantBankAccountHolderName = merchantDetails
+                                                .accountHolderName,
+                                            pfProductCategory = pfProductCategory,
+                                            pfProductBrand = pfProductBrand,
+                                            pfProductIMEI = pfProductIMEI,
+                                            pfProductSKUID = pfProductSKUId
+                                        )
+                                    } catch (e: Exception) {
+                                        Log.e("LenderStatusError", "Error processing lender status", e)
+                                        showNoLoanOffersScreen = true
+                                    } finally {
+                                        webViewModel.setWebInProgress(false)
                                     }
-                                                  },
-                                startTimer = bottomSheetState.isVisible,
-                                showDialog = showDialog,
-                                timer = 7
-                            )
+                                }
+                            }
                         }
+
                     ) {
-                        FixedTopBottomScreen(
-                            navController = navController,
-                            backgroundColor = appWhite,
-                            contentStart = 0.dp,
-                            contentEnd = 0.dp,
-                            topBarBackgroundColor = appOrange,
-                            topBarText = stringResource(R.string.down_payment_screen),
-                            showBackButton = true,
-                            onBackClick = { navigateApplyByCategoryScreen(navController) },
-                            showBottom = true,
-                            showCheckBox = true,
-                            checkboxState = checkboxState,
-                            onCheckBoxChange = { isChecked ->
-                                if (isChecked) {
-                                    coroutineScope.launch {
-                                        focusManager.clearFocus()
-                                        keyboardController?.hide()
-                                        bottomSheetState.show()
-                                    }
-                                } else {
-                                    registerViewModel.onCheckBoxDetailChanged(false)
-                                    showError = !checkboxState
-                                }
-//
-                            },
-                            checkBoxText = stringResource(R.string.i_understand_and_agree_to_buyer_app_terms_and_conditions),
-                            showErrorMsg = showError,
-                            errorMsg = errorMsg,
-                            showSingleButton = true,
-                            primaryButtonText = stringResource(R.string.submit),
-                            onPrimaryButtonClick = {
-                                if (!checkboxState) {
-                                    showError = true
-                                    errorMsg = context.getString(R.string.please_agree_buyer_App_terms)
-                                } else if (showInValidAmountError) {
-                                    showError = true
-                                    errorMsg = context.getString(R.string.please_enter_valid_downpayment_amount)
-                                } else {
-                                    showError = false
-                                    CoroutineScope(Dispatchers.Main).launch {
-                                        Log.d("DownPaymentScreen", "Sugu loanTenure: $loanTenure")
-                                        TokenManager.save("downpaymentAmount", amount.toString())
-                                        TokenManager.save("loanTenure", loanTenure.toString())
-                                        TokenManager.save("productPriceAmount", productPrice.toString())
-
-                                        webViewModel.setWebInProgress(true)
-
-                                        try {
-                                            webViewModel.getLenderStatusApi(
-                                                context = context,
-                                                loanType = "PURCHASE_FINANCE",
-                                                step = "FORM_SUBMISSION_REQUEST"
-                                            )
-
-                                            val lenderStatusModel = webViewModel.getLenderStatusResponse
-                                                .filterNotNull().first()
-
-                                            val lenderStatus = lenderStatusModel?.data?.response
-
-                                            if (lenderStatus.isNullOrEmpty()) {
-                                                showNoLoanOffersScreen = true
-                                                return@launch
-                                            }
-
-                                            val json = Json {
-                                                prettyPrint = true
-                                                ignoreUnknownKeys = true
-                                            }
-
-                                            val lenderStatusJson = json.encodeToString(
-                                                LenderStatusResponse.serializer(),
-                                                LenderStatusResponse(response = lenderStatus)
-                                            )
-
-                                            navigateToFormSubmissionWebScreen(navController, fromFlow, lenderStatusJson)
-
-                                            TokenManager.save("downpaymentAmount", amount.toString())
-                                            TokenManager.save("pfloanTenure", loanTenure.toString())
-                                            TokenManager.save("productPriceAmount", productPrice.toString())
-
-                                            loadWebScreen(
-                                                fromFlow = fromFlow,
-                                                webViewModel = webViewModel,
-                                                context = context,
-                                                endUse = "PF flow",
-                                                purpose = "PF flow",
-                                                downPaymentAmount = amount.toString(),
-                                                pfloanTenure = loanTenure.toString(),
-                                                productPrice = productPrice.toString(),
-                                                pfMerchantGst = merchantDetails.gst,
-                                                pfMerchantPan = merchantDetails.pan,
-                                                pfMerchantBankAccountNumber = merchantDetails.bankAccountNumber,
-                                                pfMerchantIfscCode = merchantDetails.ifscCode,
-                                                pfMerchantBankAccountHolderName = merchantDetails
-                                                    .accountHolderName,
-                                                pfProductCategory = pfProductCategory,
-                                                pfProductBrand = pfProductBrand,
-                                                pfProductIMEI = pfProductIMEI,
-                                                pfProductSKUID = pfProductSKUId
-                                            )
-                                        } catch (e: Exception) {
-                                            Log.e("LenderStatusError", "Error processing lender status", e)
-                                            showNoLoanOffersScreen = true
-                                        } finally {
-                                            webViewModel.setWebInProgress(false)
-                                        }
-                                    }
-                                }
-                            }
-
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(backgroundOrange)
                         ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(backgroundOrange)
-                            ) {
-//                                ProductDetailsCard(productName, productPrice, mrpPrice)
-                                ProductDetailsCard(verifySessionResponse,
-                                    amount = amount,
-                                    onAmountChange = { amount = it } ,  // ✅ pass setter
-                                    merchantDetails = merchantDetails
-                                     )
-                                userDetails?.data?.let { PFPersonalDetailsCard(profile = it) }
-                                DownPaymentDetailsCard(
-                                    amount = amount,
-                                    maxAmount = maxAmount,
-                                    showInValidAmountError = showInValidAmountError,
-                                    onAmountChange = { amount = it },
-                                    onValidationChanged = { showInValidAmountError = it } // <- sync state here
-                                )
-                                PreferredTenureCard(editLoanRequestViewModel)
-                            }
+                            ProductDetailsCard(verifySessionResponse,
+                                amount = amount,
+                                onAmountChange = { amount = it } ,  // ✅ pass setter
+                                merchantDetails = merchantDetails
+                                 )
+                            userDetails?.data?.let { PFPersonalDetailsCard(profile = it) }
+                            DownPaymentDetailsCard(
+                                amount = amount,
+                                maxAmount = maxAmount,
+                                showInValidAmountError = showInValidAmountError,
+                                onAmountChange = { amount = it },
+                                onValidationChanged = { showInValidAmountError = it } // <- sync state here
+                            )
+                            PreferredTenureCard(editLoanRequestViewModel)
                         }
                     }
                 }
             }
+
         }
     }
 
-//    if(showDialog.value){
-//        ConsentDialogBox(showDialog)
-//    }
-}
 
 @Composable
 private fun ConfirmExitDialog(
@@ -486,98 +481,6 @@ private fun ConfirmExitDialog(
         }
     )
 }
-
-
-//@Composable
-//fun ProductDetailsCard(productName: String, productPrice: Long, mrpPrice: Long) {
-//    DownPaymentCard(
-//        cardHeader = stringResource(R.string.product_details)
-//    ) {
-//        Row(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(bottom = 8.dp),
-//            horizontalArrangement = Arrangement.spacedBy(10.dp),
-//            verticalAlignment = Alignment.Top
-//        ) {
-//            Image(
-//                painter = painterResource(id = R.drawable.phone_image),
-//                contentDescription = "Product Image",
-//                modifier = Modifier
-//                    .weight(0.3f)
-//                    .height(150.dp)
-//            )
-//
-//            Column(
-//                modifier = Modifier
-//                    .weight(0.7f)
-//                    .padding(top = 10.dp),
-//                horizontalAlignment = Alignment.Start,
-//                verticalArrangement = Arrangement.spacedBy(10.dp)
-//            ) {
-//                RegisterText(
-//                    text = productName,
-//                    style = normal16Text400,
-//                    textAlign = TextAlign.Start,
-//                    boxAlign = Alignment.TopStart
-//                )
-//                RegisterText(
-//                    text = "QTY: 1",
-//                    style = normal14Text400,
-//                    textAlign = TextAlign.Start,
-//                    boxAlign = Alignment.TopStart
-//                )
-//                RegisterText(
-//                    text = "MRP: ₹${CommonMethods().formatWithCommas(mrpPrice.toInt())}",
-//                    style = normal14Text400,
-//                    textAlign = TextAlign.Start,
-//                    boxAlign = Alignment.TopStart
-//                )
-//                RegisterText(
-//                    text = "Product price: ₹${CommonMethods().formatWithCommas(productPrice.toInt())}",
-//                    style = normal14Text700,
-//                    textAlign = TextAlign.Start,
-//                    boxAlign = Alignment.TopStart
-//                )
-//                Row(
-//                    modifier = Modifier.fillMaxWidth(),
-//                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-//                ) {
-//                    ClickableText(
-//                        text = stringResource(id = R.string.cancellable),
-//                        top = 0.dp,
-//                        roundedCornerShape = 18.dp,
-//                        textColor = appBlack,
-//                        borderColor = appOrange,
-//                        backgroundColor = appWhite,
-//                        style = normal14Text400,
-//                        horizontalPadding = 26.dp,
-//                        verticalPadding = 5.dp
-//                    ) {
-//                        Log.d("DownPayment", "Cancellable")
-//                    }
-//                    ClickableText(
-//                        text = stringResource(id = R.string.returnable),
-//                        top = 0.dp,
-//                        roundedCornerShape = 18.dp,
-//                        textColor = appBlack,
-//                        borderColor = appOrange,
-//                        backgroundColor = appWhite,
-//                        style = normal14Text400,
-//                        horizontalPadding = 26.dp,
-//                        verticalPadding = 5.dp
-//                    ) { Log.d("DownPaymentScreen", "Returnable") }
-//                }
-////                RegisterText(
-////                    text = stringResource(R.string.more_details),
-////                    textColor = appOrange,
-////                    style = normal14Text700.copy(textDecoration = TextDecoration.Underline),
-////                    modifier = Modifier.clickable { Log.d("DownPaymentScreen", "more details") }
-////                )
-//            }
-//        }
-//    }
-//}
 
 
 @Composable
@@ -1031,6 +934,13 @@ fun DownPaymentDetailsCard(
                 textColor = appBlack
             )
         )
+
+        Text(
+            text = "Down payment cannot exceed the Price minus 10",
+            style = normal14Text400.copy(color = Color.Gray),
+            modifier = Modifier.padding(top = 8.dp)
+        )
+        Spacer(modifier = Modifier.height(5.dp))
         if (isError) {
             RegisterText(
                 text = stringResource(R.string.please_enter_valid_downpayment_amount),
