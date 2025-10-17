@@ -360,12 +360,12 @@ fun SelectingFlow(
         }
 
         // If status is ready (data or url present), proceed to the decided flow
-        (userStatus?.data?.data != null || userStatus?.data?.url != null) -> {
+        (checked || userStatus?.data?.data != null || userStatus?.data?.url != null) -> {
             PurchaseDecidedFlow(
                 context = context,
                 status = userStatus,
                 navController = navController,
-                fromFlow = "", // or "Purchase Finance" if you want to tag the source
+                fromFlow = "Purchase Finance", // or "Purchase Finance" if you want to tag the source
                 verifySessionResponse = verifySessionResponse
             )
         }
