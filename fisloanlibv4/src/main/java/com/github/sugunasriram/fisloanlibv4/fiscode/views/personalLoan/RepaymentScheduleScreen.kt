@@ -193,13 +193,14 @@ fun RepaymentScheduleScreen(
 
 
     // Call getOrderPaymentStatus when the composable first loads
-    LaunchedEffect(Unit) {
-        // Fetch payment status
-        getOrderPaymentStatusViewModel.getOrderPaymentStatus(
-            loanType = loanType,
-            loanId = orderId,
-            context = context
-        )
+    LaunchedEffect(checked) {
+        if (checked) {
+            getOrderPaymentStatusViewModel.getOrderPaymentStatus(
+                loanType = loanType,
+                loanId = orderId,
+                context = context
+            )
+        }
     }
 
     when {
@@ -1302,10 +1303,10 @@ fun PaymentHistoryCard(payment: List<OrderPaymentStatusItem?>?) {
             end = 10.dp
         ) {
             payment?.forEach { payment ->
-                val paymentDate =
-                    payment?.updatedAt?.let {
-                        CommonMethods().displayFormattedDate(it)
-                    }
+//                val paymentDate =
+//                    payment?.updatedAt?.let {
+//                        CommonMethods().displayFormattedDate(it)
+//                    }
                 payment?.params?.amount?.let { amount ->
                     val newTextHeader =
                         CommonMethods().displayFormattedText(payment.time?.label ?: "Down Payment")

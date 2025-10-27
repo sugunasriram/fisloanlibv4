@@ -30,7 +30,8 @@ data class OrderPaymentStatusItem(
     val time: TimeItem? = null,
     @SerialName("type")
     val type: String? = null,
-    val updatedAt: String? = null
+    val updatedAt: String? = null,
+    val timestamp: String? = null  //Sugu added - Missed EMI fix
 )
 
 @Serializable
