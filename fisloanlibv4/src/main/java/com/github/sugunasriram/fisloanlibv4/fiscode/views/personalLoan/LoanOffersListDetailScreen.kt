@@ -302,7 +302,7 @@ fun LoanOfferListDetailView(
 ) {
     var backPressedTime by remember { mutableLongStateOf(0L) }
 
-    if (isEditProcess) {
+    if (isEditProcess  || productPriceAmountValue == 0.0f) {
         ProcessingAnimation(text = "Processing Please Wait...", image = R.raw.we_are_currently_processing_hour_glass)
     } else {
         if (isEdited) {
