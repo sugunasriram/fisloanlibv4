@@ -934,7 +934,7 @@ fun NavGraphBuilder.mobileNavigation(
                     offerId,
                     fromScreen = fromScreen,
                     fromFlow = fromFlow,
-                    pageContent = {}
+//                    pageContent = {}
                 )
             }
         }

@@ -22,13 +22,15 @@ data class PfOfferConfirmResponse(
 data class PfOfferConfirmData(
     val catalog: PfCatalog? = null,
     val offerResponse: PfCatalog? = null,
-    val eNACHUrlObject: PfCatalog? = null
+    val eNACHUrlObject: PfCatalog? = null,
+
 )
 
 @Serializable
 data class PfCatalog(
     @SerialName("_id")
     val id: String? = null,
+    val consent: Boolean? = null,
 
     @SerialName("parent_item_id")
     val parentItemID: String? = null,

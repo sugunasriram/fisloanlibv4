@@ -1,5 +1,6 @@
 package com.github.sugunasriram.fisloanlibv4.fiscode.views.purchaseFinance
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -11,6 +12,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.CenterProgress
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateSignInPage
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToAnimationLoader
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToLoanAgreementScreen
@@ -20,6 +22,8 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToRepayme
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.pf.PfOfferConfirmResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.purchaseFinance.PfBankDetailViewModel
+import com.github.sugunasriram.fisloanlibv4.fiscode.components.ProcessingAnimation
+import com.github.sugunasriram.fisloanlibv4.R
 
 @Composable
 fun PfBankKycVerificationScreen(
@@ -66,6 +70,7 @@ fun PfBankKycVerificationScreen(
     }
 }
 
+@SuppressLint("ResourceType")
 @Composable
 fun PfBankKycVerificationScreenView(
     navController: NavHostController,
@@ -80,21 +85,33 @@ fun PfBankKycVerificationScreenView(
     pfBankDetailViewModel: PfBankDetailViewModel
 ) {
     if (bankDetailCollecting) {
-        CenterProgress()
+        ProcessingAnimation(text = "Processing Please Wait...",image = R.raw.we_are_currently_processing_hour_glass)
     } else {
         if (bankDetailCollected) {
-            bankDetailResponse?.data?.catalog?.fromURL?.let { url ->
-                navigateToRepaymentScreen(
-                    navController,
-                    transactionId,
-                    url,
-                    offerId,
-                    fromFlow
-                )
+            val formUrl = bankDetailResponse?.data?.catalog?.fromURL
+            val consent = bankDetailResponse?.data?.catalog?.consent
+
+            when {
+                !formUrl.isNullOrBlank() -> {
+                    navigateToRepaymentScreen(
+                        navController = navController,
+                        transactionId = transactionId,
+                        url = formUrl,
+                        id = offerId,
+                        fromFlow = fromFlow
+                    )
+                }
+
+                consent == false -> {
+                    navigateApplyByCategoryScreen(navController)
+                }
+                else ->{
+                    navigateApplyByCategoryScreen(navController)
+                }
             }
         } else {
-            if (kycUrl.length > 0 && !kycUrl.equals("No Need KYC URL", true)) {
-                kycUrl?.let { entityKycUrl ->
+            if (kycUrl.isNotEmpty() && !kycUrl.equals("No Need KYC URL", true)) {
+                kycUrl.let { entityKycUrl ->
                     navigateToPfKycWebViewScreen(
                         navController = navController,
                         transactionId = transactionId,
