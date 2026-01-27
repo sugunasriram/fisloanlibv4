@@ -377,7 +377,8 @@ dependencies {
     // SSE
     implementation("io.ktor:ktor-client-websockets:$ktorVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$ktorVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutineAndroidVersion")
+//    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutineAndroidVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$ktorVersion")
 
     // Android Permissions
     implementation("pub.devrel:easypermissions:$easyPermissionVersion")

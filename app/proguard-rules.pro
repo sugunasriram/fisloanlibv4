@@ -66,3 +66,10 @@
 
 # Optional: if using commons-logging
 -dontwarn org.apache.commons.logging.**
+
+# --- SLF4J (binding is optional in many Android setups) ---
+-dontwarn org.slf4j.impl.StaticLoggerBinder
+-dontwarn org.slf4j.impl.StaticMDCBinder
+-dontwarn org.slf4j.impl.StaticMarkerBinder
+-dontwarn org.slf4j.**
+
