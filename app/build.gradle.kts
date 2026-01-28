@@ -321,7 +321,8 @@ val securityCryptoVersion = "1.1.0-alpha06"
 val easyPermissionVersion = "3.0.0"
 
 dependencies {
-    implementation(project(":fisloanlibv4")) // Sugu1
+//    implementation(project(":fisloanlibv4")) // Sugu1
+    implementation("com.github.sugunasriram:fisloanlibv4:v1.0.60")
 
     implementation("org.bouncycastle:bcprov-jdk15to18:1.79")
     implementation("org.bouncycastle:bctls-jdk15to18:1.79")

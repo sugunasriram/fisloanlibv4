@@ -17,5 +17,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "fs"
 include(":app")
-include(":fisloanlibv4")
+//include(":fisloanlibv4")
  

@@ -151,3 +151,8 @@
 -dontwarn org.slf4j.impl.StaticMarkerBinder
 -dontwarn org.slf4j.**
 
+#-dontwarn com.github.sugunasriram.fisloanlibv4.LoanLib$LoanDetails
+#-dontwarn com.github.sugunasriram.fisloanlibv4.LoanLib$SessionDetails
+#-dontwarn com.github.sugunasriram.fisloanlibv4.LoanLib
+
+
