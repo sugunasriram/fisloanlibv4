@@ -4,8 +4,10 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.net.http.SslError
@@ -31,6 +33,7 @@ import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -457,6 +460,365 @@ private val json1 = Json {
 //    }
 //}
 
+
+//Option -2 - workig in android, but failig in React app
+//@Composable
+//fun PfKycWebViewScreen(
+//    navController: NavHostController,
+//    transactionId: String,
+//    url: String,
+//    id: String,
+//    fromScreen: String,
+//    fromFlow: String,
+//) {
+//    CompositionLocalProvider(
+//        LocalSaveableStateRegistry provides null
+//    ) {
+//        PfKycWebViewScreenInternal(
+//            navController = navController,
+//            transactionId = transactionId,
+//            url = url,
+//            id = id,
+//            fromScreen = fromScreen,
+//            fromFlow = fromFlow,
+//        )
+//    }
+//}
+//
+//private var filePathCallbackFn: ValueCallback<Array<Uri>>? = null
+//private var uploadMessage: ValueCallback<Uri>? = null
+//var redirectionSet = false
+//@Composable
+//private fun PfKycWebViewScreenInternal(
+//    navController: NavHostController,
+//    transactionId: String,
+//    url: String,
+//    id: String,
+//    fromScreen: String,
+//    fromFlow: String,
+//) {
+//    val context = LocalContext.current
+//    val activity = context.findActivity()
+//
+//    val decidedScreen = if (fromScreen == "1") "2" else "3"
+//    val sseViewModel: SSEViewModel = viewModel()
+//
+//    var lateNavigate by remember { mutableStateOf(false) }
+//    var errorMsg by remember { mutableStateOf<String?>(null) }
+//
+//    val errorTitle = stringResource(id = R.string.kyc_failed)
+//
+//    LaunchedEffect(Unit) {
+//        sseViewModel.startListening(ApiPaths().sse)
+//
+//        sseViewModel.events.collect { event ->
+//            if (event.isEmpty() || lateNavigate) return@collect
+//
+//            if (event == "__SSE_FAILURE__") {
+//                sseViewModel.stopListening()
+//                navigateToFormRejectedScreen(
+//                    navController,
+//                    errorTitle = "Session Time Out",
+//                    fromFlow = fromFlow,
+//                    errorMsg = "Please try again after some time"
+//                )
+//                return@collect
+//            }
+//
+//            runCatching {
+//                val sseData = json1.decodeFromString<SSEData>(event)
+//                val sseTxnId = sseData.data?.data?.txnId
+//                val formId = sseData.data?.data?.data?.form_id
+//                val type = sseData.data?.data?.type
+//
+//                if (
+//                    transactionId == sseTxnId &&
+//                    (type == "ACTION" || type == "INFO")
+//                ) {
+//                    if (sseData.data.data.data?.error != null) {
+//                        errorMsg = sseData.data.data.data.error.message
+//                        sseViewModel.stopListening()
+//                        navigateToFormRejectedScreen(
+//                            navController,
+//                            fromFlow = fromFlow,
+//                            errorTitle = errorTitle,
+//                            errorMsg = errorMsg
+//                        )
+//                    } else {
+//                        formId?.let {
+//                            TokenManager.save("formId", it)
+//                            lateNavigate = true
+//                            sseViewModel.stopListening()
+//                            navigateToBankKycVerificationScreen(
+//                                navController,
+//                                kycUrl = "No Need KYC URL",
+//                                transactionId = transactionId,
+//                                offerId = id,
+//                                verificationStatus = decidedScreen,
+//                                fromFlow = fromFlow
+//                            )
+//                        }
+//                    }
+//                }
+//            }.onFailure {
+//                Log.e("SSE", "Parsing error", it)
+//            }
+//        }
+//    }
+//
+//    Column(modifier = Modifier.fillMaxSize()) {
+//        TopBar(
+//            navController = navController,
+//            onBackClick = { navigateApplyByCategoryScreen(navController) },
+//            topBarText = "Kyc Verification"
+//        )
+//
+//        PFKycWebView(
+//            url = url,
+//            modifier = Modifier.weight(1f),
+//            activity = activity
+//        )
+//    }
+//}
+//@Composable
+//private fun PFKycWebView(
+//    url: String,
+//    modifier: Modifier,
+//    activity: Activity?
+//) {
+//    val context = LocalContext.current
+//
+//    var fileChooserCallback by remember {
+//        mutableStateOf<ValueCallback<Array<Uri>>?>(null)
+//    }
+//
+//    val fileChooserLauncher =
+//        rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
+//            try {
+//                if (uris.isEmpty()) {
+//                    fileChooserCallback?.onReceiveValue(null)
+//                } else {
+//                    fileChooserCallback?.onReceiveValue(uris.toTypedArray())
+//                }
+//            } catch (_: Exception) {
+//                fileChooserCallback?.onReceiveValue(null)
+//            } finally {
+//                fileChooserCallback = null
+//            }
+//        }
+//
+//    val webView = remember {
+//        WebView(context).apply {
+//            id = View.NO_ID
+//            layoutParams = ViewGroup.LayoutParams(
+//                ViewGroup.LayoutParams.MATCH_PARENT,
+//                ViewGroup.LayoutParams.MATCH_PARENT
+//            )
+//            isSaveEnabled = false
+//        }
+//    }
+//
+//    LaunchedEffect(Unit) {
+//        setupWebViewDefaults(
+//            webView = webView,
+//            context = context,
+//            activity = activity,
+//            fileChooserLauncher = fileChooserLauncher
+//        ) { callback ->
+//            // Cancel any previous callback first
+//            fileChooserCallback?.onReceiveValue(null)
+//            fileChooserCallback = callback
+//        }
+//        webView.loadUrl(url)
+//    }
+//
+//    DisposableEffect(Unit) {
+//        onDispose {
+//            fileChooserCallback?.onReceiveValue(null)
+//            fileChooserCallback = null
+//
+//            webView.apply {
+//                stopLoading()
+//                clearHistory()
+//                clearCache(true)
+//                removeAllViews()
+//                destroy()
+//            }
+//        }
+//    }
+//
+//    AndroidView(
+//        modifier = modifier .fillMaxSize(),
+//        factory = { webView }
+//    )
+//}
+//@SuppressLint("SetJavaScriptEnabled")
+//private fun setupWebViewDefaults(
+//    webView: WebView,
+//    activity: Activity?,
+//    context: Context = webView.context,
+//    fileChooserLauncher: ManagedActivityResultLauncher<String, List<Uri>>,
+//    onFileChooserReady: (ValueCallback<Array<Uri>>?) -> Unit
+//) {
+//    webView.settings.apply {
+//        javaScriptEnabled = true
+//        domStorageEnabled = true
+//
+//        allowFileAccess = true
+//        allowContentAccess = true
+//
+//        useWideViewPort = true
+//        loadWithOverviewMode = true
+//
+//        setSupportZoom(false)
+//        builtInZoomControls = false
+//        displayZoomControls = false
+//
+//        cacheMode = WebSettings.LOAD_NO_CACHE
+//        mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+//        mediaPlaybackRequiresUserGesture = false
+//    }
+//
+//    CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)
+//
+//    webView.webViewClient = WebViewClient()
+//
+//    webView.webChromeClient = object : WebChromeClient() {
+//
+////        override fun onPermissionRequest(request: PermissionRequest?) {
+////            request?.grant(request.resources)
+////        }
+//
+////        override fun onShowFileChooser(
+////            webView: WebView?,
+////            filePathCallback: ValueCallback<Array<Uri>>?,
+////            fileChooserParams: FileChooserParams?
+////        ): Boolean {
+////
+////            onFileChooserReady(filePathCallback)
+////            fileChooserLauncher.launch("image/*")
+////            return true
+////        }
+//
+//        override fun onJsAlert(
+//            view: WebView?,
+//            url: String?,
+//            message: String?,
+//            result: JsResult?
+//        ): Boolean {
+//            AlertDialog.Builder(activity ?: view?.context)
+//                .setMessage(message)
+//                .setPositiveButton("OK") { _, _ -> result?.confirm() }
+//                .setCancelable(false)
+//                .show()
+//            return true
+//        }
+//
+//        override fun onPermissionRequest(request: PermissionRequest) {
+//            activity?.runOnUiThread {
+//                if (request.resources.contains(PermissionRequest.RESOURCE_VIDEO_CAPTURE)) {
+//                    MainActivity.webPermissionRequest = request
+//                    ActivityCompat.requestPermissions(
+//                        activity,
+//                        arrayOf(Manifest.permission.CAMERA),
+//                        CommonMethods().CAMERA_PERMISSION_REQUEST_CODE
+//                    )
+//                } else {
+//                    request.deny()
+//                }
+//            }
+//        }
+//
+//        private fun showPermissionDialog(request: PermissionRequest) {
+//            AlertDialog.Builder(context)
+//                .setTitle("Camera Permission Request")
+//                .setMessage("This site wants to access your camera. Do you allow it?")
+//                .setPositiveButton("Allow") { _, _ ->
+//                    ActivityCompat.requestPermissions(
+//                        activity!!,
+//                        arrayOf
+//                        (Manifest.permission.CAMERA),
+//                        CommonMethods().CAMERA_PERMISSION_REQUEST_CODE
+//                    )
+//                }
+//                .setNegativeButton("Deny") { _, _ ->
+//                    request.deny()
+//                }
+//                .setCancelable(false)
+//                .show()
+//        }
+//
+//        override fun onConsoleMessage(consoleMessage: ConsoleMessage): Boolean {
+//            if (consoleMessage.messageLevel() == ConsoleMessage.MessageLevel.ERROR) {
+//                Log.e("WebView JS Error", consoleMessage.message())
+//            }
+//            return super.onConsoleMessage(consoleMessage)
+//        }
+//
+//        // For Android 5.0+
+//        override fun onShowFileChooser(
+//            webView: WebView,
+//            filePathCallback: ValueCallback<Array<Uri>>,
+//            fileChooserParams: FileChooserParams
+//        ): Boolean {
+//            filePathCallbackFn = filePathCallback
+//            fileChooserLauncher.launch("*/*")
+//            return true
+//        }
+//
+//        // For Android 4.1+
+//        fun openFileChooser(
+//            uploadMsg: ValueCallback<Uri>,
+//            acceptType: String,
+//            capture: String
+//        ) {
+//            uploadMessage = uploadMsg
+//            fileChooserLauncher.launch("*/*")
+//        }
+//
+//        // For Android 3.0+
+//        fun openFileChooser(uploadMsg: ValueCallback<Uri>, acceptType: String) {
+//            openFileChooser(uploadMsg, acceptType, "")
+//        }
+//
+//        // For Android < 3.0
+//        fun openFileChooser(uploadMsg: ValueCallback<Uri>) {
+//            openFileChooser(uploadMsg, "*/*")
+//        }
+//    }
+//
+//    webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+//
+//    webView.clearCache(true)
+//    val cookieManager = CookieManager.getInstance()
+//                            // Enable cookies
+//    cookieManager.setAcceptCookie(true)
+//
+//    // If you want to allow third-party cookies (optional)
+//    // Pass the WebView instance directly
+//    cookieManager.setAcceptThirdPartyCookies(webView, true)
+//
+//    // Set the CookieManager as the WebView's CookieManager
+//    CookieManager.getInstance().setAcceptCookie(true)
+//
+//
+//
+//
+//}
+//
+//private fun Context.findActivity(): Activity? = when (this) {
+//    is Activity -> this
+//    is ContextWrapper -> baseContext.findActivity()
+//    else -> null
+//}
+
+//Code updated to work o react app as well - Option 3
+// ✅ Updated complete file (fixes WebView <input type="file"> upload in RN host too)
+// Key fixes:
+// 1) Use StartActivityForResult + FileChooserParams.createIntent() + parseResult()
+// 2) Store callback in Compose state via onFileChooserReady(...)
+// 3) Remove unused global callbacks (filePathCallbackFn/uploadMessage) that were breaking flow
+
 @Composable
 fun PfKycWebViewScreen(
     navController: NavHostController,
@@ -480,9 +842,8 @@ fun PfKycWebViewScreen(
     }
 }
 
-private var filePathCallbackFn: ValueCallback<Array<Uri>>? = null
-private var uploadMessage: ValueCallback<Uri>? = null
 var redirectionSet = false
+
 @Composable
 private fun PfKycWebViewScreenInternal(
     navController: NavHostController,
@@ -575,6 +936,7 @@ private fun PfKycWebViewScreenInternal(
         )
     }
 }
+
 @Composable
 private fun PFKycWebView(
     url: String,
@@ -583,22 +945,22 @@ private fun PFKycWebView(
 ) {
     val context = LocalContext.current
 
-    var fileChooserCallback by remember {
-        mutableStateOf<ValueCallback<Array<Uri>>?>(null)
-    }
+    var fileChooserCallback by remember { mutableStateOf<ValueCallback<Array<Uri>>?>(null) }
 
+    // ✅ Best-practice launcher for WebView file chooser
     val fileChooserLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            val cb = fileChooserCallback
+            fileChooserCallback = null
+
             try {
-                if (uris.isEmpty()) {
-                    fileChooserCallback?.onReceiveValue(null)
-                } else {
-                    fileChooserCallback?.onReceiveValue(uris.toTypedArray())
-                }
+                val uris = WebChromeClient.FileChooserParams.parseResult(
+                    result.resultCode,
+                    result.data
+                )
+                cb?.onReceiveValue(uris)
             } catch (_: Exception) {
-                fileChooserCallback?.onReceiveValue(null)
-            } finally {
-                fileChooserCallback = null
+                cb?.onReceiveValue(null)
             }
         }
 
@@ -643,16 +1005,17 @@ private fun PFKycWebView(
     }
 
     AndroidView(
-        modifier = modifier .fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         factory = { webView }
     )
 }
+
 @SuppressLint("SetJavaScriptEnabled")
 private fun setupWebViewDefaults(
     webView: WebView,
     activity: Activity?,
     context: Context = webView.context,
-    fileChooserLauncher: ManagedActivityResultLauncher<String, List<Uri>>,
+    fileChooserLauncher: ManagedActivityResultLauncher<Intent, ActivityResult>,
     onFileChooserReady: (ValueCallback<Array<Uri>>?) -> Unit
 ) {
     webView.settings.apply {
@@ -674,26 +1037,13 @@ private fun setupWebViewDefaults(
         mediaPlaybackRequiresUserGesture = false
     }
 
-    CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)
+    val cookieManager = CookieManager.getInstance()
+    cookieManager.setAcceptCookie(true)
+    cookieManager.setAcceptThirdPartyCookies(webView, true)
 
     webView.webViewClient = WebViewClient()
 
     webView.webChromeClient = object : WebChromeClient() {
-
-//        override fun onPermissionRequest(request: PermissionRequest?) {
-//            request?.grant(request.resources)
-//        }
-
-//        override fun onShowFileChooser(
-//            webView: WebView?,
-//            filePathCallback: ValueCallback<Array<Uri>>?,
-//            fileChooserParams: FileChooserParams?
-//        ): Boolean {
-//
-//            onFileChooserReady(filePathCallback)
-//            fileChooserLauncher.launch("image/*")
-//            return true
-//        }
 
         override fun onJsAlert(
             view: WebView?,
@@ -724,25 +1074,6 @@ private fun setupWebViewDefaults(
             }
         }
 
-        private fun showPermissionDialog(request: PermissionRequest) {
-            AlertDialog.Builder(context)
-                .setTitle("Camera Permission Request")
-                .setMessage("This site wants to access your camera. Do you allow it?")
-                .setPositiveButton("Allow") { _, _ ->
-                    ActivityCompat.requestPermissions(
-                        activity!!,
-                        arrayOf
-                        (Manifest.permission.CAMERA),
-                        CommonMethods().CAMERA_PERMISSION_REQUEST_CODE
-                    )
-                }
-                .setNegativeButton("Deny") { _, _ ->
-                    request.deny()
-                }
-                .setCancelable(false)
-                .show()
-        }
-
         override fun onConsoleMessage(consoleMessage: ConsoleMessage): Boolean {
             if (consoleMessage.messageLevel() == ConsoleMessage.MessageLevel.ERROR) {
                 Log.e("WebView JS Error", consoleMessage.message())
@@ -750,55 +1081,31 @@ private fun setupWebViewDefaults(
             return super.onConsoleMessage(consoleMessage)
         }
 
-        // For Android 5.0+
+        // ✅ Android 5.0+ file chooser support (this is what <input type="file"> uses)
         override fun onShowFileChooser(
             webView: WebView,
             filePathCallback: ValueCallback<Array<Uri>>,
             fileChooserParams: FileChooserParams
         ): Boolean {
-            filePathCallbackFn = filePathCallback
-            fileChooserLauncher.launch("*/*")
-            return true
-        }
+            // Store callback in Compose state so launcher can return the selected URIs
+            onFileChooserReady(filePathCallback)
 
-        // For Android 4.1+
-        fun openFileChooser(
-            uploadMsg: ValueCallback<Uri>,
-            acceptType: String,
-            capture: String
-        ) {
-            uploadMessage = uploadMsg
-            fileChooserLauncher.launch("*/*")
-        }
-
-        // For Android 3.0+
-        fun openFileChooser(uploadMsg: ValueCallback<Uri>, acceptType: String) {
-            openFileChooser(uploadMsg, acceptType, "")
-        }
-
-        // For Android < 3.0
-        fun openFileChooser(uploadMsg: ValueCallback<Uri>) {
-            openFileChooser(uploadMsg, "*/*")
+            return try {
+                val intent = fileChooserParams.createIntent().apply {
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                fileChooserLauncher.launch(intent)
+                true
+            } catch (_: ActivityNotFoundException) {
+                onFileChooserReady(null)
+                filePathCallback.onReceiveValue(null)
+                false
+            }
         }
     }
 
     webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
-
     webView.clearCache(true)
-    val cookieManager = CookieManager.getInstance()
-                            // Enable cookies
-    cookieManager.setAcceptCookie(true)
-
-    // If you want to allow third-party cookies (optional)
-    // Pass the WebView instance directly
-    cookieManager.setAcceptThirdPartyCookies(webView, true)
-
-    // Set the CookieManager as the WebView's CookieManager
-    CookieManager.getInstance().setAcceptCookie(true)
-
-
-
-
 }
 
 private fun Context.findActivity(): Activity? = when (this) {
