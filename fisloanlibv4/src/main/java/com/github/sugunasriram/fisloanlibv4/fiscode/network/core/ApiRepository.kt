@@ -84,6 +84,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.Up
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.UpdateLoanAmountPfResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.UpdateLoanBody
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.UpdateResponse
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.pf.PFLoanApprovedResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.pf.PfOfferConfirm
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.pf.PfOfferConfirmResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.userIssues.AllReportedUserIssuesResponse
@@ -747,7 +748,8 @@ object ApiRepository {
         }
     }
 
-    suspend fun pfLoanApproved(id: String, loanType: String): PfOfferConfirmResponse? {
+//    suspend fun pfLoanApproved(id: String, loanType: String): PfOfferConfirmResponse? {
+    suspend fun pfLoanApproved(id: String, loanType: String): PFLoanApprovedResponse? {
         val requestBody = mapOf("id" to id, "loanType" to loanType)
         return KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().loanApproved) {
@@ -759,6 +761,16 @@ object ApiRepository {
         }
     }
 
+//    suspend fun pfLoanEntityApproval(bankDetail: PfBankDetail): PfOfferConfirmResponse? {
+//        return KtorClient.getInstance().use { httpClient ->
+//            httpClient.post(ApiPaths().addAccountDetails) {
+//                val accessToken = TokenManager.read("accessToken")
+//                val bearerToken = "Bearer $accessToken"
+//                header("Authorization", bearerToken)
+//                body = bankDetail
+//            }
+//        }
+//    }
     suspend fun pfLoanEntityApproval(bankDetail: PfBankDetail): PfOfferConfirmResponse? {
         return KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().addAccountDetails) {

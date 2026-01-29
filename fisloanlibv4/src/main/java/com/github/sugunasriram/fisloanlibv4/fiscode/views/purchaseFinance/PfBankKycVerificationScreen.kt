@@ -2,6 +2,8 @@ package com.github.sugunasriram.fisloanlibv4.fiscode.views.purchaseFinance
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -24,6 +26,9 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.purchaseFinance.PfBankDetailViewModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.ProcessingAnimation
 import com.github.sugunasriram.fisloanlibv4.R
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.pf.PFLoanApprovedResponse
+import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.MiddleOfTheLoanScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToRepaymentScheduleScreen
 
 @Composable
 fun PfBankKycVerificationScreen(
@@ -46,6 +51,10 @@ fun PfBankKycVerificationScreen(
     val showServerIssueScreen by pfBankDetailViewModel.showServerIssueScreen.observeAsState(false)
     val unexpectedErrorScreen by pfBankDetailViewModel.unexpectedError.observeAsState(false)
     val unAuthorizedUser by pfBankDetailViewModel.unAuthorizedUser.observeAsState(false)
+    val middleLoan by pfBankDetailViewModel.middleLoan.observeAsState(false)
+    val errorMessage by pfBankDetailViewModel.errorMessage.collectAsState()
+    BackHandler { navigateApplyByCategoryScreen(navController) }
+
     when {
         navigationToSignIn -> navigateSignInPage(navController)
         showInternetScreen -> CommonMethods().ShowInternetErrorScreen(navController)
@@ -53,6 +62,7 @@ fun PfBankKycVerificationScreen(
         showServerIssueScreen -> CommonMethods().ShowServerIssueErrorScreen(navController)
         unexpectedErrorScreen -> CommonMethods().ShowUnexpectedErrorScreen(navController)
         unAuthorizedUser -> CommonMethods().ShowUnAuthorizedErrorScreen(navController)
+        middleLoan -> MiddleOfTheLoanScreen(navController, errorMessage)
         else -> {
             PfBankKycVerificationScreenView(
                 navController = navController,
@@ -75,7 +85,7 @@ fun PfBankKycVerificationScreen(
 fun PfBankKycVerificationScreenView(
     navController: NavHostController,
     bankDetailCollecting: Boolean,
-    bankDetailResponse: PfOfferConfirmResponse?,
+    bankDetailResponse: PFLoanApprovedResponse?,
     transactionId: String,
     bankDetailCollected: Boolean,
     offerId: String,
@@ -88,9 +98,10 @@ fun PfBankKycVerificationScreenView(
         ProcessingAnimation(text = "Processing Please Wait...",image = R.raw.we_are_currently_processing_hour_glass)
     } else {
         if (bankDetailCollected) {
-            val formUrl = bankDetailResponse?.data?.catalog?.fromURL
+            val formUrl = bankDetailResponse?.data?.catalog?.catalog?.fromURL
             val consent = bankDetailResponse?.data?.catalog?.consent
-
+            //----fixed on 0128
+            val orderId = bankDetailResponse?.data?.catalog?.id
             when {
                 !formUrl.isNullOrBlank() -> {
                     navigateToRepaymentScreen(
@@ -103,10 +114,34 @@ fun PfBankKycVerificationScreenView(
                 }
 
                 consent == false -> {
-                    navigateApplyByCategoryScreen(navController)
+                    //----fixed on 0128
+                    orderId?.let {
+                        navigateToRepaymentScheduleScreen(
+                            navController = navController,
+                            orderId = it,
+                            fromFlow = fromFlow,
+                            fromScreen = fromFlow
+                        )
+                    }
+//                    navigateApplyByCategoryScreen(navController)
                 }
                 else ->{
-                    navigateApplyByCategoryScreen(navController)
+                    //----fixed on 0128
+                    orderId?.let {
+                        navigateToRepaymentScheduleScreen(
+                            navController = navController,
+                            orderId = it,
+                            fromFlow = fromFlow,
+                            fromScreen = fromFlow
+                        )
+                    }
+//                    navigateToLoanSummaryScreen(
+//                        navController = navController,
+//                        id = "user-001",
+//                        consentHandler = "1",
+//                        fromFlow = fromFlow
+//                    )
+//                    navigateApplyByCategoryScreen(navController)
                 }
             }
         } else {

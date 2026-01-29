@@ -25,6 +25,27 @@ data class PfOfferConfirmData(
     val eNACHUrlObject: PfCatalog? = null,
 
 )
+//----fixed on 0128
+@Serializable
+data class PFLoanApprovedResponse(
+    val status: Boolean? = null,
+    val data: CatalogData? = null,
+    val statusCode: Long? = null
+)
+@Serializable
+data class CatalogData(
+    val catalog: CatalogWrapper?
+)
+@Serializable
+data class CatalogWrapper(
+    val txnId: String?,
+    val type: String?,
+    val id: String?,
+    val catalog: PfCatalog?,
+    val consent: Boolean?
+)
+
+
 
 @Serializable
 data class PfCatalog(

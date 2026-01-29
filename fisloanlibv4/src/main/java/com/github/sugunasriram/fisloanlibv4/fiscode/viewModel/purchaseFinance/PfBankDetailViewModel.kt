@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.core.ApiRepository
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.core.ApiRepository.handleAuthGetAccessTokenApi
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.pf.PFLoanApprovedResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.pf.PfOfferConfirmResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.BaseViewModel
@@ -63,8 +64,10 @@ class PfBankDetailViewModel : BaseViewModel() {
     private val _bankDetailCollected = MutableStateFlow(false)
     val bankDetailCollected: StateFlow<Boolean> = _bankDetailCollected
 
-    private val _bankDetailResponse = MutableStateFlow<PfOfferConfirmResponse?>(null)
-    val bankDetailResponse: StateFlow<PfOfferConfirmResponse?> = _bankDetailResponse
+    //----fixed on 0128
+    private val _bankDetailResponse = MutableStateFlow<PFLoanApprovedResponse?>(null)
+    //----fixed on 0128
+    val bankDetailResponse: StateFlow<PFLoanApprovedResponse?> = _bankDetailResponse
 
     private val _navigationToSignIn = MutableStateFlow(false)
     val navigationToSignIn: StateFlow<Boolean> = _navigationToSignIn
@@ -108,8 +111,8 @@ class PfBankDetailViewModel : BaseViewModel() {
             }
         }
     }
-
-    private suspend fun handlePfLoanApprovedSuccess(response: PfOfferConfirmResponse) {
+    //----fixed on 0128
+    private suspend fun handlePfLoanApprovedSuccess(response: PFLoanApprovedResponse) {
         withContext(Dispatchers.Main) {
             _bankDetailCollecting.value = false
             _bankDetailCollected.value = true
