@@ -963,6 +963,8 @@ class LoanAgreementViewModel : BaseViewModel() {
 
             runCatching {
                 withContext(Dispatchers.IO) {
+                    Log.d("Sugu", "Check 10")
+
                     val sessionLoanId = if (loanId == "1234" || loanId == "4321") "" else loanId
                     ApiRepository.createSession(
                         createSessionRequest = CreateSessionRequest(
@@ -991,7 +993,7 @@ class LoanAgreementViewModel : BaseViewModel() {
                         error.response.status.value == 401
                     ) {
                         Log.d("Sugu", "Received 401. Trying to refresh access token...")
-                        val refreshed = handleAuthGetAccessTokenApi()
+                        val refreshed = withContext(Dispatchers.IO) { handleAuthGetAccessTokenApi() }
 
                         if (refreshed) {
                             Log.d("Sugu", "Access token refreshed. Retrying createPfSession...")
@@ -1003,6 +1005,7 @@ class LoanAgreementViewModel : BaseViewModel() {
                         }
                     } else {
                         // Handle other errors normally
+                        Log.d("Sugu", "handleFailure called for error: ${error.message}")
                         handleFailure(error = error, context = context)
                         //_createSessionState.value = CreateSessionUiState.Error(error.message ?: "Unknown error")
                     }

@@ -173,6 +173,7 @@ fun BureauOffersScreen(
         showInternetScreen -> CommonMethods().ShowInternetErrorScreen(navController)
         showTimeOutScreen -> RequestTimeOutScreen(navController) {
 //            navigateApplyByCategoryScreen(navController)
+            Log.d("Sugu", "Check 2")
             navigateToFISExitScreen(navController, loanId="4321")
         }
 

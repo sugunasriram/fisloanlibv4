@@ -501,6 +501,7 @@ object ApiRepository {
             }
         }
     }
+
 // searchApi with AA Consent
     suspend fun formSubmissionApi(searchBodyModel: SearchBodyModel): SearchModel? {
         return KtorClient.getInstance().use { httpClient ->

@@ -612,6 +612,7 @@ fun IncrementTimer(maxMinutes: Int = 5, navController: NavHostController) {
         if (minutes >= maxMinutes) {
             Log.d("IncrementTimer", "Timer finished")
 //            navigateApplyByCategoryScreen(navController)
+            Log.d("Sugu", "Check 1")
             navigateToFISExitScreen(navController, loanId="4321")
         }
     }

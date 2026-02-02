@@ -1,5 +1,6 @@
 package com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
@@ -33,7 +34,10 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal36Text700
 fun NoLoanOffersAvailableScreen(
     navController: NavHostController,titleText:String=stringResource(R.string.no_loan_offers_available),
 //    onClick: () -> Unit = { navigateApplyByCategoryScreen(navController = navController) }
-    onClick: () -> Unit = { navigateToFISExitScreen(navController, loanId="4321") }
+    onClick: () -> Unit = {
+        Log.d("Sugu", "Check 16")
+
+        navigateToFISExitScreen(navController, loanId="4321") }
 ) {
     TopBottomBarForNegativeScreen(showTop = false, showBottom = true, navController = navController) {
         StartingText(

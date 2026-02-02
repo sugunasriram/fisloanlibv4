@@ -1,5 +1,6 @@
 package com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
@@ -21,13 +22,19 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normalSerif32Text50
 @Composable
 fun KYCFailedScreen(navController: NavHostController) {
 //    BackHandler { navigateApplyByCategoryScreen(navController) }
-    BackHandler { navigateToFISExitScreen(navController, loanId="4321") }
+    BackHandler {
+        Log.d("Sugu", "Check 14")
+
+        navigateToFISExitScreen(navController, loanId="4321") }
     FixedTopBottomScreen(
         navController = navController,
         backgroundColor = appWhite,
         showBackButton = true,
 //        onBackClick = { navController.popBackStack() },
-        onBackClick = { navigateToFISExitScreen(navController, loanId="4321") },
+        onBackClick = {
+            Log.d("Sugu", "Check 15")
+
+            navigateToFISExitScreen(navController, loanId="4321") },
         topBarBackgroundColor = appWhite
     ) {
         StartingText(

@@ -522,6 +522,8 @@ fun RepaymentScheduleView(
         } else {
             //Sugu todo
 //            navigateApplyByCategoryScreen(navController)
+            Log.d("Sugu", "Check 24")
+
             navigateToFISExitScreen(navController, loanId="4321")
         }
     }
@@ -542,6 +544,8 @@ fun RepaymentScheduleView(
             } else {
                 //Sugu todo
 //                navigateApplyByCategoryScreen(navController)
+                Log.d("Sugu", "Check 25")
+
                 navigateToFISExitScreen(navController, loanId="4321")
 
             }
@@ -569,7 +573,10 @@ fun RepaymentScheduleView(
         },
         tertiaryButtonText = stringResource(R.string.home),
 //        onTertiaryButtonClick = { navigateApplyByCategoryScreen(navController) }
-        onTertiaryButtonClick = {             navigateToFISExitScreen(navController, loanId="4321") }
+        onTertiaryButtonClick = {
+            Log.d("Sugu", "Check 27")
+
+            navigateToFISExitScreen(navController, loanId="4321") }
     ) {
         if(checkingStatus || orderPaymentListLoading){
             CenterProgressFixedHeight(top=320.dp)
