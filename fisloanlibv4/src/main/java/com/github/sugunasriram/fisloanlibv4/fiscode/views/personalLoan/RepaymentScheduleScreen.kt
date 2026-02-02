@@ -574,9 +574,9 @@ fun RepaymentScheduleView(
         tertiaryButtonText = stringResource(R.string.home),
 //        onTertiaryButtonClick = { navigateApplyByCategoryScreen(navController) }
         onTertiaryButtonClick = {
-            Log.d("Sugu", "Check 27")
+            Log.d("Sugu", "Check 27, loanId: $orderId")
 
-            navigateToFISExitScreen(navController, loanId="4321") }
+            navigateToFISExitScreen(navController, loanId=orderId) }
     ) {
         if(checkingStatus || orderPaymentListLoading){
             CenterProgressFixedHeight(top=320.dp)
