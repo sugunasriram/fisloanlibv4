@@ -131,6 +131,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.CancelLoa
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.CancelLoanResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.grayD6
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal28Text700
+import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
 
 var amount_to_be_paid = ""
 var coolOffPeriodDate = ""
@@ -575,6 +576,13 @@ fun RepaymentScheduleView(
 //        onTertiaryButtonClick = { navigateApplyByCategoryScreen(navController) }
         onTertiaryButtonClick = {
             Log.d("Sugu", "Check 27, loanId: $orderId")
+
+            //Write loanAmount & teure in shared pref
+            scope.launch {
+                TokenManager.save("pfPrincipal", principal)
+                TokenManager.save("pfInterestRate", interestRate.toString())
+                // add more saves here if needed
+            }
 
             navigateToFISExitScreen(navController, loanId=orderId) }
     ) {

@@ -59,6 +59,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.purchaseFinance.PurchaseFinanceViewModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.interestRate
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.loanAmount
+import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.principal
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.tenure
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -83,6 +84,8 @@ fun FISExitCofirmationScreen(
 
     val downpaymentAmountValue = remember { mutableStateOf<String?>(null) }
     val loanTenureValue = remember { mutableStateOf<String?>(null) }
+    val principalAmount = remember { mutableStateOf<String?>(null) }
+    val interest = remember { mutableStateOf<String?>(null) }
 
     val autoAborted = remember { mutableStateOf(false) }
     val forceLoader = remember { mutableStateOf(false) }
@@ -97,6 +100,8 @@ fun FISExitCofirmationScreen(
     LaunchedEffect(Unit) {
         downpaymentAmountValue.value = TokenManager.read("downpaymentAmount")
         loanTenureValue.value = TokenManager.read("pfloanTenure")
+        principalAmount.value = TokenManager.read("pfPrincipal")
+        interest.value = TokenManager.read("pfInterestRate")
         Log.d(
             "LoanDisbursementScreen",
             "Sugu downpaymentAmountValue: ${downpaymentAmountValue.value}, " +
@@ -182,8 +187,8 @@ fun FISExitCofirmationScreen(
                 val isDummyLoan = (loanId == "1234" || loanId == "4321")
                 Log.d("Sugu", "Check 13, loanId :"+ loanId)
 
-                val finalLoanAmount = if (isDummyLoan) 0.0 else loanAmount?.toDoubleOrNull() ?: 0.0
-                val finalInterestRate = if (isDummyLoan) 0.0 else interestRate?.toDoubleOrNull() ?: 0.0
+                val finalLoanAmount = if (isDummyLoan) 0.0 else principalAmount.value?.toDoubleOrNull() ?: 0.0
+                val finalInterestRate = if (isDummyLoan) 0.0 else interest.value?.toDoubleOrNull() ?: 0.0
                 val finalTenure = if (isDummyLoan) 0 else loanTenureVal
 
                 Log.d(
