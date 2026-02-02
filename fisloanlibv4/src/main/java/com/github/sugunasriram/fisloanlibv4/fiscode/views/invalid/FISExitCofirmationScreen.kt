@@ -89,6 +89,9 @@ fun FISExitCofirmationScreen(
 
     val purchaseFinanceViewModel: PurchaseFinanceViewModel = viewModel()
 
+    // ✅ NEW: blocks createPfSession from being called multiple times (recomposition / double click)
+    val createSessionRequested = remember(loanId) { mutableStateOf(false) }
+
 
     // Load values
     LaunchedEffect(Unit) {
@@ -102,34 +105,68 @@ fun FISExitCofirmationScreen(
     }
 
     // --- helper to perform the ABORT action (same as tapping the ABORT button) ---
+//    fun triggerAbort() {
+//        if (inProgress) return
+//        if (createSessionRequested.value) return // ✅ prevents multiple triggers
+//
+//        if (!inProgress) {
+//            val sanitizedLoanId = loanId.takeUnless { it == "1234" }.orEmpty()
+//            loanAgreementViewModel.createPfSession(sanitizedLoanId, context)
+//
+//            CoroutineScope(Dispatchers.Main).launch {
+//                val mobileNumber = TokenManager.read("mobileNumber")
+//                purchaseFinanceViewModel.pFDeleteUser(
+//                    context = context,
+//                    deleteUserBodyModel = PFDeleteUserBodyModel(
+//                        loanType = "PURCHASE_FINANCE",
+//                        mobileNumber = mobileNumber
+//                    ),
+//                )
+//            }
+//        }
+//    }
     fun triggerAbort() {
-        if (!inProgress) {
-            val sanitizedLoanId = loanId.takeUnless { it == "1234" }.orEmpty()
-            loanAgreementViewModel.createPfSession(sanitizedLoanId, context)
+        if (inProgress) return
+        if (createSessionRequested.value) return
 
-            CoroutineScope(Dispatchers.Main).launch {
-                val mobileNumber = TokenManager.read("mobileNumber")
-                purchaseFinanceViewModel.pFDeleteUser(
-                    context = context,
-                    deleteUserBodyModel = PFDeleteUserBodyModel(
-                        loanType = "PURCHASE_FINANCE",
-                        mobileNumber = mobileNumber
-                    ),
-                )
-            }
+        createSessionRequested.value = true  // ✅ IMPORTANT: set flag before calling API
+
+        val sanitizedLoanId = loanId.takeUnless { it == "1234" }.orEmpty()
+        loanAgreementViewModel.createPfSession(sanitizedLoanId, context)
+
+        CoroutineScope(Dispatchers.Main).launch {
+            val mobileNumber = TokenManager.read("mobileNumber")
+            purchaseFinanceViewModel.pFDeleteUser(
+                context = context,
+                deleteUserBodyModel = PFDeleteUserBodyModel(
+                    loanType = "PURCHASE_FINANCE",
+                    mobileNumber = mobileNumber
+                ),
+            )
         }
     }
 
+
     // Auto abort for loanId = 4321
+//    LaunchedEffect(loanId) {
+//        Log.d("Sugu", "Check 12")
+//
+//        if (loanId == "4321" && !autoAborted.value) {
+//            Log.d("Sugu", "Check 11")
+//
+//            autoAborted.value = true
+//            forceLoader.value = true
+//            triggerAbort()
+//        }
+//    }
+
+    // ✅ If you want auto-create-session for non-dummy loans, do it ONCE here (not in UI body)
+    val isDummyLoan = (loanId == "1234" || loanId == "4321")
     LaunchedEffect(loanId) {
-        Log.d("Sugu", "Check 12")
-
-        if (loanId == "4321" && !autoAborted.value) {
-            Log.d("Sugu", "Check 11")
-
-            autoAborted.value = true
-            forceLoader.value = true
-            triggerAbort()
+        if (!isDummyLoan && !createSessionRequested.value) {
+            createSessionRequested.value = true
+            val sanitizedLoanId = loanId.takeUnless { it == "1234" }.orEmpty()
+            loanAgreementViewModel.createPfSession(sanitizedLoanId, context)
         }
     }
 
@@ -162,12 +199,15 @@ fun FISExitCofirmationScreen(
             is LoanAgreementViewModel.CreateSessionUiState.Error -> {
 //                Toast.makeText(context, s.message ?: "Something went wrong", Toast.LENGTH_SHORT).show()
                 Log.d("FISExitCofirmationScreen", s.message ?: "Something went wrong")
+                // ✅ allow retry if error
+                createSessionRequested.value = false
+                forceLoader.value = false
             }
             else -> Unit
         }
     }
 
-    val isDummyLoan = (loanId == "1234" || loanId == "4321")
+//    val isDummyLoan = (loanId == "1234" || loanId == "4321")
 
     if (forceLoader.value) {
         Box(
@@ -282,8 +322,8 @@ fun FISExitCofirmationScreen(
             }
         }
     }else {
-        val sanitizedLoanId = loanId.takeUnless { it == "1234" }.orEmpty()
-        loanAgreementViewModel.createPfSession(sanitizedLoanId, context)
+//        val sanitizedLoanId = loanId.takeUnless { it == "1234" }.orEmpty()
+//        loanAgreementViewModel.createPfSession(sanitizedLoanId, context)
     }
 }
 
