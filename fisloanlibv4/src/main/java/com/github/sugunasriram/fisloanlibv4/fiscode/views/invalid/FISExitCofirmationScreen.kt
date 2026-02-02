@@ -186,6 +186,13 @@ fun FISExitCofirmationScreen(
                 val finalInterestRate = if (isDummyLoan) 0.0 else interestRate?.toDoubleOrNull() ?: 0.0
                 val finalTenure = if (isDummyLoan) 0 else loanTenureVal
 
+                Log.d(
+                    "LoanDisbursementScreen 3",
+                    "Sugu downpaymentAmountValue: ${downpaymentAmountVal}, " +
+                            "loanTure: ${finalTenure}" +
+                            "loanAmount: ${finalLoanAmount}, interestRate: ${finalInterestRate} "
+                )
+
                 val details = LoanLib.LoanDetails(
                     sessionId = sessionId,
                     interestRate = finalInterestRate,

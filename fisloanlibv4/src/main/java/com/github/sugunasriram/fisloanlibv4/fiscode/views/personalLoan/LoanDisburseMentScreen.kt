@@ -160,6 +160,14 @@ fun LoanDisbursementScreen(
                 val downpaymentAmountVal = downpaymentAmountValue.value?.toIntOrNull() ?: 0
                 val loanTenureVal = loanTenureValue.value?.toIntOrNull() ?: 0
                 val sessionId = (uiState as LoanAgreementViewModel.CreateSessionUiState.Success).sessionId
+
+            Log.d(
+                "LoanDisbursementScreen 2",
+                "Sugu downpaymentAmountValue: ${downpaymentAmountValue.value}, " +
+                        "loanTure: ${loanTenureVal}" +
+                        "loanAmount: ${loanAmount}, interestRate: ${interestRate} "
+            )
+
                 val details = LoanLib.LoanDetails(
                     sessionId = sessionId,
                     interestRate = interestRate?.toDoubleOrNull() ?: 0.0,
@@ -773,6 +781,7 @@ fun LoanDisbursementCard(loanDetail: Catalog?) {
 
             if ( title.contains("principal", ignoreCase = true)) {
                 loanAmount = rawValue
+                Log.d("Sugu", "Parsed loanAmount: $loanAmount")
             }
 
             quoteBreakUp.let {
