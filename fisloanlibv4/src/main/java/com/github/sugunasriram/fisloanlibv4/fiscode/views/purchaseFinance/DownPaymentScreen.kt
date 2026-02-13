@@ -364,7 +364,7 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
                                 CoroutineScope(Dispatchers.Main).launch {
                                     Log.d("DownPaymentScreen", "Sugu loanTenure: $loanTenure")
                                     TokenManager.save("downpaymentAmount", amount.toString())
-                                    TokenManager.save("loanTenure", loanTenure.toString())
+                                    TokenManager.save("pfloanTenure", loanTenure.toString())
                                     TokenManager.save("productPriceAmount", productPrice.toString())
 
                                     webViewModel.setWebInProgress(true)

@@ -129,6 +129,7 @@ import java.time.format.DateTimeParseException
 import java.util.Locale
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.CancelLoan
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.CancelLoanResponse
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.sse.Catalog
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.grayD6
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal28Text700
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
@@ -758,7 +759,8 @@ fun RepaymentScheduleView(
                 fromFlow = fromFlow,
                 navController = navController,
                 isLoanClosed = isLoanClosed,
-                isLoanInitiated = isLoanInitiated
+                isLoanInitiated = isLoanInitiated,
+                loanAgreementViewModel = loanAgreementViewModel
             )
         }
     }
@@ -833,13 +835,14 @@ fun CompleteLoanDetails(
     navController: NavHostController,
     fromFlow: String,
     isLoanClosed: Boolean,
-    isLoanInitiated: Boolean
+    isLoanInitiated: Boolean,
+    loanAgreementViewModel: LoanAgreementViewModel
 ) {
     val relevantPayments = orderPaymentStatusList?.filter { payment ->
         payment.status == "PAID"
     }
     // Application Details
-    ApplicantDetails(loanDetails, context)
+    ApplicantDetails(loanDetails, context, loanAgreementViewModel = loanAgreementViewModel)
     // Loan Summary
     LoanSummary(loanDetails)
     // EMI Details Table
@@ -865,7 +868,8 @@ fun CompleteLoanDetails(
 }
 
 @Composable
-fun ApplicantDetails(loanDetails: OfferResponseItem, context: Context) {
+fun ApplicantDetails(loanDetails: OfferResponseItem, context: Context,
+                     loanAgreementViewModel:LoanAgreementViewModel) {
     DisplayCard(
         cardColor = appWhite,
         borderColor = appWhite,
@@ -1063,19 +1067,40 @@ fun ApplicantDetails(loanDetails: OfferResponseItem, context: Context) {
                                 ) &&
                                 displayValue?.startsWith("P") == true
                             ) {
-                                convertISODurationToReadable(displayValue ?: "").let {
-                                        readableDuration ->
-                                    OnlyReadAbleText(
-                                        textHeader = newTitle,
-                                        textValue = readableDuration ?: "",
-                                        style = normal14Text400,
-                                        textColorHeader = slateGrayColor,
-                                        end = 5.dp,
-                                        start = 5.dp,
-                                        top = 8.dp,
-                                        bottom = 8.dp
-                                    )
+//                                convertISODurationToReadable(displayValue ?: "").let {
+//                                        readableDuration ->
+//                                    OnlyReadAbleText(
+//                                        textHeader = newTitle,
+//                                        textValue = readableDuration ?: "",
+//                                        style = normal14Text400,
+//                                        textColorHeader = slateGrayColor,
+//                                        end = 5.dp,
+//                                        start = 5.dp,
+//                                        top = 8.dp,
+//                                        bottom = 8.dp
+//                                    )
+//                                }
+                                val parsed = convertISODurationToReadableWithTenure(displayValue)
+
+                                // Save tenure ONLY for TERM (not for frequency), and only once per months value
+                                if (newTitle.equals("term", ignoreCase = true)) {
+                                    parsed.tenureMonths?.let { months ->
+                                        LaunchedEffect(months) {
+                                            loanAgreementViewModel.saveLoanTenure(months)
+                                        }
+                                    }
                                 }
+
+                                OnlyReadAbleText(
+                                    textHeader = newTitle,
+                                    textValue = parsed.readable,
+                                    style = normal14Text400,
+                                    textColorHeader = slateGrayColor,
+                                    end = 5.dp,
+                                    start = 5.dp,
+                                    top = 8.dp,
+                                    bottom = 8.dp
+                                )
                             } else {
                                 OnlyReadAbleText(
                                     textHeader = newTitle,
@@ -1096,31 +1121,99 @@ fun ApplicantDetails(loanDetails: OfferResponseItem, context: Context) {
     }
 }
 
-fun convertISODurationToReadable(durationStr: String): String {
+
+data class DurationParseResult(
+    val readable: String,
+    val tenureMonths: Int? = null
+)
+
+/**
+ * Supports:
+ *  - Period: PnYnMnD (ex: P6M, P1Y6M, P15D)
+ *  - Duration: PTnHnM (ex: PT2H30M)
+ * Also sanitizes inputs like "P3D Days" -> "P3D"
+ */
+fun convertISODurationToReadableWithTenure(durationStr: String): DurationParseResult {
+    val raw = durationStr.trim()
+    if (raw.isBlank()) return DurationParseResult(readable = "")
+
+    // sanitize "P3D Days" -> "P3D"
+    val s = raw.split(Regex("\\s+")).firstOrNull().orEmpty()
+
     return try {
-        if (durationStr.startsWith("P") && !durationStr.contains("T")) {
-            val period = Period.parse(durationStr)
-            buildString {
-                if (period.years > 0) append("${period.years} year${if (period.years > 1) "s" else ""} ")
-                if (period.months > 0) append("${period.months} month${if (period.months > 1) "s" else ""} ")
-                if (period.days > 0) append("${period.days} day${if (period.days > 1) "s" else ""}")
-            }.trim()
-        } else if (durationStr.contains("T")) {
-            val duration = Duration.parse(durationStr)
-            val hours = duration.toHours()
-            val minutes = (duration.toMinutes() % 60)
-            buildString {
-                if (hours > 0) append("$hours hour${if (hours > 1) "s" else ""} ")
-                if (minutes > 0) append("$minutes minute${if (minutes > 1) "s" else ""}")
-            }.trim()
-        } else {
-            durationStr
+        // Time-based ISO duration: PTnHnM (we won't compute tenure months here)
+        if (s.startsWith("P", ignoreCase = true) && s.contains("T", ignoreCase = true)) {
+            // Simple parser for hours/minutes/seconds
+            val time = s.substringAfter("T", "")
+            val h = Regex("""(\d+)H""", RegexOption.IGNORE_CASE).find(time)?.groupValues?.get(1)?.toLongOrNull() ?: 0L
+            val m = Regex("""(\d+)M""", RegexOption.IGNORE_CASE).find(time)?.groupValues?.get(1)?.toLongOrNull() ?: 0L
+            val sec = Regex("""(\d+)S""", RegexOption.IGNORE_CASE).find(time)?.groupValues?.get(1)?.toLongOrNull() ?: 0L
+
+            val readable = buildString {
+                if (h > 0) append("$h hour${if (h > 1) "s" else ""} ")
+                if (m > 0) append("$m minute${if (m > 1) "s" else ""} ")
+                if (sec > 0) append("$sec second${if (sec > 1) "s" else ""}")
+            }.trim().ifBlank { raw }
+
+            DurationParseResult(readable = readable)
         }
-    } catch (e: DateTimeParseException) {
+        // Date-based ISO period: PnYnMnD
+        else if (s.startsWith("P", ignoreCase = true)) {
+            val years = Regex("""(\d+)Y""", RegexOption.IGNORE_CASE).find(s)?.groupValues?.get(1)?.toIntOrNull() ?: 0
+            val months = Regex("""(\d+)M""", RegexOption.IGNORE_CASE).find(s)?.groupValues?.get(1)?.toIntOrNull() ?: 0
+            val days = Regex("""(\d+)D""", RegexOption.IGNORE_CASE).find(s)?.groupValues?.get(1)?.toIntOrNull() ?: 0
+
+            val readable = buildString {
+                if (years > 0) append("$years year${if (years > 1) "s" else ""} ")
+                if (months > 0) append("$months month${if (months > 1) "s" else ""} ")
+                if (days > 0) append("$days day${if (days > 1) "s" else ""}")
+            }.trim().ifBlank { raw }
+
+            val tenureMonths = (years * 12) + months
+
+            DurationParseResult(
+                readable = readable,
+                tenureMonths = tenureMonths.takeIf { it > 0 }
+            )
+        } else {
+            DurationParseResult(readable = raw)
+        }
+    } catch (e: Exception) {
         Log.d("LoanOffersListDetail", "Error parsing duration: ${e.message}")
-        durationStr
+        DurationParseResult(readable = raw)
     }
 }
+
+/** If you still need the old function somewhere */
+fun convertISODurationToReadable(durationStr: String): String =
+    convertISODurationToReadableWithTenure(durationStr).readable
+
+
+//fun convertISODurationToReadable(durationStr: String): String {
+//    return try {
+//        if (durationStr.startsWith("P") && !durationStr.contains("T")) {
+//            val period = Period.parse(durationStr)
+//            buildString {
+//                if (period.years > 0) append("${period.years} year${if (period.years > 1) "s" else ""} ")
+//                if (period.months > 0) append("${period.months} month${if (period.months > 1) "s" else ""} ")
+//                if (period.days > 0) append("${period.days} day${if (period.days > 1) "s" else ""}")
+//            }.trim()
+//        } else if (durationStr.contains("T")) {
+//            val duration = Duration.parse(durationStr)
+//            val hours = duration.toHours()
+//            val minutes = (duration.toMinutes() % 60)
+//            buildString {
+//                if (hours > 0) append("$hours hour${if (hours > 1) "s" else ""} ")
+//                if (minutes > 0) append("$minutes minute${if (minutes > 1) "s" else ""}")
+//            }.trim()
+//        } else {
+//            durationStr
+//        }
+//    } catch (e: DateTimeParseException) {
+//        Log.d("LoanOffersListDetail", "Error parsing duration: ${e.message}")
+//        durationStr
+//    }
+//}
 
 @Composable
 fun LoanSummary(offer: OfferResponseItem) {
@@ -2258,3 +2351,4 @@ fun PrePartPaymentResponseHandle(
         }
     }
 }
+

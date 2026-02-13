@@ -1,5 +1,6 @@
 package com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan
 
+// For coroutines + the specific exception
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -36,13 +37,12 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collectLatest
-
-// For coroutines + the specific exception
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.CancelLoan
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.CancelLoanResponse
+import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
 
 class LoanAgreementViewModel : BaseViewModel() {
 
@@ -118,6 +118,12 @@ class LoanAgreementViewModel : BaseViewModel() {
 
     private val _pfLoanCancelResponse = MutableStateFlow<CancelLoanResponse?>(null)
     val pfLoanCancelResponse: StateFlow<CancelLoanResponse?> = _pfLoanCancelResponse
+
+    fun saveLoanTenure(months: Int) {
+        viewModelScope.launch {
+            TokenManager.save("pfloanTenure", months.toString())
+        }
+    }
 
     fun cancelLoanRequest(cancelLoan: CancelLoan, context: Context) {
         _pfLoanCancelling.value = true
