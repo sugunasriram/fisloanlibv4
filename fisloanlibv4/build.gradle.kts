@@ -134,8 +134,7 @@ dependencies {
     val junitTestVersion = "1.2.1"
     val accomPagerVersion = "0.20.0"
     val accomVersion = "0.30.1"
-    val ktorVersion = "1.6.4"
-    val kotlinSerializationVersion = "1.3.2"
+
     val dataStoreVersion = "1.1.1"
     val coilVersion = "2.2.2"
     val webkitVersion = "1.11.0"
@@ -147,6 +146,10 @@ dependencies {
     val sysUiControllerVersion = "0.27.0"
     val securityCryptoVersion = "1.1.0-alpha06"
     val easyPermissionVersion = "3.0.0"
+
+    val kotlinSerializationVersion = "1.3.2"
+    val ktorVersion = "1.6.4"
+    val coroutineVersion = "1.7.3"
 
 // Basic Android
     // Basic Android
@@ -199,8 +202,8 @@ dependencies {
 
     // SSE
     implementation("io.ktor:ktor-client-websockets:$ktorVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$ktorVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$ktorVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutineVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutineVersion")
 
     // Android Permissions
     implementation("pub.devrel:easypermissions:$easyPermissionVersion")
