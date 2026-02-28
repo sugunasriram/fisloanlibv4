@@ -49,6 +49,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.painter.Painter
@@ -100,6 +101,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal18Text400
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal18Text500
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal20Text500
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal20Text700
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.slateGrayColor
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.primaryOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.auth.OtpViewModel
@@ -220,9 +222,9 @@ fun InputField(
     selectedRadio: String = radioList.first(),
     onRadioSelected: (String) -> Unit = {},
     colors: TextFieldColors = TextFieldDefaults.outlinedTextFieldColors(
-        focusedBorderColor = appTheme,
-        unfocusedBorderColor = backgroundOrange,
-        cursorColor = cursorColor,
+        focusedBorderColor = MaterialTheme.colors.primary,
+        unfocusedBorderColor = MaterialTheme.colors.background,
+        cursorColor = MaterialTheme.colors.primary,
         errorBorderColor = errorRed,
         disabledBorderColor = Color.Transparent
     )
@@ -249,7 +251,7 @@ fun InputField(
                 TextFieldDefaults.outlinedTextFieldColors(
                     focusedBorderColor = Color.Transparent,
                     unfocusedBorderColor = Color.Transparent,
-                    cursorColor = cursorColor,
+                    cursorColor = MaterialTheme.colors.primary,
                     errorBorderColor = errorRed,
                     disabledBorderColor = Color.Transparent
                 )
@@ -285,7 +287,8 @@ fun InputField(
                     Image(
                         painter = leadingImage,
                         contentDescription = null,
-                        modifier = Modifier.padding(start = 10.dp).size(24.dp)
+                        modifier = Modifier.padding(start = 10.dp).size(24.dp),
+                        colorFilter = ColorFilter.tint(MaterialTheme.colors.primary)
                     )
                 }
                 if (!showBox) {
@@ -310,7 +313,7 @@ fun InputField(
                             TextFieldDefaults.outlinedTextFieldColors(
                                 focusedBorderColor = Color.Transparent,
                                 unfocusedBorderColor = Color.Transparent,
-                                cursorColor = cursorColor,
+                                cursorColor = MaterialTheme.colors.primary,
                                 errorBorderColor = errorRed,
                                 disabledBorderColor = Color.Transparent
                             )
@@ -340,7 +343,7 @@ fun InputField(
                                     readOnly = true,
                                     keyboardOptions = KeyboardOptions.Default,
                                     colors = TextFieldDefaults.outlinedTextFieldColors(
-                                        focusedBorderColor = appTheme,
+                                        focusedBorderColor = MaterialTheme.colors.primary,
                                         unfocusedBorderColor = Color.Transparent,
                                         cursorColor = Color.Transparent,
                                         errorBorderColor = errorRed,
@@ -425,13 +428,13 @@ fun InputField(
                                     }
                                 }
                             }
-//                            if (!error.isNullOrEmpty()) {
-//                                Text(
-//                                    text = error, style = normal12Text400,
-//                                    color = errorRed,
-//                                    modifier = Modifier.padding(start = 16.dp, top = 2.dp)
-//                                )
-//                            }
+                            if (!error.isNullOrEmpty()) {
+                                Text(
+                                    text = error, style = normal12Text400,
+                                    color = errorRed,
+                                    modifier = Modifier.padding(start = 16.dp, top = 2.dp)
+                                )
+                            }
                         }
                     }
                 }
@@ -453,7 +456,7 @@ fun OutLineTextFieldHeader(
     Row() {
         Text(
             text = topText,
-            color = if (showOptional) appBlack else appOrange,
+            color = if (showOptional) appBlack else MaterialTheme.colors.primary,
             style = normal14Text400,
             modifier = Modifier.padding(
                 start = topTextStart,
@@ -511,25 +514,27 @@ fun SignUpText(
 fun HyperText(
     text: String,
     modifier: Modifier = Modifier,
-    textColor: Color = primaryOrange,
+    textColor: Color = MaterialTheme.colors.primary,
+    textStyle: TextStyle = normal20Text500,
     start: Dp = 8.dp,
     end: Dp = 8.dp,
     top: Dp = 8.dp,
     bottom: Dp = 8.dp,
     boxTop: Dp = 0.dp,
+    boxStart: Dp = 0.dp,
     alignment: Alignment = Alignment.TopEnd,
     onClick: () -> Unit
 ) {
     Box(
         contentAlignment = alignment,
         modifier = modifier
-            .padding(top = boxTop)
+            .padding(top = boxTop,start=boxStart)
             .fillMaxSize()
     ) {
         Box(
             contentAlignment = Alignment.Center,
             modifier = modifier.wrapContentWidth()
-                .background(backgroundOrange, RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colors.background, RoundedCornerShape(8.dp))
         ) {
             Text(
                 text = text,
@@ -537,38 +542,7 @@ fun HyperText(
                 modifier = modifier
                     .clickable { onClick() }
                     .padding(start = start, top = top, bottom = bottom, end = end),
-                style = normal20Text500
-            )
-        }
-    }
-}
-
-@Composable
-fun LanguageText(
-    language: String,
-    showIcon: Boolean,
-    style: TextStyle = normal14Text400,
-    start: Dp = 24.dp,
-    end: Dp = 24.dp,
-    top: Dp = 10.dp,
-    bottom: Dp = 10.dp,
-    height: Dp = 35.dp,
-    width: Dp = 1.dp,
-    onClick: () -> Unit
-) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .clickable { onClick() }
-            .fillMaxWidth()
-            .padding(start = start, end = end, top = top, bottom = bottom)
-    ) {
-        Text(text = language, style = style)
-        if (showIcon) {
-            Image(
-                painter = painterResource(id = R.drawable.correct_icon),
-                contentDescription = stringResource(id = R.string.correct_icon)
+                style = textStyle
             )
         }
     }
@@ -741,7 +715,7 @@ fun SpaceBetweenTextIcon(
         Image(
             painter = painterResource(id = image),
             contentDescription = stringResource(id = R.string.correct_icon),
-            modifier
+            modifier = modifier
                 .clickable { onClick() }
                 .padding(start = 4.dp, top = 4.dp, bottom = 8.dp, end = imageEnd)
                 .size(imageSize)
@@ -755,7 +729,7 @@ fun HeaderNextRowValue(
     textValue: String,
     modifier: Modifier,
     textColorHeader: Color = appBlack,
-    textColorValue: Color = appBlueTitle,
+    textColorValue: Color = appBlack,
     rowBackground: Color = Color.Transparent,
     start: Dp = 10.dp,
     end: Dp = 20.dp,
@@ -812,13 +786,13 @@ fun TextInputLayout(
         fontSize = 20.sp,
         fontFamily = FontFamily(Font(R.font.robotocondensed_semibold)),
         fontWeight = FontWeight(400),
-        color = appOrange
+        color = MaterialTheme.colors.primary,
     )
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
     Column(modifier = modifier) {
-        var newText: String = text.replace(hintText.toLowerCase(Locale.ROOT), "").trim()
+        var newText: String = text.replace(hintText.lowercase(Locale.ROOT), "").trim()
         if (isFocused) {
             Text(
                 text = hintText,
@@ -826,8 +800,8 @@ fun TextInputLayout(
                 style = normal18Text400,
                 textAlign = TextAlign.Start
             )
-            newText = textFieldVal.text.replace(hintText.toLowerCase(Locale.ROOT), "").trim()
-            if (newText.isEmpty() || newText.equals("0")) {
+            newText = textFieldVal.text.replace(hintText.lowercase(Locale.ROOT), "").trim()
+            if (newText.isEmpty() || newText == "0") {
                 newText = ""
             }
         }
@@ -840,9 +814,9 @@ fun TextInputLayout(
             keyboardOptions = keyboardOptions,
             textStyle = style.copy(textAlign = TextAlign.Center),
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = appTheme,
-                unfocusedBorderColor = appTheme,
-                cursorColor = cursorColor
+                focusedBorderColor = MaterialTheme.colors.primary,
+                unfocusedBorderColor = MaterialTheme.colors.primary,
+                cursorColor = MaterialTheme.colors.primary
             ),
             readOnly = readOnly,
             shape = RoundedCornerShape(16.dp)
@@ -1131,8 +1105,10 @@ fun OnlyClickAbleText(
     textValue: String,
     modifier: Modifier = Modifier,
     end: Dp = 20.dp,
-    textColorHeader: Color = appBlueTitle,
-    textColorValue: Color = appOrange,
+    textColorHeader: Color = slateGrayColor,
+    textColorValue: Color = MaterialTheme.colors.primary,
+    headerWeight:Float=0.7f,
+    valueWeight:Float=1f,
     start: Dp = 10.dp,
     top: Dp = 8.dp,
     bottom: Dp = 0.dp,
@@ -1151,14 +1127,14 @@ fun OnlyClickAbleText(
             text = textHeader,
             style = style,
             color = textColorHeader,
-            modifier = Modifier.weight(0.7f)
+            modifier = Modifier.weight(headerWeight)
         )
         Text(
             text = textValue,
             style = style,
             color = textColorValue,
             modifier = Modifier
-                .weight(1f)
+                .weight(valueWeight)
                 .clickable { onClick() },
             textAlign = textValueAlignment
         )

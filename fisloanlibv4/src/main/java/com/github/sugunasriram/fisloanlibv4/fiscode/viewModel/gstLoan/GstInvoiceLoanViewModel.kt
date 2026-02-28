@@ -9,7 +9,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.network.core.ApiRepository
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.core.ApiRepository.handleAuthGetAccessTokenApi
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.gst.GstInvoice
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
-import io.ktor.client.features.ResponseException
+import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

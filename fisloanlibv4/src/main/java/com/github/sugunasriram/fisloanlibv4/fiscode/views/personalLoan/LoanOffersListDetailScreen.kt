@@ -235,6 +235,8 @@ fun LoanOffersListDetailsScreen(
         middleLoan -> MiddleOfTheLoanScreen(navController, errorMessage)
 //        middleLoan -> CommonMethods().ShowMiddleLoanErrorScreen(navController, errorMessage)
         else -> {
+            Log.d("Sugu 0", "productPriceAmountValue : "+productPriceValue)  ;
+
             LoanOfferListDetailView(
                 isEditProcess = isEditProcess,
                 isEdited = isEdited,
@@ -301,6 +303,8 @@ fun LoanOfferListDetailView(
     coroutineScope: CoroutineScope
 ) {
     var backPressedTime by remember { mutableLongStateOf(0L) }
+
+    Log.d("Sugu 1", "productPriceAmountValue : "+productPriceAmountValue)  ;
 
     if (isEditProcess  || productPriceAmountValue == 0.0f) {
         ProcessingAnimation(text = "Processing Please Wait...", image = R.raw.we_are_currently_processing_hour_glass)

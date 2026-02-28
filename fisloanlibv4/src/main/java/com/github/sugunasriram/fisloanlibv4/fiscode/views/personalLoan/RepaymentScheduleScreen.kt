@@ -1063,6 +1063,7 @@ fun ApplicantDetails(loanDetails: OfferResponseItem, context: Context,
                                 )
                             } else if ((
                                 newTitle.equals("term", ignoreCase = true) ||
+                                newTitle.contains("validity", ignoreCase = true) ||
                                     newTitle.contains("frequency", ignoreCase = true)
                                 ) &&
                                 displayValue?.startsWith("P") == true

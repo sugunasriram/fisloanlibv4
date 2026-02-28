@@ -28,11 +28,12 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.UpdatePro
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.igm.ImageUploadBody
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
-import io.ktor.client.features.ResponseException
+import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
@@ -58,7 +59,8 @@ class RegisterViewModel : ViewModel() {
 
     private val _middleLoan = MutableLiveData(false)
     val middleLoan: LiveData<Boolean> = _middleLoan
-
+    private val _navigationToSignIn = MutableStateFlow(false)
+    val navigationToSignIn: StateFlow<Boolean> = _navigationToSignIn
     private val _showLoader = MutableLiveData(false)
     val showLoader: LiveData<Boolean> = _showLoader
 
@@ -255,8 +257,7 @@ class RegisterViewModel : ViewModel() {
     val panApiThrewError: StateFlow<Boolean> = _panApiThrewError
 
     fun onPanNumberChanged(value: String, context: Context, navController: NavHostController) {
-//        val sanitizedInput = value.replace(Regex("[^a-zA-Z0-9]"), "").take(10)
-        _panNumber.value = value
+        _panNumber.value = value.uppercase()
         if (CommonMethods().isValidPanNumber(value) != true) {
             _panError.value = context.getString(R.string.enter_valid_pan_number)
         } else {
@@ -649,7 +650,7 @@ class RegisterViewModel : ViewModel() {
 //        isGST:Boolean
     ) {
         clearMessage()
-        if (!validateProfile(profile, officialAddressField, context, profileRequester)) {
+        if (!validateProfile(profile, context, profileRequester)) {
             _showErrorMsg.value = true
             _errorMsg.value = context.getString(R.string.please_check_all_fields)
         } else if (isUploadDocument && (profile.statements.isNullOrEmpty() || profile.invoices.isNullOrEmpty())) {
@@ -666,7 +667,6 @@ class RegisterViewModel : ViewModel() {
     }
     private fun validateProfile(
         profile: Profile,
-        officialAddressField: AddressModel,
         context: Context,
         profileRequester: ProfileFocusRequester
     ): Boolean {
@@ -833,11 +833,11 @@ class RegisterViewModel : ViewModel() {
         _shouldShowKeyboard.value = false
     }
 
-    private val _isUpdating = MutableStateFlow(false)
-    val isUpdating: StateFlow<Boolean> = _isUpdating
+    private val _isUpdatingProfile = MutableStateFlow(false)
+    val isUpdatingProfile: StateFlow<Boolean> = _isUpdatingProfile
 
-    private val _upDated = MutableStateFlow(false)
-    val upDated: StateFlow<Boolean> = _upDated
+    private val _upDatedProfile = MutableStateFlow(false)
+    val upDatedProfile: StateFlow<Boolean> = _upDatedProfile
 
     private val _shownMsg = MutableStateFlow(false)
     val shownMsg: StateFlow<Boolean> = _shownMsg
@@ -854,7 +854,7 @@ class RegisterViewModel : ViewModel() {
         context: Context,
         navController: NavHostController
     ) {
-        _isUpdating.value = true
+        _isUpdatingProfile.value = true
         viewModelScope.launch(Dispatchers.IO) {
             handleUpdateUserDetails(profile, context, navController)
         }
@@ -870,7 +870,7 @@ class RegisterViewModel : ViewModel() {
             ApiRepository.updateUserDetails(profile)
         }.onSuccess { response ->
             response?.let {
-                handleUpdateUserDetailsSuccess(response, profile)
+                handleUpdateUserDetailsSuccess(response)
             }
         }.onFailure { error ->
             // Session Management
@@ -892,10 +892,10 @@ class RegisterViewModel : ViewModel() {
         }
     }
 
-    private suspend fun handleUpdateUserDetailsSuccess(response: UpdateProfile, profile: Profile) {
+    private suspend fun handleUpdateUserDetailsSuccess(response: UpdateProfile) {
         withContext(Dispatchers.Main) {
-            _isUpdating.value = false
-            _upDated.value = true
+            _isUpdatingProfile.value = false
+            _upDatedProfile.value = true
             _shownMsg.value = false
             _updateResponse.value = response
         }
@@ -923,7 +923,7 @@ class RegisterViewModel : ViewModel() {
                 )
             }
         }
-        _isUpdating.value = false
+        _isUpdatingProfile.value = false
     }
 
     private val _checkBoxDetail: MutableLiveData<Boolean> = MutableLiveData(false)
@@ -937,17 +937,17 @@ class RegisterViewModel : ViewModel() {
         _checkBoxDetail.value = false
     }
 
-    private val _inProgress = MutableStateFlow(false)
-    val inProgress: StateFlow<Boolean> = _inProgress
+    private val _gettingUserDetails = MutableStateFlow(false)
+    val gettingUserDetails: StateFlow<Boolean> = _gettingUserDetails
 
-    private val _isCompleted = MutableStateFlow(false)
-    val isCompleted: StateFlow<Boolean> = _isCompleted
+    private val _gotUserDetails = MutableStateFlow(false)
+    val gotUserDetails: StateFlow<Boolean> = _gotUserDetails
 
-    private val _getUserResponse = MutableStateFlow<ProfileResponse?>(null)
-    val getUserResponse: StateFlow<ProfileResponse?> = _getUserResponse
+    private val _getUserResponse = MutableStateFlow<UpdateProfile?>(null)
+    val getUserResponse: StateFlow<UpdateProfile?> = _getUserResponse
 
     fun getUserDetail(context: Context, navController: NavHostController) {
-        _inProgress.value = true
+        _gettingUserDetails.value = true
         viewModelScope.launch(Dispatchers.IO) {
             handleUserDetail(context, navController)
         }
@@ -985,15 +985,23 @@ class RegisterViewModel : ViewModel() {
         }
     }
 
-    private suspend fun handleSuccessUserDetail(response: ProfileResponse?) {
+    private suspend fun handleSuccessUserDetail(response: UpdateProfile?) {
         withContext(Dispatchers.Main) {
+
             response?.let { it ->
+                val incomeRangeMap = mapOf(
+                    "upto_1lakh" to  "Below 1 Lakh",
+                    "above_1lakh_upto_5lakh" to "1–5 Lakh",
+                    "above_5lakh_upto_10lakh" to "5–10 Lakh",
+                    "above_10lakh_upto_25lakh" to "10–25 Lakh",
+                    "above_25lakh_upto_1cr" to "25 Lakh-1 Crore",
+                    "above_1cr" to "1 Crore Above"
+                )
                 _firstName.value = it.data?.firstName ?: ""
                 _lastName.value = it.data?.lastName
                 _personalEmailId.value = it.data?.email
                 _officialEmailId.value = it.data?.officialEmail
                 _phoneNumber.value = it.data?.mobileNumber
-                _mobileNumber.value = it.data?.mobileNumber
                 _dob.value = it.data?.dob
                 _gender.value = it.data?.gender
                 _panNumber.value = it.data?.panNumber
@@ -1001,7 +1009,7 @@ class RegisterViewModel : ViewModel() {
                 _companyName.value = it.data?.companyName
                 _udyamNumber.value = it.data?.udyamNumber
                 _income.value = it.data?.income
-//
+
                 _area1.value = it.data?.address1
                 _district1.value = it.data?.address2
                 _city1.value = it.data?.city1
@@ -1009,8 +1017,8 @@ class RegisterViewModel : ViewModel() {
                 _pinCode1.value = it.data?.pincode1
                 _officialAddressField.value = AddressModel(_area1.value, _district1.value, _city1.value, _state1.value, _pinCode1.value)
 //
-                _inProgress.value = false
-                _isCompleted.value = true
+                _gettingUserDetails.value = false
+                _gotUserDetails.value = true
                 _getUserResponse.value = it
                 TokenManager.save("userName", it.data?.firstName.toString())
                 TokenManager.save("mobileNumber", it.data?.mobileNumber.toString())

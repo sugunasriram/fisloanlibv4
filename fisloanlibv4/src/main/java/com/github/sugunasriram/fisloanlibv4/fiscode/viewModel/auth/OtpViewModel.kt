@@ -20,8 +20,8 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.LoginDeta
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.BaseViewModel
-import io.ktor.client.features.ClientRequestException
-import io.ktor.client.features.ResponseException
+import io.ktor.client.plugins.ClientRequestException
+import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow

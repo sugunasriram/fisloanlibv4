@@ -5,11 +5,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.core.ApiRepository
-import com.github.sugunasriram.fisloanlibv4.fiscode.network.core.ApiRepository.handleAuthGetAccessTokenApi
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.StatusResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.UserStatus
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
-import io.ktor.client.features.ResponseException
+import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -56,7 +55,7 @@ class UserStatusViewModel : BaseViewModel() {
     val checked: StateFlow<Boolean> = _checked
 
     private val _navigationToSignup = MutableStateFlow(false)
-    val navigationToSignIn: StateFlow<Boolean> = _navigationToSignup
+    val navigationToSignUp: StateFlow<Boolean> = _navigationToSignup
 
     fun getUserStatus(loanType: String, context: Context) {
         _checkingStatus.value = true
@@ -79,18 +78,17 @@ class UserStatusViewModel : BaseViewModel() {
                 error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                if (handleAuthGetAccessTokenApi()) {
+                if (ApiRepository.handleAuthGetAccessTokenApi()) {
                     handleGstUserStatus(
                         loanType = loanType,
                         context = context,
-                        checkForAccessToken =
-                        false
+                        checkForAccessToken = false
                     )
                 } else {
                     _navigationToSignup.value = true
                 }
             } else {
-                handleGstUserStatusFailure(error = error, context = context)
+                handleGetUserStatusFailure(error = error, context = context)
             }
         }
     }
@@ -103,7 +101,7 @@ class UserStatusViewModel : BaseViewModel() {
         }
     }
 
-    private suspend fun handleGstUserStatusFailure(error: Throwable, context: Context) {
+    private suspend fun handleGetUserStatusFailure(error: Throwable, context: Context) {
         withContext(Dispatchers.Main) {
             if (error is ResponseException) {
                 CommonMethods().handleResponseException(
@@ -153,7 +151,7 @@ class UserStatusViewModel : BaseViewModel() {
                 error is ResponseException &&
                 error.response.status.value == 401
             ) {
-                if (handleAuthGetAccessTokenApi()) {
+                if (ApiRepository.handleAuthGetAccessTokenApi()) {
                     handleStatus(
                         loanType = loanType,
                         context = context,
@@ -164,7 +162,7 @@ class UserStatusViewModel : BaseViewModel() {
                     _navigationToSignup.value = true
                 }
             } else {
-                handleGstUserStatusFailure(error = error, context = context)
+                handleGetUserStatusFailure(error = error, context = context)
             }
         }
     }

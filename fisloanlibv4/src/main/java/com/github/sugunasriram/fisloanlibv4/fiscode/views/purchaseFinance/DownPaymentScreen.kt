@@ -162,8 +162,8 @@ val registerViewModel: RegisterViewModel = viewModel()
     val showNoLenderResponse by webViewModel.showNoLenderResponse.collectAsState()
     val lenderStatusProgress by webViewModel.lenderStatusProgress.collectAsState()
 
-    val inProgress by registerViewModel.inProgress.collectAsState()
-    val isCompleted by registerViewModel.isCompleted.collectAsState()
+    val inProgress by registerViewModel.gettingUserDetails.collectAsState()
+    val isCompleted by registerViewModel.gotUserDetails.collectAsState()
     val userDetails by registerViewModel.getUserResponse.collectAsState()
 
     val context = LocalContext.current
@@ -258,6 +258,9 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
                                     TokenManager.save("downpaymentAmount", amount.toString())
                                     TokenManager.save("pfloanTenure", loanTenure.toString())
                                     TokenManager.save("productPriceAmount", productPrice.toString())
+
+                                    Log.d("Sugu 12", "productPriceAmountValue : " +
+                                            ""+productPrice.toString())  ;
 
                                     webViewModel.setWebInProgress(true)
                                     try {
@@ -367,6 +370,9 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
                                     TokenManager.save("pfloanTenure", loanTenure.toString())
                                     TokenManager.save("productPriceAmount", productPrice.toString())
 
+                                    Log.d("Sugu 11", "productPriceAmountValue : " +
+                                            ""+productPrice.toString())  ;
+
                                     webViewModel.setWebInProgress(true)
 
                                     try {
@@ -401,6 +407,9 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
                                         TokenManager.save("downpaymentAmount", amount.toString())
                                         TokenManager.save("pfloanTenure", loanTenure.toString())
                                         TokenManager.save("productPriceAmount", productPrice.toString())
+
+                                        Log.d("Sugu 10", "productPriceAmountValue : " +
+                                                ""+productPrice.toString())  ;
 
                                         loadWebScreen(
                                             fromFlow = fromFlow,

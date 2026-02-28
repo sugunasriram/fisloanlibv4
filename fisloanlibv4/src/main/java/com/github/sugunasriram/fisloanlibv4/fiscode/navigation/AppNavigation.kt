@@ -31,7 +31,7 @@ fun navigateToOtpScreen(
     }
 }
 
-fun navigateToUpdateProfileScreen(navController: NavHostController, closeCurrent: Boolean = false, fromFlow: String) {
+fun navigateToUpdateProfileScreen(navController: NavHostController, fromFlow: String,closeCurrent: Boolean = false, ) {
     navController.navigate("${AppScreens.UpdateProfileScreen.route}/$fromFlow") {
         shouldCloseCurrent(navController, closeCurrent)
     }
@@ -142,14 +142,14 @@ fun navigateToBureauOffersScreen(
 fun navigateToAccountAggregatorScreen(
     navController: NavHostController,
     loanPurpose: String,
-    fromFlow: String,
+    fromFlow: String,fromScreen: String,
     id: String,
     transactionId: String,
     url: String,
     closeCurrent: Boolean = false
 ) {
     val encodedUrl = Uri.encode(url)
-    navController.navigate("${AppScreens.AccountAggregatorScreen.route}/$loanPurpose/$fromFlow/$id/$transactionId/$encodedUrl") {
+    navController.navigate("${AppScreens.AccountAggregatorScreen.route}/$loanPurpose/$fromFlow/$fromScreen/$id/$transactionId/$encodedUrl") {
         shouldCloseCurrent(navController, closeCurrent)
     }
 }
@@ -208,12 +208,12 @@ fun navigateToLoanStatusScreen(navController: NavHostController,loanType:String,
     }
 }
 
-fun navigateToPrePaymentScreen(navController: NavHostController, closeCurrent: Boolean = false) {
-    navController.navigate(AppScreens.PrePaymentScreen.route) {
+fun navigateToPrePaymentScreen(navController: NavHostController, loanType: String, closeCurrent: Boolean = false) {
+    val encodedLoanType = Uri.encode(loanType)
+    navController.navigate("${AppScreens.PrePaymentScreen.route}/$encodedLoanType") {
         shouldCloseCurrent(navController, closeCurrent)
     }
 }
-
 fun navigateLoanStatusDetailScreen(
     navController: NavHostController,
     closeCurrent: Boolean = false
@@ -358,9 +358,12 @@ fun navigateToAccountDetailsScreen(
     id: String,
     fromFlow: String,
     fromScreen: String,
+    selectedNomineeIds: List<String>? = null,isKyc: Boolean=false,
     closeCurrent: Boolean = false
 ) {
-    navController.navigate("${AppScreens.AccountDetailsScreen.route}/$id/$fromFlow/$fromScreen") {
+    val nomineeIdsArg = if (selectedNomineeIds.isNullOrEmpty()) "[]"
+    else selectedNomineeIds.joinToString(",")
+    navController.navigate("${AppScreens.AccountDetailsScreen.route}/$id/$fromFlow/$fromScreen/$nomineeIdsArg/$isKyc") {
         shouldCloseCurrent(navController, closeCurrent)
     }
 }
@@ -374,11 +377,14 @@ fun navigateToEditAccountDetailsScreen(
     bankAccountType: String,
     bankIfsc: String,
     bankAccountNumber: String,
+    selectedNomineeIds: List<String>? = null,isKyc: Boolean=false,
     closeCurrent: Boolean = false
 ) {
+    val nomineeIdsArg = if (selectedNomineeIds.isNullOrEmpty()) "[]"
+    else selectedNomineeIds.joinToString(",")
     navController.navigate(
         "${AppScreens.EditAccountDetailsScreen.route}/$id/$fromFlow/$accountId" +
-            "/$bankAccountHolderName/$bankAccountType/$bankIfsc/$bankAccountNumber"
+            "/$bankAccountHolderName/$bankAccountType/$bankIfsc/$bankAccountNumber/$nomineeIdsArg/$isKyc"
     ) {
         shouldCloseCurrent(navController, closeCurrent)
     }

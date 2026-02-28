@@ -100,6 +100,7 @@ import kotlinx.serialization.json.Json
 import java.util.Locale
 import androidx.compose.material.Card
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFISExitScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.ItemTagsItem
 
 private val json = Json { prettyPrint = true }
 
@@ -158,6 +159,11 @@ fun BureauOffersScreen(
         initialValue = ModalBottomSheetValue.Hidden,
         skipHalfExpanded = true
     )
+    val selectedOffer = remember { mutableStateOf<Offer?>(null) }
+    val multiOffersBottomSheetState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
+    )
 
     // use decodedWithoutAAResponse if loanPurpose matches
     val effectiveSearchResponse = if (loanPurpose == stringResource(R.string.getUerFlow)) {
@@ -208,14 +214,14 @@ fun BureauOffersScreen(
                     ),
                     searchModel = null
                 )
-            }
-            else {
+            } else {
                 if (effectiveSearchResponse?.data?.offerResponse.isNullOrEmpty()) {
                     if (effectiveSearchResponse?.data?.url != null) {
                         navigateToAccountAggregatorScreen(
                             navController,
                             loanPurpose,
                             fromFlow,
+                            "WithOutBureauOffers",
                             effectiveSearchResponse?.data?.id.toString(),
                             effectiveSearchResponse?.data?.transactionId.toString(),
                             effectiveSearchResponse?.data?.url.toString()
@@ -237,6 +243,25 @@ fun BureauOffersScreen(
                             )
                         }
                     ) {
+                        CustomModalBottomSheet(
+                            bottomSheetState = multiOffersBottomSheetState,
+                            sheetContent = {
+                                selectedOffer.value?.offer?.let {
+                                    selectedOffer.value?.id?.let { id ->
+                                        MultiOfferContent(
+                                            bottomSheetState = multiOffersBottomSheetState,
+                                            coroutineScope = coroutineScope,
+                                            context = context,
+                                            selectedOffers = selectedOffer.value?.offer?.itemTags?.filterNotNull(),
+                                            data = it,
+                                            navController = navController,
+                                            fromFlow = fromFlow,
+                                            id = id
+                                        )
+                                    }
+                                }
+                            }
+                        ) {
                             FixedTopBottomScreen(
                                 navController = navController,
                                 topBarBackgroundColor = appOrange,
@@ -254,6 +279,7 @@ fun BureauOffersScreen(
                                             navController,
                                             loanPurpose,
                                             fromFlow,
+                                            "WithBureauOffers",
                                             effectiveSearchResponse.data.id.toString(),
                                             effectiveSearchResponse.data.transactionId.toString(),
                                             effectiveSearchResponse.data.url.toString()
@@ -288,7 +314,35 @@ fun BureauOffersScreen(
                                 )
 
                                 filteredOffers.forEachIndexed { index, offer ->
-                                    OfferCard(navController, offer, fromFlow, index)
+                                    OfferCard(
+                                        navController,
+                                        offer,
+                                        fromFlow,
+                                        index,
+                                        onClick = {
+//                                            selectedOffer.value = offer // Set the current selected offer
+//                                            coroutineScope.launch { multiOffersBottomSheetState.show() }
+                                            val itemTagsSize = offer.offer?.itemTags?.size ?: 0
+                                            if (itemTagsSize > 1) {
+                                                selectedOffer.value = offer
+                                                coroutineScope.launch { multiOffersBottomSheetState.show() }
+                                            } else {
+                                                offer.offer?.id?.let { id ->
+                                                    val json = Json { prettyPrint = true }
+                                                    val responseItem = json.encodeToString(OfferResponseItem.serializer(), offer.offer)
+                                                    offer.id?.let {
+                                                        navigateToLoanOffersListDetailScreen(
+                                                            navController = navController,
+                                                            responseItem = responseItem,
+                                                            id = it,
+                                                            showButtonId = "1",
+                                                            fromFlow = fromFlow
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    )
                                     Spacer(modifier = Modifier.height(8.dp))
                                 }
                                 effectiveSearchResponse?.data?.rejectedLenders
@@ -320,9 +374,90 @@ fun BureauOffersScreen(
                                     }
                             }
                         }
+                    }
                 }
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun MultiOfferContent(
+    bottomSheetState: ModalBottomSheetState,
+    coroutineScope: CoroutineScope,
+    context: Context,
+    selectedOffers: List<ItemTagsItem>?,
+    data: OfferResponseItem,
+    navController: NavHostController,
+    fromFlow: String,
+    id: String
+) {
+    val bankName = data.providerDescriptor?.name ?: "Bank"
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 10.dp)
+            .background(shape = RoundedCornerShape(40.dp), color = Color.White)
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = bankName,
+                style = bold20Text100,
+                color = appBlack,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.weight(0.9f)
+            )
+            Icon(
+                painter = painterResource(id = R.drawable.close_icon),
+                contentDescription = stringResource(id = R.string.bottom_sheet_close),
+                modifier = Modifier.weight(0.1f)
+                    .padding(end = 10.dp, top = 10.dp, bottom = 10.dp)
+                    .clickable {
+                        coroutineScope.launch { bottomSheetState.hide() }
+                    }
+            )
+        }
+
+        HorizontalDivider(top = 3.dp, color = backgroundOrange, start = 3.dp, end = 3.dp)
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp)
+        ) {
+            selectedOffers?.forEach { offerTag ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 6.dp)
+                        .clickable {
+                            val json = Json { prettyPrint = true }
+                            val responseItem = json.encodeToString(OfferResponseItem.serializer(), data)
+                            navigateToLoanOffersListDetailScreen(
+                                navController = navController,
+                                responseItem = responseItem,
+                                id = id,
+                                showButtonId = "1", // or appropriate value
+                                fromFlow = fromFlow
+                            )
+                            coroutineScope.launch { bottomSheetState.hide() }
+                        },
+                    shape = RoundedCornerShape(12.dp),
+                    elevation = 8.dp
+                ) {
+                    Text(
+                        text = "Yet to be updated...",
+                        style = normal14Text700,
+                        color = appBlack,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(5.dp).background(appOrange))
     }
 }
 
@@ -394,7 +529,13 @@ fun loadWebScreen(
 }
 
 @Composable
-fun OfferCard(navController: NavHostController, offerResponseItem: Offer?, fromFlow: String, index: Int) {
+fun OfferCard(
+    navController: NavHostController,
+    offerResponseItem: Offer?,
+    fromFlow: String,
+    index: Int,
+    onClick: () -> Unit
+) {
     offerResponseItem?.let { offerResponse ->
         offerResponse.offer?.let { offer ->
             val json = Json { prettyPrint = true }
@@ -408,19 +549,21 @@ fun OfferCard(navController: NavHostController, offerResponseItem: Offer?, fromF
             var tenure = "-"
             var installmentAmount = "-"
             if (fromFlow.equals("Personal Loan", ignoreCase = true)) {
-            offer.quoteBreakUp?.forEach { quote ->
-                if (quote?.title?.lowercase(Locale.ROOT)?.contains("principal") == true) {
-                    loanAmount = quote.value ?: "-"
-                }
-            }}
-             if (fromFlow.equals("Purchase Finance", ignoreCase = true)){
-           offer.itemTags?.forEach { itemTag ->
-                itemTag?.tags?.forEach { tag ->
-                    if (tag.key.contains("PRINCIPAL_AMOUNT", ignoreCase = true)) {
-                        loanAmount = tag.value
+                offer.quoteBreakUp?.forEach { quote ->
+                    if (quote?.title?.lowercase(Locale.ROOT)?.contains("principal") == true) {
+                        loanAmount = quote.value ?: "-"
                     }
                 }
-            }}
+            }
+            if (fromFlow.equals("Purchase Finance", ignoreCase = true)) {
+                offer.itemTags?.forEach { itemTag ->
+                    itemTag?.tags?.forEach { tag ->
+                        if (tag.key.contains("PRINCIPAL_AMOUNT", ignoreCase = true)) {
+                            loanAmount = tag.value
+                        }
+                    }
+                }
+            }
 
             offer.itemTags?.forEach { itemTag ->
                 itemTag?.tags?.forEach { tag ->
@@ -475,17 +618,7 @@ fun OfferCard(navController: NavHostController, offerResponseItem: Offer?, fromF
                     .shadow(8.dp, RoundedCornerShape(12.dp), clip = false) // gray shadow
             ) {
                 Card(
-                    modifier = Modifier.clickable {
-                            offerResponse.id?.let { id ->
-                                navigateToLoanOffersListDetailScreen(
-                                    navController = navController,
-                                    responseItem = responseItem,
-                                    id = id,
-                                    showButtonId = "1",
-                                    fromFlow = fromFlow
-                                )
-                            }
-                        },
+                    modifier = Modifier.clickable { onClick() },
                     elevation = 8.dp,
                     backgroundColor = Color.White
                 ) {
@@ -571,19 +704,17 @@ fun OfferCard(navController: NavHostController, offerResponseItem: Offer?, fromF
                                     }
 
                                     Spacer(Modifier.height(15.dp))
-
-                                    Row {
-                                        //Sugu ToDo
-                                        var loanTenure = "-"
-                                        if (tenure?.startsWith("P") == true) {
-                                            convertISODurationToReadable(
-                                                tenure ?: ""
-                                            ).let { readableDuration ->
-                                                loanTenure = readableDuration
-                                            }
-                                        }else{
-                                            loanTenure= tenure
+                                    var loanTenure = "-"
+                                    if (tenure?.startsWith("P") == true) {
+                                        convertISODurationToReadable(
+                                            tenure ?: ""
+                                        ).let { readableDuration ->
+                                            loanTenure = readableDuration
                                         }
+                                    }else{
+                                        loanTenure= tenure
+                                    }
+                                    Row {
                                         HeaderWithValue(
                                             textHeader = stringResource(id = R.string.tenure),
                                             textValue = loanTenure,

@@ -9,7 +9,7 @@ class ApiPaths {
     val verifySession = "superAppSessions/verifySession"
 
     // Base URL Flow Api Path
-    val baseUrl = "/api/v1"
+    val baseUrl = "/api/v1/"
 
     // Auth Flow Api Paths
     val authLogIn = "auth/login"

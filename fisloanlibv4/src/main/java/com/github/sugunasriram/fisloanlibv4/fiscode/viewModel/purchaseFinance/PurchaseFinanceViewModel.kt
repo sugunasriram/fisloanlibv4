@@ -13,7 +13,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.De
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.LoanSearchResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.BaseViewModel
-import io.ktor.client.features.ResponseException
+import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

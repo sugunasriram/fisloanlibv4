@@ -1,28 +1,27 @@
 package com.github.sugunasriram.fisloanlibv4.fiscode.network.core
 
 import android.util.Log
-import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods.Companion.BASE_URL
 import com.github.sugunasriram.fisloanlibv4.fiscode.FsApp
+import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods.Companion.BASE_URL
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
-import io.ktor.client.features.HttpTimeout
-import io.ktor.client.features.defaultRequest
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.features.json.serializer.KotlinxSerializer
-import io.ktor.client.features.logging.LogLevel
-import io.ktor.client.features.logging.Logger
-import io.ktor.client.features.logging.Logging
-import io.ktor.client.features.observer.ResponseObserver
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logger
+import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.plugins.observer.ResponseObserver
 import io.ktor.client.request.accept
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
-import io.ktor.http.URLBuilder
-import io.ktor.http.Url
 import io.ktor.http.contentType
-import io.ktor.http.takeFrom
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.json.Json
 
 open class KtorClient {
-    private val baseUrl = Url("${BASE_URL}${ApiPaths().baseUrl}")
+//    private val baseUrl = Url("${BASE_URL}${ApiPaths().baseUrl}")
+    private val baseUrl =" $BASE_URL${ApiPaths().baseUrl}"
 
     companion object {
         private lateinit var instance: KtorClient
@@ -38,6 +37,7 @@ open class KtorClient {
 
     fun getClient(isBaseUrl: Boolean = true): HttpClient {
         return HttpClient(Android) {
+
             install(Logging) {
                 logger = object : Logger {
                     override fun log(message: String) {
@@ -46,16 +46,16 @@ open class KtorClient {
                             !info.startsWith("access-control") &&
                             !info.startsWith("cache-control") &&
                             !info.startsWith("connection") &&
-                            !info.startsWith("content-type") &&
+//                            !info.startsWith("content-type") &&
                             !info.startsWith("date") &&
                             !info.startsWith("expires") &&
-                            !info.startsWith("keep-alive") &&
+//                            !info.startsWith("keep-alive") &&
                             !info.startsWith("pragma") &&
-                            !info.startsWith("transfer-encoding") &&
-                            !info.startsWith("x-") &&
+//                            !info.startsWith("transfer-encoding") &&
+//                            !info.startsWith("x-") &&
                             !info.startsWith("BODY ") &&
                             !info.startsWith("Accept") &&
-                            !info.startsWith("Content-Length") &&
+//                            !info.startsWith("Content-Length") &&
                             info.isNotEmpty()
                         ) {
                             Log.wtf("Ktor ==>", message)
@@ -68,9 +68,10 @@ open class KtorClient {
                 level = LogLevel.ALL
             }
 
-            install(JsonFeature) {
-                serializer = KotlinxSerializer(
-                    kotlinx.serialization.json.Json {
+            install(ContentNegotiation) {
+//                serializer = KotlinxSerializer(
+                json(
+                   Json {
                         prettyPrint = true
                         isLenient = true
                         encodeDefaults = true
@@ -92,27 +93,12 @@ open class KtorClient {
             }
 
             defaultRequest {
+                url(baseUrl)
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
 
-                if (isBaseUrl) {
-                    url.takeFrom(
-                        URLBuilder().takeFrom(baseUrl).apply {
-                            encodedPath += url.encodedPath
-                        }
-                    )
-                }
-                val requestPath = url.encodedPath
-                val skipAuth = requestPath.contains("verifySession", ignoreCase = true)
-
-                if (!skipAuth) {
-                    FsApp.getInstance().token?.let { token ->
-                        header("Authorization", getUserToken(token))
-                        Log.d("Ktor ==>", "Adding Authorization for $requestPath")
-
-                    }
-                } else{
-                    Log.d("Ktor ==>", "skipping Authorization for $requestPath")
+                FsApp.getInstance().token?.let { token ->
+                    header("Authorization", getUserToken(token))
                 }
             }
         }

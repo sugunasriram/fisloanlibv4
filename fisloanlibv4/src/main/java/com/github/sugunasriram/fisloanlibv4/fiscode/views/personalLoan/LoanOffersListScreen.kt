@@ -17,8 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
-import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
@@ -62,7 +60,9 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.components.HorizontalDivider
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateSignInPage
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFISExitScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToLoanOffersListDetailScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.Offer
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.OfferResponseItem
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.OffersWithRejections
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appBlack
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appOrange
@@ -86,6 +86,12 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Tab
 
 private val json1 = Json { prettyPrint = true }
 private var loanAmountVal = ""
@@ -94,7 +100,6 @@ private var loanAmountVal = ""
 @Composable
 fun LoanOffersListScreen(navController: NavHostController, offerItem: String, fromFlow: String) {
     val tabs = listOf("Bureau Offers", "AA Offers")
-    var selectedTabIndex by remember { mutableIntStateOf(1) }
 
     var aAOffersSearchQuery by remember { mutableStateOf("") }
     var bureauOffersSearchQuery by remember { mutableStateOf("") }
@@ -109,9 +114,19 @@ fun LoanOffersListScreen(navController: NavHostController, offerItem: String, fr
     val offerList = offerWithRejected.offers
     val rejectedLenders = offerWithRejected.rejectedLenders
 
+    val aaOffersInitial = offerList?.filter { it.bureauConsent == false }.orEmpty()
+    val initialTab = if (aaOffersInitial.isEmpty()) 0 else 1
+    var selectedTabIndex by remember { mutableIntStateOf(initialTab) }
+
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val filterOptionBottomSheetState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
+    )
+
+    val selectedOffer = remember { mutableStateOf<Offer?>(null) }
+    val multiOffersBottomSheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
         skipHalfExpanded = true
     )
@@ -144,135 +159,217 @@ fun LoanOffersListScreen(navController: NavHostController, offerItem: String, fr
                 )
             }
         ) {
-            FixedTopBottomScreen(
-                navController = navController,
-                topBarBackgroundColor = appOrange,
-                topBarText = stringResource(R.string.loan_offer),
-                showBackButton = true,
-                backgroundColor = appWhite,
-//                onBackClick = { navigateApplyByCategoryScreen(navController) }
-                onBackClick = {             navigateToFISExitScreen(navController, loanId="1234")
+            CustomModalBottomSheet(
+                bottomSheetState = multiOffersBottomSheetState,
+                sheetContent = {
+                    selectedOffer.value?.offer?.let {
+                        selectedOffer.value?.id?.let { id ->
+                            MultiOfferContent(
+                                bottomSheetState = multiOffersBottomSheetState,
+                                coroutineScope = coroutineScope,
+                                context = context,
+                                selectedOffers = selectedOffer.value?.offer?.itemTags?.filterNotNull(),
+                                data = it,
+                                navController = navController,
+                                fromFlow = fromFlow,
+                                id = id
+                            )
+                        }
+                    }
                 }
             ) {
-                TabRow(
-                    selectedTabIndex = selectedTabIndex,
-                    modifier = Modifier.fillMaxWidth(),
+                FixedTopBottomScreen(
+                    navController = navController,
+                    topBarBackgroundColor = appOrange,
+                    topBarText = stringResource(R.string.loan_offer),
+                    showBackButton = true,
                     backgroundColor = appWhite,
-                    indicator = { tabPositions ->
-                        TabRowDefaults.Indicator(
-                            Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex])
-                                .height(3.dp),
-                            color = appOrange
-                        )
-                    }
+                    onBackClick = { navigateApplyByCategoryScreen(navController) }
                 ) {
-                    tabs.forEachIndexed { index, title ->
-                        val isSelected = selectedTabIndex == index
-                        Tab(
-                            selected = isSelected,
-                            onClick = { selectedTabIndex = index },
-                            modifier = Modifier
-                                .background(appWhite, RoundedCornerShape(5.dp))
-                                .padding(8.dp)
-                        ) {
-                            Text(
-                                text = title,
-                                color = if (isSelected) appOrange else checkBoxGray,
-                                modifier = Modifier.padding(8.dp)
+                    TabRow(
+                        selectedTabIndex = selectedTabIndex,
+                        modifier = Modifier.fillMaxWidth(),
+                        backgroundColor = appWhite,
+                        indicator = { tabPositions ->
+                            TabRowDefaults.Indicator(
+                                Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex])
+                                    .height(3.dp),
+                                color = appOrange
                             )
                         }
-                    }
-                }
-
-                when (selectedTabIndex) {
-                    0 -> {
-                        if (filteredBureauOffers.isEmpty()) {
-                            Spacer(modifier = Modifier.height(150.dp))
-                            NoExistingLoanScreen(displayText = stringResource(R.string.no_existing_lenders))
-                        } else {
-                            SearchBar(
-                                searchValue = bureauOffersSearchQuery,
-                                onSearchQueryChanged = { bureauOffersSearchQuery = it },
-                                onFilterClick = {
-                                    coroutineScope.launch { filterOptionBottomSheetState.show() }
-                                }
-                            )
-                            filteredBureauOffers.forEachIndexed { index, offer ->
-                                OfferCard(navController, offer, fromFlow, index)
-                                Spacer(modifier = Modifier.height(16.dp))
+                    ) {
+                        tabs.forEachIndexed { index, title ->
+                            val isSelected = selectedTabIndex == index
+                            Tab(
+                                selected = isSelected,
+                                onClick = { selectedTabIndex = index },
+                                modifier = Modifier
+                                    .background(appWhite, RoundedCornerShape(5.dp))
+                                    .padding(8.dp)
+                            ) {
+                                Text(
+                                    text = title,
+                                    color = if (isSelected) appOrange else checkBoxGray,
+                                    modifier = Modifier.padding(8.dp)
+                                )
                             }
-                          rejectedLenders?.chunked(2)
-                                ?.forEachIndexed { chunkIndex, lenderPair ->
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 4.dp, vertical = 4.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                    ) {
-                                        lenderPair.forEachIndexed { indexInPair, lender ->
-                                            RejectedOfferCard(
-                                                navController = navController,
-                                                lender = lender,
-                                                index = chunkIndex * 2 + indexInPair,
-                                                modifier = Modifier.weight(1f)
-                                            )
-                                        }
+                        }
+                    }
 
-                                        // If this row has only one lender (i.e., odd count), add spacer for alignment
-                                        if (lenderPair.size == 1 && (rejectedLenders.size) > 1
+                    when (selectedTabIndex) {
+                        0 -> {
+                            if (filteredBureauOffers.isEmpty()) {
+                                Spacer(modifier = Modifier.height(150.dp))
+                                NoExistingLoanScreen(displayText = stringResource(R.string.no_existing_lenders))
+                            } else {
+                                SearchBar(
+                                    searchValue = bureauOffersSearchQuery,
+                                    onSearchQueryChanged = { bureauOffersSearchQuery = it },
+                                    onFilterClick = {
+                                        coroutineScope.launch { filterOptionBottomSheetState.show() }
+                                    }
+                                )
+                                filteredBureauOffers.forEachIndexed { index, offer ->
+                                    OfferCard(
+                                        navController,
+                                        offer,
+                                        fromFlow,
+                                        index,
+                                        onClick = {
+//                                            selectedOffer.value = offer // Set the current selected offer
+//                                            coroutineScope.launch { multiOffersBottomSheetState.show() }
+                                            val itemTagsSize = offer.offer?.itemTags?.size ?: 0
+                                            if (itemTagsSize > 1) {
+                                                selectedOffer.value = offer
+                                                coroutineScope.launch { multiOffersBottomSheetState.show() }
+                                            } else {
+                                                offer.offer?.id?.let { id ->
+                                                    val json = Json { prettyPrint = true }
+                                                    val responseItem = json.encodeToString(
+                                                        OfferResponseItem.serializer(),
+                                                        offer.offer
+                                                    )
+                                                    offer.id?.let {
+                                                        navigateToLoanOffersListDetailScreen(
+                                                            navController = navController,
+                                                            responseItem = responseItem,
+                                                            id = it,
+                                                            showButtonId = "1",
+                                                            fromFlow = fromFlow
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                }
+                                rejectedLenders?.chunked(2)
+                                    ?.forEachIndexed { chunkIndex, lenderPair ->
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 4.dp, vertical = 4.dp),
+                                            horizontalArrangement = Arrangement.spacedBy(6.dp)
                                         ) {
-                                            Spacer(modifier = Modifier.weight(1f))
+                                            lenderPair.forEachIndexed { indexInPair, lender ->
+                                                RejectedOfferCard(
+                                                    navController = navController,
+                                                    lender = lender,
+                                                    index = chunkIndex * 2 + indexInPair,
+                                                    modifier = Modifier.weight(1f)
+                                                )
+                                            }
+
+                                            // If this row has only one lender (i.e., odd count), add spacer for alignment
+                                            if (lenderPair.size == 1 && (rejectedLenders.size) > 1
+                                            ) {
+                                                Spacer(modifier = Modifier.weight(1f))
+                                            }
                                         }
                                     }
-                                }
-                        }
-                    }
-
-                    1 -> {
-                        if (filteredAaOffers.isEmpty()) {
-                            Spacer(modifier = Modifier.height(150.dp))
-                            NoExistingLoanScreen(displayText = stringResource(R.string.no_existing_offers))
-                        } else {
-                            SearchBar(
-                                searchValue = aAOffersSearchQuery,
-                                onSearchQueryChanged = { aAOffersSearchQuery = it },
-                                onFilterClick = {
-                                    coroutineScope.launch { filterOptionBottomSheetState.show() }
-                                }
-                            )
-                            filteredAaOffers.forEachIndexed { index, offer ->
-                                OfferCard(navController, offer, fromFlow, index)
-                                Spacer(modifier = Modifier.height(16.dp))
                             }
-                            rejectedLenders?.chunked(2)
-                            ?.forEachIndexed { chunkIndex, lenderPair ->
-                                val isSingleItem = lenderPair.size == 1
+                        }
 
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 4.dp, vertical = 4.dp),
-                                    horizontalArrangement = if (isSingleItem) Arrangement.Center else Arrangement.spacedBy(6.dp)
-                                ) {
-                                    lenderPair.forEachIndexed { indexInPair, lender ->
-                                        RejectedOfferCard(
-                                            navController = navController,
-                                            lender = lender,
-                                            index = chunkIndex * 2 + indexInPair,
-                                            modifier = Modifier.weight(if (isSingleItem) 0.8f else 1f) // slightly narrower if centered
-                                        )
+                        1 -> {
+                            if (filteredAaOffers.isEmpty()) {
+                                Spacer(modifier = Modifier.height(150.dp))
+                                NoExistingLoanScreen(displayText = stringResource(R.string.no_existing_offers))
+                            } else {
+                                SearchBar(
+                                    searchValue = aAOffersSearchQuery,
+                                    onSearchQueryChanged = { aAOffersSearchQuery = it },
+                                    onFilterClick = {
+                                        coroutineScope.launch { filterOptionBottomSheetState.show() }
                                     }
-                                    if (!isSingleItem && lenderPair.size == 1) {
-                                        Spacer(modifier = Modifier.weight(1f))
-                                    }
+                                )
+                                filteredAaOffers.forEachIndexed { index, offer ->
+                                    OfferCard(
+                                        navController,
+                                        offer,
+                                        fromFlow,
+                                        index,
+                                        onClick = {
+//                                            selectedOffer.value = offer // Set the current selected offer
+//                                            coroutineScope.launch { multiOffersBottomSheetState.show() }
+                                            val itemTagsSize = offer.offer?.itemTags?.size ?: 0
+                                            if (itemTagsSize > 1) {
+                                                selectedOffer.value = offer
+                                                coroutineScope.launch { multiOffersBottomSheetState.show() }
+                                            } else {
+                                                offer.offer?.id?.let { id ->
+                                                    val json = Json { prettyPrint = true }
+                                                    val responseItem = json.encodeToString(OfferResponseItem.serializer(), offer.offer)
+                                                    offer.id?.let {
+                                                        navigateToLoanOffersListDetailScreen(
+                                                            navController = navController,
+                                                            responseItem = responseItem,
+                                                            id = it,
+                                                            showButtonId = "1",
+                                                            fromFlow = fromFlow
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
                                 }
+                                rejectedLenders?.chunked(2)
+                                    ?.forEachIndexed { chunkIndex, lenderPair ->
+                                        val isSingleItem = lenderPair.size == 1
+
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 4.dp, vertical = 4.dp),
+                                            horizontalArrangement = if (isSingleItem) {
+                                                Arrangement.Center
+                                            } else {
+                                                Arrangement.spacedBy(
+                                                    6.dp
+                                                )
+                                            }
+                                        ) {
+                                            lenderPair.forEachIndexed { indexInPair, lender ->
+                                                RejectedOfferCard(
+                                                    navController = navController,
+                                                    lender = lender,
+                                                    index = chunkIndex * 2 + indexInPair,
+                                                    modifier = Modifier.weight(if (isSingleItem) 0.8f else 1f) // slightly narrower if centered
+                                                )
+                                            }
+                                            if (!isSingleItem && lenderPair.size == 1) {
+                                                Spacer(modifier = Modifier.weight(1f))
+                                            }
+                                        }
+                                    }
                             }
                         }
                     }
                 }
             }
-            }
-
+        }
     }
 }
 
@@ -375,9 +472,9 @@ fun SearchBar(
             textStyle = normal16Text500,
             shape = RoundedCornerShape(16.dp),
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = appTheme,
-                unfocusedBorderColor = backgroundOrange,
-                cursorColor = cursorColor,
+                focusedBorderColor = MaterialTheme.colors.primary,
+                unfocusedBorderColor = MaterialTheme.colors.background,
+                cursorColor = MaterialTheme.colors.primary,
                 errorBorderColor = errorRed
             )
         )

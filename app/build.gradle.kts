@@ -229,6 +229,10 @@ android {
                 "CONSENT_CALLBACK_REDIRECT_URL",
                 "\"https://stagingondcfs.jtechnoparks.in/jt-bap/api/v1/finvu/consent-callback/\""
             )
+
+            // uses debug keystore (no prod key needed)
+            signingConfig = signingConfigs.getByName("debug")
+
 //            buildConfigField("Boolean", "FEATURE_X_ENABLED", "true")
         }
         create("PROD") {
@@ -245,18 +249,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "1.8"
-        freeCompilerArgs += listOf(
-            "-P",
-            "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=/tmp/compose-metrics",
-            "-P",
-            "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=/tmp/compose-reports"
-        )
+    kotlin {
+        jvmToolchain(17)
     }
 
     buildFeatures {
@@ -264,10 +262,10 @@ android {
         buildConfig = true
     }
 
-    composeOptions {
-//        kotlinCompilerExtensionVersion = "1.4.3"
-        kotlinCompilerExtensionVersion = "1.5.13"
-    }
+//    composeOptions {
+////        kotlinCompilerExtensionVersion = "1.4.3"
+//        kotlinCompilerExtensionVersion = "1.5.13"
+//    }
 
     packaging {
         resources {
@@ -296,8 +294,9 @@ android {
 
 val lifecycleVersion = "2.8.4"
 val corektxVersion = "1.13.1"
-val composeVersion = "1.6.8"
-val jetbrainKotlinVersion = "1.9.20"
+//val composeVersion = "1.6.8"
+val composeVersion = "1.7.0"
+//val jetbrainKotlinVersion = "1.9.20"
 val activityComposeVersion = "1.9.1"
 val navComposeVersion = "2.7.7"
 val roomVersion = "2.6.1"
@@ -305,8 +304,7 @@ val junitVersion = "4.13.2"
 val junitTestVersion = "1.2.1"
 val accomPagerVersion = "0.20.0"
 val accomVersion = "0.30.1"
-val ktorVersion = "1.6.4"
-val coroutineVersion = "1.7.3"
+//val ktorVersion = "1.6.4"
 val kotlinSerializationVersion = "1.3.2"
 val dataStoreVersion = "1.1.1"
 val coilVersion = "2.2.2"
@@ -320,6 +318,10 @@ val sysUiControllerVersion = "0.27.0"
 val securityCryptoVersion = "1.1.0-alpha06"
 val easyPermissionVersion = "3.0.0"
 
+val coroutinesVersion = "1.8.1"
+val ktorVersion = "2.3.12"
+val serializationVersion = "1.6.3"
+
 dependencies {
     implementation(project(":fisloanlibv4")) // Sugu1
 //    implementation("com.github.sugunasriram:fisloanlibv4:v1.0.60")
@@ -331,7 +333,7 @@ dependencies {
     implementation("androidx.core:core-ktx:$corektxVersion")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$jetbrainKotlinVersion")
+//    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$jetbrainKotlinVersion")
 
     // Compose Core
     implementation("androidx.compose.ui:ui:$composeVersion")
@@ -370,16 +372,27 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:$gmsPlayVersion")
 
     // Ktor
-    implementation("io.ktor:ktor-client-android:$ktorVersion")
-    implementation("io.ktor:ktor-client-serialization:$ktorVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion")
-    implementation("io.ktor:ktor-client-logging-jvm:$ktorVersion")
-
-    // SSE
-    implementation("io.ktor:ktor-client-websockets:$ktorVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutineVersion")
+//    implementation("io.ktor:ktor-client-android:$ktorVersion")
+//    implementation("io.ktor:ktor-client-serialization:$ktorVersion")
+//    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion")
+//    implementation("io.ktor:ktor-client-logging-jvm:$ktorVersion")
+//
+//    // SSE
+//    implementation("io.ktor:ktor-client-websockets:$ktorVersion")
+//    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$ktorVersion")
 //    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutineAndroidVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutineVersion")
+    // Ktor
+    implementation("io.ktor:ktor-client-android:${ktorVersion}")
+    implementation("io.ktor:ktor-client-content-negotiation:${ktorVersion}")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.12")
+    implementation("io.ktor:ktor-client-logging:${ktorVersion}")
+// Serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${serializationVersion}")
+// SSE / WebSockets
+    implementation("io.ktor:ktor-client-websockets:${ktorVersion}")
+// Coroutines (FIXED)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${coroutinesVersion}")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${coroutinesVersion}")
 
     // Android Permissions
     implementation("pub.devrel:easypermissions:$easyPermissionVersion")

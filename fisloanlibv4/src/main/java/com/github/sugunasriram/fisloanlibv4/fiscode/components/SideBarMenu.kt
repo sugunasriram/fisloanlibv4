@@ -161,11 +161,11 @@ fun SideMenuContent(
     navController: NavHostController
 ) {
     val registerViewModel: RegisterViewModel = viewModel()
-    val inProgress by registerViewModel.inProgress.collectAsState()
-    val isCompleted by registerViewModel.isCompleted.collectAsState()
+    val inProgress by registerViewModel.gettingUserDetails.collectAsState()
+    val isCompleted by registerViewModel.gotUserDetails.collectAsState()
     val getUserResponse by registerViewModel.getUserResponse.collectAsState()
 
-    val loanAgreementViewModel : LoanAgreementViewModel = viewModel()
+    val loanAgreementViewModel: LoanAgreementViewModel = viewModel()
     val plLoanListLoading by loanAgreementViewModel.plLoanListLoading.collectAsState()
     val plLoanListLoaded by loanAgreementViewModel.plLoanListLoaded.collectAsState()
     val pfLoanListLoading by loanAgreementViewModel.pfLoanListLoading.collectAsState()
@@ -177,6 +177,8 @@ fun SideMenuContent(
     var showAboutMenuPopUp by remember { mutableStateOf(false) }
     var showSettingsMenuPopUp by remember { mutableStateOf(false) }
     var expandLoanStatus by remember { mutableStateOf(false) }
+    var expandPrePartPayment by remember { mutableStateOf(false) }
+    var expandMutualFunds by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
 
@@ -211,11 +213,10 @@ fun SideMenuContent(
                 expandLoanStatus = !expandLoanStatus
             }
         )
-
         if (expandLoanStatus) {
             val allLoaded = plLoanListLoaded && pfLoanListLoaded
             val allEmpty = personalLoanList?.data.isNullOrEmpty() &&
-                    purchaseFinanceList?.data.isNullOrEmpty()
+                purchaseFinanceList?.data.isNullOrEmpty()
 
             if (allLoaded && allEmpty) {
                 expandLoanStatus = false
@@ -304,9 +305,29 @@ fun SideMenuContent(
             painter = painterResource(id = R.drawable.pre_payment),
             onClick = {
                 closeDrawer(coroutineScope, drawerState)
-                navigateToPrePaymentScreen(navController)
+                navigateToPrePaymentScreen(navController, "PURCHASE_FINANCE")
             }
         )
+
+        // PURCHASE_FINANCE
+        when {
+            pfLoanListLoading -> CenterProgress()
+            pfLoanListLoaded && !purchaseFinanceList?.data.isNullOrEmpty() -> {
+                StartingText(
+                    text = stringResource(id = R.string.purchase_finance),
+                    textColor = appOrange,
+                    style = normal18Text500,
+                    modifier = Modifier.clickable {
+                        closeDrawer(coroutineScope, drawerState)
+                        navigateToPrePaymentScreen(navController, "PURCHASE_FINANCE")
+                    },
+                    start = 45.dp,
+                    top = 4.dp
+                )
+            }
+        }
+
+    HorizontalDivider(top = 0.dp)
         SideMenuTextButton(
             title = stringResource(id = R.string.settings),
             painter = painterResource(id = R.drawable.settings),

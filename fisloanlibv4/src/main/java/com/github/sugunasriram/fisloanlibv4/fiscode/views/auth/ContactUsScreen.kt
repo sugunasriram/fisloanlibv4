@@ -62,7 +62,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.slateGrayColor
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.textBlack
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
-import io.ktor.client.features.ResponseException
+import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

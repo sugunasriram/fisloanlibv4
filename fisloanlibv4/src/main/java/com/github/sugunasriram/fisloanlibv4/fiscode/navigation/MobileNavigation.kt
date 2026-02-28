@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
@@ -51,7 +52,6 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.BasicDeta
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.BureauOffersScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.EditBankDetailScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.LoanDisbursementScreen
-import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.LoanOffers
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.LoanOffersListDetailsScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.LoanOffersListScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.LoanSummaryScreen
@@ -79,8 +79,9 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.views.webview.personalLoan.P
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.webview.personalLoan.WebKycScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.webview.purchaseFinance.PfKycWebViewScreen
 import com.google.gson.Gson
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import java.net.URLDecoder
 
 
 fun NavGraphBuilder.mobileNavigation(
@@ -433,19 +434,19 @@ fun NavGraphBuilder.mobileNavigation(
                 )
             }
         }
-        composable("${AppScreens.LoanOffersScreen.route}/{offerResponse}/{fromFlow}/{encodedSearchResponse}") { backStackEntry ->
-            val offerResponse = backStackEntry.arguments?.getString("offerResponse")
-            val fromFlow = backStackEntry.arguments?.getString("fromFlow")
-            val withoutAAResponse = backStackEntry.arguments?.getString("encodedSearchResponse")
-            if (offerResponse != null && fromFlow != null) {
-                LoanOffers(
-                    navController = navController,
-                    purpose = offerResponse,
-                    fromFlow = fromFlow,
-                    withoutAAResponse = withoutAAResponse ?: ""
-                )
-            }
-        }
+//        composable("${AppScreens.LoanOffersScreen.route}/{offerResponse}/{fromFlow}/{encodedSearchResponse}") { backStackEntry ->
+//            val offerResponse = backStackEntry.arguments?.getString("offerResponse")
+//            val fromFlow = backStackEntry.arguments?.getString("fromFlow")
+//            val withoutAAResponse = backStackEntry.arguments?.getString("encodedSearchResponse")
+//            if (offerResponse != null && fromFlow != null) {
+//                LoanOffers(
+//                    navController = navController,
+//                    purpose = offerResponse,
+//                    fromFlow = fromFlow,
+//                    withoutAAResponse = withoutAAResponse ?: ""
+//                )
+//            }
+//        }
 
         composable("${AppScreens.LoanOffersListScreen.route}/{offerResponse}/{fromFlow}") { backStackEntry ->
             val offerResponse = backStackEntry.arguments?.getString("offerResponse")

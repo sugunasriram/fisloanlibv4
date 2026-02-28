@@ -101,6 +101,7 @@ import java.util.Locale
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.shape.CircleShape
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.UpdateProfile
 
 @SuppressLint("ResourceType")
 @OptIn(ExperimentalMaterialApi::class)
@@ -114,8 +115,8 @@ fun ReviewDetailsScreen(navController: NavHostController, loanPurpose: String, f
     val unexpectedErrorScreen by registerViewModel.unexpectedError.observeAsState(false)
     val unAuthorizedUser by registerViewModel.unAuthorizedUser.observeAsState(false)
 
-    val inProgress by registerViewModel.inProgress.collectAsState()
-    val isCompleted by registerViewModel.isCompleted.collectAsState()
+    val inProgress by registerViewModel.gettingUserDetails.collectAsState()
+    val isCompleted by registerViewModel.gotUserDetails.collectAsState()
     val userDetails by registerViewModel.getUserResponse.collectAsState()
     val showDialog : MutableState<Boolean> =  remember {  mutableStateOf(false) }
 
@@ -176,7 +177,7 @@ fun ReviewDetailView(
     context: Context,
     inProgress: Boolean,
     isCompleted: Boolean,
-    userDetails: ProfileResponse?,
+    userDetails: UpdateProfile?,
     checkboxState: Boolean,
     loanPurpose: String,
     fromFlow: String,
@@ -316,7 +317,7 @@ fun goBack(navController: NavHostController, fromFlow: String, loanPurpose: Stri
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun PersonalDetailView(
-    userDetails: ProfileResponse?,
+    userDetails: UpdateProfile?,
     loanPurpose: String,
     annualIncome: String,
     annualIncomeBottomSheetState: ModalBottomSheetState,

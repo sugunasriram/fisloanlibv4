@@ -90,16 +90,21 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.pf.PfOfferConf
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.userIssues.AllReportedUserIssuesResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.userIssues.UserReportedIssueCreateRequest
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.userIssues.UserReportedIssueResponse
+import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods.Companion.BASE_URL
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.engine.android.Android
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.features.json.serializer.KotlinxSerializer
-import io.ktor.client.features.logging.LogLevel
-import io.ktor.client.features.logging.Logging
+import io.ktor.client.plugins.ClientRequestException
+import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -108,10 +113,15 @@ object ApiRepository {
 
     suspend fun verifySession(sessionId: String): VerifySessionResponse? {
         val requestBody = mapOf("id" to sessionId)
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().verifySession) {
-                body = requestBody
+                setBody(requestBody)
             }
+        }
+        return when (response.status.value) {
+            200, 201 -> response.body<VerifySessionResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
@@ -121,8 +131,8 @@ object ApiRepository {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = createSessionRequest
-            }
+                setBody(createSessionRequest)
+            }.body()
         }
     }
 
@@ -130,69 +140,89 @@ object ApiRepository {
     suspend fun signup(profile: Profile): Signup? {
         return KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().authSignIn) {
-                body = profile
-            }
+                setBody(profile)
+            }.body()
         }
     }
 
     suspend fun userRole(): UserRole? {
-        return KtorClient.getInstance().use { httpClient ->
-            httpClient.get(ApiPaths().authRoles) {
+        Log.d("res_H_baseURL",BASE_URL)
+        val response = KtorClient.getInstance().use { httpClient ->
+            httpClient.get(ApiPaths().authRoles){
+                contentType(ContentType.Application.Json)
             }
+        }
+        return when (response.status.value) {
+            200, 201 -> response.body<UserRole>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun generateAuthOtp(mobileNumber: String, countryCode: String, role: String): GenerateAuthOtp? {
         val requestBody = mapOf("mobileNumber" to mobileNumber, "countryCode" to countryCode, "role" to role)
-        return KtorClient.getInstance().use { httpClient ->
-            httpClient.post(ApiPaths().authGenerateOtp) {
-                body = requestBody
-            }
+        val response = KtorClient.getInstance().use { httpClient ->
+            httpClient
+                .post(ApiPaths().authGenerateOtp) {
+                    contentType(ContentType.Application.Json)
+                    setBody(requestBody)
+                }
+        }
+        return when (response.status.value) {
+            200, 201 -> response.body<GenerateAuthOtp>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun login(loginDetails: LoginDetails): AuthOtp? {
-        return KtorClient.getInstance().use { httpClient ->
-            httpClient.post(ApiPaths().authLogIn) {
-                body = loginDetails
-            }
+        val response = KtorClient.getInstance().use { httpClient ->
+            httpClient
+                .post(ApiPaths().authLogIn) {
+                    contentType(ContentType.Application.Json)
+                    setBody(loginDetails)
+                }
+        }
+        return when (response.status.value) {
+            200, 201 -> response.body<AuthOtp>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun logout(refreshToken: String): Logout? {
         val requestBody = mapOf("refreshToken" to refreshToken)
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().authLogOut) {
                 val accessToken = TokenManager.read("accessToken")
-                val bearerToken = "Bearer $accessToken"
-                header("Authorization", bearerToken)
-                body = requestBody
-            }
-        }
-    }
-
-    suspend fun authOtp(orderId: String, otp: String): AuthOtp? {
-        val requestBody = mapOf("orderId" to orderId, "otp" to otp)
-        return KtorClient.getInstance().use { httpClient ->
-            httpClient.post(ApiPaths().authOtp) {
-                body = requestBody
-            }
+                header("Authorization", "Bearer $accessToken")
+                contentType(ContentType.Application.Json)
+                setBody(requestBody)
+            }  }
+        return when (response.status.value) {
+            200, 201 -> response.body<Logout>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     private suspend fun authGetAccessToken(refreshToken: String): AuthOtp {
         val requestBody = mapOf("refreshToken" to refreshToken)
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().authGetAccessToken) {
-                body = requestBody
-            }
+                setBody(requestBody)
+            }  }
+        return when (response.status.value) {
+            200,201 -> response.body<AuthOtp>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     /*
-    * This function will read REFRESHTOKEN and get ACCESSTOKEN from BE
-    * ACCESSTOKEN & REFRESHTOKEN are stored in SharedPreference
-    * if ACCESSTOKEN is NULL, return FALSE, so that LOGIN Screen can be shown to user.
+     * This function will read REFRESHTOKEN and get ACCESSTOKEN from BE
+     * ACCESSTOKEN & REFRESHTOKEN are stored in SharedPreference
+     * if ACCESSTOKEN is NULL, return FALSE, so that LOGIN Screen can be shown to user.
      */
     suspend fun handleAuthGetAccessTokenApi(): Boolean {
         val refreshToken = TokenManager.read("refreshToken")
@@ -218,7 +248,7 @@ object ApiRepository {
                         // Handle case where accessToken is null
                         // For example, show an error or log the issue
                         Log.e("Auth", "AccessToken is null")
-                        return false
+                        val response = false
                     }
                 }
             }.onFailure { error ->
@@ -230,26 +260,36 @@ object ApiRepository {
         return false
     }
 
-    suspend fun getUserDetail(): ProfileResponse? {
-        return KtorClient.getInstance().use { httpClient ->
+    suspend fun getUserDetail(): UpdateProfile? {
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().profile) {
                 val accessToken = TokenManager.read("accessToken")
-                val bearerToken = "Bearer $accessToken"
-                header("Authorization", bearerToken)
+                header("Authorization", "Bearer $accessToken")
+                contentType(ContentType.Application.Json)
             }
+        }
+        return when (response.status.value) {
+            200, 201 -> response.body<UpdateProfile>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun updateUserDetails(profile: Profile): UpdateProfile? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().updateProfile) {
                 val accessToken = TokenManager.read("accessToken")
-                val bearerToken = "Bearer $accessToken"
-                header("Authorization", bearerToken)
-                body = profile
-            }
+                header("Authorization", "Bearer $accessToken")
+                contentType(ContentType.Application.Json)
+                setBody(profile)
+            }  }
+        return when (response.status.value) {
+            200, 201 -> response.body<UpdateProfile>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
+
     suspend fun updateBankStatement(statements: List<String>): UpdateProfile? {
         val requestBody = mapOf("statements" to statements)
         return KtorClient.getInstance().use { httpClient ->
@@ -257,49 +297,57 @@ object ApiRepository {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = requestBody
-            }
+                setBody(requestBody)
+            }.body()
         }
     }
 
     suspend fun updateUserIncome(income: String): UpdateIncome? {
         val requestBody = mapOf("income" to income)
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().updateUserIncome) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = requestBody
-            }
+                setBody(requestBody)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<UpdateIncome>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun getUserNameFromPan(pan: String): PanVerificationResponse? {
         val requestBody = mapOf("panCard" to pan)
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().panVerification) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = requestBody
-            }
+                setBody(requestBody)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<PanVerificationResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun getCity(pinCode: String): PincodeModel? {
-        val apiKey = "AIzaSyB6XW-WRFTFqOx05Xwi2Ek5ygSGnbyLVsQ"
+        val apiKey = "AIzaSyDLZ2Sr9a8M9YKrWKv4vJ4V19z3VE8y39s"
         val url = "https://maps.googleapis.com/maps/api/geocode/json?address=$pinCode&key=$apiKey"
         return try {
             withContext(Dispatchers.IO) {
                 val client = HttpClient(Android)
-                val response: String = client.get(url)
+                val response: String = client.get(url).body()
                 client.close()
                 val jsonObject = JSONObject(response)
                 if (jsonObject.getString("status") == "OK") {
                     val results = jsonObject.getJSONArray("results")
                     if (results.length() > 0) {
                         val firstResult = results.getJSONObject(0)
-                        Log.d("res_H", firstResult.toString())
+                        Log.d("res_HfirstResult", firstResult.toString())
                         val addressComponents = firstResult.getJSONArray("address_components")
 
                         val cities = mutableSetOf<String>()
@@ -308,9 +356,9 @@ object ApiRepository {
                         for (i in 0 until addressComponents.length()) {
                             val component = addressComponents.getJSONObject(i)
                             val types = component.getJSONArray("types")
-                            if (types.toString().contains("locality") ) {
+                            if (types.toString().contains("locality")) {
                                 cities.add(component.getString("long_name"))
-                            }else if (types.toString().contains("administrative_area_level_3")) {
+                            } else if (types.toString().contains("administrative_area_level_3")) {
                                 district = component.getString("long_name")
                             } else if (types.toString().contains("administrative_area_level_1")) {
                                 state = component.getString("long_name")
@@ -325,7 +373,7 @@ object ApiRepository {
                         }
 
                         if (cities.isNotEmpty() && state.isNotEmpty()) {
-                            PincodeModel(pinCode, cities.toList(),district, state)
+                            PincodeModel(pinCode, cities.toList(), district, state)
                         } else {
                             null
                         }
@@ -353,8 +401,8 @@ object ApiRepository {
         )
         return KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().forgotPassword) {
-                body = requestBody
-            }
+                setBody(requestBody)
+            }.body()
         }
     }
 
@@ -372,8 +420,8 @@ object ApiRepository {
         )
         return KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().resetPassword) {
-                body = requestBody
-            }
+                setBody(requestBody)
+            }.body()
         }
     }
 
@@ -381,8 +429,8 @@ object ApiRepository {
         val requestBody = mapOf("orderId" to orderId, "otp" to otp)
         return KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().verifyOtp) {
-                body = requestBody
-            }
+                setBody(requestBody)
+            }.body()
         }
     }
 
@@ -393,237 +441,335 @@ object ApiRepository {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = requestBody
-            }
+                setBody(requestBody)
+            }.body()
         }
     }
 
     // Bank Related Flow Api Repository
     suspend fun getBankAccount(): BankAccount? {
-        return KtorClient.getInstance().use { httpClient ->
-//            httpClient.get(ApiPaths().getBankAccounts) {
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().getBankAccounts) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-            }
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<BankAccount>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
-    suspend fun getBankName(ifscCode: String): IFSCResponse {
-        val url = "https://ifsc.razorpay.com/$ifscCode"
-        val client = HttpClient(Android) {
-            install(JsonFeature) {
-                serializer = KotlinxSerializer()
-            }
-            install(Logging) {
-                level = LogLevel.BODY
-            }
+//    suspend fun getBankName(ifscCode: String): IFSCResponse {
+//        val url = "https://ifsc.razorpay.com/$ifscCode"
+//
+//        val client = HttpClient(OkHttp) {
+//            install(ContentNegotiation) {
+//                json(
+//                    Json {
+//                        ignoreUnknownKeys = true
+//                        isLenient = true
+//                    }
+//                )
+//            }
+//            install(Logging) {
+//                level = LogLevel.BODY
+//            }
+//        }
+//
+//        return client.use {
+//            withContext(Dispatchers.IO) {
+//                it.get(url).body()
+//            }
+//        }
+//    }
+suspend fun getBankName(ifscCode: String): IFSCResponse? {
+    val code = ifscCode.trim().uppercase()
+    if (code.isEmpty()) return null
+
+    val url = "https://ifsc.razorpay.com/$code"
+
+    return try {
+        val response = KtorClient.getInstance().use { httpClient ->
+            httpClient.get(url) // no Authorization header for Razorpay IFSC endpoint
         }
-        return client.use {
-            withContext(Dispatchers.IO) {
-                it.get(url)
-            }
+
+        when (response.status.value) {
+            200 -> response.body<IFSCResponse>()
+            404 -> null
+            else -> throw ResponseException(response, "IFSC lookup failed: ${response.status}")
         }
+    } catch (e: Exception) {
+        Log.e("getBankName", "Error: ${e.message}", e)
+        null
     }
+}
 
     suspend fun getBankList(): BankList? {
-        return KtorClient.getInstance().use { httpClient ->
-//            httpClient.get(ApiPaths().getBanksList) {
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().getBanksList) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-            }
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<BankList>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun addBank(bankDetail: AddBankDetail): AddBankDetailResponse? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().addBank) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = bankDetail
-            }
+                setBody(bankDetail)
+//                body = bankDetail
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<AddBankDetailResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     // Personal Loan Flow Api Repository
     suspend fun aaConsentApproval(aaConsentApproval: ConsentApprovalRequest): ConsentApprovalResponse? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().aaConsentApproval) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = aaConsentApproval
-            }
+                setBody(aaConsentApproval)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<ConsentApprovalResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
+
     suspend fun pLSearchApi(searchBodyModel: SearchBodyModel): LoanSearchResponse? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().search) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = searchBodyModel
-            }
+                setBody(searchBodyModel)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<LoanSearchResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun pFDeleteUserApi(deleteUserBodyModel: PFDeleteUserBodyModel): DeleteUserResponse? {
         return KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().deleteUser) {
-                body = deleteUserBodyModel
-            }
+                setBody(deleteUserBodyModel)
+            }.body()
         }
     }
+
     suspend fun pFSearchApi(searchBodyModel: PFSearchBodyModel): LoanSearchResponse? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().search) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = searchBodyModel
-            }
+                setBody(searchBodyModel)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<LoanSearchResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
-    suspend fun getLenderStatusApi(loanType: String, step:String): GetLenderStatusModel? {
-        val requestBody = mapOf("loanType" to loanType ,"step" to step)
-
-        return KtorClient.getInstance().use { httpClient ->
+    suspend fun getLenderStatusApi(loanType: String, step: String): GetLenderStatusModel? {
+        val requestBody = mapOf("loanType" to loanType, "step" to step)
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().getLenderStatus) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = requestBody
-            }
+                setBody(requestBody)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<GetLenderStatusModel>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
-// searchApi with AA Consent
+    // searchApi with AA Consent
     suspend fun formSubmissionApi(searchBodyModel: SearchBodyModel): SearchModel? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().formSubmission) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = searchBodyModel
-            }
-        }
+                setBody(searchBodyModel)
+            }}
+    return when (response.status.value) {
+        200, 201 -> response.body<SearchModel>()
+        401 -> throw ClientRequestException(response, "Unauthorized")
+        else -> throw ResponseException(response, "Unexpected error")
     }
+}
 
     suspend fun updateConsentHandler(updateConsentHandlerBody: UpdateConsentHandlerBody): UpdateConsentHandler? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().updateLoanAgreement) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = updateConsentHandlerBody
-            }
+                setBody(updateConsentHandlerBody)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<UpdateConsentHandler>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun updateLoanAgreement(updateLoanBody: UpdateLoanBody): UpdateLoanAgreement? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().updateLoanAgreement) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = updateLoanBody
-            }
+                setBody(updateLoanBody)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<UpdateLoanAgreement>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun getCustomerLoanList(loanType: String): CustomerLoanList? {
         val requestBody = mapOf("loanType" to loanType)
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().getCustomerLoanList) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = requestBody
-            }
+                setBody(requestBody)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<CustomerLoanList>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun cancelLoan(cancelLoan: CancelLoan): CancelLoanResponse? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().cancelLoan) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = cancelLoan
-            }
+                setBody(cancelLoan)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<CancelLoanResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun completeLoanOrders(): CustomerLoanList? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().completeListOfOrders) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-            }
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<CustomerLoanList>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
-    suspend fun loanOrdersByLoanType(loanType:String): CustomerLoanList? {
+    suspend fun loanOrdersByLoanType(loanType: String): CustomerLoanList? {
         val requestBody = mapOf("loanType" to loanType)
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().loanOrdersList) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = requestBody
-            }
+                setBody(requestBody)
+//                body = requestBody
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<CustomerLoanList>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun updateLoanAmount(updateLoanAmountBody: UpdateLoanAmountBody): UpdateResponse? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().updateLoanAmount) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = updateLoanAmountBody
-            }
+                setBody(updateLoanAmountBody)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<UpdateResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
-
-
     suspend fun addAccountDetail(bankDetail: BankDetail): BankDetailResponse? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().addAccountDetails) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = bankDetail
-            }
+                setBody(bankDetail)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<BankDetailResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun updateBank(bankDetail: UpdateBankDetail): AddBankDetailResponse? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().updateBank) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = bankDetail
-            }
+                setBody(bankDetail)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<AddBankDetailResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
-
     suspend fun deleteAccountDetail(id: String): AddBankDetailResponse? {
         val requestBody = mapOf("_id" to id)
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().deleteBank) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = requestBody
-            }
+                setBody(requestBody)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<AddBankDetailResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
@@ -632,464 +778,596 @@ object ApiRepository {
         loanId: String
     ): OrderPaymentStatusResponse? {
         val requestBody = mapOf("loanType" to loanType, "orderId" to loanId)
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().getOrderStatus) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = requestBody
-            }
+                setBody(requestBody)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<OrderPaymentStatusResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     // Gst Flow Api Repository
     suspend fun gstSearch(gstSearchBody: GstSearchBody): GstSearchResponse? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().search) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = gstSearchBody
-            }
+                setBody(gstSearchBody)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<GstSearchResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun gstConsentApproval(aaConsentApproval: ConsentApprovalRequest): GstConsentResponse? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().aaConsentApproval) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = aaConsentApproval
-            }
+                setBody(aaConsentApproval)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<GstConsentResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun gstConfirmOffer(gstOfferConfirm: GstOfferConfirm): GstOfferConfirmResponse? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().updateLoanAmount) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = gstOfferConfirm
-            }
+                setBody(gstOfferConfirm)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<GstOfferConfirmResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun gstInitiateOffer(id: String, loanType: String): GstOfferConfirmResponse? {
         val requestBody = mapOf("id" to id, "loanType" to loanType)
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().initialOfferSelect) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = requestBody
-            }
+                setBody(requestBody)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<GstOfferConfirmResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun gstLoanApproved(id: String, loanType: String): GstOfferConfirmResponse? {
         val requestBody = mapOf("id" to id, "loanType" to loanType)
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().loanApproved) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = requestBody
-            }
+                setBody(requestBody)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<GstOfferConfirmResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun gstLoanEntityApproval(bankDetail: GstBankDetail): GstOfferConfirmResponse? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().addAccountDetails) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = bankDetail
-            }
+                setBody(bankDetail)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<GstOfferConfirmResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun getOrderById(loanType: String, orderId: String): OrderByIdResponse? {
         Log.d("Sugu loanType", loanType)
         val requestBody = mapOf("loanType" to loanType, "orderId" to orderId)
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().getOrderById) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = requestBody
-            }
+                setBody(requestBody)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<OrderByIdResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
-
     // Purchase Finance
-
     suspend fun pfConfirmOffer(pfOfferConfirm: PfOfferConfirm): PfOfferConfirmResponse? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().updateLoanAmount) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = pfOfferConfirm
-            }
+                setBody(pfOfferConfirm)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<PfOfferConfirmResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun pfInitiateOffer(id: String, loanType: String): PfOfferConfirmResponse? {
         val requestBody = mapOf("id" to id, "loanType" to loanType)
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().initialOfferSelect) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = requestBody
-            }
+                setBody(requestBody)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<PfOfferConfirmResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
-//    suspend fun pfLoanApproved(id: String, loanType: String): PfOfferConfirmResponse? {
     suspend fun pfLoanApproved(id: String, loanType: String): PFLoanApprovedResponse? {
         val requestBody = mapOf("id" to id, "loanType" to loanType)
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().loanApproved) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = requestBody
-            }
+                setBody(requestBody)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<PFLoanApprovedResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
-//    suspend fun pfLoanEntityApproval(bankDetail: PfBankDetail): PfOfferConfirmResponse? {
-//        return KtorClient.getInstance().use { httpClient ->
-//            httpClient.post(ApiPaths().addAccountDetails) {
-//                val accessToken = TokenManager.read("accessToken")
-//                val bearerToken = "Bearer $accessToken"
-//                header("Authorization", bearerToken)
-//                body = bankDetail
-//            }
-//        }
-//    }
     suspend fun pfLoanEntityApproval(bankDetail: PfBankDetail): PfOfferConfirmResponse? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().addAccountDetails) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = bankDetail
-            }
+                setBody(bankDetail)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<PfOfferConfirmResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
-
     // Igm Flow Api Repository
-
     suspend fun getIssueCategories(): IssueCategories? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().getIssueCategories) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-            }
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<IssueCategories>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun getIssueWithSubCategories(category: String): IssueSubCategories? {
         val requestBody = mapOf("category" to category)
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().getIssueWithSubCategories) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = requestBody
-            }
+                setBody(requestBody)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<IssueSubCategories>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun imageUpload(imageUploadBody: ImageUploadBody): ImageUpload? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().issueImageUpload) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = imageUploadBody
-            }
+                setBody(imageUploadBody)
+            }}
+        return when (response.status.value) {
+            200,201 -> response.body<ImageUpload>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun documentUpload(imageUploadBody: ImageUploadBody): DocumentUpload? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().issueImageUpload) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = imageUploadBody
-            }
+                setBody(imageUploadBody)
+            }}
+        return when (response.status.value) {
+            200,201 -> response.body<DocumentUpload>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
-
     suspend fun createIssue(createIssueBody: CreateIssueBody): CreateIssueResponse? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().createIssue) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = createIssueBody
-            }
+                setBody(createIssueBody)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<CreateIssueResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun getIssueListForUser(issueListBody: IssueListBody): IssueListResponse? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().issueList) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = issueListBody
-            }
+                setBody(issueListBody)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<IssueListResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun closeIssue(closeIssueBody: CloseIssueBody): CloseIssueResponse? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().closeIssue) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = closeIssueBody
-            }
+                setBody(closeIssueBody)
+            }}
+        Log.d("res_Hapirepo",response.status.value.toString())
+        return when (response.status.value) {
+            200, 201 -> response.body<CloseIssueResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun issueStatus(issueId: String): IssueStatusResponse? {
         val requestBody = mapOf("issueId" to issueId)
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().issueStatus) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = requestBody
-            }
+                setBody(requestBody)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<IssueStatusResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun issueById(issueId: String): IssueByIdResponse? {
         val requestBody = mapOf("issue_id" to issueId)
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().issueById) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = requestBody
-            }
+                setBody(requestBody)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<IssueByIdResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun checkOrderIssues(orderId: String): CheckOrderIssueModel? {
         val requestBody = mapOf("order_id" to orderId)
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().checkOrderIssues) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = requestBody
-            }
+                setBody(requestBody)
+            }}
+        return when (response.status.value) {
+            200,201 -> response.body<CheckOrderIssueModel>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
-
     suspend fun orderIssues(orderId: String): OrderIssueResponse? {
         val requestBody = mapOf("order_id" to orderId)
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().orderIssues) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = requestBody
-            }
+                setBody(requestBody)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<OrderIssueResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
-
     suspend fun cygnetGenerateOtp(gstIn: String, username: String): GstOtpResponse? {
         val requestBody = mapOf("gstin" to gstIn, "username" to username)
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().cygnetGenerateOtp) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = requestBody
-            }
+                setBody(requestBody)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<GstOtpResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun verifyOtpForGstIn(id: String, otp: String): GstOtpVerify? {
         val requestBody = mapOf("id" to id, "otp" to otp)
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().verifyOtpForGstIn) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = requestBody
-            }
+                setBody(requestBody)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<GstOtpVerify>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun gstInvoices(gstIn: String): GstInvoice? {
         val requestBody = mapOf("gstin" to gstIn)
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().gstInDetails) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = requestBody
-            }
+                setBody(requestBody)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<GstInvoice>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun getUserStatus(loanType: String): UserStatus? {
         val requestBody = mapOf("loanType" to loanType)
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().getUserStatus) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = requestBody
-            }
+                setBody(requestBody)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<UserStatus>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
     suspend fun status(loanType: String, orderId: String): StatusResponse? {
         val requestBody = mapOf("loanType" to loanType, "orderId" to orderId)
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().status) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = requestBody
-            }
+                setBody(requestBody)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<StatusResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     // Document Related Api Repo
-
     suspend fun contactUs(): ContactUsResponse? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.get(ApiPaths().contactUs) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-            }
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<ContactUsResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
-
     suspend fun privacyPolicy(): PrivacyPolicyResponse? {
-        return KtorClient.getInstance().use { httpClient ->
-//            httpClient.get(ApiPaths().privacyPolicy) {
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().privacyPolicy) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-            }
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<PrivacyPolicyResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
-
     suspend fun termCondition(): TermsConditionResponse? {
-        return KtorClient.getInstance().use { httpClient ->
-//            httpClient.get(ApiPaths().termsOfUse) {
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().termsOfUse) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-            }
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<TermsConditionResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
-
     suspend fun aboutUs(): AboutUsResponse? {
-        return KtorClient.getInstance().use { httpClient ->
-//            httpClient.get(ApiPaths().aboutUs) {
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().aboutUs) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-            }
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<AboutUsResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
     suspend fun offerList(loanType: String): OfferListModel? {
         val requestBody = mapOf("loanType" to loanType)
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().offerList) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = requestBody
-            }
+                setBody(requestBody)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<OfferListModel>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun gstOfferList(loanType: String): GstOfferListModel? {
         val requestBody = mapOf("loanType" to loanType)
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().offerList) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = requestBody
-            }
+                setBody(requestBody)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<GstOfferListModel>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun pfOfferList(loanType: String): PfOfferListModel? {
         val requestBody = mapOf("loanType" to loanType)
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().offerList) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = requestBody
-            }
+                setBody(requestBody)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<PfOfferListModel>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
-
     suspend fun pFFormSubmissionApi(financeSearchModel: FinanceSearchModel): SearchModel? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().formSubmission) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = financeSearchModel
-            }
+                setBody(financeSearchModel)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<SearchModel>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun financeConsentApproval(aaConsentApproval: ConsentApprovalRequest): ConsentApprovalResponse? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().aaConsentApproval) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = aaConsentApproval
-            }
+                setBody(aaConsentApproval)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<ConsentApprovalResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
-
     suspend fun userReportedIssueCreate(requestBody: UserReportedIssueCreateRequest): UserReportedIssueResponse? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().userReportedIssueCreate) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-                body = requestBody
-            }
+                setBody(requestBody)
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<UserReportedIssueResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
     suspend fun getAllUserReportedIssueFindUserId(): AllReportedUserIssuesResponse? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.get(ApiPaths().userReportedIssueFindUserId) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
-            }
+            }}
+        return when (response.status.value) {
+            200, 201 -> response.body<AllReportedUserIssuesResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
+
+
 }

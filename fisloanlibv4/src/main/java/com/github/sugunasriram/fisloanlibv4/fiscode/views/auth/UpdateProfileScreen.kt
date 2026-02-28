@@ -238,10 +238,10 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
     val showError by registerViewModel.showErrorMsg.observeAsState(false)
     val errorMsg by registerViewModel.errorMsg.observeAsState("")
 
-    val inProgress by registerViewModel.inProgress.collectAsState()
-    val isCompleted by registerViewModel.isCompleted.collectAsState()
-    val isUpdating by registerViewModel.isUpdating.collectAsState()
-    val upDated by registerViewModel.upDated.collectAsState()
+    val inProgress by registerViewModel.gettingUserDetails.collectAsState()
+    val isCompleted by registerViewModel.gotUserDetails.collectAsState()
+    val isUpdating by registerViewModel.isUpdatingProfile.collectAsState()
+    val upDated by registerViewModel.upDatedProfile.collectAsState()
     val shownMsg by registerViewModel.shownMsg.collectAsState()
     val shouldShowKeyboard by registerViewModel.shouldShowKeyboard.observeAsState(false)
 

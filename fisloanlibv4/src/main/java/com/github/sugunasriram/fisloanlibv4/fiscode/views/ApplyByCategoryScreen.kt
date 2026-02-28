@@ -30,6 +30,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -96,6 +97,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToUpdateP
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToWebViewFlowOneScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.UserStatus
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.ProfileResponse
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.UpdateProfile
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.VerifySessionResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.finance.PFSearchBodyModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.gst.GstSearchData
@@ -142,6 +144,8 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @Composable
 fun ApplyByCategoryScreen(navController: NavHostController,
@@ -162,18 +166,16 @@ fun ApplyByCategoryScreen(navController: NavHostController,
     val checked by userStatusViewModel.checked.collectAsState()
     val userStatus by userStatusViewModel.userStatus.collectAsState()
 
-    val navigationToSignIn by userStatusViewModel.navigationToSignIn.collectAsState()
+    val navigationToSignIn by userStatusViewModel.navigationToSignUp.collectAsState()
     val userDetails by registerViewModel.getUserResponse.collectAsState()
 
-    val userDetailsAPILoading by registerViewModel.inProgress.collectAsState()
-    val userDetailsAPICompleted by registerViewModel.isCompleted.collectAsState()
+    val userDetailsAPILoading by registerViewModel.gettingUserDetails.collectAsState()
+    val userDetailsAPICompleted by registerViewModel.gotUserDetails.collectAsState()
 
     val activity = LocalContext.current as? Activity
     val context = LocalContext.current
 
-    LaunchedEffect(Unit) {
-        registerViewModel.getUserDetail(context, navController)
-    }
+    LaunchedEffect(Unit) { registerViewModel.getUserDetail(context, navController) }
     BackHandler { activity?.finish() }
     when {
         navigationToSignIn -> navigateSignInPage(navController)
@@ -301,7 +303,7 @@ fun SelectingFlow(
     checked: Boolean, // currently not used in this streamlined flow
     showLoader: Boolean,
     errorMessage: String,
-    userDetails: ProfileResponse?,
+    userDetails: UpdateProfile?,
     userDetailsAPILoading: Boolean,
     userDetailsAPICompleted: Boolean,
     verifySessionResponse: VerifySessionResponse?
@@ -760,6 +762,7 @@ fun PurchaseDecidedFlow(
         }
     } else if (status.data.data?.firstOrNull()?.step.equals("consent_request_sent", true)) {
         LaunchedEffect(Unit) {
+            delay(400)
             webViewModel.getLenderStatusApi(
                 context = context,
                 loanType = "PURCHASE_FINANCE",
@@ -924,6 +927,7 @@ fun PurchaseDecidedFlow(
             transactionId?.let { Log.d("test transactionId: ", it) }
             status.data.data?.forEach { data ->
                 data?.step?.let { step ->
+                    Log.d("Sugu test step: ", step)
                     if (step.equals("post_search", true)) {
                         val offerList = data.offerResponse
                             ?.flatMap { offerResponseItem ->
@@ -942,6 +946,7 @@ fun PurchaseDecidedFlow(
                                 minInterestRate = it?.minInterestRate
                             )
                         }
+                        Log.d("Sugu test offerList: ", offerList.toString())
                         val combined = OffersWithRejections(
                             offers = offerList,
                             rejectedLenders = rejectedList
@@ -971,18 +976,16 @@ fun PurchaseDecidedFlow(
                     } else if (step.equals("offer_confirm_form_submission_APPROVED", true)) {
                         status.data.data.forEach { userItem ->
                             userItem?.data?.forEach { item ->
-                                item?.fromUrl?.let { verificationUrl ->
-                                    userItem.id?.let { id ->
-                                        transactionId?.let { transactionId ->
-                                            navigateToBankKycVerificationScreen(
-                                                navController = navController,
-                                                kycUrl = verificationUrl,
-                                                transactionId = transactionId,
-                                                offerId = id,
-                                                verificationStatus = "2",
-                                                fromFlow = fromFlow
-                                            )
-                                        }
+                                userItem.id?.let { id ->
+                                    transactionId?.let { transactionId ->
+                                        navigateToBankKycVerificationScreen(
+                                            navController = navController,
+                                            kycUrl = "No Need KYC URL",
+                                            transactionId = transactionId,
+                                            offerId = id,
+                                            verificationStatus = "2",
+                                            fromFlow = fromFlow
+                                        )
                                     }
                                 }
                             }

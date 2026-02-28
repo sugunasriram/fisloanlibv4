@@ -3,15 +3,6 @@ package com.github.sugunasriram.fisloanlibv4.fiscode.network.sse
 import android.util.Log
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.core.ApiRepository
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.android.Android
-import io.ktor.client.features.HttpTimeout
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.features.json.serializer.KotlinxSerializer
-import io.ktor.client.features.logging.DEFAULT
-import io.ktor.client.features.logging.LogLevel
-import io.ktor.client.features.logging.Logger
-import io.ktor.client.features.logging.Logging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -29,18 +20,22 @@ import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.SocketTimeoutException
 import java.net.URL
+import java.util.concurrent.TimeUnit
 import javax.net.ssl.HttpsURLConnection
 
 class SSEClient(private val sseUrl: String, private val scope: CoroutineScope) {
+
     private var sseJob: Job? = null
+
     private val _events = MutableStateFlow("")
     val events: StateFlow<String> = _events
 
     private lateinit var client: OkHttpClient
     private var call: Call? = null
 
-// OkHttpClient SSE
-
+    // -----------------------------
+    // OkHttp SSE (recommended)
+    // -----------------------------
     fun start() {
         if (sseJob?.isActive == true) {
             Log.w("SSEClient", "SSE already running. Ignoring start().")
@@ -48,9 +43,7 @@ class SSEClient(private val sseUrl: String, private val scope: CoroutineScope) {
         }
         stop()
         Log.d("SSEClient", "Starting new SSE connection...")
-        sseJob = scope.launch(Dispatchers.IO) {
-            runSse()
-        }
+        sseJob = scope.launch(Dispatchers.IO) { runSse() }
     }
 
     fun stop() {
@@ -68,31 +61,41 @@ class SSEClient(private val sseUrl: String, private val scope: CoroutineScope) {
 
         while (scope.isActive) {
             val accessToken = TokenManager.read("accessToken")
-            val bearerToken = "Bearer $accessToken"
-            Log.d("SSEClient", "BearerToken : $bearerToken")
-            if (bearerToken.isNullOrEmpty()) {
+            val bearerToken = accessToken?.let { "Bearer $it" }
+
+            if (bearerToken.isNullOrBlank()) {
                 Log.d("SSEClient", "No token found. Cannot connect.")
                 break
             }
 
             client = OkHttpClient.Builder()
-                .callTimeout(0, java.util.concurrent.TimeUnit.SECONDS) // no timeout
-                .readTimeout(0, java.util.concurrent.TimeUnit.SECONDS) // avoid read timeout
-                .connectTimeout(0, java.util.concurrent.TimeUnit.SECONDS) // connection must be established in 10s
-                .retryOnConnectionFailure(true).build()
+                // SSE streams are long lived; avoid client-level timeouts
+                .callTimeout(0, TimeUnit.SECONDS)
+                .readTimeout(0, TimeUnit.SECONDS)
+                .connectTimeout(15, TimeUnit.SECONDS)
+                .retryOnConnectionFailure(true)
+                .build()
 
-            val request = Request.Builder().url(sseUrl).addHeader("Authorization", bearerToken)
-                .addHeader("Accept", "text/event-stream").build()
+            val request = Request.Builder()
+                .url(sseUrl)
+                .addHeader("Authorization", bearerToken)
+                .addHeader("Accept", "text/event-stream")
+                .build()
 
             call = client.newCall(request)
 
             try {
                 val response = call!!.execute()
+
                 if (!response.isSuccessful) {
                     if (response.code == 401) {
-                        Log.d("SSE", "Got 401. Checking token...")
-                        if (ApiRepository.handleAuthGetAccessTokenApi()) {
-                            Log.d("SSEClient", "Token still exists. Restarting SSE...")
+                        Log.d("SSEClient", "Got 401. Refreshing token...")
+                        val refreshed = ApiRepository.handleAuthGetAccessTokenApi()
+                        response.close()
+
+                        if (refreshed) {
+                            Log.d("SSEClient", "Token refreshed. Reconnecting SSE...")
+                            retryCount = 0
                             continue
                         } else {
                             Log.d("SSEClient", "Token expired. Cannot reconnect.")
@@ -100,67 +103,91 @@ class SSEClient(private val sseUrl: String, private val scope: CoroutineScope) {
                         }
                     } else {
                         Log.d("SSEClient", "SSE connection failed: ${response.code}")
+                        response.close()
                         break
                     }
-                } else {
-                    Log.d("SSEClient", "Connected to SSE")
-                    response.body?.charStream()?.use { reader ->
-                        val bufferedReader = BufferedReader(reader)
-                        var line: String?
-                        while (scope.isActive) {
-                            line = bufferedReader.readLine()
-                            if (line == null) {
-                                Log.d("SSE", "Stream ended. Restarting...")
-                                break
-                            }
-                            if (line.startsWith("data:")) {
-                                val eventData = line.removePrefix("data:").trim()
-                                _events.value = eventData
-                                Log.wtf("SSEClient", "data : $eventData")
-                            }
+                }
+
+                Log.d("SSEClient", "Connected to SSE")
+                retryCount = 0
+
+                response.body?.charStream()?.use { reader ->
+                    val bufferedReader = BufferedReader(reader)
+                    var line: String?
+
+                    while (scope.isActive) {
+                        line = bufferedReader.readLine()
+                        if (line == null) {
+                            Log.d("SSEClient", "Stream ended. Restarting...")
+                            break
+                        }
+
+                        // Standard SSE: "data: ...."
+                        if (line.startsWith("data:")) {
+                            val eventData = line.removePrefix("data:").trim()
+                            _events.value = eventData
+                            Log.wtf("SSEClient", "data : $eventData")
                         }
                     }
                 }
+
+                response.close()
+                // loop continues => reconnect
+
             } catch (e: Exception) {
+                // common reconnect cases
                 if (e is EOFException) {
                     Log.d("SSEClient", "EOFException: ${e.message}. Reconnecting...")
                     delay(3000)
                     continue
-                } else if (e.message == "Socket closed") {
-                    Log.d("SSEClient SOCKET CLOSED", "Error: ${e.localizedMessage}")
-                    break
-                } else {
-                    retryCount++
-                    val delayTime = baseDelay * (1 shl (retryCount - 1))
-                    Log.d("SSEClient", "Unhandled exception: ${e.localizedMessage}. Retry $retryCount/$maxRetries")
-                    if (retryCount >= maxRetries) {
-                        Log.e("SSEClient", "Max retries reached. Stopping SSE ")
-                        _events.value = "__SSE_FAILURE__"
-                        break
-                    }
-                    delay(delayTime)
-                    continue
                 }
+                if (e.message == "Socket closed") {
+                    Log.d("SSEClient", "Socket closed. Stopping.")
+                    break
+                }
+
+                retryCount++
+                val delayTime = baseDelay * (1 shl (retryCount - 1))
+
+                Log.d(
+                    "SSEClient",
+                    "Exception: ${e.localizedMessage}. Retry $retryCount/$maxRetries"
+                )
+
+                if (retryCount >= maxRetries) {
+                    Log.e("SSEClient", "Max retries reached. Stopping SSE")
+                    _events.value = "__SSE_FAILURE__"
+                    break
+                }
+
+                delay(delayTime)
             }
         }
     }
 
-// java HttpsURLConnection SSE
+    // -----------------------------
+    // java HttpsURLConnection SSE (kept as-is, cleaned a bit)
+    // -----------------------------
     private var isListening = false
     private var reconnectJob: Job? = null
 
     fun startListening() {
         Log.d("SSEClient", "--startListening-- $sseUrl")
         if (isListening) return
+
         isListening = true
         reconnectJob = scope.launch(Dispatchers.IO) {
             var attempt = 0
+
             while (isListening) {
-                Log.d("SSEClient", "--isListening--")
                 try {
-                    // Fetch access token and prepare the authorization header
                     val accessToken = TokenManager.read("accessToken")
-                    val token = "Bearer $accessToken"
+                    val token = accessToken?.let { "Bearer $it" }
+
+                    if (token.isNullOrBlank()) {
+                        Log.d("SSEClient", "No token found. Cannot connect.")
+                        break
+                    }
 
                     val connection = URL(sseUrl).openConnection() as HttpsURLConnection
                     connection.requestMethod = "GET"
@@ -168,42 +195,46 @@ class SSEClient(private val sseUrl: String, private val scope: CoroutineScope) {
                     connection.setRequestProperty("Authorization", token)
                     connection.connect()
 
-                    Log.d("SSEClient", "BearerToken : $token")
-
                     val responseCode = connection.responseCode
                     if (responseCode == 401) {
                         Log.d("SSEClient", "--401--")
-                        if (ApiRepository.handleAuthGetAccessTokenApi()) {
-                            connection.disconnect()
+                        val refreshed = ApiRepository.handleAuthGetAccessTokenApi()
+                        connection.disconnect()
+
+                        if (refreshed) {
+                            attempt = 0
+                            continue
+                        } else {
                             stopListening()
-                            val sseClient = getInstance(sseUrl, scope)
-                            sseClient.startListening()
+                            break
                         }
                     } else if (responseCode == HttpURLConnection.HTTP_OK) {
                         Log.d("SSEClient", "---Starts stream---")
                         val reader = BufferedReader(InputStreamReader(connection.inputStream))
-                        attempt = 0 // Reset attempt on successful connection
+                        attempt = 0
 
                         while (isListening) {
                             val line = reader.readLine() ?: break
-                            if (line.startsWith("data: ")) {
-                                _events.value = line.substring(6)
+                            if (line.startsWith("data:")) {
+                                _events.value = line.removePrefix("data:").trim()
                             }
                         }
+
                         reader.close()
                         connection.disconnect()
                     } else {
-                        Log.d("SSEClient", "---Unknown---")
+                        Log.d("SSEClient", "---Unknown response--- $responseCode")
+                        connection.disconnect()
+                        handleReconnection(attempt++)
                     }
                 } catch (e: EOFException) {
-                    Log.w("SSEClient", "EOFException occurred: ${e.message}")
+                    Log.w("SSEClient", "EOFException: ${e.message}")
                     handleReconnection(attempt++)
                 } catch (e: SocketTimeoutException) {
-                    Log.w("SSEClient", "SocketTimeoutException occurred: ${e.message}")
+                    Log.w("SSEClient", "SocketTimeoutException: ${e.message}")
                     handleReconnection(attempt++)
                 } catch (e: Exception) {
                     Log.d("SSEClient", "Exception: ${e.message}")
-                    e.printStackTrace()
                     handleReconnection(attempt++)
                 }
             }
@@ -211,30 +242,31 @@ class SSEClient(private val sseUrl: String, private val scope: CoroutineScope) {
     }
 
     private suspend fun handleReconnection(attempt: Int) {
-        delay((attempt * 1000L).coerceAtMost(10000L)) // Exponential backoff, max 10 seconds
+        delay((attempt * 1000L).coerceAtMost(10000L))
     }
 
     fun clearEvents() {
-        _events.value = "" // Reset to default or empty value
+        _events.value = ""
     }
 
     fun stopListening() {
         isListening = false
-        Log.d("SSEClient", "stopListening canceled")
         reconnectJob?.cancel()
-        clearEvents() // Clear Old Events
+        reconnectJob = null
+        clearEvents()
+        Log.d("SSEClient", "stopListening canceled")
     }
 
     companion object {
-        var instance: SSEClient ? = null
+        private var instance: SSEClient? = null
 
         fun getInstance(url: String, scope: CoroutineScope): SSEClient {
-            instance?.let {
-                return instance as SSEClient
-            } ?: kotlin.run {
-                instance = SSEClient(url, scope)
-                return instance as SSEClient
-            }
+            val existing = instance
+            if (existing != null) return existing
+
+            val created = SSEClient(url, scope)
+            instance = created
+            return created
         }
     }
 }

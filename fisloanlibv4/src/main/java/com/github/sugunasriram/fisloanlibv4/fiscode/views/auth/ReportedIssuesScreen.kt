@@ -58,7 +58,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal14Text500
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal16Text400
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal18Text400
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal32Text700
-import io.ktor.client.features.ResponseException
+import io.ktor.client.plugins.ResponseException
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter

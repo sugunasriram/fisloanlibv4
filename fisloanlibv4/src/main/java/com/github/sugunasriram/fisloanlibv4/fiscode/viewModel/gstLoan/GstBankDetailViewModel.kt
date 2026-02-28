@@ -9,12 +9,12 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.network.core.ApiRepository.h
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.gst.GstOfferConfirmResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.BaseViewModel
-import io.ktor.client.features.ResponseException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import io.ktor.client.plugins.ResponseException
 
 class GstBankDetailViewModel : BaseViewModel() {
 

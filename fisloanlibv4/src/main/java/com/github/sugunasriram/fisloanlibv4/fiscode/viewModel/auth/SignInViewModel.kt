@@ -13,7 +13,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.GenerateA
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.LogIn
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.UserRole
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.BaseViewModel
-import io.ktor.client.features.ResponseException
+import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow

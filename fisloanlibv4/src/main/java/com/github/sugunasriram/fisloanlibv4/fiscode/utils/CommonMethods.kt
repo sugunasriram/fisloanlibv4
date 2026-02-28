@@ -38,10 +38,9 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.NegativeCommon
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.RequestTimeOutScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.UnAuthorizedScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.UnexpectedErrorScreen
-import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.convertUTCToLocalDateTime
-import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.coolOffPeriodDate
-import io.ktor.client.features.HttpRequestTimeoutException
-import io.ktor.client.features.ResponseException
+import io.ktor.client.plugins.HttpRequestTimeoutException
+import io.ktor.client.plugins.ResponseException
+import io.ktor.client.statement.bodyAsText
 import io.ktor.client.statement.readText
 import kotlinx.coroutines.TimeoutCancellationException
 import org.json.JSONException
@@ -67,6 +66,7 @@ class CommonMethods {
     companion object {
         const val BASE_URL = "https://stagingondcfs.jtechnoparks.in/jt-bap"
     }
+
     private val emailPattern =
         "[a-zA-Z0-9+._%\\-]{1,256}" + "@" + "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}" + "(" + "\\." + "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" + ")+"
 
@@ -105,6 +105,20 @@ class CommonMethods {
             "^(?!.*\\.\\.)(?!.*\\.@)(?!.*@\\.)(?!.*\\s)([a-zA-Z0-9]+[\\w.-]*)@([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,16}$"
         )
         return emailRegex.matches(email)
+    }
+    fun snakeToHumanReadable(input: String?): String {
+        return input?.split("_")
+            ?.joinToString(" ") { it.lowercase() }
+            ?.replaceFirstChar { it.uppercase() } ?:""  // Capitalize first letter of the sentence
+    }
+    fun verifyPhoneNumber(phoneNumber: String, context: Context): Boolean {
+        return phoneNumber.matches(Regex("^[6-9]\\d{9}$"))
+//        val phoneUtil = PhoneNumberUtil.getInstance();
+//        val number = phoneUtil.parse(context.getString(R.string.country_code) + phoneNumber, "IN");
+//        if(phoneUtil.isValidNumber(number)){
+//            return phoneUtil.getNumberType(number) == PhoneNumberUtil.PhoneNumberType.MOBILE
+//        }
+//        return false
     }
 
     fun isValidPanNumber(panNumber: String?) = panNumber?.let {
@@ -170,7 +184,7 @@ class CommonMethods {
     fun parseAndFormatIndianCurrency(input: String): String {
         val cleaned = input
             .replace("INR", "", ignoreCase = true) // Remove INR
-            .replace("[^\\d.]".toRegex(), "")      // Remove anything except digits and dot
+            .replace("[^\\d.]".toRegex(), "") // Remove anything except digits and dot
             .trim()
 
         val amount = cleaned.toDoubleOrNull() ?: 0.0
@@ -199,6 +213,7 @@ class CommonMethods {
             "" // Return empty string on failure
         }
     }
+
     @Composable
     fun displayFormattedDate(timeStamp: String): String {
         val formattedDate = remember {
@@ -261,8 +276,7 @@ class CommonMethods {
             onClick = {
 //                navigateApplyByCategoryScreen(navController)
                 Log.d("Sugu", "Check 3")
-
-                navigateToFISExitScreen(navController, loanId="4321")
+                navigateToFISExitScreen(navController, loanId = "4321")
             }
         )
     }
@@ -272,8 +286,7 @@ class CommonMethods {
         RequestTimeOutScreen(navController, onClick = {
         //    navigateApplyByCategoryScreen(navController)
             Log.d("Sugu", "Check 4")
-
-            navigateToFISExitScreen(navController, loanId="4321")
+            navigateToFISExitScreen(navController, loanId = "4321")
         })
     }
 
@@ -286,17 +299,19 @@ class CommonMethods {
 //            onClick = { navigateApplyByCategoryScreen(navController) }
             onClick = {
                 Log.d("Sugu", "Check 5")
-                navigateToFISExitScreen(navController, loanId="4321") }
+                navigateToFISExitScreen(navController, loanId = "4321")
+            }
         )
     }
 
     @Composable
     fun ShowUnexpectedErrorScreen(navController: NavHostController) {
-        UnexpectedErrorScreen(navController = navController,
-//            onClick = { navigateApplyByCategoryScreen(navController) }
+        UnexpectedErrorScreen(
+            navController = navController,
             onClick = {
                 Log.d("Sugu", "Check 6")
-                navigateToFISExitScreen(navController, loanId="4321") }
+                navigateToFISExitScreen(navController, loanId = "4321")
+            }
         )
     }
 
@@ -306,17 +321,15 @@ class CommonMethods {
     }
 
     @Composable
-    fun ShowMiddleLoanErrorScreen(
-        navController: NavHostController
-    ) {
+    fun ShowMiddleLoanErrorScreen(navController: NavHostController) {
         UnexpectedErrorScreen(
             navController = navController,
             errorMsg = stringResource(id = R.string.middle_loan_error_message),
 //            onClick = { navigateApplyByCategoryScreen(navController) }
             onClick = {
                 Log.d("Sugu", "Check 7")
-
-                navigateToFISExitScreen(navController, loanId="4321") }
+                navigateToFISExitScreen(navController, loanId = "4321")
+            }
         )
 //        NoResponseFormLenders(navController = navController)
     }
@@ -335,8 +348,8 @@ class CommonMethods {
 //            onClick = { navigateApplyByCategoryScreen(navController) }
             onClick = {
                 Log.d("Sugu", "Check 8")
-
-                navigateToFISExitScreen(navController, loanId="4321") }
+                navigateToFISExitScreen(navController, loanId = "4321")
+            }
         )
 //        NoResponseFormLenders(navController = navController)
     }
@@ -352,20 +365,10 @@ class CommonMethods {
     @Composable
     fun timeBufferString(remainingTime: RemainingTime): String {
         val components = mutableListOf<String>()
-
-        if (remainingTime.days > 0) {
-            components.add("${remainingTime.days} days")
-        }
-        if (remainingTime.hours > 0) {
-            components.add("${remainingTime.hours} hours")
-        }
-        if (remainingTime.minutes > 0) {
-            components.add("${remainingTime.minutes} minutes")
-        }
-        if (remainingTime.seconds > 0) {
-            components.add("${remainingTime.seconds} seconds")
-        }
-
+        if (remainingTime.days > 0) components.add("${remainingTime.days} days")
+        if (remainingTime.hours > 0) components.add("${remainingTime.hours} hours")
+        if (remainingTime.minutes > 0) components.add("${remainingTime.minutes} minutes")
+        if (remainingTime.seconds > 0) components.add("${remainingTime.seconds} seconds")
         return components.joinToString(separator = ", ")
     }
 
@@ -379,35 +382,25 @@ class CommonMethods {
 
     @Composable
     fun getRemainingTime(dateString: String): RemainingTime? {
-        // Define the date formatter according to the input date format
         val formatter = DateTimeFormatter.ISO_DATE_TIME
-
         return try {
-            // Parse the input date string to a ZonedDateTime
             val inputDate = ZonedDateTime.parse(dateString, formatter)
-
-            // Get the current date in UTC
             val now = ZonedDateTime.now(ZoneId.of("UTC"))
-
-            // Calculate the duration between the input date and now
             val duration = Duration.between(now, inputDate)
 
-            // Determine if the input date is in the future or past
             val absDuration = if (duration.isNegative) duration.negated() else duration
-
             val isFuture = !duration.isNegative
 
-            // Extract days, hours, minutes, and seconds from the duration
             val days = absDuration.toDays()
             val hours = absDuration.minus(days, ChronoUnit.DAYS).toHours()
-            val minutes =
-                absDuration.minus(days, ChronoUnit.DAYS).minus(hours, ChronoUnit.HOURS).toMinutes()
-            val seconds = absDuration.minus(days, ChronoUnit.DAYS).minus(hours, ChronoUnit.HOURS)
+            val minutes = absDuration.minus(days, ChronoUnit.DAYS).minus(hours, ChronoUnit.HOURS).toMinutes()
+            val seconds = absDuration.minus(days, ChronoUnit.DAYS)
+                .minus(hours, ChronoUnit.HOURS)
                 .minus(minutes, ChronoUnit.MINUTES).seconds
 
             RemainingTime(isFuture, days, hours, minutes, seconds)
         } catch (e: Exception) {
-            null // Return null if parsing fails
+            null
         }
     }
 
@@ -565,7 +558,7 @@ class CommonMethods {
                         val dueDate = payment.time?.range?.start?.let {
                             formatDateFromTimestamp(it)
                         }.orEmpty()
-                        val amount ="₹${payment.params?.amount.orEmpty()}"
+                        val amount = "₹${payment.params?.amount.orEmpty()}"
                         val status = payment.status.orEmpty()
 
                         val rowData = listOf(emiNum, dueDate, amount, status)
@@ -591,8 +584,8 @@ class CommonMethods {
                 val totalWidth = pageInfo.pageWidth - 80f
                 val columnWidths = listOf(
                     0.45f * totalWidth, // Payment Type (label)
-                    0.35f * totalWidth,  // Amount
-                    0.35f * totalWidth   // Status
+                    0.35f * totalWidth, // Amount
+                    0.35f * totalWidth // Status
                 )
 
                 val headers = listOf("Payment Type", "Amount", "Status")
@@ -644,16 +637,14 @@ class CommonMethods {
 //            drawLabelValueLine("Application ID", loanDetails.itemId ?: "")
             drawLabelValueLine("Application ID", loanDetails.id ?: "")
             drawLabelValueLine("Loan Type", loanDetails.itemDescriptor?.name.orEmpty())
-            drawLabelValueLine("Loan Amount", formatIndianDoubleCurrency(loanDetails.itemPrice?.value.orEmpty().toDouble()))
+            drawLabelValueLine("Loan Amount", loanDetails.itemPrice?.value.orEmpty())
             loanDetails.itemTags?.forEach { itemTags ->
                 if (itemTags?.display == true) {
                     itemTags.tags.forEach { tag ->
                         val label = CommonMethods().displayFormattedText(tag.key)
                         val value = if (tag.key.contains("cool_off", ignoreCase = true)) {
                             CommonMethods().uTCToLocalDateTimeConversion(tag.value)
-                        }else if (tag.key.contains("amount", ignoreCase = true)) {
-                        CommonMethods().formatIndianDoubleCurrency(tag.value.toDouble())
-                    }  else {
+                        } else {
                             tag.value
                         }
                         drawLabelValueLine(label, value)
@@ -664,7 +655,7 @@ class CommonMethods {
             drawSectionHeader("LOAN SUMMARY:")
             loanDetails.quoteBreakUp?.forEach {
                 val label = CommonMethods().displayFormattedText(it?.title.orEmpty())
-                val value = formatIndianDoubleCurrency(it?.value.orEmpty().toDouble())
+                val value = it?.value.orEmpty()
                 drawLabelValueLine(label, value)
             }
             drawTextLine("")
@@ -741,7 +732,7 @@ class CommonMethods {
         manager.notify(1010, notification)
     }
 
-    fun downloadPdf(context: Context, url: String, fileName: String,title:String) {
+    fun downloadPdf(context: Context, url: String, fileName: String, title: String) {
         try {
             val timestamp = SimpleDateFormat("yyyyMMdd HH:mm", Locale.getDefault())
                 .format(Date())
@@ -759,13 +750,16 @@ class CommonMethods {
             val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
             downloadManager.enqueue(request)
             CommonMethods().toastMessage(
-                context = context, toastMsg = "Downloading Loan Agreement"
+                context = context,
+                toastMsg = "Downloading Loan Agreement"
             )
 
         } catch (e: Exception) {
             CommonMethods().toastMessage(
-                context = context, toastMsg =  "Download failed: ${e.message}"
-            ) }
+                context = context,
+                toastMsg = "Download failed: ${e.message}"
+            )
+        }
     }
 
     @Composable
@@ -900,11 +894,17 @@ class CommonMethods {
         searchError: () -> Unit = { }
     ) {
         val statusCode = error.response.status.value
-        val responseBody = error.response.readText()
+//        val responseBody = error.response.readText()
+        val responseBody = error.response.bodyAsText()
         when (statusCode) {
             400 -> {
-//                val errorMessage = CommonMethods().parseErrorMessage(responseBody)
-//                CommonMethods().toastMessage(context, errorMessage)
+                try {
+                    val jsonObject = JSONObject(responseBody)
+                    val data = jsonObject.optString("data", "No data available")
+                    updateErrorMessage(data)
+                } catch (e: JSONException) {
+                    Log.e("Error", "Error parsing 400 response body", e)
+                }
                 _unexpectedError.value = true
             }
 
@@ -962,23 +962,6 @@ class CommonMethods {
         return actualDate
     }
 
-    fun isValidDob(dob: String): Boolean {
-        val pattern = """^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$"""
-//        val pattern = """^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/\d{4}$"""
-        if (!dob.matches(Regex(pattern))) return false
-
-        return try {
-            val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
-            val dobDate = LocalDate.parse(dob, formatter)
-            val today = LocalDate.now()
-            val adultDate = today.minusYears(18)
-
-            dobDate.isBefore(adultDate)
-        } catch (e: DateTimeParseException) {
-            false
-        }
-    }
-
     fun formatWithCommas(number: Int): String {
         try {
             val decimalFormat = DecimalFormat("##,##,###", DecimalFormatSymbols(Locale("en", "IN")))
@@ -1004,6 +987,7 @@ class CommonMethods {
             else -> cleaned.replace("[^0-9]".toRegex(), "").takeIf { it.isNotEmpty() }
         }
     }
+
     private fun uTCToLocalDateTimeConversion(utcDateTime: String): String {
         val zonedDateTime =
             ZonedDateTime.parse(utcDateTime).withZoneSameInstant(ZoneId.of("Asia/Kolkata"))

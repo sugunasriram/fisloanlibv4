@@ -168,8 +168,8 @@ fun BasicDetailsScreen(navController: NavHostController, fromFlow: String, loanP
     val unexpectedErrorScreen by registerViewModel.unexpectedError.observeAsState(false)
     val unAuthorizedUser by registerViewModel.unAuthorizedUser.observeAsState(false)
 
-    val inProgress by registerViewModel.inProgress.collectAsState()
-    val isCompleted by registerViewModel.isCompleted.collectAsState()
+    val inProgress by registerViewModel.gettingUserDetails.collectAsState()
+    val isCompleted by registerViewModel.gotUserDetails.collectAsState()
 
     var selectedCity1 by remember { mutableStateOf(city1 ?: "") }
     val onCity1Selected: (String) -> Unit = { selectedText ->
