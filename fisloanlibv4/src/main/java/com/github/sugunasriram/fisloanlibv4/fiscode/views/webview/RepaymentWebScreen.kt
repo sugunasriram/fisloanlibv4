@@ -78,7 +78,6 @@ private var uploadMessage: ValueCallback<Uri>? = null
 var mGeoLocationRequestOriginRepayment: String? = null
 var mGeoLocationCallbackRepayment: GeolocationPermissions.Callback? = null
 
-@RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun RepaymentWebScreen(
