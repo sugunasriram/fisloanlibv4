@@ -36,6 +36,45 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
 import java.io.Serializable
 
 object LoanLib {
+
+    data class PersonalDetails(
+        val name: String = "",
+        val dob: String = "",
+        val personalEmailId: String = "",
+        val officialEmailId: String = "",
+        val gender: String = "",
+        val address1: String = "",
+        val pincode1: String = "",
+        val address2: String = "",
+        val pincode2: String = ""
+    ) : Serializable
+
+    data class ProductDetails(
+        val productCategory: String = "",
+        val productSKUID: String = "",
+        val productBrand: String = "",
+        val productPrice: Double = 0.0,
+        val downpayment: Double = 0.0,
+        val merchantPan: String = "",
+        val merchantGst: String = "",
+        val merchantBankAccountNumber: String = "",
+        val merchantIfscCode: String = "",
+        val merchantBankAccountHolderName: String = ""
+    ) : Serializable
+
+    data class SessionDetails(
+        val sessionId: String = "",
+        val loanId: String = ""
+    ) : Serializable
+
+    data class LoanDetails(
+        val sessionId: String,
+        val loanAmount: Double,
+        val interestRate: Double,
+        val tenure: Int,
+        val downpaymentAmount: Int
+    ) : Serializable
+
     var callback: ((LoanDetails) -> Unit)? = null
 
     fun launchFirstScreen(context: Context) {
@@ -144,6 +183,7 @@ object LoanLib {
         val intent = Intent(context, ThirdScreenActivity::class.java)
         context.startActivity(intent)
     }
+
     fun LaunchFISApp(context: Context) {
         Toast.makeText(context, "Launching FIS", Toast.LENGTH_SHORT).show()
 
@@ -160,90 +200,21 @@ object LoanLib {
         }
     }
 
-    data class PersonalDetails(
-        val name: String = "",
-        val dob: String = "",
-        val personalEmailId: String = "",
-        val officialEmailId: String = "",
-        val gender: String = "",
-        val address1: String = "",
-        val pincode1: String = "",
-        val address2: String = "",
-        val pincode2: String = ""
-    ) : Serializable
-
-    data class ProductDetails(
-        val productCategory: String = "",
-        val productSKUID: String = "",
-        val productBrand: String = "",
-        val productPrice: Double = 0.0,
-        val downpayment: Double = 0.0,
-        val merchantPan: String = "",
-        val merchantGst: String = "",
-        val merchantBankAccountNumber: String = "",
-        val merchantIfscCode: String = "",
-        val merchantBankAccountHolderName: String = ""
-    ) : Serializable
-
-    data class SessionDetails(
-        val sessionId: String = "",
-        val loanId: String = ""
-    ) : Serializable
-
     fun LaunchFISAppWithParams(
         context: Context,
-//        personalDetails: PersonalDetails,
-//        productDetails: ProductDetails
     ) {
-//        Toast.makeText(context, "Launching FIS with Params", Toast.LENGTH_SHORT).show()
-
         // Initialize the library
         init(context)
 
         val intent = Intent(context, MainActivity::class.java)
-//        intent.putExtra("personalDetails", personalDetails)
-//        intent.putExtra("productDetails", productDetails)
-
         context.startActivity(intent)
     }
 
-    data class LoanDetails(
-        val sessionId: String,
-        val loanAmount: Double,
-        val interestRate: Double,
-        val tenure: Int,
-        val downpaymentAmount: Int
-    ) : Serializable
-//    fun LaunchFISAppWithParamsAndCallback(
-//        context: Context,
-//        personalDetails: PersonalDetails,
-//        productDetails: ProductDetails,
-//        sessionDetails: SessionDetails ? = null,
-//        callback: (LoanDetails) -> Unit
-//    ) {
-//        Toast.makeText(context, "Launching FIS with Params", Toast.LENGTH_SHORT).show()
-//
-//        // Initialize the library
-//        init(context)
-//
-//        val intent = Intent(context, MainActivity::class.java)
-//        intent.putExtra("personalDetails", personalDetails)
-//        intent.putExtra("productDetails", productDetails)
-//        intent.putExtra("sessionDetails", sessionDetails)
-//
-//        LoanLib.callback = callback
-//
-//        // (context as Activity).startActivityForResult(intent, 2001)
-//        context.startActivity(intent)
-//    }
-
     fun LaunchFISAppWithParamsAndCallback(
         context: Context,
-        sessionDetails: SessionDetails ? = null,
+        sessionDetails: SessionDetails? = null,
         callback: (LoanDetails) -> Unit
     ) {
-//        Toast.makeText(context, "Launching FIS with Params", Toast.LENGTH_SHORT).show()
-
         // Initialize the library
         init(context)
 
@@ -252,17 +223,14 @@ object LoanLib {
 
         LoanLib.callback = callback
 
-        // (context as Activity).startActivityForResult(intent, 2001)
         context.startActivity(intent)
     }
 
     fun LaunchFISAppForLoanDetails(
         context: Context,
-        sessionDetails: SessionDetails ? = null,
+        sessionDetails: SessionDetails? = null,
         callback: (LoanDetails) -> Unit
     ) {
-//        Toast.makeText(context, "Launching FIS with Params", Toast.LENGTH_SHORT).show()
-
         // Initialize the library
         init(context)
 
@@ -271,7 +239,6 @@ object LoanLib {
 
         LoanLib.callback = callback
 
-        // (context as Activity).startActivityForResult(intent, 2001)
         context.startActivity(intent)
     }
 }

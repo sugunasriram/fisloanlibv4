@@ -1,0 +1,3 @@
+-keep class com.github.sugunasriram.fisloanlibv4.LoanLib { *; }
+-keep class com.github.sugunasriram.fisloanlibv4.LoanLib$** { *; }
+-keepattributes Signature,InnerClasses,EnclosingMethod

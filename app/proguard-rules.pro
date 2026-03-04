@@ -35,22 +35,16 @@
 -keep class com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.LogIn { *; }
 -keep class com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.Token { *; }
 
--keep class com.github.sugunasriram.fisloanlibv4.fiscode.network.core.* { *; }
--keep class com.github.sugunasriram.fisloanlibv4.fiscode.network.core.*.* { *; }
-
--keep class com.github.sugunasriram.fisloanlibv4.fiscode.network.model.* { *; }
--keep class com.github.sugunasriram.fisloanlibv4.fiscode.network.model.*.* { *; }
-
--keep class com.github.sugunasriram.fisloanlibv4.fiscode.network.sse.* { *; }
--keep class com.github.sugunasriram.fisloanlibv4.fiscode.network.sse.*.* { *; }
+-keep class com.github.sugunasriram.fisloanlibv4.fiscode.network.core.** { *; }
+-keep class com.github.sugunasriram.fisloanlibv4.fiscode.network.model.** { *; }
+-keep class com.github.sugunasriram.fisloanlibv4.fiscode.network.sse.** { *; }
 
 -keepclassmembers class * extends android.webkit.WebViewClient {
     public *;
 }
 
-
 # Keep all Serializable annotations (optional)
--keepattributes *Annotation*
+-keepattributes *Annotation*,Signature,EnclosingMethod,InnerClasses
 
 # PDF support
 -dontwarn com.gemalto.jp2.**
@@ -73,10 +67,9 @@
 -dontwarn org.slf4j.impl.StaticMarkerBinder
 -dontwarn org.slf4j.**
 
-
--dontwarn com.github.sugunasriram.fisloanlibv4.LoanLib$LoanDetails
--dontwarn com.github.sugunasriram.fisloanlibv4.LoanLib$SessionDetails
--dontwarn com.github.sugunasriram.fisloanlibv4.LoanLib
+# Keep LoanLib and its nested data classes
+-keep class com.github.sugunasriram.fisloanlibv4.LoanLib { *; }
+-keep class com.github.sugunasriram.fisloanlibv4.LoanLib$** { *; }
 
 # Coil 3 (known R8 missing class detection)
 -dontwarn coil3.PlatformContext
@@ -91,7 +84,3 @@
 
 # SLF4J binding is optional
 -dontwarn org.slf4j.impl.**
-
--dontwarn com.github.sugunasriram.fisloanlibv4.LoanLib$LoanDetails
--dontwarn com.github.sugunasriram.fisloanlibv4.LoanLib$SessionDetails
--dontwarn com.github.sugunasriram.fisloanlibv4.LoanLib
