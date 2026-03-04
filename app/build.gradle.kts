@@ -196,7 +196,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -205,7 +205,7 @@ android {
         }
         debug {
             isMinifyEnabled = false
-            isShrinkResources = false
+//            isShrinkResources = false
 //             proguardFiles(
 //                 getDefaultProguardFile("proguard-android-optimize.txt"),
 //                 "proguard-rules.pro"
@@ -325,6 +325,9 @@ val serializationVersion = "1.6.3"
 dependencies {
     implementation(project(":fisloanlibv4")) // Sugu1
 //    implementation("com.github.sugunasriram:fisloanlibv4:v1.0.60")
+
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("androidx.activity:activity-ktx:1.8.1")
 
     implementation("org.bouncycastle:bcprov-jdk15to18:1.79")
     implementation("org.bouncycastle:bctls-jdk15to18:1.79")

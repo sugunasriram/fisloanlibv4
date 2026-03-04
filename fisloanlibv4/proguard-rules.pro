@@ -155,4 +155,16 @@
 -dontwarn com.github.sugunasriram.fisloanlibv4.LoanLib$SessionDetails
 -dontwarn com.github.sugunasriram.fisloanlibv4.LoanLib
 
+# Coil 3 (known R8 missing class detection)
+-dontwarn coil3.PlatformContext
 
+# Tink KeysDownloader optional deps
+-dontwarn com.google.api.client.http.**
+-dontwarn com.google.api.client.util.**
+-dontwarn org.joda.time.**
+
+# Ktor debug detector references JVM-only APIs
+-dontwarn java.lang.management.**
+
+# SLF4J binding is optional
+-dontwarn org.slf4j.impl.**
