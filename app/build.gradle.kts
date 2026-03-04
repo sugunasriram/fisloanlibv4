@@ -204,12 +204,12 @@ android {
 //            signingConfig = signingConfigs.getByName("config")
         }
         debug {
-            isMinifyEnabled = false
-//            isShrinkResources = false
-//             proguardFiles(
-//                 getDefaultProguardFile("proguard-android-optimize.txt"),
-//                 "proguard-rules.pro"
-//             )
+            isMinifyEnabled = true
+            isShrinkResources = false
+             proguardFiles(
+                 getDefaultProguardFile("proguard-android-optimize.txt"),
+                 "proguard-rules.pro"
+             )
         }
     }
     splits {
