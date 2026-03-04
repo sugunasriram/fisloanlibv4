@@ -91,3 +91,7 @@
 
 # SLF4J binding is optional
 -dontwarn org.slf4j.impl.**
+
+-dontwarn com.github.sugunasriram.fisloanlibv4.LoanLib$LoanDetails
+-dontwarn com.github.sugunasriram.fisloanlibv4.LoanLib$SessionDetails
+-dontwarn com.github.sugunasriram.fisloanlibv4.LoanLib
