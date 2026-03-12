@@ -70,7 +70,7 @@ class CreateIssueViewModel : ViewModel() {
     }
     fun clearImageUploadError() {
         _showImageNotUploadedError.value = false
-        _imageUploadError.value=null
+        _imageUploadError.value = null
     }
 
     private val _shortDesc: MutableLiveData<String?> = MutableLiveData("")
@@ -109,7 +109,7 @@ class CreateIssueViewModel : ViewModel() {
 
     fun onLongDescriptionChanged(value: String) {
         val sanitized = value
-            .replace(Regex("[^\\p{ASCII}\\s₹]"), "")  // Remove non-ASCII except ₹
+            .replace(Regex("[^\\p{ASCII}\\s₹]"), "") // Remove non-ASCII except ₹
             .replace(Regex(" {2,}"), " ")
         _longDesc.value = sanitized
     }

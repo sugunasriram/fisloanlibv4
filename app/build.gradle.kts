@@ -194,7 +194,7 @@ val serializationVersion = "1.6.3"
 
 dependencies {
     implementation(project(":fisloanlibv4")) // Sugu1
-//    implementation("com.github.sugunasriram:fisloanlibv4:v2.0.5")
+//    implementation("com.github.sugunasriram:fisloanlibv4:v2.0.6")
 
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.activity:activity-ktx:1.8.1")

@@ -125,14 +125,30 @@ object ApiRepository {
         }
     }
 
+//    suspend fun createSession(createSessionRequest: CreateSessionRequest): CreateSessionResponse? {
+//        return KtorClient.getInstance().use { httpClient ->
+//            httpClient.post(ApiPaths().createSession) {
+//                val accessToken = TokenManager.read("accessToken")
+//                val bearerToken = "Bearer $accessToken"
+//                header("Authorization", bearerToken)
+//                setBody(createSessionRequest)
+//            }.body()
+//        }
+//    }
     suspend fun createSession(createSessionRequest: CreateSessionRequest): CreateSessionResponse? {
-        return KtorClient.getInstance().use { httpClient ->
+        val response = KtorClient.getInstance().use { httpClient ->
             httpClient.post(ApiPaths().createSession) {
                 val accessToken = TokenManager.read("accessToken")
                 val bearerToken = "Bearer $accessToken"
                 header("Authorization", bearerToken)
                 setBody(createSessionRequest)
-            }.body()
+            }
+        }
+
+        return when (response.status.value) {
+            200, 201 -> response.body<CreateSessionResponse>()
+            401 -> throw ClientRequestException(response, "Unauthorized")
+            else -> throw ResponseException(response, "Unexpected error")
         }
     }
 
