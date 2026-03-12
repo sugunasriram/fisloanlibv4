@@ -17,6 +17,7 @@ import android.os.Build
 import android.os.Environment
 import android.util.Log
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.res.painterResource
@@ -137,6 +138,7 @@ class CommonMethods {
         Pattern.compile(udyamPattern).matcher(it).find()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun getThreeMonthRange(fromDate: LocalDate = LocalDate.now()): String {
         val startDate = fromDate.minusMonths(3)
         val endDate = fromDate
@@ -201,6 +203,7 @@ class CommonMethods {
     fun roundToNearestHundred(value: Float): Float {
         return Math.round(value / 100) * 100.toFloat()
     }
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun formatDateFromTimestamp(timestamp: String): String {
         return try {
             val zonedDateTime = ZonedDateTime.parse(timestamp)
@@ -214,6 +217,7 @@ class CommonMethods {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @Composable
     fun displayFormattedDate(timeStamp: String): String {
         val formattedDate = remember {
@@ -380,6 +384,7 @@ class CommonMethods {
         return formattedText
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @Composable
     fun getRemainingTime(dateString: String): RemainingTime? {
         val formatter = DateTimeFormatter.ISO_DATE_TIME
@@ -407,6 +412,302 @@ class CommonMethods {
     fun toastMessage(context: Context, toastMsg: String) {
         Toast.makeText(context, toastMsg, Toast.LENGTH_SHORT).show()
     }
+//    fun generatePdfAndNotify(
+//        context: Context,
+//        loanDetails: OfferResponseItem,
+//        payment: List<OrderPaymentStatusItem>,
+//        title: String
+//    ) {
+//        val lenderName = loanDetails.providerDescriptor?.name.orEmpty()
+//        val fileName =
+//            "$title-${SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault()).format(Date())}.pdf"
+//        val downloadsDir =
+//            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+//        val pdfFile = File(downloadsDir, fileName)
+//        try {
+//            val document = PdfDocument()
+//            val paint = Paint().apply { textSize = 14f }
+//            val pageWidth = 595
+//            val pageHeight = 842
+//            var pageNumber = 1
+//
+//            var pageInfo = PdfDocument.PageInfo.Builder(pageWidth, pageHeight, pageNumber).create()
+//            var page = document.startPage(pageInfo)
+//            var canvas = page.canvas
+//            var y = 80
+//
+//            fun newPage() {
+//                document.finishPage(page)
+//                pageNumber++
+//                pageInfo = PdfDocument.PageInfo.Builder(pageWidth, pageHeight, pageNumber).create()
+//                page = document.startPage(pageInfo)
+//                canvas = page.canvas
+//                y = 50
+//            }
+//
+//            fun drawTextLine(text: String) {
+//                if (y > 800) { // near end of page
+//                    newPage()
+//                }
+//                canvas.drawText(text, 30f, y.toFloat(), paint)
+//                y += 25
+//            }
+//
+//            fun breakTextRightAligned(text: String, maxWidth: Float, paint: Paint): List<String> {
+//                val lines = mutableListOf<String>()
+//
+//                if (paint.measureText(text) <= maxWidth) {
+//                    lines.add(text)
+//                    return lines
+//                }
+//
+//                var start = 0
+//                var end = text.length
+//
+//                while (start < text.length) {
+//                    var lineEnd = end
+//                    while (lineEnd > start) {
+//                        val candidate = text.substring(start, lineEnd)
+//                        if (paint.measureText(candidate) <= maxWidth) {
+//                            lines.add(candidate)
+//                            start = lineEnd
+//                            break
+//                        }
+//                        lineEnd--
+//                    }
+//
+//                    // If we didn't break (very long word), break forcibly
+//                    if (lineEnd == start) {
+//                        val maxChars =
+//                            maxWidth / paint.measureText("W") // estimate based on wide char
+//                        val forcedEnd = (start + maxChars).toInt().coerceAtMost(text.length)
+//                        lines.add(text.substring(start, forcedEnd))
+//                        start = forcedEnd
+//                    }
+//                }
+//
+//                return lines
+//            }
+//
+//            fun drawLabelValueLine(label: String, value: String) {
+//                if (y > 800) newPage()
+//
+//                val labelX = 30f
+//                val pageWidth = pageInfo.pageWidth
+//                val maxWidth = pageWidth - 2 * labelX
+//                val valueMaxWidth = maxWidth - 200f // leave space for label
+//
+//                val isLink = value.startsWith("http")
+//                val linkPaint = Paint(paint).apply {
+//                    color = Color.BLUE
+//                    isUnderlineText = true
+//                    textSize = paint.textSize
+//                }
+//
+//                val valuePaint = if (isLink) linkPaint else paint
+//                val valueLines = breakTextRightAligned(value, valueMaxWidth, valuePaint)
+//                canvas.drawText(label, labelX, y.toFloat(), paint)
+//
+//                valueLines.forEachIndexed { index, line ->
+//                    if (y > 800) newPage()
+//                    val textWidth = valuePaint.measureText(line)
+//                    val valueX = pageWidth - textWidth - 30f // 30f right margin
+//                    if (index == 0) {
+//                        // First line already drawn above, just skip
+//                    } else {
+//                        y += 25
+//                    }
+//                    canvas.drawText(line, valueX, y.toFloat(), valuePaint)
+//                }
+//
+//                y += 25 // extra space after label-value block
+//            }
+//
+//            fun drawSectionHeader(title: String) {
+//                if (y > 800) newPage()
+//                paint.textSize = 18f
+//                paint.isFakeBoldText = true
+//                paint.isUnderlineText = true
+//                canvas.drawText(title, 30f, y.toFloat(), paint)
+//                y += 30
+//                paint.isFakeBoldText = false
+//                paint.isUnderlineText = false
+//                paint.textSize = 14f
+//            }
+//
+//            fun drawEmiTable() {
+//                var emiCounter = 0
+//                val totalWidth = pageInfo.pageWidth - 80f
+//                val columnWidths = listOf(
+//                    0.25f * totalWidth, // EMI No
+//                    0.35f * totalWidth, // Date
+//                    0.25f * totalWidth, // Amount
+//                    0.25f * totalWidth  // Status
+//                )
+//                val headers = listOf("EMI No.", "EMI Due Date", "EMI Amount", "Status")
+//
+//                // Header row
+//                var x = 30f
+//                paint.isFakeBoldText = true
+//                headers.forEachIndexed { index, header ->
+//                    canvas.drawText(header, x, y.toFloat(), paint)
+//                    x += columnWidths[index]
+//                }
+//                paint.isFakeBoldText = false
+//                y += 25
+//
+//                loanDetails.payments?.forEach { payment ->
+//                    if (payment?.type == "POST_FULFILLMENT") {
+////                        val emiNum = payment.id.orEmpty()
+//                        val emiNum = (++emiCounter).toString()
+//                        val dueDate = payment.time?.range?.start?.let {
+//                            formatDateFromTimestamp(it)
+//                        }.orEmpty()
+//                        val amount = "₹${payment.params?.amount.orEmpty()}"
+//                        val status = payment.status.orEmpty()
+//
+//                        val rowData = listOf(emiNum, dueDate, amount, status)
+//
+//                        x = 30f
+//                        rowData.forEachIndexed { index, cell ->
+//                            canvas.drawText(cell, x, y.toFloat(), paint)
+//                            x += columnWidths[index]
+//                        }
+//
+//                        y += 20
+//                        if (y > 800) newPage()
+//                    }
+//                }
+//
+//                y += 10 // spacing after the table
+//            }
+//
+//            fun drawPaymentHistoryTable() {
+//                if (payment.isEmpty()) return
+//                drawTextLine("")
+//                drawSectionHeader("Payment History")
+//                val totalWidth = pageInfo.pageWidth - 80f
+//                val columnWidths = listOf(
+//                    0.45f * totalWidth, // Payment Type (label)
+//                    0.35f * totalWidth, // Amount
+//                    0.35f * totalWidth // Status
+//                )
+//
+//                val headers = listOf("Payment Type", "Amount", "Status")
+//
+//                var x = 30f
+//                paint.isFakeBoldText = true
+//                headers.forEachIndexed { index, header ->
+//                    canvas.drawText(header, x, y.toFloat(), paint)
+//                    x += columnWidths[index]
+//                }
+//                paint.isFakeBoldText = false
+//                y += 25
+//
+//                payment.forEach { item ->
+//                    if (y > 800) newPage()
+//                    val label = CommonMethods().displayFormattedText(item.time?.label.orEmpty())
+//                    val amount = "₹${item.params?.amount.orEmpty()}"
+//                    val status = item.status.orEmpty()
+//
+//                    val rowData = listOf(label, amount, status)
+//
+//                    x = 30f
+//                    rowData.forEachIndexed { index, cell ->
+//                        canvas.drawText(cell, x, y.toFloat(), paint)
+//                        x += columnWidths[index]
+//                    }
+//
+//                    y += 20
+//                }
+//
+//                y += 10 // Spacing after table
+//            }
+//
+//            drawSectionHeader("Loan Application Details: $lenderName")
+//
+//            // Fill from loanDetails
+//            drawLabelValueLine(
+//                "Applicant Name",
+//                loanDetails.fulfillments?.firstOrNull()?.customer?.person?.name.orEmpty()
+//            )
+//            drawLabelValueLine(
+//                "Mobile Number",
+//                loanDetails.fulfillments?.firstOrNull()?.customer?.contact?.phone.orEmpty()
+//            )
+//            drawLabelValueLine(
+//                "Email",
+//                loanDetails.fulfillments?.firstOrNull()?.customer?.contact?.email.orEmpty().lowercase()
+//            )
+////            drawLabelValueLine("Application ID", loanDetails.itemId ?: "")
+//            drawLabelValueLine("Application ID", loanDetails.id ?: "")
+//            drawLabelValueLine("Loan Type", loanDetails.itemDescriptor?.name.orEmpty())
+//            drawLabelValueLine("Loan Amount", loanDetails.itemPrice?.value.orEmpty())
+//            loanDetails.itemTags?.forEach { itemTags ->
+//                if (itemTags?.display == true) {
+//                    itemTags.tags.forEach { tag ->
+//                        val label = CommonMethods().displayFormattedText(tag.key)
+//                        val value = if (tag.key.contains("cool_off", ignoreCase = true)) {
+//                            CommonMethods().uTCToLocalDateTimeConversion(tag.value)
+//                        } else {
+//                            tag.value
+//                        }
+//                        drawLabelValueLine(label, value)
+//                    }
+//                }
+//            }
+//            drawTextLine("")
+//            drawSectionHeader("LOAN SUMMARY:")
+//            loanDetails.quoteBreakUp?.forEach {
+//                val label = CommonMethods().displayFormattedText(it?.title.orEmpty())
+//                val value = it?.value.orEmpty()
+//                drawLabelValueLine(label, value)
+//            }
+//            drawTextLine("")
+//            drawSectionHeader("EMI Details:")
+//            drawEmiTable()
+//            drawPaymentHistoryTable()
+//            drawTextLine("")
+//            drawSectionHeader("Lender Info:")
+//            loanDetails.providerTags
+//                ?.firstOrNull { it?.name == "Lsp Info" }
+//                ?.tags
+//                ?.forEach { (key, value) ->
+//                    val label = CommonMethods().displayFormattedText(key)
+//                    drawLabelValueLine(label, value)
+//                }
+//            drawTextLine("")
+//            drawSectionHeader("Grievance Redressal Officer(GRO) Details:")
+//            loanDetails.providerTags
+//                ?.firstOrNull { it?.name == "Contact Info" }
+//                ?.tags
+//                ?.forEach { (key, value) ->
+//                    val label = CommonMethods().displayFormattedText(key)
+//                    drawLabelValueLine(label, value)
+//                }
+//            document.finishPage(page)
+//            document.writeTo(FileOutputStream(pdfFile))
+//            document.close()
+//
+//            // 2. Trigger media scan so file is visible in File Managers
+//            MediaScannerConnection.scanFile(
+//                context,
+//                arrayOf(pdfFile.absolutePath),
+//                arrayOf("application/pdf"),
+//                null
+//            )
+//
+//            // 3. Show custom notification
+//            showNotification(context, pdfFile, title)
+//
+//            CommonMethods().toastMessage(context, "Downloading Loan Details")
+//        } catch (e: Exception) {
+//            CommonMethods().toastMessage(context, "Download failed: ${e.localizedMessage}")
+//            Log.d("res_H", "Error: ${e.localizedMessage}")
+//        }
+//    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
     fun generatePdfAndNotify(
         context: Context,
         loanDetails: OfferResponseItem,
@@ -416,12 +717,21 @@ class CommonMethods {
         val lenderName = loanDetails.providerDescriptor?.name.orEmpty()
         val fileName =
             "$title-${SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault()).format(Date())}.pdf"
+
         val downloadsDir =
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+
+        if (!downloadsDir.exists()) {
+            downloadsDir.mkdirs()
+        }
+
         val pdfFile = File(downloadsDir, fileName)
+        var document: PdfDocument? = null
+
         try {
-            val document = PdfDocument()
-            val paint = Paint().apply { textSize = 14f }
+            document = PdfDocument()
+            val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 14f }
+
             val pageWidth = 595
             val pageHeight = 842
             var pageNumber = 1
@@ -431,25 +741,29 @@ class CommonMethods {
             var canvas = page.canvas
             var y = 80
 
-            fun newPage() {
-                document.finishPage(page)
-                pageNumber++
-                pageInfo = PdfDocument.PageInfo.Builder(pageWidth, pageHeight, pageNumber).create()
-                page = document.startPage(pageInfo)
-                canvas = page.canvas
-                y = 50
+            fun ensureSpace(requiredHeight: Int = 25) {
+                if (y + requiredHeight > pageHeight - 40) {
+                    document!!.finishPage(page)
+                    pageNumber++
+                    pageInfo = PdfDocument.PageInfo.Builder(pageWidth, pageHeight, pageNumber).create()
+                    page = document!!.startPage(pageInfo)
+                    canvas = page.canvas
+                    y = 50
+                }
             }
 
             fun drawTextLine(text: String) {
-                if (y > 800) { // near end of page
-                    newPage()
-                }
+                ensureSpace(25)
                 canvas.drawText(text, 30f, y.toFloat(), paint)
                 y += 25
             }
 
             fun breakTextRightAligned(text: String, maxWidth: Float, paint: Paint): List<String> {
                 val lines = mutableListOf<String>()
+                if (text.isEmpty()) {
+                    lines.add("")
+                    return lines
+                }
 
                 if (paint.measureText(text) <= maxWidth) {
                     lines.add(text)
@@ -457,25 +771,26 @@ class CommonMethods {
                 }
 
                 var start = 0
-                var end = text.length
 
                 while (start < text.length) {
-                    var lineEnd = end
-                    while (lineEnd > start) {
-                        val candidate = text.substring(start, lineEnd)
+                    var end = text.length
+                    var found = false
+
+                    while (end > start) {
+                        val candidate = text.substring(start, end)
                         if (paint.measureText(candidate) <= maxWidth) {
                             lines.add(candidate)
-                            start = lineEnd
+                            start = end
+                            found = true
                             break
                         }
-                        lineEnd--
+                        end--
                     }
 
-                    // If we didn't break (very long word), break forcibly
-                    if (lineEnd == start) {
-                        val maxChars =
-                            maxWidth / paint.measureText("W") // estimate based on wide char
-                        val forcedEnd = (start + maxChars).toInt().coerceAtMost(text.length)
+                    if (!found) {
+                        val approxChars =
+                            (maxWidth / paint.measureText("W")).toInt().coerceAtLeast(1)
+                        val forcedEnd = (start + approxChars).coerceAtMost(text.length)
                         lines.add(text.substring(start, forcedEnd))
                         start = forcedEnd
                     }
@@ -485,45 +800,43 @@ class CommonMethods {
             }
 
             fun drawLabelValueLine(label: String, value: String) {
-                if (y > 800) newPage()
-
+                val safeValue = value.ifBlank { "-" }
                 val labelX = 30f
-                val pageWidth = pageInfo.pageWidth
-                val maxWidth = pageWidth - 2 * labelX
-                val valueMaxWidth = maxWidth - 200f // leave space for label
+                val currentPageWidth = pageInfo.pageWidth
+                val maxWidth = currentPageWidth - 2 * labelX
+                val valueMaxWidth = maxWidth - 200f
 
-                val isLink = value.startsWith("http")
+                val isLink = safeValue.startsWith("http", ignoreCase = true)
                 val linkPaint = Paint(paint).apply {
                     color = Color.BLUE
                     isUnderlineText = true
-                    textSize = paint.textSize
                 }
-
                 val valuePaint = if (isLink) linkPaint else paint
-                val valueLines = breakTextRightAligned(value, valueMaxWidth, valuePaint)
+                val valueLines = breakTextRightAligned(safeValue, valueMaxWidth, valuePaint)
+
+                ensureSpace(25 * valueLines.size + 10)
+
                 canvas.drawText(label, labelX, y.toFloat(), paint)
 
                 valueLines.forEachIndexed { index, line ->
-                    if (y > 800) newPage()
-                    val textWidth = valuePaint.measureText(line)
-                    val valueX = pageWidth - textWidth - 30f // 30f right margin
-                    if (index == 0) {
-                        // First line already drawn above, just skip
-                    } else {
+                    if (index > 0) {
                         y += 25
+                        ensureSpace(25)
                     }
+                    val textWidth = valuePaint.measureText(line)
+                    val valueX = currentPageWidth - textWidth - 30f
                     canvas.drawText(line, valueX, y.toFloat(), valuePaint)
                 }
 
-                y += 25 // extra space after label-value block
+                y += 25
             }
 
-            fun drawSectionHeader(title: String) {
-                if (y > 800) newPage()
+            fun drawSectionHeader(titleText: String) {
+                ensureSpace(35)
                 paint.textSize = 18f
                 paint.isFakeBoldText = true
                 paint.isUnderlineText = true
-                canvas.drawText(title, 30f, y.toFloat(), paint)
+                canvas.drawText(titleText, 30f, y.toFloat(), paint)
                 y += 30
                 paint.isFakeBoldText = false
                 paint.isUnderlineText = false
@@ -534,14 +847,15 @@ class CommonMethods {
                 var emiCounter = 0
                 val totalWidth = pageInfo.pageWidth - 80f
                 val columnWidths = listOf(
-                    0.25f * totalWidth, // EMI No
-                    0.35f * totalWidth, // Date
-                    0.25f * totalWidth, // Amount
-                    0.25f * totalWidth  // Status
+                    0.20f * totalWidth,
+                    0.30f * totalWidth,
+                    0.25f * totalWidth,
+                    0.25f * totalWidth
                 )
                 val headers = listOf("EMI No.", "EMI Due Date", "EMI Amount", "Status")
 
-                // Header row
+                ensureSpace(50)
+
                 var x = 30f
                 paint.isFakeBoldText = true
                 headers.forEachIndexed { index, header ->
@@ -551,15 +865,14 @@ class CommonMethods {
                 paint.isFakeBoldText = false
                 y += 25
 
-                loanDetails.payments?.forEach { payment ->
-                    if (payment?.type == "POST_FULFILLMENT") {
-//                        val emiNum = payment.id.orEmpty()
+                loanDetails.payments?.forEach { item ->
+                    if (item?.type == "POST_FULFILLMENT") {
+                        ensureSpace(25)
+
                         val emiNum = (++emiCounter).toString()
-                        val dueDate = payment.time?.range?.start?.let {
-                            formatDateFromTimestamp(it)
-                        }.orEmpty()
-                        val amount = "₹${payment.params?.amount.orEmpty()}"
-                        val status = payment.status.orEmpty()
+                        val dueDate = item.time?.range?.start?.let { formatDateFromTimestamp(it) }.orEmpty()
+                        val amount = "₹${item.params?.amount.orEmpty()}"
+                        val status = item.status.orEmpty()
 
                         val rowData = listOf(emiNum, dueDate, amount, status)
 
@@ -570,25 +883,27 @@ class CommonMethods {
                         }
 
                         y += 20
-                        if (y > 800) newPage()
                     }
                 }
 
-                y += 10 // spacing after the table
+                y += 10
             }
 
             fun drawPaymentHistoryTable() {
                 if (payment.isEmpty()) return
+
                 drawTextLine("")
                 drawSectionHeader("Payment History")
+
                 val totalWidth = pageInfo.pageWidth - 80f
                 val columnWidths = listOf(
-                    0.45f * totalWidth, // Payment Type (label)
-                    0.35f * totalWidth, // Amount
-                    0.35f * totalWidth // Status
+                    0.40f * totalWidth,
+                    0.30f * totalWidth,
+                    0.30f * totalWidth
                 )
-
                 val headers = listOf("Payment Type", "Amount", "Status")
+
+                ensureSpace(50)
 
                 var x = 30f
                 paint.isFakeBoldText = true
@@ -600,7 +915,8 @@ class CommonMethods {
                 y += 25
 
                 payment.forEach { item ->
-                    if (y > 800) newPage()
+                    ensureSpace(25)
+
                     val label = CommonMethods().displayFormattedText(item.time?.label.orEmpty())
                     val amount = "₹${item.params?.amount.orEmpty()}"
                     val status = item.status.orEmpty()
@@ -616,12 +932,11 @@ class CommonMethods {
                     y += 20
                 }
 
-                y += 10 // Spacing after table
+                y += 10
             }
 
             drawSectionHeader("Loan Application Details: $lenderName")
 
-            // Fill from loanDetails
             drawLabelValueLine(
                 "Applicant Name",
                 loanDetails.fulfillments?.firstOrNull()?.customer?.person?.name.orEmpty()
@@ -634,10 +949,10 @@ class CommonMethods {
                 "Email",
                 loanDetails.fulfillments?.firstOrNull()?.customer?.contact?.email.orEmpty().lowercase()
             )
-//            drawLabelValueLine("Application ID", loanDetails.itemId ?: "")
-            drawLabelValueLine("Application ID", loanDetails.id ?: "")
+            drawLabelValueLine("Application ID", loanDetails.id.orEmpty())
             drawLabelValueLine("Loan Type", loanDetails.itemDescriptor?.name.orEmpty())
             drawLabelValueLine("Loan Amount", loanDetails.itemPrice?.value.orEmpty())
+
             loanDetails.itemTags?.forEach { itemTags ->
                 if (itemTags?.display == true) {
                     itemTags.tags.forEach { tag ->
@@ -651,6 +966,7 @@ class CommonMethods {
                     }
                 }
             }
+
             drawTextLine("")
             drawSectionHeader("LOAN SUMMARY:")
             loanDetails.quoteBreakUp?.forEach {
@@ -658,10 +974,12 @@ class CommonMethods {
                 val value = it?.value.orEmpty()
                 drawLabelValueLine(label, value)
             }
+
             drawTextLine("")
             drawSectionHeader("EMI Details:")
             drawEmiTable()
             drawPaymentHistoryTable()
+
             drawTextLine("")
             drawSectionHeader("Lender Info:")
             loanDetails.providerTags
@@ -671,8 +989,9 @@ class CommonMethods {
                     val label = CommonMethods().displayFormattedText(key)
                     drawLabelValueLine(label, value)
                 }
+
             drawTextLine("")
-            drawSectionHeader("Grievance Redressal Officer(GRO) Details:")
+            drawSectionHeader("Grievance Redressal Officer (GRO) Details:")
             loanDetails.providerTags
                 ?.firstOrNull { it?.name == "Contact Info" }
                 ?.tags
@@ -680,28 +999,43 @@ class CommonMethods {
                     val label = CommonMethods().displayFormattedText(key)
                     drawLabelValueLine(label, value)
                 }
-            document.finishPage(page)
-            document.writeTo(FileOutputStream(pdfFile))
-            document.close()
 
-            // 2. Trigger media scan so file is visible in File Managers
+            document.finishPage(page)
+
+            FileOutputStream(pdfFile).use { outputStream ->
+                document.writeTo(outputStream)
+                outputStream.flush()
+            }
+
+            document.close()
+            document = null
+
             MediaScannerConnection.scanFile(
                 context,
                 arrayOf(pdfFile.absolutePath),
-                arrayOf("application/pdf"),
-                null
-            )
+                arrayOf("application/pdf")
+            ) { path, uri ->
+                Log.d("PDF_GEN", "Scanned: $path -> $uri")
+            }
 
-            // 3. Show custom notification
-            showNotification(context, pdfFile, title)
-
-            CommonMethods().toastMessage(context, "Downloading Loan Details")
+            if (pdfFile.exists()) {
+                showNotification(context, pdfFile, title)
+                CommonMethods().toastMessage(context, "Loan details downloaded")
+            } else {
+                CommonMethods().toastMessage(context, "PDF file was not created")
+            }
         } catch (e: Exception) {
+            try {
+                document?.close()
+            } catch (_: Exception) {
+            }
+
             CommonMethods().toastMessage(context, "Download failed: ${e.localizedMessage}")
-            Log.d("res_H", "Error: ${e.localizedMessage}")
+            Log.e("res_H", "Error generating PDF", e)
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun showNotification(context: Context, file: File, title: String) {
         val channelId = "pdf_channel"
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -709,7 +1043,12 @@ class CommonMethods {
         val channel = NotificationChannel(channelId, "PDF Downloads", NotificationManager.IMPORTANCE_DEFAULT)
         manager.createNotificationChannel(channel)
 
-        val uri = FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
+//        val uri = FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
+        val uri = FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.provider",
+            file
+        )
 
         val intent = Intent(Intent.ACTION_VIEW).apply {
             setDataAndType(uri, "application/pdf")
@@ -988,6 +1327,7 @@ class CommonMethods {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun uTCToLocalDateTimeConversion(utcDateTime: String): String {
         val zonedDateTime =
             ZonedDateTime.parse(utcDateTime).withZoneSameInstant(ZoneId.of("Asia/Kolkata"))
