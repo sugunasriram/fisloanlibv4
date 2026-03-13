@@ -515,18 +515,38 @@ fun RepaymentScheduleView(
                 status.contains("SANCTIONED", ignoreCase = true)
         } ?: false
     BackHandler {
+        Log.d("Sugu 30", "fromScreen : "+fromScreen)
+
         if (fromScreen == "Loan Summary") {
             navController.popBackStack()
         } else if (fromScreen == "Loan Status") {
             navController.popBackStack()
         } else if (fromScreen == "PrePayment") {
             navController.popBackStack()
-        } else {
-            //Sugu todo
-//            navigateApplyByCategoryScreen(navController)
-            Log.d("Sugu", "Check 24")
+        }
+//        else {
+//            //Sugu todo
+////            navigateApplyByCategoryScreen(navController)
+//            Log.d("Sugu", "Check 24")
+//
+//            navigateToFISExitScreen(navController, loanId="4321")
+//        }
+        else {
+            if (!orderId.isNullOrBlank()) {
+                Log.d("Sugu", "Check 27 b, loanId: $orderId")
 
-            navigateToFISExitScreen(navController, loanId="4321")
+                scope.launch {
+                    TokenManager.save("pfPrincipal", principal)
+                    TokenManager.save("pfInterestRate", interestRate.toString())
+                    // TokenManager.save("pfTenure", tenure.toString())
+                    // add more saves here if needed
+
+                    navigateToFISExitScreen(navController, loanId = orderId)
+                }
+            } else {
+                Log.d("Sugu", "Check 24 b")
+                navigateToFISExitScreen(navController, loanId = "4321")
+            }
         }
     }
     FixedTopBottomScreen(
@@ -543,13 +563,31 @@ fun RepaymentScheduleView(
                 navController.popBackStack()
             } else if (fromScreen == "PrePayment") {
                 navController.popBackStack()
-            } else {
-                //Sugu todo
-//                navigateApplyByCategoryScreen(navController)
-                Log.d("Sugu", "Check 25")
+            }
+//            else {
+//                //Sugu todo
+////                navigateApplyByCategoryScreen(navController)
+//                Log.d("Sugu", "Check 25")
+//
+//                navigateToFISExitScreen(navController, loanId="4321")
+//
+//            }
+            else {
+                if (!orderId.isNullOrBlank()) {
+                    Log.d("Sugu", "Check 30a, loanId: $orderId")
 
-                navigateToFISExitScreen(navController, loanId="4321")
+                    scope.launch {
+                        TokenManager.save("pfPrincipal", principal)
+                        TokenManager.save("pfInterestRate", interestRate.toString())
+                        // TokenManager.save("pfTenure", tenure.toString())
+                        // add more saves here if needed
 
+                        navigateToFISExitScreen(navController, loanId = orderId)
+                    }
+                } else {
+                    Log.d("Sugu", "Check 24a")
+                    navigateToFISExitScreen(navController, loanId = "4321")
+                }
             }
         },
         showBottom = true,
