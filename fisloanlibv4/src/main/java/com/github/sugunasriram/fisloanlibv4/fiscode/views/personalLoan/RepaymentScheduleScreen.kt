@@ -377,7 +377,6 @@ fun RepaymentScheduleScreenHandle(
                         }
                     }
 
-
                     CustomModalBottomSheet(
                         bottomSheetState = bottomSheetStateValue,
                         sheetContent = {
@@ -469,6 +468,7 @@ fun RepaymentScheduleView(
     checkingStatus:Boolean,
     orderPaymentListLoading:Boolean
 ) {
+    Log.d("res_H",fromScreen)
     var showLoanCancelPopUp by remember { mutableStateOf(false) }
 
     val pfLoanCancelling by loanAgreementViewModel.pfLoanCancelling.collectAsState()
@@ -625,9 +625,9 @@ fun RepaymentScheduleView(
 
             navigateToFISExitScreen(navController, loanId=orderId) }
     ) {
-        if(checkingStatus || orderPaymentListLoading){
-            CenterProgressFixedHeight(top=320.dp)
-        }else {
+        if (checkingStatus || orderPaymentListLoading||pfLoanCancelling) {
+            CenterProgressFixedHeight(top = 320.dp)
+        } else {
 //        Get Cool Off Period
             loanDetails.itemTags?.forEach { itemTags ->
                 itemTags?.let {
@@ -666,13 +666,13 @@ fun RepaymentScheduleView(
                     start = 80.dp,
                     end = 80.dp
                 ) {
-                    val cancelLoan = CancelLoan(
-                        loanType = "PURCHASE_FINANCE",
-                        orderId = orderId,
-                        cancelType = "SOFT_CANCEL",
-                        cancelReason = "something"
-                    )
-                    loanAgreementViewModel.cancelLoanRequest(cancelLoan, context)
+//                    val cancelLoan = CancelLoan(
+//                        loanType = "PURCHASE_FINANCE",
+//                        orderId = orderId,
+//                        cancelType = "SOFT_CANCEL",
+//                        cancelReason = "something"
+//                    )
+//                    loanAgreementViewModel.cancelLoanRequest(cancelLoan, context)
                     showLoanCancelPopUp = true
                 }
             }
@@ -680,41 +680,44 @@ fun RepaymentScheduleView(
                 AlertDialog(
                     onDismissRequest = { showLoanCancelPopUp = false },
                     confirmButton = {
-                        CurvedPrimaryButton(
-                            text = stringResource(id = R.string.yes),
-                            start = 15.dp,
-                            end = 15.dp,
-                            top = 5.dp,
-                            bottom = 5.dp,
-                            enabled = !pfLoanCancelling
-                        ) {
-                            if (cancelReason.isBlank()) {
-                                cancelReasonError = true
-                            } else {
-                                val cancelLoan = CancelLoan(
-                                    loanType = "PURCHASE_FINANCE",
-                                    orderId = orderId,
-                                    cancelType = "CONFIRM_CANCEL",
-                                    cancelReason = cancelReason
-                                )
-                                loanAgreementViewModel.cancelLoanRequest(cancelLoan, context)
-                                if (pfLoanCancelled && !pfLoanCancelling) {
-                                    loanAgreementViewModel.status(
-                                        loanType = loanType,
-                                        context = context,
-                                        orderId = orderId
+                        Column {
+                            CurvedPrimaryButton(
+                                text = stringResource(id = R.string.yes),
+                                start = 15.dp,
+                                end = 15.dp,
+                                top = 5.dp,
+                                bottom = 5.dp,
+                                enabled = !pfLoanCancelling
+                            ) {
+                                if (cancelReason.isBlank()) {
+                                    cancelReasonError = true
+                                } else {
+                                    val cancelLoan = CancelLoan(
+                                        loanType = "PURCHASE_FINANCE",
+                                        orderId = orderId,
+                                        cancelType = "CONFIRM_CANCEL",
+                                        cancelReason = cancelReason
                                     )
-                                    getOrderPaymentStatusViewModel.getOrderPaymentStatus(
-                                        loanType = loanType,
-                                        loanId = orderId,
-                                        context = context
-                                    )
+                                    loanAgreementViewModel.cancelLoanRequest(cancelLoan, context)
+                                    if (pfLoanCancelled && !pfLoanCancelling) {
+                                        loanAgreementViewModel.status(
+                                            loanType = loanType,
+                                            context = context,
+                                            orderId = orderId
+                                        )
+                                        getOrderPaymentStatusViewModel.getOrderPaymentStatus(
+                                            loanType = loanType,
+                                            loanId = orderId,
+                                            context = context
+                                        )
+                                    }
+                                    showLoanCancelPopUp = false
                                 }
-                                showLoanCancelPopUp = false
                             }
                         }
                     },
                     dismissButton = {
+                        Column {
                         CurvedPrimaryButton(
                             text = stringResource(id = R.string.no),
                             start = 15.dp,
@@ -725,6 +728,8 @@ fun RepaymentScheduleView(
                         ) {
                             showLoanCancelPopUp = false
                         }
+                            Spacer(modifier = Modifier.height(12.dp))
+                            }
                     },
                     title = {
                         Text(
@@ -735,8 +740,8 @@ fun RepaymentScheduleView(
                         )
                     },
                     text = {
-                        if (pfLoanCancelling && !pfLoanCancelled) CenterProgressFixedHeight(top = 0.dp, size = 20.dp)
-                        if (pfLoanCancelled && !pfLoanCancelling) {
+//                        if (pfLoanCancelling) CenterProgressFixedHeight(top = 0.dp, size = 20.dp)
+//                        if (pfLoanCancelled && !pfLoanCancelling) {
                             Column {
                                 Text(
                                     "This action will stop your loan process. Do you want to continue?",
@@ -780,7 +785,7 @@ fun RepaymentScheduleView(
                                         modifier = Modifier.padding(start = 4.dp, top = 2.dp)
                                     )
                                 }
-                            }
+//                            }
                         }
                     },
                     modifier = Modifier
@@ -1530,9 +1535,10 @@ fun LoanAgreementDetailsCard(loanDocument: OfferResponseItem, context: Context) 
         ?.url?.let { loanPdfUrl ->
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = if (loanPdfUrl.contains("null"))Alignment.Top
+                else Alignment.CenterVertically,
                 modifier = Modifier
-                    .fillMaxWidth().padding( top = 5.dp)
+                    .fillMaxWidth().padding(top = 5.dp)
                     .background(color = Color.Transparent)
             ) {
                 Text(
@@ -1541,21 +1547,37 @@ fun LoanAgreementDetailsCard(loanDocument: OfferResponseItem, context: Context) 
                     color = appBlack,
                     modifier = Modifier.padding(start = 10.dp)
                 )
-                CurvedPrimaryButton(
-                    text = stringResource(id = R.string.download),
-                    style = normal14Text700,
-                    start = 15.dp,
-                    end = 15.dp,top=5.dp, bottom = 5.dp,
-                    modifier = Modifier.padding(horizontal = 8.dp)
-                ) {
-                    val fileName = loanPdfUrl.substringAfterLast("/").substringBefore("?").ifEmpty { "loan_agreement" }
-                    CommonMethods().downloadPdf(
-                        context,
-                        loanPdfUrl,
-                        fileName,
-                        "$lenderName-LoanAgreement"
-                    )
+                Column (
+                    horizontalAlignment = Alignment.End
+                ){
+                    CurvedPrimaryButton(
+                        text = stringResource(id = R.string.download),
+                        style = normal14Text700,
+                        start = 15.dp,
+                        end = 15.dp,
+                        top = 5.dp,
+                        bottom = 5.dp,
+                        enabled=!loanPdfUrl.contains("null"),
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    ) {
+                        val fileName = loanPdfUrl.substringAfterLast("/").substringBefore("?").ifEmpty { "loan_agreement" }
+                        CommonMethods().downloadPdf(
+                            context,
+                            loanPdfUrl,
+                            fileName,
+                            "$lenderName-LoanAgreement"
+                        )
+                    }
+                    if (loanPdfUrl.contains("null")) {
+                        Text(
+                            text = "Currently unavailable",
+                            style = normal12Text400,
+                            color = appBlack,
+                            modifier = Modifier.padding(top=2.dp,end = 10.dp)
+                        )
+                    }
                 }
+
             }
         }
 }
@@ -2390,4 +2412,3 @@ fun PrePartPaymentResponseHandle(
         }
     }
 }
-

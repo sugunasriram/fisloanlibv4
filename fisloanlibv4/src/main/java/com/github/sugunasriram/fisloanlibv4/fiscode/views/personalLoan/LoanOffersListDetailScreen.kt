@@ -1815,14 +1815,17 @@ fun EditLoanAmountSliderUI(
                 if (parsedValue != null) {
                     val formatted = formatCurrency(clampedInput)
 
+                    Log.d("Sugu", "clampedInput: $clampedInput")
                     inputText =
                         TextFieldValue(
                             text = formatted,
                             selection = TextRange(
                                 calculateFormattedCursorPosition(
-                                    cleanInput = cleanInput,
+//                                    cleanInput = cleanInput,
+                                    cleanInput = clampedInput, //Sugu New
                                     originalCursor = newCursor,
-                                    formattedValue = formatCurrency(cleanInput)
+//                                    formattedValue = formatCurrency(cleanInput)
+                                    formattedValue = formatCurrency(clampedInput) //Sugu New
                                 )
                             )
                         )
@@ -2026,10 +2029,16 @@ fun DownPaymentBottomSheetContent(
             Box {
                 Slider(
 //                    value = (sliderValue - minAmount) / (maxAmount - minAmount), // Normalize to 0f..1f
-                    value = (sliderValue - minAmount) / range,
+//                    value = (sliderValue - minAmount) / range,
+                    value = ((sliderValue - minAmount) / range).coerceIn(0f, 1f), //Sugu New
                     onValueChange = { newValue ->
-                        sliderValue =
-                            CommonMethods().roundToNearestHundred(newValue * (maxAmount - minAmount) + minAmount)
+                        //Sugu New
+//                        sliderValue = CommonMethods().roundToNearestHundred(newValue * (maxAmount - minAmount) + minAmount)
+                        val rawValue = newValue * (maxAmount - minAmount) + minAmount
+                        val roundedValue = CommonMethods().roundToNearestHundred(rawValue)
+
+                        sliderValue = roundedValue.coerceIn(minAmount, maxAmount)
+                        Log.d("Sugu", "sliderValue: $sliderValue")
 
                         val formatted = formatCurrency(sliderValue.toInt().toString())
                         inputText = TextFieldValue(
@@ -2117,14 +2126,18 @@ fun DownPaymentBottomSheetContent(
                 if (parsedValue != null) {
                     val formatted = formatCurrency(clampedInput)
 
+                    Log.d("Sugu2", "2 clampedInput: $clampedInput")
+
                     inputText =
                         TextFieldValue(
                             text = formatted,
                             selection = TextRange(
                                 calculateFormattedCursorPosition(
-                                    cleanInput = cleanInput,
+//                                    cleanInput = cleanInput,
+                                    cleanInput = clampedInput, //Sugu New
                                     originalCursor = newCursor,
-                                    formattedValue = formatCurrency(cleanInput)
+//                                    formattedValue = formatCurrency(cleanInput)
+                                    formattedValue = formatCurrency(clampedInput) //Sugu New
                                 )
                             )
                         )

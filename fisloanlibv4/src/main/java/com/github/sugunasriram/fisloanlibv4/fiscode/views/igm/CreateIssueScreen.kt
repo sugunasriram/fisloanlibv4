@@ -3,6 +3,8 @@ package com.github.sugunasriram.fisloanlibv4.fiscode.views.igm
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Matrix
+import android.media.ExifInterface
 import android.net.Uri
 import android.provider.MediaStore
 import android.util.Base64
@@ -58,9 +60,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.scale
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
 import com.github.sugunasriram.fisloanlibv4.R
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.CenterProgress
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.CustomDropDownField
@@ -86,6 +90,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal16Text700
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal18Text500
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.igm.CreateIssueViewModel
+import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.MiddleOfTheLoanScreen
 import java.io.ByteArrayOutputStream
 
 @Preview(showBackground = true)
@@ -121,6 +126,7 @@ fun CreateIssueScreen(
     val imageUploadResponse by createIssuePLViewModel.imageUploadResponse.collectAsState()
     val issueCreating by createIssuePLViewModel.issueCreating.collectAsState()
     val issueCreated by createIssuePLViewModel.issueCreated.collectAsState()
+    val createIssueResponse by createIssuePLViewModel.createIssueResponse.collectAsState()
     val categoryError by createIssuePLViewModel.categoryError.collectAsState()
     val subCategoryError by createIssuePLViewModel.subCategoryError.collectAsState()
     val showImageNotUploadedError by createIssuePLViewModel.showImageNotUploadedError.collectAsState()
@@ -133,6 +139,8 @@ fun CreateIssueScreen(
     val showServerIssueScreen by createIssuePLViewModel.showServerIssueScreen.observeAsState(false)
     val unexpectedErrorScreen by createIssuePLViewModel.unexpectedError.observeAsState(false)
     val unAuthorizedUser by createIssuePLViewModel.unAuthorizedUser.observeAsState(false)
+    val middleLoan by createIssuePLViewModel.middleLoan.observeAsState(false)
+    val errorMessage by createIssuePLViewModel.errorMessage.collectAsState()
 
     val categoryFocus = FocusRequester()
     val subCategoryFocus = FocusRequester()
@@ -173,7 +181,6 @@ fun CreateIssueScreen(
         createIssuePLViewModel.removeImage()
         createIssuePLViewModel.clearImageUploadError()
     }
-
 
     val onSubCategoryDismiss: () -> Unit = { subCategoryExpand = false }
     val onSubCategorySelected: (String) -> Unit =
@@ -237,6 +244,7 @@ fun CreateIssueScreen(
         showServerIssueScreen -> CommonMethods().ShowServerIssueErrorScreen(navController)
         unexpectedErrorScreen -> CommonMethods().ShowUnexpectedErrorScreen(navController)
         unAuthorizedUser -> CommonMethods().ShowUnAuthorizedErrorScreen(navController)
+        middleLoan -> MiddleOfTheLoanScreen(navController, errorMessage)
         else -> {
             if (issueListLoading || subIssueLoading || issueCreating) {
                 CenterProgress()
@@ -603,7 +611,10 @@ fun UploadImageCard(
         if (uri != null && currentIndex in 0..2) {
             selectedImageUris = selectedImageUris.toMutableList().also { it[currentIndex] = uri }
             val bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
-            val base64String = bitmapToBase64(bitmap)
+//            val base64String = bitmapToBase64(bitmap)
+            val rotatedBitmap = rotateImageIfRequired(context, bitmap, uri)
+            val base64String = bitmapToBase64(rotatedBitmap)
+
             val mimeType = context.contentResolver.getType(uri) ?: "image/jpeg"
             val imageData = Images(mimetype = mimeType, base64 = base64String)
             imagesData = imagesData.toMutableList().also { it[currentIndex] = imageData }
@@ -653,8 +664,10 @@ fun UploadImageCard(
                                 border = BorderStroke(1.dp, Color.LightGray),
                                 modifier = Modifier.fillMaxSize()
                             ) {
-                                Image(
-                                    bitmap = bitmap.asImageBitmap(),
+//                                Image(
+//                                    bitmap = bitmap.asImageBitmap(),
+                                AsyncImage(
+                                    model = uri,
                                     contentDescription = null,
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier.fillMaxSize()
@@ -851,8 +864,8 @@ fun resizeBitmap(bitmap: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
         newHeight = maxHeight
         newWidth = (newHeight * aspectRatio).toInt()
     }
-
-    return Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
+    return bitmap.scale(newWidth, newHeight)
+//    return Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
 }
 
 fun bitmapToBase64(bitmap: Bitmap): String {
@@ -862,3 +875,34 @@ fun bitmapToBase64(bitmap: Bitmap): String {
     val byteArray = byteArrayOutputStream.toByteArray()
     return Base64.encodeToString(byteArray, Base64.NO_WRAP)
 }
+@SuppressLint("ExifInterface")
+fun rotateImageIfRequired(context: Context, img: Bitmap, uri: Uri): Bitmap {
+
+    val inputStream = context.contentResolver.openInputStream(uri)
+    val exif = ExifInterface(inputStream!!)
+
+    val orientation = exif.getAttributeInt(
+        ExifInterface.TAG_ORIENTATION,
+        ExifInterface.ORIENTATION_NORMAL
+    )
+
+    val matrix = Matrix()
+
+    when (orientation) {
+        ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(90f)
+        ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(180f)
+        ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
+        else -> return img
+    }
+
+    return Bitmap.createBitmap(
+        img,
+        0,
+        0,
+        img.width,
+        img.height,
+        matrix,
+        true
+    )
+}
+
