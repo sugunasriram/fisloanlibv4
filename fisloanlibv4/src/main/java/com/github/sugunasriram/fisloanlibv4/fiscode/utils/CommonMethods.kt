@@ -310,6 +310,8 @@ class CommonMethods {
 
     @Composable
     fun ShowUnexpectedErrorScreen(navController: NavHostController) {
+        Log.d("Sugu", "test 2") ;
+
         UnexpectedErrorScreen(
             navController = navController,
             onClick = {
@@ -326,6 +328,8 @@ class CommonMethods {
 
     @Composable
     fun ShowMiddleLoanErrorScreen(navController: NavHostController) {
+        Log.d("Sugu", "test 3") ;
+
         UnexpectedErrorScreen(
             navController = navController,
             errorMsg = stringResource(id = R.string.middle_loan_error_message),
@@ -344,6 +348,8 @@ class CommonMethods {
         errorMessage: String,
         errorMsgShow: Boolean = false
     ) {
+        Log.d("Sugu", "test 2") ;
+
         UnexpectedErrorScreen(
             navController = navController,
             errorMsgShow = errorMsgShow,
@@ -1141,6 +1147,8 @@ class CommonMethods {
 
             // oops-something went wrong
             unexpectedErrorScreen -> {
+                Log.d("Sugu", "test 4") ;
+
                 UnexpectedErrorScreen(navController = navController,
 //                    onClick = { navigateApplyByCategoryScreen(navController = navController) }
                     onClick = {

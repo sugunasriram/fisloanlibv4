@@ -142,6 +142,8 @@ fun UnexpectedErrorScreen(
     errorMsgShow: Boolean = true,
 //    onClick: () -> Unit = { navigateApplyByCategoryScreen(navController = navController) },
     onClick: () -> Unit = {
+        Log.d("Sugu", "test 7") ;
+
         Log.d("Sugu", "Check 17")
 
         navigateToFISExitScreen(navController, loanId="4321") },
@@ -155,6 +157,7 @@ fun UnexpectedErrorScreen(
         onBackClick = { navController.popBackStack() },
         topBarBackgroundColor = appWhite
     ) {
+        Log.d("Sugu", "test 1") ;
         Image(
             painter = painterResource(id = R.drawable.error_unexpected_image),
             contentDescription = "",

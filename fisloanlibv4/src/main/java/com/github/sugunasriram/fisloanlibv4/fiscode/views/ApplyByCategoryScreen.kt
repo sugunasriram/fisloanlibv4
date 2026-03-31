@@ -379,6 +379,8 @@ fun SelectingFlow(
 
         // Otherwise, show a friendly error with a retry
         else -> {
+            Log.d("Sugu", "test 6") ;
+
             UnexpectedErrorScreen(
                 navController = navController,
                 errorMsgShow = false,
