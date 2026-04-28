@@ -13,11 +13,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -32,6 +34,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import com.github.sugunasriram.fisloanlibv4.R
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appBlack
@@ -147,7 +150,6 @@ fun MultiStyleTextPreview() {
         top = 30.dp
     )
 }
-
 @Composable
 fun MultipleColorText(
     text: String,
@@ -193,10 +195,13 @@ fun OnlyReadAbleText(
     end: Dp = 20.dp,
     textColorHeader: Color = readableTextGray,
     textColorValue: Color = appBlack,
+    headerWeight:Float=0.7f,
+    valueWeight:Float=1f,
     start: Dp = 20.dp,
     top: Dp = 8.dp,
     bottom: Dp = 0.dp,
     style: TextStyle = normal14Text400,
+    valueStyle: TextStyle = normal14Text400,
     showImage: Boolean = false,
     textValueAlignment: TextAlign = TextAlign.Start,
     image: Painter = painterResource(R.drawable.person_icon)
@@ -212,9 +217,8 @@ fun OnlyReadAbleText(
             Image(
                 painter = image,
                 contentDescription = "",
-                modifier = Modifier
-                    .size(26.dp)
-                    .padding(end = 10.dp)
+                colorFilter = ColorFilter.tint(MaterialTheme.colors.primary),
+                modifier = Modifier.size(26.dp).padding(end = 10.dp)
             )
         }
 
@@ -223,16 +227,16 @@ fun OnlyReadAbleText(
             style = style,
             color = textColorHeader,
             modifier = Modifier
-                .weight(0.7f)
+                .weight(headerWeight)
                 .padding(top = 4.dp) // Optional for better visual alignment
         )
 
         Text(
             text = textValue,
-            style = style,
+            style = valueStyle,
             color = textColorValue,
             modifier = Modifier
-                .weight(1f)
+                .weight(valueWeight)
                 .padding(top = 4.dp), // Optional for alignment
             textAlign = textValueAlignment
         )
@@ -305,7 +309,8 @@ fun HeaderWithValue(
     headerStyle: TextStyle = normal12Text400,
     valueStyle: TextStyle = normal14Text700,
     headerTextAlign: TextAlign = TextAlign.Start,
-    valueTextAlign: TextAlign = TextAlign.Start
+    valueTextAlign: TextAlign = TextAlign.Start,
+    headerBottomPadding: Dp = 0.dp
 ) {
     Column(
         modifier = modifier.padding(start = start, end = end, top = top, bottom = bottom)
@@ -314,7 +319,7 @@ fun HeaderWithValue(
             text = textHeader,
             style = headerStyle,
             color = headerColor,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(bottom = headerBottomPadding),
             textAlign = headerTextAlign
         )
         Text(
@@ -334,22 +339,29 @@ fun BulletImageWithText(
     end: Dp = 15.dp,
     text: String = stringResource(id = R.string.share_bank_statements_instantly),
     top: Dp = 25.dp,
-    bottom: Dp = 0.dp
+    bottom: Dp = 0.dp,
+    style: TextStyle = normal14Text400,
+    textStart: Dp = 15.dp,
+    imageSize: Dp = 20.dp,
+    modifier: Modifier= Modifier
 ) {
     Row(
         horizontalArrangement = Arrangement.Start,
-        modifier = Modifier.fillMaxWidth().padding(start = start, end = end, top = top, bottom = bottom)
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier.fillMaxWidth().padding(start = start, end = end, top = top, bottom = bottom)
     ) {
         Image(
             painter = painterResource(id = image),
             contentDescription = null,
-            contentScale = ContentScale.Fit
+            contentScale = ContentScale.Fit,
+            modifier = Modifier.size(imageSize)
+//            colorFilter = ColorFilter.tint(MaterialTheme.colors.primary),
         )
         Text(
             text = text,
-            style = normal14Text400,
+            style = style,
             color = appBlack,
-            modifier = Modifier.padding(start = 15.dp)
+            modifier = Modifier.padding(start = textStart)
         )
     }
 }
@@ -562,7 +574,30 @@ fun ClickableHeaderValueWithTextBelow(
         HorizontalDivider(start = 0.dp, end = 0.dp, top = 4.dp)
     }
 }
-
+@Composable
+fun WarningText(
+    text: String, textColor: Color=appBlack, textStyle: TextStyle= normal14Text400,
+    iconColor: Color=MaterialTheme.colors.primary,
+    horizontalArrangement: Arrangement.Horizontal = Arrangement.Start,
+){
+    Row(
+        horizontalArrangement = horizontalArrangement,
+        modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp)
+    ) {
+        Image(
+            painter =  painterResource(id = R.drawable.about),
+            contentDescription = "",
+            modifier = Modifier.size(20.dp),
+            colorFilter = ColorFilter.tint(iconColor)
+        )
+        Text(
+            text = text,
+            style = textStyle,
+            color = textColor,
+            modifier=Modifier.padding(start=5.dp)
+        )
+    }
+}
 @Composable
 fun WarningIconAndText(
     title: String,
@@ -574,7 +609,7 @@ fun WarningIconAndText(
             .fillMaxWidth()
             .background(Color.White)
             .padding(6.dp)
-            .padding(vertical = 20.dp)
+            .padding(vertical = 8.dp, horizontal = 8.dp)
     ) {
         Row(
             verticalAlignment = Alignment.Top,
@@ -583,7 +618,8 @@ fun WarningIconAndText(
             Image(
                 painter = painter,
                 contentDescription = title.lowercase(),
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(24.dp),
+                colorFilter = ColorFilter.tint(MaterialTheme.colors.primary)
             )
 
             Spacer(modifier = Modifier.padding(horizontal = 4.dp))
@@ -595,11 +631,11 @@ fun WarningIconAndText(
                     color = appBlack
                 )
 
-                Spacer(modifier = Modifier.padding(vertical = 4.dp))
+                Spacer(modifier = Modifier.padding(vertical = 2.dp))
 
                 Text(
                     text = subtext,
-                    style = normal14Text500,
+                    style = normal14Text500.copy(lineHeight = TextUnit.Unspecified),
                     color = appBlack
                 )
             }
@@ -616,6 +652,6 @@ fun WarningIconAndText(
 fun WarningIconAndTextPreview() {
     WarningIconAndText(
         title = "Please ensure that your bank details are accurate",
-        subtext = "Incorrect or invalid entries may lead to failure in processing your request.",
+        subtext = "Incorrect or invalid entries may lead to failure in processing your request."
     )
 }

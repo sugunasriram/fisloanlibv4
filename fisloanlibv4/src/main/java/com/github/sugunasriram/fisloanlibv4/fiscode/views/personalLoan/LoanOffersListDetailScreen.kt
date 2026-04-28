@@ -144,6 +144,8 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import java.util.Locale
 import kotlin.math.roundToInt
+import com.github.sugunasriram.fisloanlibv4.fiscode.components.WarningText
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal16Text500
 
 private val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
 var coolOffPeriodDateOffer = ""
@@ -551,6 +553,9 @@ fun LoanOfferListDetailView(
                     backgroundColor = backOrange,
                     contentStart = 5.dp, contentEnd = 5.dp
                 ) {
+                    val lenderName=offer.providerDescriptor?.name
+                    Log.d("res_H_lenderName",lenderName.toString())
+
                     LoanOfferListHeaderSection(offer = offer)
                     when (fromFlow) {
                         "Personal Loan" -> LoanCardInfo(offer = offer)
@@ -566,17 +571,35 @@ fun LoanOfferListDetailView(
                         }
 
                     }
-                    StartingText(
-                        text = "Valid for: 11hr 48m",
-                        textColor = errorRed,
-                        top = 5.dp,
-                        alignment = Alignment.Center
-                    )
-                    LoanRePaymentCard()
-                    LoanDetailsCard(offer = offer, context = context, fromFlow = fromFlow)
-                    LoanSummaryCard(offer = offer)
-                    GroCard(offer = offer, context = context)
-                    LspCard(offer = offer)
+//                    StartingText(
+//                        text = "Valid for: 11hr 48m",
+//                        textColor = errorRed,
+//                        top = 5.dp,
+//                        alignment = Alignment.Center
+//                    )
+                    if ((lenderName?.contains("bajaj", ignoreCase = true) == true ) ||
+                        (lenderName?.contains("bfl", ignoreCase = true) == true)) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(appWhite).padding(horizontal = 28.dp, vertical = 10.dp)
+                        ) {
+                            WarningText(
+                                text = "Please refer to Key Fact Statement for detailed\n" +
+                                        "installment amount as it may vary from lender\n" +
+                                        "to lender.",
+                                textColor = errorRed, iconColor = errorRed,
+                                textStyle = normal16Text500,
+                                horizontalArrangement = Arrangement.Center
+                            )
+                        }
+                    } else {
+                        LoanRePaymentCard()
+                        LoanDetailsCard(offer = offer, context = context, fromFlow = fromFlow)
+                        LoanSummaryCard(offer = offer)
+                        GroCard(offer = offer, context = context)
+                        LspCard(offer = offer)
+                    }
                 }
             }
         }
@@ -620,11 +643,12 @@ fun parseTenureToMonths(value: String?): String? {
 @Composable
 fun LoanOfferListHeaderSection(offer: OfferResponseItem) {
     Row(
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
     ) {
-        Column(modifier = Modifier.weight(1f)) {
+        Column(modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.Top) {
             offer.providerDescriptor?.name?.let { lender ->
                 HeaderValueInARow(
                     textHeader = stringResource(id = R.string.lender) + " : ",
@@ -635,17 +659,20 @@ fun LoanOfferListHeaderSection(offer: OfferResponseItem) {
                     valueStyle = normal14Text700,
                     valueTextAlign = TextAlign.Start
                 )
+//                if (!(lender.contains("bajaj", ignoreCase = true) == true ) ||
+//                    !(lender.contains("bfl", ignoreCase = true) == true)) {
+//                    HeaderValueInARow(
+//                        textHeader = stringResource(id = R.string.kyc) + " : ",
+//                        textValue = stringResource(id = R.string.to_be_done),
+//                        textColorHeader = gray4E,
+//                        textColorValue = appBlack,
+//                        headerStyle = normal14Text400,
+//                        valueStyle = normal14Text700,
+//                        valueTextAlign = TextAlign.Start
+//                    )
+//                }
             }
 
-            HeaderValueInARow(
-                textHeader = stringResource(id = R.string.kyc) + " : ",
-                textValue = stringResource(id = R.string.to_be_done),
-                textColorHeader = gray4E,
-                textColorValue = appBlack,
-                headerStyle = normal14Text400,
-                valueStyle = normal14Text700,
-                valueTextAlign = TextAlign.Start
-            )
         }
 
         offer.providerDescriptor?.images?.get(0)?.url?.let { imageUrl ->
