@@ -84,6 +84,8 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
+
+
 import com.github.sugunasriram.fisloanlibv4.R
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.BoxButton
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.BulletImageWithText
@@ -566,7 +568,7 @@ fun LoanOfferListDetailView(
                                 DownPaymentAmount(downPaymentAmountValue)
                             }
                             LoanGSTCardInfo(
-                                offer = offer
+                                offer = offer, downPaymentAmount=downPaymentAmountValue
                             )
                         }
 
@@ -1451,7 +1453,8 @@ sealed class PfFlow(val status: String) {
 }
 
 @Composable
-fun LoanGSTCardInfo(offer: OfferResponseItem) {
+fun LoanGSTCardInfo(offer: OfferResponseItem, downPaymentAmount: Float) {
+    Log.d("res_H", "LoanGSTCardInfo")
     // Get loan amount that user will get
 
     offer.itemTags?.forEach itemTag@{ itemTags ->
@@ -1534,25 +1537,16 @@ fun LoanGSTCardInfo(offer: OfferResponseItem) {
             }
         }
     }
-//    offer?.quoteBreakUp?.forEach { tag ->
-//        if (tag?.title?.contains("INTEREST", ignoreCase = true) == true) {
-//            interestAmount = tag?.value ?: ""
-//        }
-//    }
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-    ) {
+    Row(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier
                 .weight(1f)
                 .background(appWhite)
-                .padding(5.dp)
+                .padding(bottom = 8.dp)
         ) {
             HeaderWithValue(
                 textHeader = stringResource(id = R.string.loan_amount),
-                textValue = loanAmount,
+                textValue = "₹$loanAmount",
                 headerColor = grayA6,
                 headerStyle = normal14Text400,
                 valueColor = appBlack,
@@ -1572,16 +1566,16 @@ fun LoanGSTCardInfo(offer: OfferResponseItem) {
                 valueTextAlign = TextAlign.Center
             )
         }
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(2.dp))
         Column(
             modifier = Modifier
                 .weight(1f)
                 .background(appWhite)
-                .padding(5.dp)
+                .padding(bottom = 8.dp)
         ) {
             HeaderWithValue(
-                textHeader = stringResource(id = R.string.interest),
-                textValue = interestAmount,
+                textHeader = stringResource(id = R.string.min_down_payment),
+                textValue = "₹$downPaymentAmount",
                 headerColor = grayA6,
                 headerStyle = normal14Text400,
                 valueColor = appBlack,
@@ -1591,8 +1585,8 @@ fun LoanGSTCardInfo(offer: OfferResponseItem) {
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             HeaderWithValue(
-                textHeader = stringResource(id = R.string.rate_of_interest),
-                textValue = interestRate,
+                textHeader = stringResource(id = R.string.installment_amount),
+                textValue = installmentAmount,
                 headerColor = grayA6,
                 headerStyle = normal14Text400,
                 valueColor = appBlack,
