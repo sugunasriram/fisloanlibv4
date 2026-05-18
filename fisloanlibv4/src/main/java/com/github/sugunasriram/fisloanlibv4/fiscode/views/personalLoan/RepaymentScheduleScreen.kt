@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -73,6 +74,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.components.CustomModalBottom
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.DisplayCard
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.FixedTopBottomScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.HeaderValueWithTextBelow
+import com.github.sugunasriram.fisloanlibv4.fiscode.components.HeaderWithValue
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.HorizontalDivider
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.MultiStyleText
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.OnlyClickAbleText
@@ -81,6 +83,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.components.RegisterText
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.SpaceBetweenTextIcon
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.StartingText
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.TextDescriptionWithRadioButton
+import com.github.sugunasriram.fisloanlibv4.fiscode.components.WarningText
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateSignInPage
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToCreateIssueScreen
@@ -130,6 +133,7 @@ import java.util.Locale
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.CancelLoan
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.CancelLoanResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.sse.Catalog
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.grayA6
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.grayD6
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal28Text700
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
@@ -657,7 +661,7 @@ fun RepaymentScheduleView(
                 }
             }
             // only if PF and Loan is disbursed
-            if (isLoanDisbursed && fromFlow == "LOAN") {
+            if (isLoanDisbursed && fromFlow.equals("LOAN", ignoreCase = true)) {
                 Spacer(modifier = Modifier.height(8.dp))
                 CurvedPrimaryButton(
                     text = "Cancel Loan Request",
@@ -868,6 +872,50 @@ fun BottomSheetHandle(
     }
 }
 
+//@Composable
+//fun CompleteLoanDetails(
+//    loanDetails: OfferResponseItem,
+//    orderPaymentListLoaded: Boolean,
+//    checkOrderIssueResponse: CheckOrderIssueModel?,
+//    context: Context,
+//    orderPaymentStatusList: ArrayList<OrderPaymentStatusItem>?,
+//    navController: NavHostController,
+//    fromFlow: String,
+//    isLoanClosed: Boolean,
+//    isLoanInitiated: Boolean,
+//    loanAgreementViewModel: LoanAgreementViewModel
+//) {
+//    val relevantPayments = orderPaymentStatusList?.filter { payment ->
+//        payment.status == "PAID"
+//    }
+//    // Application Details
+//    ApplicantDetails(loanDetails, context, loanAgreementViewModel = loanAgreementViewModel)
+//    // Loan Summary
+//    LoanSummary(loanDetails)
+//    // EMI Details Table
+//    EmiDetail(loanDetails)
+//    if (orderPaymentListLoaded) {
+//        Log.d("PaymentHistory", "orderPaymentStatusList : $orderPaymentStatusList")
+//        if (!relevantPayments.isNullOrEmpty()) {
+//            Log.d("PaymentHistory", "orderPaymentStatusList-Not empty: $orderPaymentStatusList")
+//            PaymentHistoryCard(relevantPayments)
+//        }
+//    }
+//    // GRO details
+//    GRODetailsCard(loanDetails, context)
+//    // Contact details
+//    ContactDetailsCard(loanDetails)
+//    // Loan Cancellation Terms
+//    CancellationTermsCard(loanDetails, context)
+////    if(!isLoanInitiated && !isLoanClosed){
+//    ReportIssueCard(checkOrderIssueResponse, loanDetails, navController, fromFlow)
+//    // Loan Agreement Details
+//    LoanAgreementDetailsCard(loanDetails, context)
+//    DownloadLoanDetailsCard(loanDetails, relevantPayments ?: emptyList(), context)
+//}
+
+
+//Chages for BFL
 @Composable
 fun CompleteLoanDetails(
     loanDetails: OfferResponseItem,
@@ -884,30 +932,194 @@ fun CompleteLoanDetails(
     val relevantPayments = orderPaymentStatusList?.filter { payment ->
         payment.status == "PAID"
     }
-    // Application Details
-    ApplicantDetails(loanDetails, context, loanAgreementViewModel = loanAgreementViewModel)
-    // Loan Summary
-    LoanSummary(loanDetails)
-    // EMI Details Table
-    EmiDetail(loanDetails)
-    if (orderPaymentListLoaded) {
-        Log.d("PaymentHistory", "orderPaymentStatusList : $orderPaymentStatusList")
-        if (!relevantPayments.isNullOrEmpty()) {
-            Log.d("PaymentHistory", "orderPaymentStatusList-Not empty: $orderPaymentStatusList")
-            PaymentHistoryCard(relevantPayments)
+
+    // Show the same compact values card used in LoanGSTCardInfo on LoanOffersListDetailsScreen.
+    RepaymentLoanGSTCardInfo(offer = loanDetails)
+
+    val lenderName = loanDetails.providerDescriptor?.name.orEmpty()
+    val isBajajOrBfl = lenderName.contains("bajaj", ignoreCase = true) ||
+            lenderName.contains("bfl", ignoreCase = true)
+
+    if (isBajajOrBfl) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(appWhite)
+                .padding(horizontal = 28.dp, vertical = 10.dp)
+        ) {
+            WarningText(
+                text = "Please refer to Key Fact Statement for detailed\n" +
+                        "installment amount as it may vary from lender\n" +
+                        "to lender.",
+                textColor = errorRed,
+                iconColor = errorRed,
+                textStyle = normal16Text500,
+                horizontalArrangement = Arrangement.Center
+            )
+        }
+    } else {
+        // Application Details
+        ApplicantDetails(loanDetails, context, loanAgreementViewModel = loanAgreementViewModel)
+        // Loan Summary
+        LoanSummary(loanDetails)
+        // EMI Details Table
+        EmiDetail(loanDetails)
+        if (orderPaymentListLoaded) {
+            Log.d("PaymentHistory", "orderPaymentStatusList : $orderPaymentStatusList")
+            if (!relevantPayments.isNullOrEmpty()) {
+                Log.d("PaymentHistory", "orderPaymentStatusList-Not empty: $orderPaymentStatusList")
+                PaymentHistoryCard(relevantPayments)
+            }
+        }
+        // GRO details
+        GRODetailsCard(loanDetails, context)
+        // Contact details
+        ContactDetailsCard(loanDetails)
+        // Loan Cancellation Terms
+        CancellationTermsCard(loanDetails, context)
+//    if(!isLoanInitiated && !isLoanClosed){
+        ReportIssueCard(checkOrderIssueResponse, loanDetails, navController, fromFlow)
+        // Loan Agreement Details
+        LoanAgreementDetailsCard(loanDetails, context)
+        DownloadLoanDetailsCard(loanDetails, relevantPayments ?: emptyList(), context)
+    }
+}
+
+@Composable
+fun RepaymentLoanGSTCardInfo(offer: OfferResponseItem) {
+    var loanAmount = "-"
+    var tenure = "-"
+    var installmentAmount = "-"
+    var downPaymentAmount = "-"
+
+    offer.itemTags?.forEach { itemTag ->
+        itemTag?.tags?.forEach { tag ->
+            when {
+                tag.key.contains("principal", ignoreCase = true) -> {
+                    loanAmount = tag.value.cleanAmountValue()
+                }
+
+                tag.key.equals("loan_term", ignoreCase = true) ||
+                        tag.key.equals("term", ignoreCase = true) -> {
+                    tenure = if (tag.value?.startsWith("P") == true) {
+                        convertISODurationToReadable(tag.value ?: "")
+                    } else {
+                        (tag.value ?: "").lowercase().replace(" months", "")
+                    }
+                }
+
+                tag.key.contains("INSTALLMENT_AMOUNT", ignoreCase = true) -> {
+                    installmentAmount = tag.value.cleanAmountValue()
+                }
+
+                tag.key.equals("MINIMUM_DOWNPAYMENT", ignoreCase = true) ||
+                        tag.key.equals("DOWNPAYMENT", ignoreCase = true) ||
+                        tag.key.equals("DOWN_PAYMENT", ignoreCase = true) -> {
+                    downPaymentAmount = tag.value.cleanAmountValue()
+                }
+            }
         }
     }
-    // GRO details
-    GRODetailsCard(loanDetails, context)
-    // Contact details
-    ContactDetailsCard(loanDetails)
-    // Loan Cancellation Terms
-    CancellationTermsCard(loanDetails, context)
-//    if(!isLoanInitiated && !isLoanClosed){
-    ReportIssueCard(checkOrderIssueResponse, loanDetails, navController, fromFlow)
-    // Loan Agreement Details
-    LoanAgreementDetailsCard(loanDetails, context)
-    DownloadLoanDetailsCard(loanDetails, relevantPayments ?: emptyList(), context)
+
+    offer.quoteBreakUp?.forEach { item ->
+        val title = item?.title.orEmpty()
+        val value = item?.value.orEmpty().cleanAmountValue()
+        when {
+            title.contains("PRINCIPAL", ignoreCase = true) -> {
+                loanAmount = value
+            }
+
+            title.contains("INSTALLMENT_AMOUNT", ignoreCase = true) ||
+                    title.contains("INSTALLMENT AMOUNT", ignoreCase = true) -> {
+                installmentAmount = value
+            }
+
+            title.contains("DOWNPAYMENT", ignoreCase = true) ||
+                    title.contains("DOWN_PAYMENT", ignoreCase = true) ||
+                    title.contains("DOWN PAYMENT", ignoreCase = true) -> {
+                downPaymentAmount = value
+            }
+        }
+    }
+
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .background(appWhite)
+                .padding(bottom = 8.dp)
+        ) {
+            HeaderWithValue(
+                textHeader = stringResource(id = R.string.loan_amount),
+                textValue = loanAmount.toCurrencyDisplay(),
+                headerColor = grayA6,
+                headerStyle = normal14Text400,
+                valueColor = appBlack,
+                valueStyle = normal16Text700,
+                headerTextAlign = TextAlign.Center,
+                valueTextAlign = TextAlign.Center,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            HeaderWithValue(
+                textHeader = stringResource(id = R.string.tenure),
+                textValue = tenure,
+                headerColor = grayA6,
+                headerStyle = normal14Text400,
+                valueColor = appBlack,
+                valueStyle = normal16Text700,
+                headerTextAlign = TextAlign.Center,
+                valueTextAlign = TextAlign.Center
+            )
+        }
+        Spacer(modifier = Modifier.width(2.dp))
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .background(appWhite)
+                .padding(bottom = 8.dp)
+        ) {
+            HeaderWithValue(
+                textHeader = stringResource(id = R.string.min_down_payment),
+                textValue = downPaymentAmount.toCurrencyDisplay(),
+                headerColor = grayA6,
+                headerStyle = normal14Text400,
+                valueColor = appBlack,
+                valueStyle = normal16Text700,
+                headerTextAlign = TextAlign.Center,
+                valueTextAlign = TextAlign.Center,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            HeaderWithValue(
+                textHeader = stringResource(id = R.string.installment_amount),
+                textValue = installmentAmount.toCurrencyDisplay(),
+                headerColor = grayA6,
+                headerStyle = normal14Text400,
+                valueColor = appBlack,
+                valueStyle = normal16Text700,
+                headerTextAlign = TextAlign.Center,
+                valueTextAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+private fun String?.cleanAmountValue(): String {
+    return this
+        ?.replace("INR", "", ignoreCase = true)
+        ?.replace("₹", "")
+        ?.trim()
+        ?.takeIf { it.isNotEmpty() }
+        ?: "-"
+}
+
+private fun String.toCurrencyDisplay(): String {
+    return if (this == "-" || this.isBlank()) {
+        "-"
+    } else if (this.startsWith("₹")) {
+        this
+    } else {
+        "₹$this"
+    }
 }
 
 @Composable

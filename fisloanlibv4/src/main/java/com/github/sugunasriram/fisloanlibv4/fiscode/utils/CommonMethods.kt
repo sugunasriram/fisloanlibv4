@@ -1344,4 +1344,18 @@ class CommonMethods {
         val formatedStr = "Till - $dateTimeStr"
         return formatedStr
     }
+
+    fun  launchUPIApp(context: Context, upiUrl: String,navController: NavHostController) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                data = Uri.parse(upiUrl)
+            }
+            context.startActivity(intent)
+        } catch (e: Exception) {
+//        navController.popBackStack()
+            navigateApplyByCategoryScreen(navController)
+            CommonMethods().toastMessage(context, "No UPI app found to handle payment")
+        }
+    }
+
 }

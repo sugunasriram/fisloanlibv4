@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
@@ -22,6 +23,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -34,6 +36,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.TopBar
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFormRejectedScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToPrePaymentStatusScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToRepaymentScheduleScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.core.ApiPaths
@@ -42,6 +45,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.network.sse.SSEViewModel
 import kotlinx.coroutines.delay
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 
 private val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
 
@@ -88,6 +92,16 @@ fun PrePartPaymentWebView(
 
     // Handle the events and navigate based on the presence of events
     LaunchedEffect(sseEvents) {
+        if (sseEvents == "__SSE_FAILURE__") {
+            Log.d("Prepayment", "SSE failed after retries ")
+            sseViewModel.stopListening()
+            navigateToFormRejectedScreen(
+                navController = navController,
+                errorTitle = "Session Time Out",
+                fromFlow = fromFlow,
+                errorMsg = "Please try again after some time"
+            )
+        }
         if (sseEvents.isNotEmpty()) {
             lateNavigate = true
             try {
@@ -124,6 +138,11 @@ fun PrePartPaymentWebView(
             } catch (e: Exception) {
                 Log.e("SSEParsingError", "Error parsing SSE data", e)
             }
+        }
+    }
+    DisposableEffect(Unit) {
+        onDispose {
+            sseViewModel.stopListening()
         }
     }
 
@@ -210,7 +229,9 @@ fun PrePartPaymentWebView(
 private fun WebView.configureWebViewSettings() {
     settings.apply {
         javaScriptEnabled = true
-        safeBrowsingEnabled = true
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            safeBrowsingEnabled = true
+        }
         mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
         cacheMode = WebSettings.LOAD_DEFAULT
         domStorageEnabled = true
@@ -229,19 +250,18 @@ private fun createWebViewClient(
     status: String,
     fromFlow: String
 ) = object : WebViewClient() {
-    override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
+    override fun shouldOverrideUrlLoading(view: WebView, url: String?): Boolean {
         url?.let {
-            if (url.startsWith("upi://")) {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                try {
-                    view?.context?.startActivity(intent)
-                } catch (e: ActivityNotFoundException) {
-                    Toast.makeText(view?.context, "No UPI app found", Toast.LENGTH_SHORT).show()
-                }
-                return true // Don't load it in WebView
+            if (url.startsWith("upi://",ignoreCase = true)||
+                url.startsWith("gpay://", ignoreCase = true) ||
+                url.startsWith("phonepe://", ignoreCase = true) ||
+                url.startsWith("paytmmp://", ignoreCase = true)) {
+
+                CommonMethods().launchUPIApp(view.context, url, navController)
+                return true
             } else {
 //                handleUrlLoading(navController, orderId, status, url, fromFlow = fromFlow)
-                view?.loadUrl(it)
+                view.loadUrl(it)
                 return true
             }
         }

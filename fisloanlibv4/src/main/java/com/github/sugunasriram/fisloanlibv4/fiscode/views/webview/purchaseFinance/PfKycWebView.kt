@@ -8,6 +8,8 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
+import androidx.core.content.ContextCompat
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
 import android.net.http.SslError
@@ -932,7 +934,8 @@ private fun PfKycWebViewScreenInternal(
         PFKycWebView(
             url = url,
             modifier = Modifier.weight(1f),
-            activity = activity
+            navController  = navController,
+            activity = activity,
         )
     }
 }
@@ -941,11 +944,13 @@ private fun PfKycWebViewScreenInternal(
 private fun PFKycWebView(
     url: String,
     modifier: Modifier,
+    navController: NavHostController,
     activity: Activity?
 ) {
     val context = LocalContext.current
 
     var fileChooserCallback by remember { mutableStateOf<ValueCallback<Array<Uri>>?>(null) }
+
 
     // ✅ Best-practice launcher for WebView file chooser
     val fileChooserLauncher =
@@ -964,6 +969,16 @@ private fun PFKycWebView(
             }
         }
 
+//    val permissionLauncher = rememberLauncherForActivityResult(
+//        ActivityResultContracts.RequestPermission()
+//    ) { isGranted ->
+//        if (isGranted) {
+//            fileChooserLauncher.launch("image/*")
+//        }
+//    }
+
+
+
     val webView = remember {
         WebView(context).apply {
             id = View.NO_ID
@@ -980,6 +995,7 @@ private fun PFKycWebView(
             webView = webView,
             context = context,
             activity = activity,
+            navController = navController,
             fileChooserLauncher = fileChooserLauncher
         ) { callback ->
             // Cancel any previous callback first
@@ -1014,6 +1030,7 @@ private fun PFKycWebView(
 private fun setupWebViewDefaults(
     webView: WebView,
     activity: Activity?,
+    navController: NavHostController,
     context: Context = webView.context,
     fileChooserLauncher: ManagedActivityResultLauncher<Intent, ActivityResult>,
     onFileChooserReady: (ValueCallback<Array<Uri>>?) -> Unit
@@ -1041,7 +1058,52 @@ private fun setupWebViewDefaults(
     cookieManager.setAcceptCookie(true)
     cookieManager.setAcceptThirdPartyCookies(webView, true)
 
-    webView.webViewClient = WebViewClient()
+    webView.webViewClient = object : WebViewClient() {
+
+        override fun shouldOverrideUrlLoading(
+            view: WebView,
+            request: WebResourceRequest
+        ): Boolean {
+            val url = request.url.toString()
+            Log.d("res_H_PFKYC", "URL: $url")
+
+            return if (
+                url.startsWith("upi://", ignoreCase = true) ||
+                url.startsWith("gpay://", ignoreCase = true) ||
+                url.startsWith("phonepe://", ignoreCase = true) ||
+                url.startsWith("paytmmp://", ignoreCase = true)
+            ) {
+                CommonMethods().launchUPIApp(view.context, url, navController)
+                true
+            } else {
+                false
+            }
+        }
+
+        @SuppressLint("WebViewClientOnReceivedSslError")
+        override fun onReceivedSslError(
+            view: WebView?,
+            handler: SslErrorHandler?,
+            error: SslError?
+        ) {
+            val dialogContext = activity ?: view?.context
+            if (dialogContext == null) {
+                handler?.cancel()
+                return
+            }
+
+            AlertDialog.Builder(dialogContext)
+                .setMessage("SSL Certificate error. Continue?")
+                .setPositiveButton("Continue") { _, _ ->
+                    handler?.proceed()
+                }
+                .setNegativeButton("Cancel") { _, _ ->
+                    handler?.cancel()
+                }
+                .setCancelable(false)
+                .show()
+        }
+    }
 
     webView.webChromeClient = object : WebChromeClient() {
 
@@ -1051,8 +1113,14 @@ private fun setupWebViewDefaults(
             message: String?,
             result: JsResult?
         ): Boolean {
-            AlertDialog.Builder(activity ?: view?.context)
-                .setMessage(message)
+            val dialogContext = activity ?: view?.context
+            if (dialogContext == null) {
+                result?.cancel()
+                return true
+            }
+
+            AlertDialog.Builder(dialogContext)
+                .setMessage(message ?: "")
                 .setPositiveButton("OK") { _, _ -> result?.confirm() }
                 .setCancelable(false)
                 .show()
@@ -1060,14 +1128,36 @@ private fun setupWebViewDefaults(
         }
 
         override fun onPermissionRequest(request: PermissionRequest) {
-            activity?.runOnUiThread {
+            val currentActivity = activity
+            if (currentActivity == null) {
+                request.deny()
+                return
+            }
+
+            currentActivity.runOnUiThread {
                 if (request.resources.contains(PermissionRequest.RESOURCE_VIDEO_CAPTURE)) {
                     MainActivity.webPermissionRequest = request
-                    ActivityCompat.requestPermissions(
-                        activity,
-                        arrayOf(Manifest.permission.CAMERA),
-                        CommonMethods().CAMERA_PERMISSION_REQUEST_CODE
-                    )
+                    //ActivityCompat.requestPermissions(
+                     //   activity,
+                     //   arrayOf(Manifest.permission.CAMERA),
+                      //  CommonMethods().CAMERA_PERMISSION_REQUEST_CODE
+                    //)
+
+                    val hasCameraPermission = ContextCompat.checkSelfPermission(
+                        currentActivity,
+                        Manifest.permission.CAMERA
+                    ) == PackageManager.PERMISSION_GRANTED
+
+
+                    if (hasCameraPermission) {
+                        request.grant(request.resources)
+                    } else {
+                        ActivityCompat.requestPermissions(
+                            currentActivity,
+                            arrayOf(Manifest.permission.CAMERA),
+                            CommonMethods().CAMERA_PERMISSION_REQUEST_CODE
+                        )
+                    }
                 } else {
                     request.deny()
                 }
@@ -1102,6 +1192,7 @@ private fun setupWebViewDefaults(
                 false
             }
         }
+
     }
 
     webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
