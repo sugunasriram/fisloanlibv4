@@ -308,11 +308,12 @@ fun LoanOfferListDetailView(
 ) {
     var backPressedTime by remember { mutableLongStateOf(0L) }
 
-    Log.d("Sugu 1", "productPriceAmountValue : "+productPriceAmountValue)  ;
-
-    if (isEditProcess  || productPriceAmountValue == 0.0f) {
+    if (isEditProcess || (fromFlow.equals("Purchase Finance", ignoreCase = true) && productPriceAmountValue == 0.0f) ){
+        Log.d("res_H","p0")
         ProcessingAnimation(text = "Processing Please Wait...", image = R.raw.we_are_currently_processing_hour_glass)
-    } else {
+    }
+    else {
+        Log.d("res_H","p3")
         if (isEdited) {
             SuccessNavigation(
                 editLoanResponse = editLoanResponse,
@@ -322,7 +323,7 @@ fun LoanOfferListDetailView(
                 fromFlow = fromFlow,
                 id = id
             )
-        } else {
+        }  else {
             CustomModalBottomSheet(
                 bottomSheetState = bottomSheetState,
                 sheetContent = {
@@ -573,14 +574,7 @@ fun LoanOfferListDetailView(
                         }
 
                     }
-//                    StartingText(
-//                        text = "Valid for: 11hr 48m",
-//                        textColor = errorRed,
-//                        top = 5.dp,
-//                        alignment = Alignment.Center
-//                    )
-                    if ((lenderName?.contains("bajaj", ignoreCase = true) == true ) ||
-                        (lenderName?.contains("bfl", ignoreCase = true) == true)) {
+                    if(lenderName?.contains("bajaj",ignoreCase=true) == true){
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -661,18 +655,17 @@ fun LoanOfferListHeaderSection(offer: OfferResponseItem) {
                     valueStyle = normal14Text700,
                     valueTextAlign = TextAlign.Start
                 )
-//                if (!(lender.contains("bajaj", ignoreCase = true) == true ) ||
-//                    !(lender.contains("bfl", ignoreCase = true) == true)) {
-//                    HeaderValueInARow(
-//                        textHeader = stringResource(id = R.string.kyc) + " : ",
-//                        textValue = stringResource(id = R.string.to_be_done),
-//                        textColorHeader = gray4E,
-//                        textColorValue = appBlack,
-//                        headerStyle = normal14Text400,
-//                        valueStyle = normal14Text700,
-//                        valueTextAlign = TextAlign.Start
-//                    )
-//                }
+                if (!(lender.contains("bajaj", ignoreCase = true) == true)) {
+                    HeaderValueInARow(
+                        textHeader = stringResource(id = R.string.kyc) + " : ",
+                        textValue = stringResource(id = R.string.to_be_done),
+                        textColorHeader = gray4E,
+                        textColorValue = appBlack,
+                        headerStyle = normal14Text400,
+                        valueStyle = normal14Text700,
+                        valueTextAlign = TextAlign.Start
+                    )
+                }
             }
 
         }

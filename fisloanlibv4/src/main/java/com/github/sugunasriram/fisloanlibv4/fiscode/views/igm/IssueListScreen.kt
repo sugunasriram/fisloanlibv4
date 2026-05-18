@@ -232,7 +232,6 @@ fun IssueCardList(navController: NavHostController, orderId:String, issueList: L
 @Composable
 fun IssueCardD(issue: IssueObj, onClick: () -> Unit) {
     BorderCardWithElevation(
-        backgroundColor = loanIssueCardGray,
         borderColor = loanIssueCardGray,
         top = 5.dp,
         bottom = 5.dp,

@@ -14,12 +14,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.UploadFile
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -43,17 +49,22 @@ import com.github.sugunasriram.fisloanlibv4.R
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appWhite
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.backgroundOrange
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.grayD6
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.greenCard
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.lightGray
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.lightishGray
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal16Text700
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.TableRow
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.loanStatusCardGreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appRed
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal14Text500
 
 @Composable
 fun DisplayCard(
     modifier: Modifier = Modifier,
-    cardColor: Color = backgroundOrange,
-    borderColor: Color = appOrange,
+    cardColor: Color = MaterialTheme.colors.background,
+    borderColor: Color = MaterialTheme.colors.primary,
+    horizontalAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
     start: Dp = 20.dp,
     end: Dp = 20.dp,
     roundedCornerDp: Dp = 16.dp,
@@ -62,7 +73,7 @@ fun DisplayCard(
     content: @Composable () -> Unit
 ) {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = horizontalAlignment,
         verticalArrangement = Arrangement.Center,
         modifier = modifier
             .fillMaxWidth()
@@ -99,8 +110,11 @@ fun FullWidthRoundShapedCard(
         horizontalAlignment = alignment,
         modifier = modifier
             .then(
-                if (clickable) Modifier.clickable { onClick() }
-                else Modifier
+                if (clickable) {
+                    Modifier.clickable { onClick() }
+                } else {
+                    Modifier
+                }
             )
             .fillMaxWidth()
             .padding(start = start, end = end, top = top, bottom = bottom)
@@ -164,7 +178,7 @@ fun FullWidthRoundShapedElevatedCard(
 
 @Preview
 @Composable
-fun FullWidthRoundShapedElevatedCardPreview(){
+fun FullWidthRoundShapedElevatedCardPreview() {
     FullWidthRoundShapedElevatedCard(
         onClick = { },
         start = 0.dp,
@@ -194,23 +208,28 @@ fun FullWidthRoundShapedElevatedCardPreview(){
 fun BorderCardWithElevation(
     modifier: Modifier = Modifier,
     contentColor: Color = Color.Transparent,
-    backgroundColor: Color = appWhite,
-    borderColor: Color = appOrange,
+    containerColor: Color = appWhite,
+    borderColor: Color = MaterialTheme.colors.primary,
     start: Dp = 20.dp,
     end: Dp = 20.dp,
     top: Dp = 0.dp,
-    bottom: Dp = 0.dp,
+    bottom: Dp = 0.dp,borderWidth: Dp = 1.dp,
+    onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(start = start, end = end, top = top, bottom = bottom),
-        elevation = 12.dp,
-        contentColor = contentColor,
-        backgroundColor = backgroundColor,
+            .padding(start = start, end = end, top = top, bottom = bottom)
+            .then(
+                if (onClick != null) Modifier.clickable { onClick() } else Modifier
+            ),
+        colors = CardDefaults.cardColors(
+            contentColor = contentColor,
+            containerColor = containerColor,
+        ),
         shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, borderColor)
+        border = BorderStroke(borderWidth, borderColor)
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -225,8 +244,8 @@ fun BorderCardWithElevation(
 @Composable
 fun ClickableLoanStatusCard(
     modifier: Modifier = Modifier,
-    cardColor: Color = greenCard,
-    borderColor: Color = lightGray,
+    cardColor: Color = loanStatusCardGreen,
+    borderColor: Color = grayD6,
     start: Dp = 20.dp,
     end: Dp = 20.dp,
     top: Dp = 0.dp,
@@ -415,5 +434,62 @@ fun DownPaymentCard(
         }
         HorizontalDivider(color = appOrange, start = 0.dp, end = 0.dp, top = 0.dp)
         content()
+    }
+}
+
+@Composable
+fun KFSCard(kfsLink : String){
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 8.dp)
+            .background(Color.Transparent, shape = RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(16.dp))
+            .background(appWhite)
+            .padding(horizontal = 8.dp, vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        Box(
+            modifier = Modifier
+                .size(56.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .background(Color(0xFFF3E3D7)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Description,
+                contentDescription = null,
+                tint = Color(0xFF9C5A1A),
+                modifier = Modifier.size(28.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.width(16.dp))
+
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+
+            Text(
+                text = "Key Fact Statement",
+                style = normal16Text700
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = kfsLink,
+                style = normal14Text500,
+                color = appRed
+            )
+        }
+
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.OpenInNew,
+            contentDescription = null,
+            tint = Color(0xFFB0A9A3),
+            modifier = Modifier.size(32.dp)
+        )
     }
 }

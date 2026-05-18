@@ -8,6 +8,7 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -137,6 +138,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.grayA6
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.grayD6
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal28Text700
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
+import androidx.compose.ui.draw.clip
 
 var amount_to_be_paid = ""
 var coolOffPeriodDate = ""
@@ -718,6 +720,7 @@ fun RepaymentScheduleView(
                                     showLoanCancelPopUp = false
                                 }
                             }
+                            Spacer(modifier = Modifier.height(12.dp))
                         }
                     },
                     dismissButton = {
@@ -941,11 +944,15 @@ fun CompleteLoanDetails(
             lenderName.contains("bfl", ignoreCase = true)
 
     if (isBajajOrBfl) {
+        RepaymentLoanGSTCardInfo(offer = loanDetails)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 8.dp)
+                .background(Color.Transparent, shape = RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(16.dp))
                 .background(appWhite)
-                .padding(horizontal = 28.dp, vertical = 10.dp)
+                .padding(horizontal = 8.dp, vertical = 16.dp),
         ) {
             WarningText(
                 text = "Please refer to Key Fact Statement for detailed\n" +
@@ -981,7 +988,9 @@ fun CompleteLoanDetails(
         ReportIssueCard(checkOrderIssueResponse, loanDetails, navController, fromFlow)
         // Loan Agreement Details
         LoanAgreementDetailsCard(loanDetails, context)
-        DownloadLoanDetailsCard(loanDetails, relevantPayments ?: emptyList(), context)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            DownloadLoanDetailsCard(loanDetails, relevantPayments ?: emptyList(), context)
+        }
     }
 }
 
@@ -1042,7 +1051,7 @@ fun RepaymentLoanGSTCardInfo(offer: OfferResponseItem) {
         }
     }
 
-    Row(modifier = Modifier.fillMaxWidth()) {
+    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 14.dp)) {
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -1101,27 +1110,99 @@ fun RepaymentLoanGSTCardInfo(offer: OfferResponseItem) {
             )
         }
     }
-}
+    DisplayCard(
+        cardColor = appWhite,
+        borderColor = appWhite,
+        roundedCornerDp = 6.dp,
+        start = 10.dp,
+        end = 10.dp,
+        bottom = 10.dp
+    ) {
+        offer.fulfillments?.firstOrNull()?.customer?.let { customer ->
+            customer.person?.name?.let { name ->
+                OnlyReadAbleText(
+                    textHeader = stringResource(id = R.string.applicant_name),
+                    textColorHeader = slateGrayColor,
+                    textValue = name,
+                    style = normal14Text400,
+                    end = 5.dp,
+                    start = 8.dp,
+                    top = 10.dp,
+                    bottom = 8.dp
+                )
+            }
 
-private fun String?.cleanAmountValue(): String {
-    return this
-        ?.replace("INR", "", ignoreCase = true)
-        ?.replace("₹", "")
-        ?.trim()
-        ?.takeIf { it.isNotEmpty() }
-        ?: "-"
-}
+            customer.contact?.email?.let { email ->
+                OnlyReadAbleText(
+                    textHeader = stringResource(id = R.string.applicant_email),
+                    textColorHeader = slateGrayColor,
+                    textValue = email.lowercase(),
+                    style = normal14Text400,
+                    end = 5.dp,
+                    start = 8.dp,
+                    top = 8.dp,
+                    bottom = 8.dp
+                )
+            }
 
-private fun String.toCurrencyDisplay(): String {
-    return if (this == "-" || this.isBlank()) {
-        "-"
-    } else if (this.startsWith("₹")) {
-        this
-    } else {
-        "₹$this"
+            customer.contact?.phone?.let { mobileNumber ->
+                OnlyReadAbleText(
+                    textHeader = stringResource(id = R.string.mobile_number),
+                    textColorHeader = slateGrayColor,
+                    textValue = mobileNumber,
+                    style = normal14Text400,
+                    end = 5.dp,
+                    start = 8.dp,
+                    top = 8.dp,
+                    bottom = 8.dp
+                )
+            }
+        }
+        val applicationId = offer.id
+
+        val status = offer.status
+
+        if (status == null || status.equals("ACTIVE", ignoreCase = true)) {
+            // ✅ take from fulfillments
+            offer.fulfillments?.firstOrNull()?.state?.descriptor?.code?.let { loanStatus ->
+                OnlyReadAbleText(
+                    textHeader = stringResource(id = R.string.loan_status),
+                    textColorHeader = slateGrayColor,
+                    textValue = loanStatus,
+                    style = normal14Text400,
+                    end = 5.dp,
+                    start = 8.dp,
+                    top = 10.dp,
+                    bottom = 8.dp
+                )
+            }
+        } else {
+            OnlyReadAbleText(
+                textHeader = stringResource(id = R.string.loan_status),
+                textColorHeader = slateGrayColor,
+                textValue = status,
+                style = normal14Text400,
+                end = 5.dp,
+                start = 8.dp,
+                top = 10.dp,
+                bottom = 8.dp
+            )
+        }
+
+        applicationId?.let {
+            OnlyReadAbleText(
+                textHeader = stringResource(id = R.string.loan_application_id),
+                textColorHeader = slateGrayColor,
+                textValue = applicationId,
+                style = normal14Text400,
+                end = 5.dp,
+                start = 8.dp,
+                top = 8.dp,
+                bottom = 8.dp
+            )
+        }
     }
 }
-
 @Composable
 fun ApplicantDetails(loanDetails: OfferResponseItem, context: Context,
                      loanAgreementViewModel:LoanAgreementViewModel) {
@@ -1587,7 +1668,11 @@ fun EmiDetail(loanDetails: OfferResponseItem) {
                                 emiItem.status?.let { status ->
                                     emiItem.params?.amount?.let { amount ->
                                         emiItem.time?.range?.start?.let { timestamp ->
-                                            val date = CommonMethods().displayFormattedDate(timestamp)
+                                            val date = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                                CommonMethods().displayFormattedDate(timestamp)
+                                            } else {
+                                                TODO("VERSION.SDK_INT < O")
+                                            }
                                             TableRow(
                                                 emiNumber = emiNum,
                                                 dueDate = date,
@@ -1794,6 +1879,7 @@ fun LoanAgreementDetailsCard(loanDocument: OfferResponseItem, context: Context) 
         }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("SuspiciousIndentation")
 @Composable
 fun DownloadLoanDetailsCard(loanDocument: OfferResponseItem, payment: List<OrderPaymentStatusItem>, context: Context) {
@@ -1835,7 +1921,9 @@ fun DownloadLoanDetailsCard(loanDocument: OfferResponseItem, payment: List<Order
                     return@CurvedPrimaryButton // Wait for the permission result before proceeding
                 }
             }
-            CommonMethods().generatePdfAndNotify(context, loanDocument, payment, lenderName)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                CommonMethods().generatePdfAndNotify(context, loanDocument, payment, lenderName)
+            }
         }
     }
 }
@@ -2189,17 +2277,25 @@ fun PaymentOptionsPopUp(
 @Composable
 fun convertUTCToLocalDateTime(utcDateTime: String): String {
     val zonedDateTime =
-        ZonedDateTime.parse(utcDateTime).withZoneSameInstant(ZoneId.of("Asia/Kolkata"))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            ZonedDateTime.parse(utcDateTime).withZoneSameInstant(ZoneId.of("Asia/Kolkata"))
+        } else {
+            TODO("VERSION.SDK_INT < O")
+        }
     val formatter = DateTimeFormatter.ofPattern("hh:mm a, dd MMM yyyy", Locale.getDefault())
 
     val remainingTime =
-        CommonMethods().getRemainingTime(utcDateTime) ?: CommonMethods.RemainingTime(
-            isFuture = false,
-            days = 0,
-            hours = 0,
-            minutes = 0,
-            seconds = 0
-        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CommonMethods().getRemainingTime(utcDateTime) ?: CommonMethods.RemainingTime(
+                isFuture = false,
+                days = 0,
+                hours = 0,
+                minutes = 0,
+                seconds = 0
+            )
+        } else {
+            TODO("VERSION.SDK_INT < O")
+        }
     val remainingTimeStr = CommonMethods().timeBufferString(remainingTime)
 
     val dateTimeStr = zonedDateTime.format(formatter)
@@ -2444,7 +2540,11 @@ fun ForeClosure(
 //    fullAmount?.let { amount ->
     principal?.let { amount ->
         amount_to_be_paid = amount
-        val remainingTime = CommonMethods().getRemainingTime(coolOffPeriodDate)
+        val remainingTime = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CommonMethods().getRemainingTime(coolOffPeriodDate)
+        } else {
+            TODO("VERSION.SDK_INT < O")
+        }
         val timeBuffer = remainingTime?.let { CommonMethods().timeBufferString(it) }
         if (remainingTime?.isFuture == true) {
             RepaymentBottomCommon(
@@ -2579,6 +2679,25 @@ fun ForeClosureResponseHandling(
                 }
             }
         }
+    }
+}
+
+private fun String?.cleanAmountValue(): String {
+    return this
+        ?.replace("INR", "", ignoreCase = true)
+        ?.replace("₹", "")
+        ?.trim()
+        ?.takeIf { it.isNotEmpty() }
+        ?: "-"
+}
+
+private fun String.toCurrencyDisplay(): String {
+    return if (this == "-" || this.isBlank()) {
+        "-"
+    } else if (this.startsWith("₹")) {
+        this
+    } else {
+        "₹$this"
     }
 }
 
