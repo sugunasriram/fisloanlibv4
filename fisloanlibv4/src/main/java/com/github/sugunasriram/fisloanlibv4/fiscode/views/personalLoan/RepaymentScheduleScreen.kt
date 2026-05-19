@@ -936,9 +936,6 @@ fun CompleteLoanDetails(
         payment.status == "PAID"
     }
 
-    // Show the same compact values card used in LoanGSTCardInfo on LoanOffersListDetailsScreen.
-    RepaymentLoanGSTCardInfo(offer = loanDetails)
-
     val lenderName = loanDetails.providerDescriptor?.name.orEmpty()
     val isBajajOrBfl = lenderName.contains("bajaj", ignoreCase = true) ||
             lenderName.contains("bfl", ignoreCase = true)
