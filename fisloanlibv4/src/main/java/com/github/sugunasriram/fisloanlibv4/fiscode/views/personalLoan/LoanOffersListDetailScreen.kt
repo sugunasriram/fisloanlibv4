@@ -578,18 +578,24 @@ fun LoanOfferListDetailView(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(appWhite).padding(horizontal = 28.dp, vertical = 10.dp)
+                                .padding(horizontal = 8.dp, vertical = 8.dp)
+                                .background(Color.Transparent, shape = RoundedCornerShape(16.dp))
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(appWhite)
+                                .padding(horizontal = 6.dp, vertical = 12.dp),
                         ) {
                             WarningText(
-                                text = "Please refer to Key Fact Statement for detailed\n" +
-                                        "installment amount as it may vary from lender\n" +
-                                        "to lender.",
-                                textColor = errorRed, iconColor = errorRed,
+                                text = "Please refer to Key Fact Statement \n" +
+                                        "shared by the lender for further reference.",
+                                textColor = errorRed,
+                                iconColor = errorRed,
                                 textStyle = normal16Text500,
                                 horizontalArrangement = Arrangement.Center
                             )
                         }
-                    } else {
+//                        KFSCard("http://....")
+                    }else {
+
                         LoanRePaymentCard()
                         LoanDetailsCard(offer = offer, context = context, fromFlow = fromFlow)
                         LoanSummaryCard(offer = offer)
@@ -783,8 +789,7 @@ fun LoanCardInfo(offer: OfferResponseItem) {
                         ).let { readableDuration ->
                             tenure = readableDuration
                         }
-                    }
-                    else {
+                    } else {
                         tenure = tag.value.lowercase().replace(" months", "")
                     }
                 }
@@ -1447,8 +1452,7 @@ sealed class PfFlow(val status: String) {
 
 @Composable
 fun LoanGSTCardInfo(offer: OfferResponseItem, downPaymentAmount: Float) {
-    Log.d("res_H", "LoanGSTCardInfo")
-    // Get loan amount that user will get
+    var processingFee = "-"
 
     offer.itemTags?.forEach itemTag@{ itemTags ->
         itemTags?.let {
@@ -1465,6 +1469,11 @@ fun LoanGSTCardInfo(offer: OfferResponseItem, downPaymentAmount: Float) {
                             interestAmount = value ?: ""
                         }
                     }
+                    if(itemTagsItem.key.equals("PROCESSING_FEE", ignoreCase = true) ||
+                            itemTagsItem.key.equals("PROCESSING FEE", ignoreCase = true) ||
+                            itemTagsItem.key.equals("PROCESSINGFEE", ignoreCase = true)){
+                    processingFee = itemTagsItem.value
+                }
                 }
             }
         }
@@ -1567,8 +1576,8 @@ fun LoanGSTCardInfo(offer: OfferResponseItem, downPaymentAmount: Float) {
                 .padding(bottom = 8.dp)
         ) {
             HeaderWithValue(
-                textHeader = stringResource(id = R.string.min_down_payment),
-                textValue = "₹$downPaymentAmount",
+                textHeader = stringResource(id = R.string.installment_amount),
+                textValue = "₹$installmentAmount",
                 headerColor = grayA6,
                 headerStyle = normal14Text400,
                 valueColor = appBlack,
@@ -1578,17 +1587,21 @@ fun LoanGSTCardInfo(offer: OfferResponseItem, downPaymentAmount: Float) {
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             HeaderWithValue(
-                textHeader = stringResource(id = R.string.installment_amount),
-                textValue = installmentAmount,
+                textHeader = stringResource(id = R.string.processing_fee),
+                textValue = "₹$processingFee",
                 headerColor = grayA6,
                 headerStyle = normal14Text400,
                 valueColor = appBlack,
                 valueStyle = normal16Text700,
                 headerTextAlign = TextAlign.Center,
-                valueTextAlign = TextAlign.Center
+                valueTextAlign = TextAlign.Center,
+
             )
         }
     }
+    StartingText(text = stringResource(R.string.more_details),
+        style = normal16Text700, start = 10.dp, top= 8.dp, textColor = appBlack)
+    BFLLoanDetails(offer)
 }
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -2200,51 +2213,51 @@ fun DownPaymentBottomSheetContent(
             )
         }
 
-            RegisterText(
-                text = "Your down payment amount must be at least the minimum specified by the lender and cannot exceed Price - 10",
-               style = normal14Text500,
-                textColor = hintGray,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 10.dp, bottom = 16.dp)
-            )
-        }
+        RegisterText(
+            text = "Your Down payment Amount should be greater than or equal to min down payment specified by the lender",
+            style = normal14Text500,
+            textColor = hintGray,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = 10.dp, bottom = 16.dp)
+        )
+    }
 
-        // Interest and Total Due Section
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            val totalDue = maxAmount - sliderValue
-            val interestInt: Int = interest.replace(Regex("[^0-9]"), "").toInt()
-            val interestAmount = (totalDue * interestInt / 100.0).toInt()
+    // Interest and Total Due Section
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        val totalDue = maxAmount - sliderValue
+        val interestInt: Int = interest.replace(Regex("[^0-9]"), "").toInt()
+        val interestAmount = (totalDue * interestInt / 100.0).toInt()
 
-            DottedBoxWithDividers(
-                interest = "(${interest.replace(" ", "")})",
-                totalDue = "₹ ${CommonMethods().formatWithCommas((totalDue).toInt())}",
-                interestAmount = "₹ ${CommonMethods().formatWithCommas(interestAmount)}"
-            )
-        }
+        DottedBoxWithDividers(
+            interest = "(${interest.replace(" ", "")})",
+            totalDue = "₹ ${CommonMethods().formatWithCommas((totalDue).toInt())}",
+            interestAmount = "₹ ${CommonMethods().formatWithCommas(interestAmount)}"
+        )
+    }
 
-        Spacer(modifier = Modifier.height(40.dp))
-        // Buttons Section
-        Row(
-            modifier = Modifier
-                .height(60.dp)
-                .fillMaxWidth()
-                .border(1.dp, appOrange),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            BoxButton(
-                modifier = Modifier.weight(1f),
-                buttonText = stringResource(R.string.cancel),
-                textColor = appOrange,
-                backgroundColor = appWhite
-            ) {onClose() }
+    Spacer(modifier = Modifier.height(40.dp))
+    // Buttons Section
+    Row(
+        modifier = Modifier
+            .height(60.dp)
+            .fillMaxWidth()
+            .border(1.dp, appOrange),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        BoxButton(
+            modifier = Modifier.weight(1f),
+            buttonText = stringResource(R.string.cancel),
+            textColor = appOrange,
+            backgroundColor = appWhite
+        ) { onClose() }
 
-            BoxButton(
-                modifier = Modifier.weight(1f),
-                buttonText = stringResource(R.string.submit)
-            ) { onSubmit(sliderValue) }
+        BoxButton(
+            modifier = Modifier.weight(1f),
+            buttonText = stringResource(R.string.submit)
+        ) { onSubmit(sliderValue) }
     }
 }
 

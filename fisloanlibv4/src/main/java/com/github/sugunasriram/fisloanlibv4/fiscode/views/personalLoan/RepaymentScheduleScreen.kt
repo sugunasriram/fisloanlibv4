@@ -663,7 +663,8 @@ fun RepaymentScheduleView(
                 }
             }
             // only if PF and Loan is disbursed
-            if (isLoanDisbursed && fromFlow.equals("LOAN", ignoreCase = true)) {
+//            if (isLoanDisbursed && fromFlow.equals("LOAN", ignoreCase = true)) {
+            if (isLoanDisbursed ) {
                 Spacer(modifier = Modifier.height(8.dp))
                 CurvedPrimaryButton(
                     text = "Cancel Loan Request",
@@ -996,7 +997,7 @@ fun RepaymentLoanGSTCardInfo(offer: OfferResponseItem) {
     var loanAmount = "-"
     var tenure = "-"
     var installmentAmount = "-"
-    var downPaymentAmount = "-"
+    var processingFee = "-"
 
     offer.itemTags?.forEach { itemTag ->
         itemTag?.tags?.forEach { tag ->
@@ -1018,10 +1019,10 @@ fun RepaymentLoanGSTCardInfo(offer: OfferResponseItem) {
                     installmentAmount = tag.value.cleanAmountValue()
                 }
 
-                tag.key.equals("MINIMUM_DOWNPAYMENT", ignoreCase = true) ||
-                        tag.key.equals("DOWNPAYMENT", ignoreCase = true) ||
-                        tag.key.equals("DOWN_PAYMENT", ignoreCase = true) -> {
-                    downPaymentAmount = tag.value.cleanAmountValue()
+                tag.key.equals("PROCESSING_FEE", ignoreCase = true) ||
+                        tag.key.equals("PROCESSING FEE", ignoreCase = true) ||
+                        tag.key.equals("PROCESSINGFEE", ignoreCase = true) -> {
+                    processingFee = tag.value.cleanAmountValue()
                 }
             }
         }
@@ -1038,12 +1039,6 @@ fun RepaymentLoanGSTCardInfo(offer: OfferResponseItem) {
             title.contains("INSTALLMENT_AMOUNT", ignoreCase = true) ||
                     title.contains("INSTALLMENT AMOUNT", ignoreCase = true) -> {
                 installmentAmount = value
-            }
-
-            title.contains("DOWNPAYMENT", ignoreCase = true) ||
-                    title.contains("DOWN_PAYMENT", ignoreCase = true) ||
-                    title.contains("DOWN PAYMENT", ignoreCase = true) -> {
-                downPaymentAmount = value
             }
         }
     }
@@ -1085,8 +1080,8 @@ fun RepaymentLoanGSTCardInfo(offer: OfferResponseItem) {
                 .padding(bottom = 8.dp)
         ) {
             HeaderWithValue(
-                textHeader = stringResource(id = R.string.min_down_payment),
-                textValue = downPaymentAmount.toCurrencyDisplay(),
+                textHeader = stringResource(id = R.string.installment_amount),
+                textValue = installmentAmount.toCurrencyDisplay(),
                 headerColor = grayA6,
                 headerStyle = normal14Text400,
                 valueColor = appBlack,
@@ -1096,8 +1091,8 @@ fun RepaymentLoanGSTCardInfo(offer: OfferResponseItem) {
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             HeaderWithValue(
-                textHeader = stringResource(id = R.string.installment_amount),
-                textValue = installmentAmount.toCurrencyDisplay(),
+                textHeader = stringResource(id = R.string.processing_fee),
+                textValue = processingFee.toCurrencyDisplay(),
                 headerColor = grayA6,
                 headerStyle = normal14Text400,
                 valueColor = appBlack,
@@ -1105,22 +1100,28 @@ fun RepaymentLoanGSTCardInfo(offer: OfferResponseItem) {
                 headerTextAlign = TextAlign.Center,
                 valueTextAlign = TextAlign.Center
             )
+
         }
     }
+    StartingText(text = stringResource(R.string.more_details),
+        style = normal16Text700, start = 10.dp, textColor = appBlack)
+    BFLLoanDetails(offer)
     DisplayCard(
         cardColor = appWhite,
         borderColor = appWhite,
         roundedCornerDp = 6.dp,
         start = 10.dp,
         end = 10.dp,
-        bottom = 10.dp
-    ) {
+        bottom = 8.dp
+    )
+    {
         offer.fulfillments?.firstOrNull()?.customer?.let { customer ->
             customer.person?.name?.let { name ->
                 OnlyReadAbleText(
                     textHeader = stringResource(id = R.string.applicant_name),
                     textColorHeader = slateGrayColor,
                     textValue = name,
+                    textValueAlignment = TextAlign.End,
                     style = normal14Text400,
                     end = 5.dp,
                     start = 8.dp,
@@ -1134,6 +1135,7 @@ fun RepaymentLoanGSTCardInfo(offer: OfferResponseItem) {
                     textHeader = stringResource(id = R.string.applicant_email),
                     textColorHeader = slateGrayColor,
                     textValue = email.lowercase(),
+                    textValueAlignment = TextAlign.End,
                     style = normal14Text400,
                     end = 5.dp,
                     start = 8.dp,
@@ -1147,6 +1149,7 @@ fun RepaymentLoanGSTCardInfo(offer: OfferResponseItem) {
                     textHeader = stringResource(id = R.string.mobile_number),
                     textColorHeader = slateGrayColor,
                     textValue = mobileNumber,
+                    textValueAlignment = TextAlign.End,
                     style = normal14Text400,
                     end = 5.dp,
                     start = 8.dp,
@@ -1166,6 +1169,7 @@ fun RepaymentLoanGSTCardInfo(offer: OfferResponseItem) {
                     textHeader = stringResource(id = R.string.loan_status),
                     textColorHeader = slateGrayColor,
                     textValue = loanStatus,
+                    textValueAlignment = TextAlign.End,
                     style = normal14Text400,
                     end = 5.dp,
                     start = 8.dp,
@@ -1178,6 +1182,7 @@ fun RepaymentLoanGSTCardInfo(offer: OfferResponseItem) {
                 textHeader = stringResource(id = R.string.loan_status),
                 textColorHeader = slateGrayColor,
                 textValue = status,
+                textValueAlignment = TextAlign.End,
                 style = normal14Text400,
                 end = 5.dp,
                 start = 8.dp,
@@ -1191,6 +1196,7 @@ fun RepaymentLoanGSTCardInfo(offer: OfferResponseItem) {
                 textHeader = stringResource(id = R.string.loan_application_id),
                 textColorHeader = slateGrayColor,
                 textValue = applicationId,
+                textValueAlignment = TextAlign.End,
                 style = normal14Text400,
                 end = 5.dp,
                 start = 8.dp,
@@ -1454,7 +1460,60 @@ fun ApplicantDetails(loanDetails: OfferResponseItem, context: Context,
         }
     }
 }
+@Composable
+fun BFLLoanDetails(loanDetails: OfferResponseItem) {
+    DisplayCard(
+        cardColor = appWhite,
+        borderColor = appWhite,
+        roundedCornerDp = 6.dp,
+        start = 10.dp,
+        end = 10.dp,
+        bottom = 10.dp,
+        top = 6.dp
+    ) {
+        val allowedKeys = listOf(
+            "INSURANCE_CHARGES",
+            "OTHER_CHARGES",
+            "OTHER_UPFRONT_CHARGES"
+        )
 
+        loanDetails.itemTags?.forEach { itemTags ->
+            itemTags?.let {
+
+                if (it.display == true) {
+
+                    it.tags.let { tags ->
+                        tags
+                            .filter { tag ->
+                                allowedKeys.any { it.equals(tag.key, ignoreCase = true) }
+                            }
+                            .sortedBy { tag ->
+                                CommonMethods().displayFormattedText(tag.key)
+                            }
+                            .forEach { tag ->
+
+                                val newTitle = CommonMethods().displayFormattedText(tag.key)
+
+                                OnlyReadAbleText(
+                                    textHeader = newTitle,
+                                    textValue = tag.value,
+                                    style = normal14Text400,
+                                    textColorHeader = slateGrayColor,
+                                    textValueAlignment = TextAlign.End,
+                                    end = 5.dp,
+                                    start = 8.dp,
+                                    top = 8.dp,
+                                    bottom = 8.dp
+                                )
+                                HorizontalDivider(top = 0.dp, start = 8.dp, end = 5.dp)
+                            }
+                    }
+                }
+            }
+        }
+
+    }
+}
 
 data class DurationParseResult(
     val readable: String,
@@ -1749,13 +1808,13 @@ fun PaymentHistoryCard(payment: List<OrderPaymentStatusItem?>?) {
             end = 10.dp
         ) {
             payment?.forEach { payment ->
-//                val paymentDate =
-//                    payment?.updatedAt?.let {
-//                        CommonMethods().displayFormattedDate(it)
-//                    }
+                val paymentDate =
+                    payment?.updatedAt?.let {
+                        CommonMethods().displayFormattedDate(it)
+                    }
                 payment?.params?.amount?.let { amount ->
                     val newTextHeader =
-                        CommonMethods().displayFormattedText(payment.time?.label ?: "Down Payment")
+                        CommonMethods().displayFormattedText(payment.time?.label ?: "")
 
                     HeaderValueWithTextBelow(
                         textHeader = newTextHeader,
