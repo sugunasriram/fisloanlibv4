@@ -100,6 +100,9 @@ class PurchaseFinanceViewModel : BaseViewModel() {
 
     private suspend fun handleSearchApiSuccess(response: LoanSearchResponse) {
         withContext(Dispatchers.Main) {
+            Log.d("Sugu -search-pf", response.toString())
+            Log.d("Sugu", "_searchLoaded : ${_searchLoaded.value}")
+
             _searchLoaded.value = true
             _searchInProgress.value = false
             _pFSearchResponse.value = response

@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.core.ApiRepository
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.StatusResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.UserStatus
+import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.VerifySessionResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.Dispatchers
@@ -14,8 +15,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.asStateFlow
 
 class UserStatusViewModel : BaseViewModel() {
+
+    private val _verifySessionResponse =
+        MutableStateFlow<VerifySessionResponse?>(null)
+
+    val verifySessionResponse = _verifySessionResponse.asStateFlow()
+
+    fun setVerifySessionResponse(response: VerifySessionResponse?) {
+        _verifySessionResponse.value = response
+    }
 
     private val _showInternetScreen = MutableLiveData(false)
     val showInternetScreen: LiveData<Boolean> = _showInternetScreen

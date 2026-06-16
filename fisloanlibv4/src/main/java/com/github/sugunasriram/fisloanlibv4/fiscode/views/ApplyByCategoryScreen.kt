@@ -175,6 +175,24 @@ fun ApplyByCategoryScreen(navController: NavHostController,
     val activity = LocalContext.current as? Activity
     val context = LocalContext.current
 
+
+
+
+
+
+    LaunchedEffect(verifySessionResponse) {
+        if (
+            verifySessionResponse != null &&
+            userStatusViewModel.verifySessionResponse.value == null
+        ) {
+            userStatusViewModel.setVerifySessionResponse(verifySessionResponse)
+        }
+    }
+
+    val retainedVerifySessionResponse by
+    userStatusViewModel.verifySessionResponse.collectAsState()
+
+
     LaunchedEffect(Unit) { registerViewModel.getUserDetail(context, navController) }
     BackHandler { activity?.finish() }
     when {
@@ -187,14 +205,14 @@ fun ApplyByCategoryScreen(navController: NavHostController,
 //        middleLoan -> CommonMethods().ShowMiddleLoanErrorScreen(navController)
         middleLoan -> MiddleOfTheLoanScreen(navController, errorMessage)
         else -> {
-            Log.d("ApplyByCategoryScreen Sugu", "verifySessionResponse: $verifySessionResponse")
+            Log.d("ApplyByCategoryScreen Sugu", "verifySessionResponse: $retainedVerifySessionResponse")
             SelectingFlow(
                 checkingStatus = checkingStatus, navController = navController, context = context,
                 userStatus = userStatus, userStatusViewModel = userStatusViewModel,
                 checked = checked, showLoader = showLoader, errorMessage = errorMessage,
                 userDetails = userDetails, userDetailsAPILoading = userDetailsAPILoading,
                 userDetailsAPICompleted  = userDetailsAPICompleted,
-                verifySessionResponse = verifySessionResponse
+                verifySessionResponse = retainedVerifySessionResponse
             )
         }
     }
@@ -657,6 +675,9 @@ fun PurchaseDecidedFlow(
 
     if (status?.data == null || status.data.data?.any { it == null } == true) {
         Log.d("test status: ", "null")
+        Log.d("test", "searchInProgress: $searchInProgress")
+        Log.d("Sugu", "test searchLoaded: $searchLoaded")
+        Log.d("Sugu", "verifySessionResponse: $verifySessionResponse")
         if (searchInProgress) {
             CenterProgress()
         } else if (searchLoaded) {
