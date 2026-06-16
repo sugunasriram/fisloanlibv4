@@ -146,6 +146,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import com.github.sugunasriram.fisloanlibv4.fiscode.utils.SessionManager
 
 @Composable
 fun ApplyByCategoryScreen(navController: NavHostController,
@@ -176,21 +177,8 @@ fun ApplyByCategoryScreen(navController: NavHostController,
     val context = LocalContext.current
 
 
+    val retainedVerifySessionResponse = SessionManager.verifySessionResponse
 
-
-
-
-    LaunchedEffect(verifySessionResponse) {
-        if (
-            verifySessionResponse != null &&
-            userStatusViewModel.verifySessionResponse.value == null
-        ) {
-            userStatusViewModel.setVerifySessionResponse(verifySessionResponse)
-        }
-    }
-
-    val retainedVerifySessionResponse by
-    userStatusViewModel.verifySessionResponse.collectAsState()
 
 
     LaunchedEffect(Unit) { registerViewModel.getUserDetail(context, navController) }

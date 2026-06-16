@@ -30,6 +30,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.auth.InAppUpdateScreen
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
+import com.github.sugunasriram.fisloanlibv4.fiscode.utils.SessionManager
 
 class AppBridgeManager(private val activity: ComponentActivity) {
 
@@ -125,6 +126,13 @@ class AppBridgeManager(private val activity: ComponentActivity) {
                             Log.d("AppBridgeManager", "VerifySession Done")
                             // Safely read loanId from the response
 //                            val loanId = verifySessionResponse?.data?.sessionData?.loanId
+
+                            LaunchedEffect(verifySessionResponse) {
+                                verifySessionResponse?.let {
+                                    SessionManager.verifySessionResponse = it
+                                    Log.d("Sugu", "Stored SessionManager = $it")
+                                }
+                            }
 
                             LaunchedEffect(Unit) {
                                 val fromFlow = "Purchase Finance"

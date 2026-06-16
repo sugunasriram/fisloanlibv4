@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.asStateFlow
+import android.util.Log
 
 class UserStatusViewModel : BaseViewModel() {
 
@@ -25,6 +26,7 @@ class UserStatusViewModel : BaseViewModel() {
     val verifySessionResponse = _verifySessionResponse.asStateFlow()
 
     fun setVerifySessionResponse(response: VerifySessionResponse?) {
+        Log.d("Sugu", "setVerifySessionResponse called = $response")
         _verifySessionResponse.value = response
     }
 
