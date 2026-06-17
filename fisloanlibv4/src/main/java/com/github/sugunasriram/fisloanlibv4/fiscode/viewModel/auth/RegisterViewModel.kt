@@ -548,6 +548,37 @@ class RegisterViewModel : ViewModel() {
 
     private val _income: MutableLiveData<String?> = MutableLiveData("")
     val income: LiveData<String?> = _income
+    private val _incomeError: MutableLiveData<String?> = MutableLiveData(null)
+    val incomeError: LiveData<String?> = _incomeError
+
+    fun onIncomeChanged(value: String, context: Context) {
+        val incomeWithoutSymbol = stringWithoutCommas(value)
+        val maxIncome = 8000000
+        val sanitizedIncome = incomeWithoutSymbol.toIntOrNull() ?: 0
+        if (sanitizedIncome > maxIncome) {
+            _income.value = maxIncome.toString()
+        } else {
+            _income.value = sanitizedIncome.toString()
+        }
+        annualIncomeErrorHandling(sanitizedIncome, context)
+    }
+    private fun annualIncomeErrorHandling(sanitizedText: Int, context: Context) {
+        if (sanitizedText == 0) {
+            _incomeError.value = context.getString(R.string.please_enter_annual_income)
+        } else if (sanitizedText < 200000 ||
+            sanitizedText > 8000000
+        ) {
+//            _incomeError.value = context.getString(R.string.please_enter_valid_income_within_limits)
+            _incomeError.value = "Please enter within 200000 to 8000000"
+        } else {
+            _incomeError.value = null
+        }
+    }
+    private fun stringWithoutCommas(newText: String) = newText.replace("₹", "").replace(",", "")
+
+
+
+
 
     @OptIn(ExperimentalMaterialApi::class)
     fun address1Validation(
@@ -738,6 +769,28 @@ class RegisterViewModel : ViewModel() {
             _employeeTypeError.value = context.getString(R.string.select_employment_type)
             profileRequester.employeeTypeFocus.requestFocus()
             isProfileValid = false
+        }
+
+        if (profile.income.isNullOrEmpty()) {
+            _incomeError.value = context.getString(R.string.please_enter_annual_income)
+            profileRequester.incomeFocus.requestFocus()
+            isProfileValid = false
+        }else{
+            val incomeWithoutSymbol = stringWithoutCommas(profile.income)
+            val maxIncome = 8000000
+            val sanitizedIncome = incomeWithoutSymbol.toIntOrNull() ?: 0
+            if(sanitizedIncome == 0){
+//               _incomeError.value = context.getString(R.string.please_enter_valid_income_within_limits)
+                _incomeError.value = "Please enter within 200000 to 8000000"
+                profileRequester.incomeFocus.requestFocus()
+                isProfileValid = false
+            }
+            else if(sanitizedIncome > maxIncome){
+//                _incomeError.value = context.getString(R.string.please_enter_valid_income_within_limits)
+                _incomeError.value = "Please enter within 200000 to 8000000"
+                profileRequester.incomeFocus.requestFocus()
+                isProfileValid = false
+            }
         }
 
         if (profile.lastName.isNullOrEmpty()) {

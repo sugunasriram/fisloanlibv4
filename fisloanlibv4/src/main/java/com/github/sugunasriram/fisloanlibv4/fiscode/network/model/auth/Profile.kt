@@ -20,6 +20,7 @@ data class ProfileFocusRequester(
     val dobFocus: FocusRequester,
     val genderFocus: FocusRequester,
     val companyNameFocus: FocusRequester,
+    val incomeFocus: FocusRequester,
     val udyamNumberFocus: FocusRequester
 )
 

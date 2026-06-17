@@ -809,4 +809,5 @@
     <string name="downpayment_amount_cannot_be_greater_than_loan_amount">Downpayment amount
         cannot be greater than offered loan amount</string>
     <string name="min_down_payment">Min DownPayment</string>
+    <string name="please_upload_pdf_that_is_not_password_protected">Please upload PDF without password protected</string>
 </resources>

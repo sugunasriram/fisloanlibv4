@@ -6,6 +6,7 @@ import android.app.DownloadManager
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
+import androidx.compose.ui.platform.LocalConfiguration
 import android.util.Base64
 import android.util.Log
 import android.widget.Toast
@@ -178,7 +179,8 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
     val companyName by registerViewModel.companyName.observeAsState("")
     val companyNameError by registerViewModel.companyNameError.observeAsState(null)
 
-    val income by registerViewModel.income.observeAsState(initialIncome)
+    val income by registerViewModel.income.observeAsState("")
+    val incomeError by registerViewModel.incomeError.observeAsState(null)
 
     val udyamNumber by registerViewModel.udyamNumber.observeAsState(null)
     val udyamNumberError by registerViewModel.udyamNumberError.observeAsState(null)
@@ -210,6 +212,7 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
 
     val firstNameFocusRequester = remember { FocusRequester() }
     val lastNameFocusRequester = remember { FocusRequester() }
+    val incomeFocusRequester = remember { FocusRequester() }
     val personalEmailIdFocusRequester = remember { FocusRequester() }
     val officialEmailIdFocusRequester = remember { FocusRequester() }
     val phoneNumberFocusRequester = remember { FocusRequester() }
@@ -378,6 +381,7 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
                                             panFocus = panFocusRequester,
                                             firstNameFocus =firstNameFocusRequester,
                                             lastNameFocus = lastNameFocusRequester,
+                                            incomeFocus = incomeFocusRequester,
                                             personalEmailIdFocus = personalEmailIdFocusRequester,
                                             officialEmailIdFocus =officialEmailIdFocusRequester,
                                             employeeTypeFocus = employeeTypeFocusRequester,
@@ -530,7 +534,7 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
                                 boxFocusRequester=employeeTypeFocusRequester,
                                 onValueChange = {},
                                 keyboardActions = KeyboardActions(onNext ={
-                                    personalEmailIdFocusRequester.requestFocus() }),
+                                    incomeFocusRequester.requestFocus() }),
                                 leadingImage = painterResource(R.drawable.employee_type_icon),
                                 radioList = employeeTypeList,
                                 selectedRadio = employmentSelectedText,
@@ -547,6 +551,29 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
                                     personalEmailIdFocusRequester.requestFocus()
 
                                 },
+                            )
+                            BasicDetailsInputField(
+                                label = stringResource(id = R.string.annual_income),
+                                value = income ?: "",
+                                readOnly = false,
+                                showTrailingIcon = true,
+                                onValueChange = { registerViewModel.onIncomeChanged(it, context) },
+                                error = incomeError,
+                                focusRequester = incomeFocusRequester,
+                                modifier = Modifier.focusRequester(incomeFocusRequester),
+                                leadingImage = painterResource(R.drawable.annual_income_range),
+                                keyboardActions = KeyboardActions(onNext = {
+                                    personalEmailIdFocusRequester.requestFocus()
+                                }),
+                                keyboardOptions = KeyboardOptions(
+                                    capitalization = KeyboardCapitalization.Sentences,
+                                    imeAction = ImeAction.Next,
+                                    keyboardType = KeyboardType.Number
+                                ),
+                                regexPattern = "[^0-9]",
+                                inputLimit = 30,
+//                                showEditableOption = panApiThrewError,
+                                scrollState = scrollState
                             )
                             BasicDetailsInputField(
                                 label = stringResource(id = R.string.personal_email_id),
@@ -757,6 +784,7 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AddressFields(
+    headerText:String=stringResource(id = R.string.address),
     bottomSheet1Value: ModalBottomSheetState,
     address1: String?, address1Error: String?,
     scope: CoroutineScope, readOnly: Boolean = false
@@ -1057,6 +1085,8 @@ fun BasicDetailsInputField(
 
     val density = LocalDensity.current
     val context = LocalContext.current
+    val configuration = LocalConfiguration.current
+    val screenHeightPx = with(density) { configuration.screenHeightDp.dp.toPx() }
 
     LaunchedEffect(value) {
         if (value != textFieldValue.text) {
@@ -1280,6 +1310,12 @@ fun UploadDocumentCard(
         if (imageUploading) {
             CenterProgress()
         } else {
+            Text(
+                text = stringResource(id = R.string.please_upload_pdf_that_is_not_password_protected),
+                style = normal14Text500,
+                color = appBlack,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceAround
