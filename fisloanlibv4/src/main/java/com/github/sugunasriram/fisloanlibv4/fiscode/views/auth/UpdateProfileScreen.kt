@@ -102,6 +102,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.components.RegisterText
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.SideMenuProfileCard
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.StartingText
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFISExitScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.Document
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.DocumentUpload
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.PincodeModel
@@ -427,7 +428,7 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
                                 SideMenuProfileCard(
                                     userName = "", contact = "", displayUserInfo = false,
                                     navController = navController,
-                                    onBackClick = { navigateApplyByCategoryScreen(navController) }
+                                    onBackClick = { navigateToFISExitScreen(navController, loanId="1234") }
                                 )
                             }
 
