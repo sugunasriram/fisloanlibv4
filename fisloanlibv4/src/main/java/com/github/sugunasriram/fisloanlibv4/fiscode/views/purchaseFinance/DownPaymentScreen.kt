@@ -333,7 +333,7 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
                         topBarBackgroundColor = appOrange,
                         topBarText = stringResource(R.string.down_payment_screen),
                         showBackButton = true,
-                        onBackClick = { navigateApplyByCategoryScreen(navController) },
+                        onBackClick = {  navigateToFISExitScreen(navController, loanId="1234")},
                         showBottom = true,
                         showCheckBox = true,
                         checkboxState = checkboxState,
