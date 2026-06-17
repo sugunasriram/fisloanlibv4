@@ -936,8 +936,10 @@ fun PinCodeAndTownFields(
                         .background(Color.White, shape = RoundedCornerShape(16.dp)),
                     shape = RoundedCornerShape(16.dp),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = appTheme, unfocusedBorderColor = backgroundOrange,
-                        cursorColor = cursorColor, errorBorderColor = errorRed
+                        focusedBorderColor = appOrange,
+                        unfocusedBorderColor = MaterialTheme.colors.background,
+                        cursorColor = appOrange,
+                        errorBorderColor = errorRed
                     ),
                     keyboardOptions = KeyboardOptions(
                         imeAction = ImeAction.Next,

@@ -217,7 +217,7 @@ fun OnlyReadAbleText(
             Image(
                 painter = image,
                 contentDescription = "",
-                colorFilter = ColorFilter.tint(MaterialTheme.colors.primary),
+                colorFilter = ColorFilter.tint(appOrange),
                 modifier = Modifier.size(26.dp).padding(end = 10.dp)
             )
         }

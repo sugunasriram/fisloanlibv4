@@ -58,12 +58,14 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.TableRow
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.loanStatusCardGreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appRed
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal14Text500
+import androidx.compose.ui.graphics.ColorFilter
 
 @Composable
 fun DisplayCard(
     modifier: Modifier = Modifier,
+    colorFilter : ColorFilter = ColorFilter.tint(MaterialTheme.colors.primary),
     cardColor: Color = MaterialTheme.colors.background,
-    borderColor: Color = MaterialTheme.colors.primary,
+    borderColor: Color = appOrange,
     horizontalAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
     start: Dp = 20.dp,
     end: Dp = 20.dp,
@@ -399,6 +401,7 @@ fun DownPaymentCard(
     cardColor: Color = appWhite,
     borderColor: Color = appWhite,
     cardHeader: String,
+    colorFilter : ColorFilter = ColorFilter.tint(appOrange),
     image: Painter = painterResource(R.drawable.product_details),
     start: Dp = 10.dp,
     end: Dp = 10.dp,
@@ -424,6 +427,7 @@ fun DownPaymentCard(
             Image(
                 painter = image,
                 contentDescription = "CardImage",
+                colorFilter = colorFilter,
                 modifier = Modifier.size(24.dp)
             )
             Text(

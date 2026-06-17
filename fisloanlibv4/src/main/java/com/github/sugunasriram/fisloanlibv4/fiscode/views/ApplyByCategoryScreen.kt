@@ -334,29 +334,64 @@ fun SelectingFlow(
     }
 
     // 2) Fire one-time side-effects based on the result of (1)
-    val didRouteProfile = rememberSaveable { mutableStateOf(false) }
+//    val didRouteProfile = rememberSaveable { mutableStateOf(false) }
+//    val didFetchStatus = rememberSaveable { mutableStateOf(false) }
+//
+//    // 2a) Navigate to Update Profile once the user-details API is completed and profile is missing
+//    LaunchedEffect(userDetailsAPICompleted, hasMissingProfile) {
+//        if (userDetailsAPICompleted && hasMissingProfile && !didRouteProfile.value) {
+//            didRouteProfile.value = true
+//            navigateToUpdateProfileScreen(navController, fromFlow = "Purchase Finance")
+//            CommonMethods().toastMessage(
+//                context,
+//                context.getString(R.string.please_update_your_profile_to_proceed)
+//            )
+//        }
+//    }
+//
+//    // 2b) If profile is complete, fetch user status exactly once
+//    LaunchedEffect(userDetailsAPICompleted, hasMissingProfile) {
+//        if (userDetailsAPICompleted && !hasMissingProfile && !didFetchStatus.value) {
+//            didFetchStatus.value = true
+//            userStatusViewModel.getUserStatus(
+//                loanType = "PURCHASE_FINANCE",
+//                context = context
+//            )
+//        }
+//    }
+
+    // Replace the two separate LaunchedEffects with one,
+// and gate purely on a stable flag
+
     val didFetchStatus = rememberSaveable { mutableStateOf(false) }
+    val didRouteProfile = rememberSaveable { mutableStateOf(false) }
 
-    // 2a) Navigate to Update Profile once the user-details API is completed and profile is missing
     LaunchedEffect(userDetailsAPICompleted, hasMissingProfile) {
-        if (userDetailsAPICompleted && hasMissingProfile && !didRouteProfile.value) {
-            didRouteProfile.value = true
-            navigateToUpdateProfileScreen(navController, fromFlow = "Purchase Finance")
-            CommonMethods().toastMessage(
-                context,
-                context.getString(R.string.please_update_your_profile_to_proceed)
-            )
+        // When a new API call starts (completed resets to false), clear our flags
+        if (!userDetailsAPICompleted) {
+            didFetchStatus.value = false
+            didRouteProfile.value = false
+            return@LaunchedEffect
         }
-    }
 
-    // 2b) If profile is complete, fetch user status exactly once
-    LaunchedEffect(userDetailsAPICompleted, hasMissingProfile) {
-        if (userDetailsAPICompleted && !hasMissingProfile && !didFetchStatus.value) {
-            didFetchStatus.value = true
-            userStatusViewModel.getUserStatus(
-                loanType = "PURCHASE_FINANCE",
-                context = context
-            )
+        // API done — now act on the result
+        if (hasMissingProfile) {
+            if (!didRouteProfile.value) {
+                didRouteProfile.value = true
+                navigateToUpdateProfileScreen(navController, fromFlow = "Purchase Finance")
+                CommonMethods().toastMessage(
+                    context,
+                    context.getString(R.string.please_update_your_profile_to_proceed)
+                )
+            }
+        } else {
+            if (!didFetchStatus.value) {
+                didFetchStatus.value = true
+                userStatusViewModel.getUserStatus(
+                    loanType = "PURCHASE_FINANCE",
+                    context = context
+                )
+            }
         }
     }
 

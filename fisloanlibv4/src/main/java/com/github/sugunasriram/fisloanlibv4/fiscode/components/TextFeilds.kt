@@ -222,9 +222,9 @@ fun InputField(
     selectedRadio: String = radioList.first(),
     onRadioSelected: (String) -> Unit = {},
     colors: TextFieldColors = TextFieldDefaults.outlinedTextFieldColors(
-        focusedBorderColor = MaterialTheme.colors.primary,
+        focusedBorderColor = appOrange,
         unfocusedBorderColor = MaterialTheme.colors.background,
-        cursorColor = MaterialTheme.colors.primary,
+        cursorColor = appOrange,
         errorBorderColor = errorRed,
         disabledBorderColor = Color.Transparent
     )
@@ -251,7 +251,7 @@ fun InputField(
                 TextFieldDefaults.outlinedTextFieldColors(
                     focusedBorderColor = Color.Transparent,
                     unfocusedBorderColor = Color.Transparent,
-                    cursorColor = MaterialTheme.colors.primary,
+                    cursorColor = appOrange,
                     errorBorderColor = errorRed,
                     disabledBorderColor = Color.Transparent
                 )
@@ -288,7 +288,7 @@ fun InputField(
                         painter = leadingImage,
                         contentDescription = null,
                         modifier = Modifier.padding(start = 10.dp).size(24.dp),
-                        colorFilter = ColorFilter.tint(MaterialTheme.colors.primary)
+                        colorFilter = ColorFilter.tint(appOrange)
                     )
                 }
                 if (!showBox) {
@@ -313,7 +313,7 @@ fun InputField(
                             TextFieldDefaults.outlinedTextFieldColors(
                                 focusedBorderColor = Color.Transparent,
                                 unfocusedBorderColor = Color.Transparent,
-                                cursorColor = MaterialTheme.colors.primary,
+                                cursorColor = appOrange,
                                 errorBorderColor = errorRed,
                                 disabledBorderColor = Color.Transparent
                             )
@@ -343,7 +343,7 @@ fun InputField(
                                     readOnly = true,
                                     keyboardOptions = KeyboardOptions.Default,
                                     colors = TextFieldDefaults.outlinedTextFieldColors(
-                                        focusedBorderColor = MaterialTheme.colors.primary,
+                                        focusedBorderColor = appOrange,
                                         unfocusedBorderColor = Color.Transparent,
                                         cursorColor = Color.Transparent,
                                         errorBorderColor = errorRed,
@@ -456,7 +456,7 @@ fun OutLineTextFieldHeader(
     Row() {
         Text(
             text = topText,
-            color = if (showOptional) appBlack else MaterialTheme.colors.primary,
+            color = if (showOptional) appBlack else appOrange,
             style = normal14Text400,
             modifier = Modifier.padding(
                 start = topTextStart,
@@ -514,7 +514,7 @@ fun SignUpText(
 fun HyperText(
     text: String,
     modifier: Modifier = Modifier,
-    textColor: Color = MaterialTheme.colors.primary,
+    textColor: Color = appOrange,
     textStyle: TextStyle = normal20Text500,
     start: Dp = 8.dp,
     end: Dp = 8.dp,
@@ -786,7 +786,7 @@ fun TextInputLayout(
         fontSize = 20.sp,
         fontFamily = FontFamily(Font(R.font.robotocondensed_semibold)),
         fontWeight = FontWeight(400),
-        color = MaterialTheme.colors.primary,
+        color = appOrange,
     )
 ) {
     var isFocused by remember { mutableStateOf(false) }
@@ -814,9 +814,9 @@ fun TextInputLayout(
             keyboardOptions = keyboardOptions,
             textStyle = style.copy(textAlign = TextAlign.Center),
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = MaterialTheme.colors.primary,
-                unfocusedBorderColor = MaterialTheme.colors.primary,
-                cursorColor = MaterialTheme.colors.primary
+                focusedBorderColor = appOrange,
+                unfocusedBorderColor = appOrange,
+                cursorColor = appOrange
             ),
             readOnly = readOnly,
             shape = RoundedCornerShape(16.dp)
@@ -1106,7 +1106,7 @@ fun OnlyClickAbleText(
     modifier: Modifier = Modifier,
     end: Dp = 20.dp,
     textColorHeader: Color = slateGrayColor,
-    textColorValue: Color = MaterialTheme.colors.primary,
+    textColorValue: Color = appOrange,
     headerWeight:Float=0.7f,
     valueWeight:Float=1f,
     start: Dp = 10.dp,
