@@ -230,10 +230,10 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
 
 
 
-//    if (showNoLoanOffersScreen || showNoLenderResponse) {
-//        NoLoanOffersAvailableScreen(navController, titleText = stringResource(R.string.no_lenders_available))
-//        return
-//    }
+    if (showNoLoanOffersScreen || showNoLenderResponse) {
+        NoLoanOffersAvailableScreen(navController, titleText = stringResource(R.string.no_lenders_available))
+        return
+    }
     when {
         showInternetScreen -> CommonMethods().ShowInternetErrorScreen(navController)
         showTimeOutScreen -> CommonMethods().ShowTimeOutErrorScreen(navController)
@@ -274,9 +274,11 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
                                             .filterNotNull().first()
 
                                         val lenderStatus = lenderStatusModel?.data?.response
-
+                                        Log.d("res_H",lenderStatus?.size.toString())
                                         if (lenderStatus.isNullOrEmpty()) {
+                                            Log.d("res_H","showNoLoanOffersScreen")
                                             showNoLoanOffersScreen = true
+
                                             return@launch
                                         }
 
@@ -386,9 +388,11 @@ Log.d("DownPaymentScreen", "Sugu verifySessionResponse: $verifySessionResponse")
                                             .filterNotNull().first()
 
                                         val lenderStatus = lenderStatusModel?.data?.response
-
+                                        Log.d("res_H",lenderStatus?.size.toString())
                                         if (lenderStatus.isNullOrEmpty()) {
+                                            Log.d("res_H","showNoLoanOffersScreen")
                                             showNoLoanOffersScreen = true
+
                                             return@launch
                                         }
 

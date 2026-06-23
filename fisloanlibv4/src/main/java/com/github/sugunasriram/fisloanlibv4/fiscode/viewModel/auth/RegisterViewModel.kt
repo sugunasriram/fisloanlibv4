@@ -1061,7 +1061,7 @@ class RegisterViewModel : ViewModel() {
                 _employeeType.value = it.data?.employmentType
                 _companyName.value = it.data?.companyName
                 _udyamNumber.value = it.data?.udyamNumber
-                _income.value = it.data?.income
+                _income.value = it.data?.income?:""
 
                 _area1.value = it.data?.address1
                 _district1.value = it.data?.address2

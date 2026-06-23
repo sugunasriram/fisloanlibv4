@@ -31,6 +31,7 @@ import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import io.ktor.serialization.JsonConvertException
 
 class WebViewModel : BaseViewModel() {
 
@@ -54,6 +55,10 @@ class WebViewModel : BaseViewModel() {
 
     private val _middleLoan = MutableLiveData(false)
     val middleLoan: LiveData<Boolean> = _middleLoan
+
+    private val _noLoanOffers = MutableLiveData(false)
+    val noLoanOffers: LiveData<Boolean> = _noLoanOffers
+
 
     private val _searchFailed = MutableStateFlow(false)
     val searchFailed: StateFlow<Boolean> = _searchFailed
@@ -359,6 +364,9 @@ class WebViewModel : BaseViewModel() {
                         _showLoader = _showLoader, isFormSearch = isFormSearch,
                         searchError = { _searchFailed.value = true }
                     )
+                }
+                is JsonConvertException ->{
+                    _showNoLenderResponse.value=true
                 }
 
                 else -> {
