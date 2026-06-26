@@ -65,8 +65,8 @@ import java.util.regex.Pattern
 
 class CommonMethods {
     companion object {
-//        const val BASE_URL = "https://stagingondcfs.jtechnoparks.in/jt-bap"
-        const val BASE_URL = "https://ondcfs.jtechnoparks.in/jt-bap"
+        const val BASE_URL = "https://stagingondcfs.jtechnoparks.in/jt-bap"
+//        const val BASE_URL = "https://ondcfs.jtechnoparks.in/jt-bap"
     }
 
     private val emailPattern =
@@ -359,6 +359,28 @@ class CommonMethods {
 //            onClick = { navigateApplyByCategoryScreen(navController) }
             onClick = {
                 Log.d("Sugu", "Check 8")
+                navigateToFISExitScreen(navController, loanId = "4321")
+            }
+        )
+//        NoResponseFormLenders(navController = navController)
+    }
+
+    @Composable
+    fun DetailsMissingErrorScreen(
+        navController: NavHostController,
+        errorMessage: String,
+        errorMsgShow: Boolean = false
+    ) {
+        Log.d("Sugu", "test 28") ;
+
+        UnexpectedErrorScreen(
+            navController = navController,
+            errorMsgShow = errorMsgShow,
+            errorText = errorMessage,
+            errorMsg = stringResource(id = R.string.merchant_details_error_message),
+//            onClick = { navigateApplyByCategoryScreen(navController) }
+            onClick = {
+                Log.d("Sugu", "Check 80")
                 navigateToFISExitScreen(navController, loanId = "4321")
             }
         )

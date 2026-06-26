@@ -636,6 +636,7 @@
     <string name="select_checkbox_to_proceed_further">Select checkbox to proceed further</string>
     <string name="purchase_finance">Purchase Finance</string>
     <string name="middle_loan_error_message">Middle of Loan Application</string>
+    <string name="merchant_details_error_message">Merchant details missing</string>
     <string name="select_offer">Select Offer</string>
     <string name="invoice_detail">Invoice Details</string>
     <string name="invoice_company_name">Company Name</string>
