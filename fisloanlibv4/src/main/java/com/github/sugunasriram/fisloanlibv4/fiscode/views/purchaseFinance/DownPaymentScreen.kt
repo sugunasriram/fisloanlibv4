@@ -1496,6 +1496,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.finance.PFDele
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.UserStatusViewModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.PurchaseDecidedFlow
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.invalid.UnexpectedErrorScreen
+import kotlinx.coroutines.Job
 
 // FIX 1: Removed all top-level mutable vars.
 // These were global mutable state shared across all compositions — unsafe in Compose.
@@ -1515,10 +1516,12 @@ fun DownPaymentScreen(
     val registerViewModel: RegisterViewModel = viewModel()
     val webViewModel: WebViewModel = viewModel()
     val purchaseFinanceViewModel: PurchaseFinanceViewModel = viewModel()
+    val editLoanRequestViewModel: EditLoanRequestViewModel = viewModel(
+        factory = EditLoanRequestViewModelFactory("amount", "minAmount", "7")
+    )
+    val userStatusViewModel: UserStatusViewModel = viewModel()
 
-    val searchInProgress by purchaseFinanceViewModel.searchInProgress.collectAsState()
-    val searchLoaded by purchaseFinanceViewModel.searchLoaded.collectAsState()
-
+    // --- State collection (grouped together) ---
     val checkboxState: Boolean by registerViewModel.checkBoxDetail.observeAsState(false)
     val showInternetScreen by registerViewModel.showInternetScreen.observeAsState(false)
     val showTimeOutScreen by registerViewModel.showTimeOutScreen.observeAsState(false)
@@ -1526,11 +1529,16 @@ fun DownPaymentScreen(
     val unexpectedErrorScreen by registerViewModel.unexpectedError.observeAsState(false)
     val unAuthorizedUser by registerViewModel.unAuthorizedUser.observeAsState(false)
     val showNoLenderResponse by webViewModel.showNoLenderResponse.collectAsState()
-    val lenderStatusProgress by webViewModel.lenderStatusProgress.collectAsState()
-
-    val inProgress by registerViewModel.gettingUserDetails.collectAsState()
-    val isCompleted by registerViewModel.gotUserDetails.collectAsState()
     val userDetails by registerViewModel.getUserResponse.collectAsState()
+    val loanTenure by editLoanRequestViewModel.loanTenure.collectAsState(initial = 3)
+
+    // Unused but kept in case downstream code needs them:
+    // val searchInProgress by purchaseFinanceViewModel.searchInProgress.collectAsState()
+    // val searchLoaded by purchaseFinanceViewModel.searchLoaded.collectAsState()
+    // val lenderStatusProgress by webViewModel.lenderStatusProgress.collectAsState()
+    // val inProgress by registerViewModel.gettingUserDetails.collectAsState()
+    // val isCompleted by registerViewModel.gotUserDetails.collectAsState()
+    // val showLoader by userStatusViewModel.showLoader.observeAsState(false)
 
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -1545,16 +1553,9 @@ fun DownPaymentScreen(
     var showError by remember { mutableStateOf(false) }
     var errorMsg by remember { mutableStateOf("") }
     var showInValidAmountError by remember { mutableStateOf(false) }
+    var showNoLoanOffersScreen by remember { mutableStateOf(false) }
 
-    val editLoanRequestViewModel: EditLoanRequestViewModel = viewModel(
-        factory = EditLoanRequestViewModelFactory("amount", "minAmount", "7")
-    )
-    val loanTenure by editLoanRequestViewModel.loanTenure.collectAsState(initial = 3)
-
-    var amount by remember { mutableStateOf(0L) }
-
-    // FIX 1 (continued): Product metadata that was formerly global vars is now
-    // held as remembered state here and passed down to child composables.
+    // Product state — all hoisted here, never mutated by children directly
     val merchantDetails = remember { MerchantDetails() }
     var pfProductIMEI by remember { mutableStateOf("359881030314356") }
     var pfProductSKUId by remember { mutableStateOf("12345678") }
@@ -1562,6 +1563,11 @@ fun DownPaymentScreen(
     val pfProductCategory = DEFAULT_PRODUCT_CATEGORY
     var productPrice by remember { mutableStateOf(99000L) }
     var maxAmount by remember { mutableStateOf(99000L) }
+    var amount by remember { mutableStateOf(0L) }
+
+    // FIX: Track in-flight submit job so we can cancel before re-launching,
+    // preventing duplicate API calls if the button is tapped quickly.
+    val submitJob = remember { mutableStateOf<Job?>(null) }
 
     val fromFlow = "Purchase Finance"
 
@@ -1573,17 +1579,13 @@ fun DownPaymentScreen(
         navigateToFISExitScreen(navController, loanId = "1234")
     }
 
-    var showNoLoanOffersScreen by remember { mutableStateOf(false) }
-
-    val userStatusViewModel: UserStatusViewModel = viewModel()
-    val showLoader by userStatusViewModel.showLoader.observeAsState(false)
-
-    // FIX 2: Extract the duplicated lender-status → navigate → loadWebScreen logic
-    // into a single suspend function. Previously this exact block was copy-pasted
-    // into both onAcceptConsent (bottom sheet) and onPrimaryButtonClick, with the
-    // only difference being some extra TokenManager.save() calls in the button path
-    // (which were themselves redundant since they were already saved before the call).
+    // FIX: submitLoanRequest defined as a local suspend fun so it closes over
+    // the latest state values via Compose snapshot. No need to pass them as args.
+    // Both call sites (consent sheet + submit button) use this single definition.
     suspend fun submitLoanRequest() {
+        // Guard: cancel any existing in-flight job first
+        submitJob.value?.cancel()
+
         TokenManager.save("downpaymentAmount", amount.toString())
         TokenManager.save("pfloanTenure", loanTenure.toString())
         TokenManager.save("productPriceAmount", productPrice.toString())
@@ -1597,7 +1599,8 @@ fun DownPaymentScreen(
             )
 
             val lenderStatusModel = webViewModel.getLenderStatusResponse
-                .filterNotNull().first()
+                .filterNotNull()
+                .first()
 
             val lenderStatus = lenderStatusModel?.data?.response
             Log.d("res_H", lenderStatus?.size.toString())
@@ -1647,6 +1650,58 @@ fun DownPaymentScreen(
         }
     }
 
+    // FIX: Stable lambda references via remember(deps) so child composables whose
+    // only change is these lambdas do NOT recompose. Previously, inline lambdas
+    // were new instances on every frame → every child recomposed every frame.
+    val onAcceptConsent: () -> Unit = remember {
+        {
+            showError = false
+            submitJob.value = coroutineScope.launch {
+                Log.d("DownPaymentScreen", "loanTenure (consent): $loanTenure")
+                submitLoanRequest()
+            }
+        }
+    }
+
+    val onPrimaryButtonClick: () -> Unit = remember(checkboxState, showInValidAmountError) {
+        {
+            when {
+                !checkboxState -> {
+                    showError = true
+                    errorMsg = context.getString(R.string.please_agree_buyer_App_terms)
+                }
+                showInValidAmountError -> {
+                    showError = true
+                    errorMsg = context.getString(R.string.please_enter_valid_downpayment_amount)
+                }
+                else -> {
+                    showError = false
+                    submitJob.value = coroutineScope.launch {
+                        Log.d("DownPaymentScreen", "loanTenure (submit): $loanTenure")
+                        submitLoanRequest()
+                    }
+                }
+            }
+        }
+    }
+
+    val onCheckBoxChange: (Boolean) -> Unit = remember(checkboxState) {
+        { isChecked ->
+            if (isChecked) {
+                coroutineScope.launch {
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
+                    bottomSheetState.show()
+                }
+            } else {
+                registerViewModel.onCheckBoxDetailChanged(false)
+                showError = !checkboxState
+            }
+        }
+    }
+
+    // Early-exit screens — shown before the main UI tree is composed,
+    // preventing the heavy bottom sheet + column from being composed at all.
     if (showNoLoanOffersScreen || showNoLenderResponse) {
         NoLoanOffersAvailableScreen(
             navController,
@@ -1661,7 +1716,6 @@ fun DownPaymentScreen(
         showServerIssueScreen -> CommonMethods().ShowServerIssueErrorScreen(navController)
         unexpectedErrorScreen -> CommonMethods().ShowUnexpectedErrorScreen(navController)
         unAuthorizedUser -> CommonMethods().ShowUnAuthorizedErrorScreen(navController)
-        showNoLenderResponse -> NoLoanOffersAvailableScreen(navController)
         else -> {
             CustomModalBottomSheet(
                 bottomSheetState = bottomSheetState,
@@ -1671,14 +1725,7 @@ fun DownPaymentScreen(
                         bottomSheetState = bottomSheetState,
                         coroutineScope = coroutineScope,
                         registerViewModel = registerViewModel,
-                        // FIX 2 (continued): Both call sites now delegate to submitLoanRequest()
-                        onAcceptConsent = {
-                            showError = false
-                            CoroutineScope(Dispatchers.Main).launch {
-                                Log.d("DownPaymentScreen", "loanTenure (consent): $loanTenure")
-                                submitLoanRequest()
-                            }
-                        },
+                        onAcceptConsent = onAcceptConsent,
                         startTimer = bottomSheetState.isVisible,
                         showDialog = showDialog,
                         timer = 7
@@ -1697,56 +1744,28 @@ fun DownPaymentScreen(
                     showBottom = true,
                     showCheckBox = true,
                     checkboxState = checkboxState,
-                    onCheckBoxChange = { isChecked ->
-                        if (isChecked) {
-                            coroutineScope.launch {
-                                focusManager.clearFocus()
-                                keyboardController?.hide()
-                                bottomSheetState.show()
-                            }
-                        } else {
-                            registerViewModel.onCheckBoxDetailChanged(false)
-                            showError = !checkboxState
-                        }
-                    },
+                    onCheckBoxChange = onCheckBoxChange,
                     checkBoxText = stringResource(R.string.i_understand_and_agree_to_buyer_app_terms_and_conditions),
                     showErrorMsg = showError,
                     errorMsg = errorMsg,
                     showSingleButton = true,
                     primaryButtonText = stringResource(R.string.submit),
-                    onPrimaryButtonClick = {
-                        when {
-                            !checkboxState -> {
-                                showError = true
-                                errorMsg = context.getString(R.string.please_agree_buyer_App_terms)
-                            }
-                            showInValidAmountError -> {
-                                showError = true
-                                errorMsg = context.getString(R.string.please_enter_valid_downpayment_amount)
-                            }
-                            else -> {
-                                showError = false
-                                CoroutineScope(Dispatchers.Main).launch {
-                                    Log.d("DownPaymentScreen", "loanTenure (submit): $loanTenure")
-                                    submitLoanRequest()
-                                }
-                            }
-                        }
-                    }
+                    onPrimaryButtonClick = onPrimaryButtonClick
                 ) {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
                             .background(backgroundOrange)
                     ) {
-                        // FIX 1 (continued): Pass mutable state setters down instead of
-                        // relying on global vars being mutated inside child composables.
                         ProductDetailsCard(
                             verifySessionResponse = verifySessionResponse,
                             amount = amount,
                             onAmountChange = { amount = it },
                             merchantDetails = merchantDetails,
-                            onProductPriceChange = { productPrice = it; maxAmount = it },
+                            onProductPriceChange = { newPrice ->
+                                productPrice = newPrice
+                                maxAmount = newPrice
+                            },
                             onImeiChange = { pfProductIMEI = it },
                             onSkuChange = { pfProductSKUId = it },
                             onBrandChange = { pfProductBrand = it }
@@ -1798,29 +1817,40 @@ fun ProductDetailsCard(
     onSkuChange: (String) -> Unit = {},
     onBrandChange: (String) -> Unit = {}
 ) {
-    val sessionData = remember(verifySessionResponse) {
-        verifySessionResponse.data.sessionData
-    }
+    // FIX: Derive these directly — if VerifySessionResponse is not a stable
+    // data class, wrapping in remember() gives false safety. Derive cheaply
+    // and let Compose skip recomposition via equals on the stable primitives.
+    val sessionData = verifySessionResponse.data.sessionData
 
-    val sellingPrice = remember(sessionData) {
+    val sellingPrice = remember(sessionData.productSellingPrice) {
         sessionData.productSellingPrice?.toLongOrNull()
     }
-    val totalAmount = remember(sessionData) {
+    val totalAmount = remember(sessionData.cartAmount) {
         sessionData.cartAmount?.toLongOrNull()
     }
-    val fullProductName = remember(sessionData) {
+
+    val imageUrl = remember(sessionData.productSymbol) {
+        sessionData.productSymbol
+    }
+    val fullProductName = remember(
+        sessionData.productBrand,
+        sessionData.productName,
+        sessionData.productModel
+    ) {
         buildString {
             sessionData.productBrand?.let { append(" $it") }
             sessionData.productName?.let { append(" $it") }
             sessionData.productModel?.let { append(" $it") }
         }.trim()
     }
-    val imageUrl = sessionData.productSymbol
 
-    // FIX 3: Side effects (mutating MerchantDetails and notifying parent of price/sku/etc.)
-    // belong in LaunchedEffect, NOT mixed with UI layout.
-    // FIX 1: Callbacks replace direct global var mutation.
-    LaunchedEffect(sessionData) {
+    // LaunchedEffect key must be stable — use a primitive derived from sessionData
+    // rather than sessionData itself (which may not implement equals/hashCode).
+    val sessionKey = remember(sessionData) {
+        "${sessionData.merchantGST}_${sessionData.productIMEI}_${sessionData.cartAmount}"
+    }
+
+    LaunchedEffect(sessionKey) {
         merchantDetails.gst = sessionData.merchantGST ?: "24AAHFC3011G1Z4"
         merchantDetails.pan = sessionData.merchantPAN ?: "AAHFC3011G"
         merchantDetails.bankAccountNumber = sessionData.merchantBankAccount ?: "639695357641006"
@@ -1850,19 +1880,21 @@ fun ProductDetailsCard(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.Top
         ) {
-            val imagePainter = rememberAsyncImagePainter(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(imageUrl)
-                    .decoderFactory(SvgDecoder.Factory())
-                    .build()
-            )
-            Image(
-                painter = imagePainter,
-                contentDescription = "Product Image",
-                modifier = Modifier
-                    .weight(0.3f)
-                    .height(150.dp)
-            )
+            imageUrl.let { imageUrl ->
+                val imagePainter = rememberAsyncImagePainter(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(imageUrl)
+                        .decoderFactory(SvgDecoder.Factory())
+                        .build()
+                )
+                Image(
+                    painter = imagePainter,
+                    contentDescription = "Product Image",
+                    modifier = Modifier
+                        .weight(0.3f)
+                        .height(150.dp)
+                )
+            }
 
             Column(
                 modifier = Modifier
@@ -2062,9 +2094,14 @@ fun DownPaymentDetailsCard(
 
     var isError by remember { mutableStateOf(showInValidAmountError) }
 
+    // Only sync from outside when the external amount doesn't match the
+    // parsed value of what's already in the field — prevents the loop.
     LaunchedEffect(amount) {
-        val formatted = CommonMethods().formatIndianCurrency(amount.toInt())
-        if (formatted != inputText.text) {
+        val currentParsed = inputText.text
+            .replace("[^0-9]".toRegex(), "")
+            .toLongOrNull() ?: 0L
+        if (currentParsed != amount) {
+            val formatted = CommonMethods().formatIndianCurrency(amount.toInt())
             inputText = TextFieldValue(
                 text = formatted,
                 selection = TextRange(formatted.length)
