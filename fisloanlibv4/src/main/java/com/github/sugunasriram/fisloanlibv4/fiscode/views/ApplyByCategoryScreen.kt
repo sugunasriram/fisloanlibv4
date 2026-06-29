@@ -704,9 +704,13 @@ fun PurchaseDecidedFlow(
         if (searchInProgress) {
             CenterProgress()
         } else if (searchLoaded) {
-            navigateToDownPaymentScreen(navController = navController,
-                fromFlow= fromFlow,
-                verifySessionResponse = verifySessionResponse)
+            LaunchedEffect(searchLoaded) {
+                navigateToDownPaymentScreen(
+                    navController = navController,
+                    fromFlow = fromFlow,
+                    verifySessionResponse = verifySessionResponse
+                )
+            }
         }
     } else if (status.data.data?.lastOrNull()?.step.equals(
             "loan_select_form_submission_failed",
