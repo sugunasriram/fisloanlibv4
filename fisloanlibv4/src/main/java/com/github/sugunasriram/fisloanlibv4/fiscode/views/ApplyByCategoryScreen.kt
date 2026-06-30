@@ -760,10 +760,14 @@ fun PurchaseDecidedFlow(
             errorMsg = stringResource(id = R.string.form_submission_rejected_or_pending)
         )
     } else if (status.data.data?.firstOrNull()?.step.equals("pre_initial_search", true)) {
-        Log.d("Sugu", "pre_initial_search")
-        Log.d("Sugu", "verifySessionResponse : $verifySessionResponse")
-        navigateToDownPaymentScreen(navController = navController, fromFlow = fromFlow,
-            verifySessionResponse=verifySessionResponse)
+        LaunchedEffect(status.data.data) {
+            Log.d("Sugu", "pre_initial_search")
+            Log.d("Sugu", "verifySessionResponse : $verifySessionResponse")
+            navigateToDownPaymentScreen(
+                navController = navController, fromFlow = fromFlow,
+                verifySessionResponse = verifySessionResponse
+            )
+        }
     } else if (status.data.data?.firstOrNull()?.step.equals("form_submission_request", true)) {
         LaunchedEffect(Unit) {
             webViewModel.getLenderStatusApi(
@@ -864,10 +868,14 @@ fun PurchaseDecidedFlow(
         }
 
     } else if (status.data.data?.lastOrNull()?.step.equals("search", true)) {
-        Log.d("res_H", "saerch")
         if (status.data.data?.any { !it?.data.isNullOrEmpty() } == true) {
-            navigateToDownPaymentScreen(navController = navController, fromFlow = fromFlow,
-                verifySessionResponse=verifySessionResponse)
+            Log.d("res_H", "saerch")
+            if (status.data.data?.any { !it?.data.isNullOrEmpty() } == true) {
+                navigateToDownPaymentScreen(
+                    navController = navController, fromFlow = fromFlow,
+                    verifySessionResponse = verifySessionResponse
+                )
+            }
         }
         val offerList =
             status.data.data?.lastOrNull()?.offerResponse?.flatMap { offerResponseItem ->
