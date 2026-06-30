@@ -18,6 +18,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.asStateFlow
 import android.util.Log
 import kotlinx.coroutines.cancelChildren
+import com.github.sugunasriram.fisloanlibv4.fiscode.utils.PfFlowAbortManager
 
 class UserStatusViewModel : BaseViewModel() {
 
@@ -71,16 +72,18 @@ class UserStatusViewModel : BaseViewModel() {
     private val _navigationToSignup = MutableStateFlow(false)
     val navigationToSignUp: StateFlow<Boolean> = _navigationToSignup
 
-    fun cancelAllRequests() {
-        viewModelScope.coroutineContext.cancelChildren()
-    }
+
 
     fun getUserStatus(loanType: String, context: Context) {
+        if (PfFlowAbortManager.isAborted) return
+
         if (_checkingStatus.value) return  // already running
         _checkingStatus.value = true
-        viewModelScope.launch(Dispatchers.IO) {
+        val job = viewModelScope.launch(Dispatchers.IO) {
             handleGstUserStatus(loanType = loanType, context = context)
         }
+
+        PfFlowAbortManager.track(job)
     }
 
     private suspend fun handleGstUserStatus(
@@ -149,10 +152,12 @@ class UserStatusViewModel : BaseViewModel() {
     val status: StateFlow<StatusResponse?> = _status
 
     fun status(loanType: String, orderId: String, context: Context) {
+        if (PfFlowAbortManager.isAborted) return
         _checkingStatus.value = true
-        viewModelScope.launch(Dispatchers.IO) {
+        val job = viewModelScope.launch(Dispatchers.IO) {
             handleStatus(loanType = loanType, context = context, orderId = orderId)
         }
+        PfFlowAbortManager.track(job)
     }
 
     private suspend fun handleStatus(

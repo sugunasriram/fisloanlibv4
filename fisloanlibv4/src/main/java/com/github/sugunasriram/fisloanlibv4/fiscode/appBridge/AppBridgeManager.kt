@@ -32,6 +32,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.SessionManager
 import androidx.compose.runtime.saveable.rememberSaveable
+import com.github.sugunasriram.fisloanlibv4.fiscode.utils.PfFlowAbortManager
 
 class AppBridgeManager(private val activity: ComponentActivity) {
 
@@ -62,6 +63,9 @@ class AppBridgeManager(private val activity: ComponentActivity) {
         var verifySessionInvoked by remember { mutableStateOf(false) }
         var hasNavigated by rememberSaveable { mutableStateOf(false) }
 
+        LaunchedEffect(Unit) {
+            PfFlowAbortManager.reset()
+        }
 
         // Log received data
 //        personalDetails?.let { Log.d("AppBridge", "Received personalDetails: $it") }

@@ -186,10 +186,6 @@ fun ApplyByCategoryScreen(navController: NavHostController,
 
     LaunchedEffect(Unit) { registerViewModel.getUserDetail(context, navController) }
     BackHandler {
-        userStatusViewModel.cancelAllRequests()
-        registerViewModel.cancelAllRequests()
-        purchaseFinanceViewModel.cancelAllRequests()
-
         activity?.finish() }
     when {
         navigationToSignIn -> navigateSignInPage(navController)

@@ -53,9 +53,6 @@ class IncomingIntentViewModel : BaseViewModel() {
     private val _verifySessionResponse = MutableStateFlow<VerifySessionResponse?>(null)
     val verifySessionResponse: StateFlow<VerifySessionResponse?> = _verifySessionResponse
 
-    fun cancelAllRequests() {
-        viewModelScope.coroutineContext.cancelChildren()
-    }
 
     fun verifySessionApi(
         sessionId: String,

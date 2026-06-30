@@ -12,6 +12,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.finance.PFSear
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.DeleteUserResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.LoanSearchResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
+import com.github.sugunasriram.fisloanlibv4.fiscode.utils.PfFlowAbortManager
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.BaseViewModel
 import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.Dispatchers
@@ -62,23 +63,43 @@ class PurchaseFinanceViewModel : BaseViewModel() {
     private val _pFSearchResponse = MutableStateFlow<LoanSearchResponse?>(null)
     val pFSearchResponse: StateFlow<LoanSearchResponse?> = _pFSearchResponse
 
-    fun cancelAllRequests() {
-        viewModelScope.coroutineContext.cancelChildren()
+
+//    fun pFSearch(context: Context, searchBodyModel: PFSearchBodyModel) {
+//        if (_searchInProgress.value || _searchLoaded.value) return  // already running or done
+//        _searchInProgress.value = true
+//        viewModelScope.launch(Dispatchers.IO) {
+//            handlePFSearchApi(context, searchBodyModel)
+//        }
+//    }
+
+    fun pFSearch(
+        context: Context,
+        searchBodyModel: PFSearchBodyModel
+    ) {
+        if (PfFlowAbortManager.isAborted) return
+        if (_searchInProgress.value || _searchLoaded.value) return
+
+        _searchInProgress.value = true
+
+        val job = viewModelScope.launch(Dispatchers.IO) {
+            handlePFSearchApi(
+                context = context,
+                searchBodyModel = searchBodyModel
+            )
+        }
+
+        PfFlowAbortManager.track(job)
     }
 
-    fun pFSearch(context: Context, searchBodyModel: PFSearchBodyModel) {
-        if (_searchInProgress.value || _searchLoaded.value) return  // already running or done
-        _searchInProgress.value = true
-        viewModelScope.launch(Dispatchers.IO) {
-            handlePFSearchApi(context, searchBodyModel)
-        }
-    }
+
 
     private suspend fun handlePFSearchApi(
         context: Context,
         searchBodyModel: PFSearchBodyModel,
         checkForAccessToken: Boolean = true
     ) {
+        if (PfFlowAbortManager.isAborted) return
+
         kotlin.runCatching {
             ApiRepository.pFSearchApi(searchBodyModel)
         }.onSuccess { response ->
@@ -105,6 +126,8 @@ class PurchaseFinanceViewModel : BaseViewModel() {
     }
 
     private suspend fun handleSearchApiSuccess(response: LoanSearchResponse) {
+        if (PfFlowAbortManager.isAborted) return
+
         withContext(Dispatchers.Main) {
             Log.d("Sugu -search-pf", response.toString())
             Log.d("Sugu", "_searchLoaded : ${_searchLoaded.value}")

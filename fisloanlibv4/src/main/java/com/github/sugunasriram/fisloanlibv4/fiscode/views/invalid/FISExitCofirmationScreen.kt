@@ -55,6 +55,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.sugunasriram.fisloanlibv4.LoanLib
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.finance.PFDeleteUserBodyModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appBlack
+import com.github.sugunasriram.fisloanlibv4.fiscode.utils.PfFlowAbortManager
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.purchaseFinance.PurchaseFinanceViewModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.interestRate
@@ -63,7 +64,10 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.principal
 import com.github.sugunasriram.fisloanlibv4.fiscode.views.personalLoan.tenure
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
+
 
 
 @Composable
@@ -130,25 +134,61 @@ fun FISExitCofirmationScreen(
 //            }
 //        }
 //    }
+//    fun triggerAbort() {
+//        if (inProgress) return
+//        if (createSessionRequested.value) return
+//
+//        createSessionRequested.value = true  // ✅ IMPORTANT: set flag before calling API
+//
+//        PfFlowAbortManager.abort()
+//
+//        val sanitizedLoanId = loanId.takeUnless { it == "1234" }.orEmpty()
+//        loanAgreementViewModel.createPfSession(sanitizedLoanId, context)
+//
+//        CoroutineScope(Dispatchers.Main).launch {
+//            val mobileNumber = TokenManager.read("mobileNumber")
+//            purchaseFinanceViewModel.pFDeleteUser(
+//                context = context,
+//                deleteUserBodyModel = PFDeleteUserBodyModel(
+//                    loanType = "PURCHASE_FINANCE",
+//                    mobileNumber = mobileNumber
+//                ),
+//            )
+//        }
+//    }
+
     fun triggerAbort() {
-        if (inProgress) return
         if (createSessionRequested.value) return
 
-        createSessionRequested.value = true  // ✅ IMPORTANT: set flag before calling API
+        createSessionRequested.value = true
 
-        val sanitizedLoanId = loanId.takeUnless { it == "1234" }.orEmpty()
-        loanAgreementViewModel.createPfSession(sanitizedLoanId, context)
+        // Stop/ignore all existing PF flow API responses
+        PfFlowAbortManager.abort()
 
-        CoroutineScope(Dispatchers.Main).launch {
+        val sanitizedLoanId = loanId
+            .takeUnless { it == "1234" }
+            .orEmpty()
+
+        // Cleanup API 1
+        loanAgreementViewModel.createPfSession(
+            loanId = sanitizedLoanId,
+            context = context
+        )
+
+        // Cleanup API 2
+        val job = CoroutineScope(Dispatchers.Main).launch {
             val mobileNumber = TokenManager.read("mobileNumber")
+
             purchaseFinanceViewModel.pFDeleteUser(
                 context = context,
                 deleteUserBodyModel = PFDeleteUserBodyModel(
                     loanType = "PURCHASE_FINANCE",
                     mobileNumber = mobileNumber
-                ),
+                )
             )
         }
+
+        PfFlowAbortManager.track(job)
     }
 
 

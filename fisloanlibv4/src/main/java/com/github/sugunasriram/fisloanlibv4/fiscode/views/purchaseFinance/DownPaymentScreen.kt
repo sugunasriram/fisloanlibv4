@@ -1658,9 +1658,6 @@ fun DownPaymentScreen(
     }
 
     BackHandler {
-        userStatusViewModel.cancelAllRequests()
-        registerViewModel.cancelAllRequests()
-        purchaseFinanceViewModel.cancelAllRequests()
 
         navigateToFISExitScreen(navController, loanId = "1234")
     }

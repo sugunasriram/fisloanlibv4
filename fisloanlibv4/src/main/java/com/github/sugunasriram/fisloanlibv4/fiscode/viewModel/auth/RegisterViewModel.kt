@@ -40,6 +40,7 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import com.github.sugunasriram.fisloanlibv4.fiscode.utils.PfFlowAbortManager
 
 class RegisterViewModel : ViewModel() {
 
@@ -95,9 +96,6 @@ class RegisterViewModel : ViewModel() {
     val firstNameError: LiveData<String?> = _firstNameError
 
 
-    fun cancelAllRequests() {
-        viewModelScope.coroutineContext.cancelChildren()
-    }
     @SuppressLint("SuspiciousIndentation")
     fun onFirstNameChanged(value: String, context: Context) {
 //        val sanitizedInput = value.replace(Regex("[^a-zA-Z ]"), "")
@@ -1005,10 +1003,14 @@ class RegisterViewModel : ViewModel() {
     val getUserResponse: StateFlow<UpdateProfile?> = _getUserResponse
 
     fun getUserDetail(context: Context, navController: NavHostController) {
+        if (PfFlowAbortManager.isAborted) return
+
         _gettingUserDetails.value = true
-        viewModelScope.launch(Dispatchers.IO) {
+        val job = viewModelScope.launch(Dispatchers.IO) {
             handleUserDetail(context, navController)
         }
+
+        PfFlowAbortManager.track(job)
     }
 
     private suspend fun handleUserDetail(
