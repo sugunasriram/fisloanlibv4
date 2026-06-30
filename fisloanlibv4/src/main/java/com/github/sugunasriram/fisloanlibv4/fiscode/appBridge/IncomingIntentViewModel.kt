@@ -57,6 +57,8 @@ class IncomingIntentViewModel : BaseViewModel() {
         sessionId: String,
         context: Context
     ) {
+        if (_isVerifySessionChecking.value || _isVerifySessionSuccess.value) return
+
         _isVerifySessionChecking.value = true
         _isVerifySessionSuccess.value = false
         viewModelScope.launch(Dispatchers.IO) {

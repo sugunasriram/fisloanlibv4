@@ -31,6 +31,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.views.auth.InAppUpdateScreen
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.SessionManager
+import androidx.compose.runtime.saveable.rememberSaveable
 
 class AppBridgeManager(private val activity: ComponentActivity) {
 
@@ -59,6 +60,7 @@ class AppBridgeManager(private val activity: ComponentActivity) {
         val unAuthorizedUser by viewModel.unAuthorizedUser.observeAsState(false)
 
         var verifySessionInvoked by remember { mutableStateOf(false) }
+        var hasNavigated by rememberSaveable { mutableStateOf(false) }
 
 
         // Log received data
@@ -134,35 +136,46 @@ class AppBridgeManager(private val activity: ComponentActivity) {
                                 }
                             }
 
-                            LaunchedEffect(Unit) {
-                                val fromFlow = "Purchase Finance"
-                                if (!loanId.isNullOrBlank()) {
-                                    Log.d("Sugu 1", "Navigating to RepaymentScheduleScreen with " +
-                                            "loanId: $loanId")
+                            if (!hasNavigated) {
+                                LaunchedEffect(Unit) {
                                     val fromFlow = "Purchase Finance"
-                                    val fromScreen = "PURCHASE_FINANCE"
+                                    if (!loanId.isNullOrBlank()) {
+                                        Log.d(
+                                            "Sugu 1",
+                                            "Navigating to RepaymentScheduleScreen with " +
+                                                    "loanId: $loanId"
+                                        )
+                                        val fromFlow = "Purchase Finance"
+                                        val fromScreen = "PURCHASE_FINANCE"
 
-                                    val route = "${AppScreens.RepaymentScheduleScreen.route}/$loanId/$fromFlow/$fromScreen"
+                                        val route =
+                                            "${AppScreens.RepaymentScheduleScreen.route}/$loanId/$fromFlow/$fromScreen"
 
-                                    Log.d("Sugu", "Navigating to: $route")
-                                    navController.navigate(route)  {
-                                        launchSingleTop = true
-                                    }
-                                } else {
-                                    val  verifySessionResponsStr = Json
-                                        .encodeToString<VerifySessionResponse?>(
-                                        verifySessionResponse
-                                    )
+                                        Log.d("Sugu", "Navigating to: $route")
+                                        navController.navigate(route) {
+                                            launchSingleTop = true
+                                        }
+                                    } else {
+                                        val verifySessionResponsStr = Json
+                                            .encodeToString<VerifySessionResponse?>(
+                                                verifySessionResponse
+                                            )
 
-                                    Log.d("AppBridgeManager", "Navigating to ApplyByCategoryScreen with " +
-                                            "verifySessionResponse: $verifySessionResponsStr")
+                                        Log.d(
+                                            "AppBridgeManager",
+                                            "Navigating to ApplyByCategoryScreen with " +
+                                                    "verifySessionResponse: $verifySessionResponsStr"
+                                        )
 
-                                    val encodedVerifySessionResponse = Uri.encode(verifySessionResponsStr, "UTF-8")
+                                        val encodedVerifySessionResponse =
+                                            Uri.encode(verifySessionResponsStr, "UTF-8")
 //                                    navController.navigate(AppScreens.DownPaymentScreen.route)
-                                    val route = "${AppScreens.ApplyByCategoryScreen
-                                        .route}/$fromFlow?encodedVerifySessionResponse=$encodedVerifySessionResponse"
+                                        val route = "${
+                                            AppScreens.ApplyByCategoryScreen
+                                                .route
+                                        }/$fromFlow?encodedVerifySessionResponse=$encodedVerifySessionResponse"
 
-                                    navController.navigate(route)
+                                        navController.navigate(route)
 //                                    navController.getBackStackEntry(AppScreens.DownPaymentScreen.route)
 //                                        .savedStateHandle
 ////                                    .set("verifySessionResponse", verifySessionResponse)
@@ -172,6 +185,7 @@ class AppBridgeManager(private val activity: ComponentActivity) {
 //                                                verifySessionResponse
 //                                            )
 //                                        )
+                                    }
                                 }
                             }
                         }
