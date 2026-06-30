@@ -31,6 +31,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
 import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -93,6 +94,10 @@ class RegisterViewModel : ViewModel() {
     private val _firstNameError: MutableLiveData<String?> = MutableLiveData("")
     val firstNameError: LiveData<String?> = _firstNameError
 
+
+    fun cancelAllRequests() {
+        viewModelScope.coroutineContext.cancelChildren()
+    }
     @SuppressLint("SuspiciousIndentation")
     fun onFirstNameChanged(value: String, context: Context) {
 //        val sanitizedInput = value.replace(Regex("[^a-zA-Z ]"), "")

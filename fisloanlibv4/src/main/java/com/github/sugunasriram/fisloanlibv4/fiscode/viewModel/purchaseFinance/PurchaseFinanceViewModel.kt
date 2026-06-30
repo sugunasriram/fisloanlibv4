@@ -15,6 +15,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.BaseViewModel
 import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -60,6 +61,10 @@ class PurchaseFinanceViewModel : BaseViewModel() {
 
     private val _pFSearchResponse = MutableStateFlow<LoanSearchResponse?>(null)
     val pFSearchResponse: StateFlow<LoanSearchResponse?> = _pFSearchResponse
+
+    fun cancelAllRequests() {
+        viewModelScope.coroutineContext.cancelChildren()
+    }
 
     fun pFSearch(context: Context, searchBodyModel: PFSearchBodyModel) {
         if (_searchInProgress.value || _searchLoaded.value) return  // already running or done

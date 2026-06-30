@@ -12,6 +12,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.VerifySes
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.BaseViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -52,6 +53,9 @@ class IncomingIntentViewModel : BaseViewModel() {
     private val _verifySessionResponse = MutableStateFlow<VerifySessionResponse?>(null)
     val verifySessionResponse: StateFlow<VerifySessionResponse?> = _verifySessionResponse
 
+    fun cancelAllRequests() {
+        viewModelScope.coroutineContext.cancelChildren()
+    }
 
     fun verifySessionApi(
         sessionId: String,

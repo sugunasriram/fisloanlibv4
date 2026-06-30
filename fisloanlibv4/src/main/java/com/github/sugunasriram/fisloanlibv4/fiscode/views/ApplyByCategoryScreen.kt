@@ -153,6 +153,8 @@ fun ApplyByCategoryScreen(navController: NavHostController,
                           verifySessionResponse: VerifySessionResponse?) {
     val userStatusViewModel: UserStatusViewModel = viewModel()
     val registerViewModel: RegisterViewModel = viewModel()
+    val purchaseFinanceViewModel: PurchaseFinanceViewModel = viewModel()
+
 
     val showInternetScreen by userStatusViewModel.showInternetScreen.observeAsState(false)
     val showTimeOutScreen by userStatusViewModel.showTimeOutScreen.observeAsState(false)
@@ -177,12 +179,18 @@ fun ApplyByCategoryScreen(navController: NavHostController,
     val context = LocalContext.current
 
 
+
     val retainedVerifySessionResponse = SessionManager.verifySessionResponse
 
 
 
     LaunchedEffect(Unit) { registerViewModel.getUserDetail(context, navController) }
-    BackHandler { activity?.finish() }
+    BackHandler {
+        userStatusViewModel.cancelAllRequests()
+        registerViewModel.cancelAllRequests()
+        purchaseFinanceViewModel.cancelAllRequests()
+
+        activity?.finish() }
     when {
         navigationToSignIn -> navigateSignInPage(navController)
         showInternetScreen -> CommonMethods().ShowInternetErrorScreen(navController)
@@ -201,6 +209,7 @@ fun ApplyByCategoryScreen(navController: NavHostController,
                 checked = checked, showLoader = showLoader, errorMessage = errorMessage,
                 userDetails = userDetails, userDetailsAPILoading = userDetailsAPILoading,
                 userDetailsAPICompleted  = userDetailsAPICompleted,
+                purchaseFinanceViewModel = purchaseFinanceViewModel,
                 verifySessionResponse = retainedVerifySessionResponse
             )
         }
@@ -313,6 +322,7 @@ fun SelectingFlow(
     userDetails: UpdateProfile?,
     userDetailsAPILoading: Boolean,
     userDetailsAPICompleted: Boolean,
+    purchaseFinanceViewModel: PurchaseFinanceViewModel,
     verifySessionResponse: VerifySessionResponse?
 ) {
     // 0) If either the status check or user-details API is still loading, show progress and exit.
@@ -410,6 +420,7 @@ fun SelectingFlow(
                 status = userStatus,
                 navController = navController,
                 fromFlow = "Purchase Finance", // or "Purchase Finance" if you want to tag the source
+                purchaseFinanceViewModel = purchaseFinanceViewModel,
                 verifySessionResponse = verifySessionResponse
             )
         }
@@ -663,9 +674,9 @@ fun PurchaseDecidedFlow(
     status: UserStatus?,
     navController: NavHostController,
     fromFlow: String,
+    purchaseFinanceViewModel: PurchaseFinanceViewModel,
     verifySessionResponse: VerifySessionResponse?
 ) {
-    val purchaseFinanceViewModel: PurchaseFinanceViewModel = viewModel()
     val searchInProgress by purchaseFinanceViewModel.searchInProgress.collectAsState()
     val searchLoaded by purchaseFinanceViewModel.searchLoaded.collectAsState()
     val webViewModel: WebViewModel = viewModel()

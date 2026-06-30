@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.asStateFlow
 import android.util.Log
+import kotlinx.coroutines.cancelChildren
 
 class UserStatusViewModel : BaseViewModel() {
 
@@ -69,6 +70,10 @@ class UserStatusViewModel : BaseViewModel() {
 
     private val _navigationToSignup = MutableStateFlow(false)
     val navigationToSignUp: StateFlow<Boolean> = _navigationToSignup
+
+    fun cancelAllRequests() {
+        viewModelScope.coroutineContext.cancelChildren()
+    }
 
     fun getUserStatus(loanType: String, context: Context) {
         if (_checkingStatus.value) return  // already running
