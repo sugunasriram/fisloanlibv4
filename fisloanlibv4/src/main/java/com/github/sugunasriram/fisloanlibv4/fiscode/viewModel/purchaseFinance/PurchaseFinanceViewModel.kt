@@ -62,6 +62,7 @@ class PurchaseFinanceViewModel : BaseViewModel() {
     val pFSearchResponse: StateFlow<LoanSearchResponse?> = _pFSearchResponse
 
     fun pFSearch(context: Context, searchBodyModel: PFSearchBodyModel) {
+        if (_searchInProgress.value || _searchLoaded.value) return  // already running or done
         _searchInProgress.value = true
         viewModelScope.launch(Dispatchers.IO) {
             handlePFSearchApi(context, searchBodyModel)

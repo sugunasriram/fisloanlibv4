@@ -193,7 +193,8 @@ fun ApplyByCategoryScreen(navController: NavHostController,
 //        middleLoan -> CommonMethods().ShowMiddleLoanErrorScreen(navController)
         middleLoan -> MiddleOfTheLoanScreen(navController, errorMessage)
         else -> {
-            Log.d("ApplyByCategoryScreen Sugu", "verifySessionResponse: $retainedVerifySessionResponse")
+            Log.d("NEWEST ApplyByCategoryScreen Sugu", "verifySessionResponse: " +
+                    "$retainedVerifySessionResponse")
             SelectingFlow(
                 checkingStatus = checkingStatus, navController = navController, context = context,
                 userStatus = userStatus, userStatusViewModel = userStatusViewModel,
@@ -680,8 +681,10 @@ fun PurchaseDecidedFlow(
     val errorMessage by webViewModel.errorMessage.collectAsState()
     val navigationToSignIn by webViewModel.navigationToSignIn.collectAsState()
 
+    val didSearch = rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(status?.data) {
-        if (status?.data == null || status.data.data?.any { it == null } == true) {
+        if ((status?.data == null || status.data.data?.any { it == null } == true) && !didSearch.value) {
+            didSearch.value = true
             Log.d("test status: ", "null")
             purchaseFinanceViewModel.pFSearch(
                 context = context,

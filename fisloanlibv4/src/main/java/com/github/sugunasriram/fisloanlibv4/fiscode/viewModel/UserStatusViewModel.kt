@@ -71,6 +71,7 @@ class UserStatusViewModel : BaseViewModel() {
     val navigationToSignUp: StateFlow<Boolean> = _navigationToSignup
 
     fun getUserStatus(loanType: String, context: Context) {
+        if (_checkingStatus.value) return  // already running
         _checkingStatus.value = true
         viewModelScope.launch(Dispatchers.IO) {
             handleGstUserStatus(loanType = loanType, context = context)
