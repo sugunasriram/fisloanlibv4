@@ -15,6 +15,7 @@ import android.webkit.PermissionRequest
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -33,6 +34,7 @@ class MainActivity : ComponentActivity() {
 
     private val updateCompleted = mutableStateOf(false)
     private lateinit var bridgeManager: AppBridgeManager
+    private val currentIntent = mutableStateOf<Intent?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,6 +43,7 @@ class MainActivity : ComponentActivity() {
 
         // 👇 Handle intent
         bridgeManager = AppBridgeManager(this)
+        currentIntent.value = intent
 
 //        setContent {
 //            FsTheme {
@@ -56,6 +59,8 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val navController = rememberNavController()
+            val activeIntent by currentIntent
+
 
             NavHost(
                 navController = navController,
@@ -65,14 +70,21 @@ class MainActivity : ComponentActivity() {
 //                    AppBridgeManager(this@MainActivity).RenderContent(intent, navController)
 //                }
 
-                composable(AppScreens.BridgeEntryScreen.route) {
-                    bridgeManager.RenderContent(intent, navController)
-                }
 
-                mobileNavigation(navController, startDestination = AppScreens.SplashScreen.route)
+                    composable(AppScreens.BridgeEntryScreen.route) {
+                        activeIntent?.let { bridgeManager.RenderContent(it, navController) }
+                    }
+                    mobileNavigation(navController, startDestination = AppScreens.SplashScreen.route)
+
             }
         }
 
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        currentIntent.value = intent
     }
 
     override fun onRequestPermissionsResult(

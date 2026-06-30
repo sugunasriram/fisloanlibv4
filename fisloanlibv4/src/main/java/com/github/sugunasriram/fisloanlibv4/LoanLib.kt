@@ -238,6 +238,7 @@ object LoanLib {
         context.startActivity(intent)
     }
 
+
     fun LaunchFISAppForLoanDetails(
         context: Context,
         sessionDetails: SessionDetails? = null,
