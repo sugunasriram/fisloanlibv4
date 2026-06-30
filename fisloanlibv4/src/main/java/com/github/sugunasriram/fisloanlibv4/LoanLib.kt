@@ -34,6 +34,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.app.MainActivity
 import com.github.sugunasriram.fisloanlibv4.fiscode.dataStore
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
 import java.io.Serializable
+import com.github.sugunasriram.fisloanlibv4.fiscode.utils.PfFlowAbortManager
 
 object LoanLib {
 
@@ -218,10 +219,21 @@ object LoanLib {
         // Initialize the library
         init(context)
 
+        // Cancel/ignore any previous PF flow before starting a new one
+        PfFlowAbortManager.abort()
+        PfFlowAbortManager.reset()
+
         val intent = Intent(context, MainActivity::class.java)
         intent.putExtra("sessionDetails", sessionDetails)
 
         LoanLib.callback = callback
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+
+        if (context !is Activity) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+
 
         context.startActivity(intent)
     }
