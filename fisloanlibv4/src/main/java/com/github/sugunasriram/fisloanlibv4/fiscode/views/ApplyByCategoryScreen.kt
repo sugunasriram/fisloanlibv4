@@ -699,6 +699,8 @@ fun PurchaseDecidedFlow(
     val errorMessage by webViewModel.errorMessage.collectAsState()
     val navigationToSignIn by webViewModel.navigationToSignIn.collectAsState()
 
+    val didNavigateToDownPayment = rememberSaveable { mutableStateOf(false) }
+
     LaunchedEffect(status?.data) {
         if ((status?.data == null || status.data.data?.any { it == null } == true) && !didSearch) {
             onDidSearchChange(true)
@@ -723,10 +725,11 @@ fun PurchaseDecidedFlow(
         Log.d("Sugu", "verifySessionResponse: $verifySessionResponse")
         if (searchInProgress) {
             CenterProgress()
-        } else if (searchLoaded) {
+        } else if (searchLoaded && !didNavigateToDownPayment.value) {
             LaunchedEffect(searchLoaded) {
                 Log.d("Sugu test status: ", "navigate to DownPayment")
 
+                didNavigateToDownPayment.value = true
                 navigateToDownPaymentScreen(
                     navController = navController,
                     fromFlow = fromFlow,

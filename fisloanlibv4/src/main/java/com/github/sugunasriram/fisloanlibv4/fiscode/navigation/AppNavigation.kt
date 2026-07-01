@@ -874,6 +874,7 @@ fun navigateToDownPaymentScreen(
     Log.d("navigateToDownPaymentScreen", "Navigating to: $destinationUrl")
 
     navController.navigate(destinationUrl) {
+        launchSingleTop = true
         shouldCloseCurrent(navController, closeCurrent)
     }
 }
