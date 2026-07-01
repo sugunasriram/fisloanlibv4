@@ -222,8 +222,8 @@ object LoanLib {
 
         Log.d("Sugu test", "LaunchFISAppWithParamsAndCallback: $sessionDetails")
         // Cancel/ignore any previous PF flow before starting a new one
-        PfFlowAbortManager.abort()
-        PfFlowAbortManager.reset()
+//        PfFlowAbortManager.abort()
+//        PfFlowAbortManager.reset()
 
         val intent = Intent(context, MainActivity::class.java)
         intent.putExtra("sessionDetails", sessionDetails)

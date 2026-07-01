@@ -75,7 +75,7 @@ class UserStatusViewModel : BaseViewModel() {
 
 
     fun getUserStatus(loanType: String, context: Context) {
-        if (PfFlowAbortManager.isAborted) return
+//        if (PfFlowAbortManager.isAborted) return
 
         if (_checkingStatus.value) return  // already running
         _checkingStatus.value = true
@@ -83,7 +83,7 @@ class UserStatusViewModel : BaseViewModel() {
             handleGstUserStatus(loanType = loanType, context = context)
         }
 
-        PfFlowAbortManager.track(job)
+//        PfFlowAbortManager.track(job)
     }
 
     private suspend fun handleGstUserStatus(
@@ -152,12 +152,12 @@ class UserStatusViewModel : BaseViewModel() {
     val status: StateFlow<StatusResponse?> = _status
 
     fun status(loanType: String, orderId: String, context: Context) {
-        if (PfFlowAbortManager.isAborted) return
+//        if (PfFlowAbortManager.isAborted) return
         _checkingStatus.value = true
         val job = viewModelScope.launch(Dispatchers.IO) {
             handleStatus(loanType = loanType, context = context, orderId = orderId)
         }
-        PfFlowAbortManager.track(job)
+//        PfFlowAbortManager.track(job)
     }
 
     private suspend fun handleStatus(

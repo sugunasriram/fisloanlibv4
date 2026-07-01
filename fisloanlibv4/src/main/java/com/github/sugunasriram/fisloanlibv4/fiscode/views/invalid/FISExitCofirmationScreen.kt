@@ -163,7 +163,7 @@ fun FISExitCofirmationScreen(
         createSessionRequested.value = true
 
         // Stop/ignore all existing PF flow API responses
-        PfFlowAbortManager.abort()
+//        PfFlowAbortManager.abort()
 
         val sanitizedLoanId = loanId
             .takeUnless { it == "1234" }
@@ -188,7 +188,7 @@ fun FISExitCofirmationScreen(
             )
         }
 
-        PfFlowAbortManager.track(job)
+//        PfFlowAbortManager.track(job)
     }
 
 

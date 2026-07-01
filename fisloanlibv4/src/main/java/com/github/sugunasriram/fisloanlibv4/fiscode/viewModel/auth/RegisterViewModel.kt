@@ -1003,14 +1003,14 @@ class RegisterViewModel : ViewModel() {
     val getUserResponse: StateFlow<UpdateProfile?> = _getUserResponse
 
     fun getUserDetail(context: Context, navController: NavHostController) {
-        if (PfFlowAbortManager.isAborted) return
+//        if (PfFlowAbortManager.isAborted) return
 
         _gettingUserDetails.value = true
         val job = viewModelScope.launch(Dispatchers.IO) {
             handleUserDetail(context, navController)
         }
 
-        PfFlowAbortManager.track(job)
+//        PfFlowAbortManager.track(job)
     }
 
     private suspend fun handleUserDetail(

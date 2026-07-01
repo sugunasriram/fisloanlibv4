@@ -76,7 +76,7 @@ class PurchaseFinanceViewModel : BaseViewModel() {
         context: Context,
         searchBodyModel: PFSearchBodyModel
     ) {
-        if (PfFlowAbortManager.isAborted) return
+//        if (PfFlowAbortManager.isAborted) return
         if (_searchInProgress.value || _searchLoaded.value) return
 
         _searchInProgress.value = true
@@ -88,7 +88,7 @@ class PurchaseFinanceViewModel : BaseViewModel() {
             )
         }
 
-        PfFlowAbortManager.track(job)
+//        PfFlowAbortManager.track(job)
     }
 
 
@@ -98,7 +98,7 @@ class PurchaseFinanceViewModel : BaseViewModel() {
         searchBodyModel: PFSearchBodyModel,
         checkForAccessToken: Boolean = true
     ) {
-        if (PfFlowAbortManager.isAborted) return
+//        if (PfFlowAbortManager.isAborted) return
 
         kotlin.runCatching {
             ApiRepository.pFSearchApi(searchBodyModel)
@@ -126,7 +126,7 @@ class PurchaseFinanceViewModel : BaseViewModel() {
     }
 
     private suspend fun handleSearchApiSuccess(response: LoanSearchResponse) {
-        if (PfFlowAbortManager.isAborted) return
+//        if (PfFlowAbortManager.isAborted) return
 
         withContext(Dispatchers.Main) {
             Log.d("Sugu -search-pf", response.toString())

@@ -64,7 +64,7 @@ class AppBridgeManager(private val activity: ComponentActivity) {
         var hasNavigated by rememberSaveable { mutableStateOf(false) }
 
         LaunchedEffect(Unit) {
-            PfFlowAbortManager.reset()
+//            PfFlowAbortManager.reset()
         }
 
         // Log received data
