@@ -76,7 +76,7 @@ class MainActivity : ComponentActivity() {
                     composable(AppScreens.BridgeEntryScreen.route) {
                         activeIntent?.let { bridgeManager.RenderContent(it, navController) }
                     }
-//                    mobileNavigation(navController, startDestination = AppScreens.SplashScreen.route)
+                    mobileNavigation(navController, startDestination = AppScreens.SplashScreen.route)
 
             }
         }
