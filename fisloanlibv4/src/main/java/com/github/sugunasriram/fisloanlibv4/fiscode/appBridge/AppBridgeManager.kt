@@ -70,7 +70,7 @@ class AppBridgeManager(private val activity: ComponentActivity) {
         // Log received data
 //        personalDetails?.let { Log.d("AppBridge", "Received personalDetails: $it") }
 //        productDetails?.let { Log.d("AppBridge", "Received productDetails: $it") }
-        sessionDetails?.let { Log.d("AppBridge", "Received sessionDetails: $it") }
+        sessionDetails?.let { Log.d("Sugu test AppBridge", "Received sessionDetails: $it") }
 
 //        if (showDialog.value) {
 //            AlertDialog(

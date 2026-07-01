@@ -1,6 +1,7 @@
 package com.github.sugunasriram.fisloanlibv4.fiscode.utils
 
 import kotlinx.coroutines.Job
+import java.util.concurrent.atomic.AtomicInteger
 
 object PfFlowAbortManager {
 
@@ -33,5 +34,15 @@ object PfFlowAbortManager {
         }
 
         activeJobs.clear()
+    }
+
+    private val flowCounter = AtomicInteger(0)
+
+    fun startNewFlow(): Int {
+        return flowCounter.incrementAndGet()
+    }
+
+    fun isStale(flowId: Int): Boolean {
+        return flowId != flowCounter.get()
     }
 }

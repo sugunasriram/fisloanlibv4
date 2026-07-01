@@ -2334,6 +2334,8 @@ fun CompanyConsentContent(
     }
 }
 
+
+
 @Preview(showBackground = true)
 @Composable
 fun DownPaymentScreenPreview() {

@@ -3,6 +3,7 @@ package com.github.sugunasriram.fisloanlibv4
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.view.Gravity
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -219,6 +220,7 @@ object LoanLib {
         // Initialize the library
         init(context)
 
+        Log.d("Sugu test", "LaunchFISAppWithParamsAndCallback: $sessionDetails")
         // Cancel/ignore any previous PF flow before starting a new one
         PfFlowAbortManager.abort()
         PfFlowAbortManager.reset()
