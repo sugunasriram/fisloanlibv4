@@ -147,6 +147,7 @@ import kotlinx.serialization.json.Json
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.SessionManager
+import androidx.compose.runtime.MutableState
 
 @Composable
 fun ApplyByCategoryScreen(navController: NavHostController,
@@ -181,6 +182,8 @@ fun ApplyByCategoryScreen(navController: NavHostController,
 
 
     val retainedVerifySessionResponse = SessionManager.verifySessionResponse
+    var didSearch by rememberSaveable { mutableStateOf(false) }
+
 
 
 
@@ -206,6 +209,8 @@ fun ApplyByCategoryScreen(navController: NavHostController,
                 userDetails = userDetails, userDetailsAPILoading = userDetailsAPILoading,
                 userDetailsAPICompleted  = userDetailsAPICompleted,
                 purchaseFinanceViewModel = purchaseFinanceViewModel,
+                didSearch = didSearch,
+                onDidSearchChange = { didSearch = it },
                 verifySessionResponse = retainedVerifySessionResponse
             )
         }
@@ -315,6 +320,8 @@ fun SelectingFlow(
     checked: Boolean, // currently not used in this streamlined flow
     showLoader: Boolean,
     errorMessage: String,
+    didSearch:Boolean,
+    onDidSearchChange: (Boolean) -> Unit,
     userDetails: UpdateProfile?,
     userDetailsAPILoading: Boolean,
     userDetailsAPICompleted: Boolean,
@@ -417,6 +424,8 @@ fun SelectingFlow(
                 navController = navController,
                 fromFlow = "Purchase Finance", // or "Purchase Finance" if you want to tag the source
                 purchaseFinanceViewModel = purchaseFinanceViewModel,
+                didSearch = didSearch,
+                onDidSearchChange = onDidSearchChange,
                 verifySessionResponse = verifySessionResponse
             )
         }
@@ -670,6 +679,8 @@ fun PurchaseDecidedFlow(
     status: UserStatus?,
     navController: NavHostController,
     fromFlow: String,
+    didSearch: Boolean,
+    onDidSearchChange: (Boolean) -> Unit,
     purchaseFinanceViewModel: PurchaseFinanceViewModel,
     verifySessionResponse: VerifySessionResponse?
 ) {
@@ -688,10 +699,9 @@ fun PurchaseDecidedFlow(
     val errorMessage by webViewModel.errorMessage.collectAsState()
     val navigationToSignIn by webViewModel.navigationToSignIn.collectAsState()
 
-    val didSearch = rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(status?.data) {
-        if ((status?.data == null || status.data.data?.any { it == null } == true) && !didSearch.value) {
-            didSearch.value = true
+        if ((status?.data == null || status.data.data?.any { it == null } == true) && !didSearch) {
+            onDidSearchChange(true)
             Log.d("test status: ", "null")
             purchaseFinanceViewModel.pFSearch(
                 context = context,
@@ -715,6 +725,8 @@ fun PurchaseDecidedFlow(
             CenterProgress()
         } else if (searchLoaded) {
             LaunchedEffect(searchLoaded) {
+                Log.d("Sugu test status: ", "navigate to DownPayment")
+
                 navigateToDownPaymentScreen(
                     navController = navController,
                     fromFlow = fromFlow,
