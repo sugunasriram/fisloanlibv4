@@ -664,23 +664,21 @@ fun RepaymentScheduleView(
             }
             // only if PF and Loan is disbursed
 //            if (isLoanDisbursed && fromFlow.equals("LOAN", ignoreCase = true)) {
-            if (isLoanDisbursed ) {
-                Spacer(modifier = Modifier.height(8.dp))
-                CurvedPrimaryButton(
-                    text = "Cancel Loan Request",
-                    textColor = appOrange,
-                    backgroundColor = appWhite,
-                    start = 80.dp,
-                    end = 80.dp
-                ) {
-//                    val cancelLoan = CancelLoan(
-//                        loanType = "PURCHASE_FINANCE",
-//                        orderId = orderId,
-//                        cancelType = "SOFT_CANCEL",
-//                        cancelReason = "something"
-//                    )
-//                    loanAgreementViewModel.cancelLoanRequest(cancelLoan, context)
-                    showLoanCancelPopUp = true
+            val lenderName = loanDetails.providerDescriptor?.name.orEmpty()
+            val isBajajOrBfl = lenderName.contains("bajaj", ignoreCase = true) ||
+                    lenderName.contains("bfl", ignoreCase = true)
+            if(!isBajajOrBfl) {
+                if (isLoanDisbursed && fromFlow.equals("LOAN", ignoreCase = true)) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    CurvedPrimaryButton(
+                        text = "Cancel Loan Request",
+                        textColor = appOrange,
+                        backgroundColor = appWhite,
+                        start = 80.dp,
+                        end = 80.dp
+                    ) {
+                        showLoanCancelPopUp = true
+                    }
                 }
             }
             if (showLoanCancelPopUp) {
