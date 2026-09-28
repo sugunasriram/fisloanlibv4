@@ -1626,7 +1626,8 @@ fun DownPaymentScreen(
 
     var showError by remember { mutableStateOf(false) }
     var errorMsg by remember { mutableStateOf("") }
-    var showInValidAmountError by remember { mutableStateOf(false) }
+    //As BFL, downpayment is zero
+//    var showInValidAmountError by remember { mutableStateOf(false) }
     var showNoLoanOffersScreen by remember { mutableStateOf(false) }
     var isSubmitting by remember { mutableStateOf(false) }
 
@@ -1641,7 +1642,9 @@ fun DownPaymentScreen(
     val pfProductCategory = DEFAULT_PRODUCT_CATEGORY
     var productPrice by remember { mutableStateOf(99000L) }
     var maxAmount by remember { mutableStateOf(99000L) }
-    var amount by remember { mutableStateOf(0L) }
+    // BFL does not support down payment
+    val amount = 0L
+//    var amount by remember { mutableStateOf(0L) }
 
     // rememberUpdatedState so the remembered lambdas below always read
     // the latest values at call-time without capturing stale snapshots
@@ -1672,7 +1675,9 @@ fun DownPaymentScreen(
                     executeSubmitLoanRequest(
                         context = context,
                         navController = navController,
-                        amount = currentAmount,
+                        //As BFL, dowpayment is zero
+//                        amount = currentAmount,
+                        amount = 0L,
                         loanTenure = currentLoanTenure,
                         productPrice = currentProductPrice,
                         merchantDetails = merchantDetails,
@@ -1696,17 +1701,18 @@ fun DownPaymentScreen(
         }
     }
 
-    val onPrimaryButtonClick: () -> Unit = remember(checkboxState, showInValidAmountError) {
+    val onPrimaryButtonClick: () -> Unit = remember(checkboxState/*, showInValidAmountError*/) {
         {
             when {
                 !checkboxState -> {
                     showError = true
                     errorMsg = context.getString(R.string.please_agree_buyer_App_terms)
                 }
-                showInValidAmountError -> {
-                    showError = true
-                    errorMsg = context.getString(R.string.please_enter_valid_downpayment_amount)
-                }
+                //As BFL, downpayment is zero
+//                showInValidAmountError -> {
+//                    showError = true
+//                    errorMsg = context.getString(R.string.please_enter_valid_downpayment_amount)
+//                }
                 else -> {
                     showError = false
                     submitLoanRequest()
@@ -1788,8 +1794,8 @@ fun DownPaymentScreen(
                     ) {
                         ProductDetailsCard(
                             verifySessionResponse = verifySessionResponse,
-                            amount = amount,
-                            onAmountChange = { amount = it },
+//                            amount = amount,
+//                            onAmountChange = { amount = it },
                             merchantDetails = merchantDetails,
                             onProductPriceChange = { newPrice ->
                                 productPrice = newPrice
@@ -1800,13 +1806,14 @@ fun DownPaymentScreen(
                             onBrandChange = { pfProductBrand = it }
                         )
                         userDetails?.data?.let { PFPersonalDetailsCard(profile = it) }
-                        DownPaymentDetailsCard(
-                            amount = amount,
-                            maxAmount = maxAmount,
-                            showInValidAmountError = showInValidAmountError,
-                            onAmountChange = { amount = it },
-                            onValidationChanged = { showInValidAmountError = it }
-                        )
+                        //As BFL doesn't allow for DownPayment
+//                        DownPaymentDetailsCard(
+//                            amount = amount,
+//                            maxAmount = maxAmount,
+//                            showInValidAmountError = showInValidAmountError,
+//                            onAmountChange = { amount = it },
+//                            onValidationChanged = { showInValidAmountError = it }
+//                        )
                         PreferredTenureCard(editLoanRequestViewModel)
                     }
                 }
@@ -1836,8 +1843,8 @@ private fun ConfirmExitDialog(
 @Composable
 fun ProductDetailsCard(
     verifySessionResponse: VerifySessionResponse,
-    amount: Long,
-    onAmountChange: (Long) -> Unit,
+//    amount: Long,
+//    onAmountChange: (Long) -> Unit,
     merchantDetails: MerchantDetails,
     onProductPriceChange: (Long) -> Unit = {},
     onImeiChange: (String) -> Unit = {},
@@ -1885,7 +1892,8 @@ fun ProductDetailsCard(
         val price = totalAmount ?: sellingPrice
         if (price != null) {
             onProductPriceChange(price)
-            onAmountChange(price / 3)
+            //As BFL doesn't allow for DownPayment
+//            onAmountChange(price / 3)
         }
     }
 
@@ -2390,8 +2398,8 @@ fun DownPaymentScreenPreview() {
     Column(modifier = Modifier.background(Color.White)) {
         ProductDetailsCard(
             verifySessionResponse = verifySessionResponseObj,
-            amount = 3000,
-            onAmountChange = {},
+//            amount = 3000,
+//            onAmountChange = {},
             merchantDetails = MerchantDetails()
         )
     }

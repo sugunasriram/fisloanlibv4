@@ -526,7 +526,9 @@ fun LoanOfferListDetailView(
                         }
                     },
                     showBottom = true,
-                    showDoubleButton = true,
+                    //BFL, no edit down payment
+//                    showDoubleButton = true,
+                    showDoubleButton = fromFlow == "Personal Loan",
                     primaryButtonText = stringResource(R.string.accept),
                     onPrimaryButtonClick = {
                         onAcceptClick(
@@ -541,16 +543,20 @@ fun LoanOfferListDetailView(
                     secondaryButtonText = if (fromFlow == "Personal Loan") {
                         stringResource(R.string.edit_loan_request)
                     } else {
-                        stringResource(R.string.edit_down_payment)
+                        //BFL, no edit down payment
+//                        stringResource(R.string.edit_down_payment)
+                        ""
                     },
                     onSecondaryButtonClick = {
-                        if (loanAmountValue.toDouble() <= minLoanAmount.toDouble()) {
-                            CommonMethods().toastMessage(
-                                context = context,
-                                toastMsg = "Offer amount is already at the minimum amount by the lender"
-                            )
-                        } else {
-                            coroutineScope.launch { bottomSheetState.show() }
+                        if (fromFlow == "Personal Loan") {
+                            if (loanAmountValue.toDouble() <= minLoanAmount.toDouble()) {
+                                CommonMethods().toastMessage(
+                                    context = context,
+                                    toastMsg = "Offer amount is already at the minimum amount by the lender"
+                                )
+                            } else {
+                                coroutineScope.launch { bottomSheetState.show() }
+                            }
                         }
                     },
                     backgroundColor = backOrange,
