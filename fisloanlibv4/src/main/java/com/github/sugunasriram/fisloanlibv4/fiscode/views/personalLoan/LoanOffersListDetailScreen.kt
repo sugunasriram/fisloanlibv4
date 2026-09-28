@@ -528,7 +528,7 @@ fun LoanOfferListDetailView(
                     showBottom = true,
                     //BFL, no edit down payment
 //                    showDoubleButton = true,
-                    showDoubleButton = fromFlow == "Personal Loan",
+                    showSingleButton = true,
                     primaryButtonText = stringResource(R.string.accept),
                     onPrimaryButtonClick = {
                         onAcceptClick(
