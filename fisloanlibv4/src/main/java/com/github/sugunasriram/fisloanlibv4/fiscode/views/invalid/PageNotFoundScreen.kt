@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,8 +12,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
@@ -531,10 +535,18 @@ fun MiddleOfTheLoanScreen(
         Log.d("Sugu", "Check 22")
 
         navigateToFISExitScreen(navController, loanId="4321") }
+) { Column(
+    modifier = Modifier
+        .background(appOrange)
+        .fillMaxSize()
+        .imePadding()
+        .navigationBarsPadding()
+        .statusBarsPadding()
 ) {
+
     TopBar(navController = navController, showBackButton = true)
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    Box(modifier = Modifier.fillMaxSize().background(appWhite), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             if (displayOffer) {
                 Image(
@@ -598,7 +610,7 @@ fun MiddleOfTheLoanScreen(
 //                        navigateApplyByCategoryScreen(navController = navController)
                         Log.d("Sugu", "Check 23")
 
-                        navigateToFISExitScreen(navController, loanId="4321")
+                        navigateToFISExitScreen(navController, loanId = "4321")
                     }
                 }
             }
@@ -609,6 +621,7 @@ fun MiddleOfTheLoanScreen(
             }
         }
     }
+}
 }
 
 @Preview

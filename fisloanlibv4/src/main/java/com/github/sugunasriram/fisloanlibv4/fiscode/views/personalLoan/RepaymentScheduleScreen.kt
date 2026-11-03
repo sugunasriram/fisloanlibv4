@@ -139,6 +139,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.grayD6
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal28Text700
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
 import androidx.compose.ui.draw.clip
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.backOrange
 
 var amount_to_be_paid = ""
 var coolOffPeriodDate = ""
@@ -560,7 +561,7 @@ fun RepaymentScheduleView(
         topBarBackgroundColor = appOrange,
         topBarText = stringResource(R.string.repayment_schedule),
         showBackButton = true,
-        backgroundColor = backgroundOrange,
+        backgroundColor = backOrange,
         contentStart = 0.dp, contentEnd = 0.dp,
         onBackClick = {
             if (fromScreen == "Loan Summary") {
@@ -631,121 +632,130 @@ fun RepaymentScheduleView(
 
             navigateToFISExitScreen(navController, loanId=orderId) }
     ) {
-        if (checkingStatus || orderPaymentListLoading||pfLoanCancelling) {
-            CenterProgressFixedHeight(top = 320.dp)
-        } else {
-//        Get Cool Off Period
-            loanDetails.itemTags?.forEach { itemTags ->
-                itemTags?.let {
-                    it.tags.let { tags ->
-                        tags.forEach { tag ->
-                            if (tag.key.contains("cool_off", ignoreCase = true)) {
-                                coolOffPeriodDate = tag.value ?: ""
-                                return@forEach // Exit the loop after processing the first matching tag
-                            }
-                        }
-                    }
-                }
-            }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(backgroundOrange, shape = RoundedCornerShape(16.dp))) {
 
-            // PRINCIPAL
-            loanDetails.quoteBreakUp?.forEach { quoteBreakUp ->
-                quoteBreakUp?.let {
-                    it.title?.let { title ->
-                        it.value?.let { description ->
-                            if (title.equals("PRINCIPAL", ignoreCase = true) ||
-                                title.lowercase().contains("PRINCIPAL_", ignoreCase = true)) {
-                                principal = description
-                                return@forEach // Exit the loop after processing the first matching tag
-                            }
-                        }
-                    }
-                }
-            }
-            // only if PF and Loan is disbursed
-//            if (isLoanDisbursed && fromFlow.equals("LOAN", ignoreCase = true)) {
-            val lenderName = loanDetails.providerDescriptor?.name.orEmpty()
-            val isBajajOrBfl = lenderName.contains("bajaj", ignoreCase = true) ||
-                    lenderName.contains("bfl", ignoreCase = true)
-            if(!isBajajOrBfl) {
-                if (isLoanDisbursed && fromFlow.equals("LOAN", ignoreCase = true)) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    CurvedPrimaryButton(
-                        text = "Cancel Loan Request",
-                        textColor = appOrange,
-                        backgroundColor = appWhite,
-                        start = 80.dp,
-                        end = 80.dp
-                    ) {
-                        showLoanCancelPopUp = true
-                    }
-                }
-            }
-            if (showLoanCancelPopUp) {
-                AlertDialog(
-                    onDismissRequest = { showLoanCancelPopUp = false },
-                    confirmButton = {
-                        Column {
-                            CurvedPrimaryButton(
-                                text = stringResource(id = R.string.yes),
-                                start = 15.dp,
-                                end = 15.dp,
-                                top = 5.dp,
-                                bottom = 5.dp,
-                                enabled = !pfLoanCancelling
-                            ) {
-                                if (cancelReason.isBlank()) {
-                                    cancelReasonError = true
-                                } else {
-                                    val cancelLoan = CancelLoan(
-                                        loanType = "PURCHASE_FINANCE",
-                                        orderId = orderId,
-                                        cancelType = "CONFIRM_CANCEL",
-                                        cancelReason = cancelReason
-                                    )
-                                    loanAgreementViewModel.cancelLoanRequest(cancelLoan, context)
-                                    if (pfLoanCancelled && !pfLoanCancelling) {
-                                        loanAgreementViewModel.status(
-                                            loanType = loanType,
-                                            context = context,
-                                            orderId = orderId
-                                        )
-                                        getOrderPaymentStatusViewModel.getOrderPaymentStatus(
-                                            loanType = loanType,
-                                            loanId = orderId,
-                                            context = context
-                                        )
-                                    }
-                                    showLoanCancelPopUp = false
+            if (checkingStatus || orderPaymentListLoading || pfLoanCancelling) {
+                CenterProgressFixedHeight(top = 320.dp)
+            } else {
+//        Get Cool Off Period
+                loanDetails.itemTags?.forEach { itemTags ->
+                    itemTags?.let {
+                        it.tags.let { tags ->
+                            tags.forEach { tag ->
+                                if (tag.key.contains("cool_off", ignoreCase = true)) {
+                                    coolOffPeriodDate = tag.value ?: ""
+                                    return@forEach // Exit the loop after processing the first matching tag
                                 }
                             }
-                            Spacer(modifier = Modifier.height(12.dp))
                         }
-                    },
-                    dismissButton = {
-                        Column {
-                        CurvedPrimaryButton(
-                            text = stringResource(id = R.string.no),
-                            start = 15.dp,
-                            end = 15.dp,
-                            top = 5.dp,
-                            bottom = 5.dp,
-                            enabled = !pfLoanCancelling
-                        ) {
-                            showLoanCancelPopUp = false
-                        }
-                            Spacer(modifier = Modifier.height(12.dp))
+                    }
+                }
+
+                // PRINCIPAL
+                loanDetails.quoteBreakUp?.forEach { quoteBreakUp ->
+                    quoteBreakUp?.let {
+                        it.title?.let { title ->
+                            it.value?.let { description ->
+                                if (title.equals("PRINCIPAL", ignoreCase = true) ||
+                                    title.lowercase().contains("PRINCIPAL_", ignoreCase = true)
+                                ) {
+                                    principal = description
+                                    return@forEach // Exit the loop after processing the first matching tag
+                                }
                             }
-                    },
-                    title = {
-                        Text(
-                            text = "Confirm Cancellation",
-                            style = normal28Text700,
-                            modifier = Modifier,
-                            color = appBlack
-                        )
-                    },
-                    text = {
+                        }
+                    }
+                }
+                // only if PF and Loan is disbursed
+//            if (isLoanDisbursed && fromFlow.equals("LOAN", ignoreCase = true)) {
+                val lenderName = loanDetails.providerDescriptor?.name.orEmpty()
+                val isBajajOrBfl = lenderName.contains("bajaj", ignoreCase = true) ||
+                        lenderName.contains("bfl", ignoreCase = true)
+                if (!isBajajOrBfl) {
+                    if (isLoanDisbursed && fromFlow.equals("LOAN", ignoreCase = true)) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        CurvedPrimaryButton(
+                            text = "Cancel Loan Request",
+                            textColor = appOrange,
+                            backgroundColor = appWhite,
+                            start = 80.dp,
+                            end = 80.dp
+                        ) {
+                            showLoanCancelPopUp = true
+                        }
+                    }
+                }
+                if (showLoanCancelPopUp) {
+                    AlertDialog(
+                        onDismissRequest = { showLoanCancelPopUp = false },
+                        confirmButton = {
+                            Column {
+                                CurvedPrimaryButton(
+                                    text = stringResource(id = R.string.yes),
+                                    start = 15.dp,
+                                    end = 15.dp,
+                                    top = 5.dp,
+                                    bottom = 5.dp,
+                                    enabled = !pfLoanCancelling
+                                ) {
+                                    if (cancelReason.isBlank()) {
+                                        cancelReasonError = true
+                                    } else {
+                                        val cancelLoan = CancelLoan(
+                                            loanType = "PURCHASE_FINANCE",
+                                            orderId = orderId,
+                                            cancelType = "CONFIRM_CANCEL",
+                                            cancelReason = cancelReason
+                                        )
+                                        loanAgreementViewModel.cancelLoanRequest(
+                                            cancelLoan,
+                                            context
+                                        )
+                                        if (pfLoanCancelled && !pfLoanCancelling) {
+                                            loanAgreementViewModel.status(
+                                                loanType = loanType,
+                                                context = context,
+                                                orderId = orderId
+                                            )
+                                            getOrderPaymentStatusViewModel.getOrderPaymentStatus(
+                                                loanType = loanType,
+                                                loanId = orderId,
+                                                context = context
+                                            )
+                                        }
+                                        showLoanCancelPopUp = false
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(12.dp))
+                            }
+                        },
+                        dismissButton = {
+                            Column {
+                                CurvedPrimaryButton(
+                                    text = stringResource(id = R.string.no),
+                                    start = 15.dp,
+                                    end = 15.dp,
+                                    top = 5.dp,
+                                    bottom = 5.dp,
+                                    enabled = !pfLoanCancelling
+                                ) {
+                                    showLoanCancelPopUp = false
+                                }
+                                Spacer(modifier = Modifier.height(12.dp))
+                            }
+                        },
+                        title = {
+                            Text(
+                                text = "Confirm Cancellation",
+                                style = normal28Text700,
+                                modifier = Modifier,
+                                color = appBlack
+                            )
+                        },
+                        text = {
 //                        if (pfLoanCancelling) CenterProgressFixedHeight(top = 0.dp, size = 20.dp)
 //                        if (pfLoanCancelled && !pfLoanCancelling) {
                             Column {
@@ -792,25 +802,26 @@ fun RepaymentScheduleView(
                                     )
                                 }
 //                            }
-                        }
-                    },
-                    modifier = Modifier
-                        .shadow(8.dp, shape = RoundedCornerShape(8.dp))
-                        .border(1.dp, appWhite, shape = RoundedCornerShape(8.dp))
+                            }
+                        },
+                        modifier = Modifier
+                            .shadow(8.dp, shape = RoundedCornerShape(8.dp))
+                            .border(1.dp, appWhite, shape = RoundedCornerShape(8.dp))
+                    )
+                }
+                CompleteLoanDetails(
+                    loanDetails = loanDetails,
+                    context = context,
+                    orderPaymentListLoaded = orderPaymentListLoaded,
+                    orderPaymentStatusList = orderPaymentStatusList,
+                    checkOrderIssueResponse = checkOrderIssueResponse,
+                    fromFlow = fromFlow,
+                    navController = navController,
+                    isLoanClosed = isLoanClosed,
+                    isLoanInitiated = isLoanInitiated,
+                    loanAgreementViewModel = loanAgreementViewModel
                 )
             }
-            CompleteLoanDetails(
-                loanDetails = loanDetails,
-                context = context,
-                orderPaymentListLoaded = orderPaymentListLoaded,
-                orderPaymentStatusList = orderPaymentStatusList,
-                checkOrderIssueResponse = checkOrderIssueResponse,
-                fromFlow = fromFlow,
-                navController = navController,
-                isLoanClosed = isLoanClosed,
-                isLoanInitiated = isLoanInitiated,
-                loanAgreementViewModel = loanAgreementViewModel
-            )
         }
     }
 }

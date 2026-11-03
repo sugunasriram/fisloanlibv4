@@ -28,6 +28,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.document.Docum
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.document.TermsConditionResponse
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appWhite
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.backOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.backgroundOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.bold12Text400
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.bold14Text500
@@ -121,7 +122,7 @@ fun TermsConditionsView(
                     }
                 },
                 onSecondaryButtonClick = { navController.popBackStack() },
-                backgroundColor = backgroundOrange
+                backgroundColor = backOrange
             ) {
                 Column(
                     modifier = Modifier

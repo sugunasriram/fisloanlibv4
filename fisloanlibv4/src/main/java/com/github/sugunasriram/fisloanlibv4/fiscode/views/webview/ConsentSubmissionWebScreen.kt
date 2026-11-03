@@ -39,7 +39,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -67,6 +70,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.Se
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.SearchResponseModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.sse.SSEData
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.sse.SSEViewModel
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.backgroundOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
@@ -210,8 +214,13 @@ fun ConsentSubmissionWebScreen(
 
     var onAllActionsCompleted by remember { mutableStateOf(false) }
     BackHandler { navigateApplyByCategoryScreen(navController) }
-    Column(modifier = Modifier.fillMaxSize()) {
-        TopBar(
+    Column(modifier = Modifier.fillMaxSize()
+        .background(color = appOrange)
+        .imePadding()
+        .statusBarsPadding()
+        .navigationBarsPadding()) {
+
+    TopBar(
             navController = navController,
             onBackClick = {
                 navigateApplyByCategoryScreen(navController)
