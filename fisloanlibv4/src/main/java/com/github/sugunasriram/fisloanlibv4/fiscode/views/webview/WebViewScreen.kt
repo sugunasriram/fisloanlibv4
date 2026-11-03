@@ -19,6 +19,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -59,6 +62,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.Se
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.personaLoan.SearchModel
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.sse.SSEData
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.sse.SSEViewModel
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.backgroundOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.viewModel.personalLoan.WebViewModel
@@ -447,8 +451,13 @@ fun AAWebScreen(
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        TopBar(
+    Column(modifier = Modifier.fillMaxSize()
+        .background(color = appOrange)
+        .imePadding()
+        .statusBarsPadding()
+        .navigationBarsPadding()) {
+
+    TopBar(
             navController = navController,
             onBackClick = {
                 val currentTime = System.currentTimeMillis()

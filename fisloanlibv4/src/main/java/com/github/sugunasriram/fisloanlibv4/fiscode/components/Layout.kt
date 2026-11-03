@@ -17,8 +17,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
@@ -77,6 +80,7 @@ fun FixedTopBottomScreen(
     showBottom: Boolean = false,
     showHyperText: Boolean = false,
     showCheckBox: Boolean = false,
+    showBankWarning: Boolean = false,
     showSingleButton: Boolean = false,
     showArrowButton: Boolean = false,
     showGetMoreOffersButton: Boolean = false,
@@ -96,10 +100,8 @@ fun FixedTopBottomScreen(
     tertiaryButtonText: String = stringResource(id = R.string.home),
     onTertiaryButtonClick: (() -> Unit)? = null,
     backgroundColor: Color = backgroundOrange,
-    buttonStart: Dp = 30.dp,
-    buttonEnd: Dp = 30.dp,
     buttonTop: Dp = 10.dp,
-    buttonBottom: Dp = 20.dp,
+    buttonBottom: Dp = 8.dp,
     contentStart: Dp = 5.dp,
     contentEnd: Dp = 5.dp,
     contentTop: Dp = 0.dp,
@@ -112,7 +114,11 @@ fun FixedTopBottomScreen(
 
     Column(
         modifier = modifier
+            .background(appOrange)
             .fillMaxSize()
+            .imePadding()
+            .navigationBarsPadding()
+            .statusBarsPadding()
             .background(backgroundColor)
             .verticalScroll(rememberScrollState())
             .pointerInput(Unit) { detectTapGestures(onTap = { focusManager.clearFocus() }) }
@@ -130,7 +136,7 @@ fun FixedTopBottomScreen(
         if (isSelfScrollable) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
+                modifier = Modifier.background(backgroundColor)
                     .weight(1f)
                     .padding(
                         start = contentStart,
@@ -145,7 +151,7 @@ fun FixedTopBottomScreen(
         } else {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
+                modifier = Modifier.background(backgroundColor)
                     .weight(1f)
                     .padding(
                         start = contentStart,
@@ -175,17 +181,25 @@ fun FixedTopBottomScreen(
             }
             if (showCheckBox) {
                 CheckBoxText(
-                    textColor = if (checkBoxText == stringResource(R.string.select_all)) appGreen else checkBoxGray,
+                    textColor = if (checkBoxText == stringResource(R.string.select_all)) appOrange else checkBoxGray,
                     style = if (checkBoxText == stringResource(R.string.select_all)) normal16Text500 else normal12Text400,
                     boxState = checkboxState,
                     text = checkBoxText, bottom = 0.dp, start = 0.dp, end = 0.dp,
-                    checkedColor = if (checkBoxText == stringResource(R.string.select_all)) appGreen else appOrange,
-                    uncheckedColor = if (checkBoxText == stringResource(R.string.select_all)) appGreen else appOrange,
+                    checkedColor = appOrange,
+                    uncheckedColor =appOrange ,
                     onCheckedChange = { isChecked ->
                         onCheckBoxChange?.invoke(isChecked)
                     }
                 )
             }
+            if(showBankWarning){
+                WarningIconAndText(
+                    title = stringResource(id = R.string.please_ensure_that_your_bank_details),
+                    subtext = stringResource(id = R.string.incorrect_or_invalid_entries_may_lead_to_failure)
+                )
+            }
+
+
             if (showErrorMsg) {
                 Row(
                     horizontalArrangement = Arrangement.Center,
@@ -265,7 +279,7 @@ fun FixedTopBottomScreen(
                     modifier = Modifier
                         .height(90.dp)
                         .fillMaxWidth()
-                        .background(backgroundOrange),
+                        .background(appWhite),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
@@ -322,6 +336,7 @@ fun TopBottomBarForNegativeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .statusBarsPadding()
             .pointerInput(Unit) {
                 detectTapGestures(onTap = { focusManager.clearFocus() })
             }
@@ -411,8 +426,10 @@ fun ScreenWithHamburger(
 
     val focusManager = LocalFocusManager.current
     Column(
-        modifier = modifier
+        modifier = modifier.background(appOrange)
             .fillMaxSize()
+            .imePadding()
+            .statusBarsPadding()
             .pointerInput(Unit) {
                 detectTapGestures(onTap = { focusManager.clearFocus() })
             }
@@ -498,7 +515,7 @@ fun SideBarLayout(
     pageContent: @Composable () -> Unit
 ) {
     Column(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize().statusBarsPadding()
     ) {
         Box {
 //            Box {

@@ -1,10 +1,15 @@
 package com.github.sugunasriram.fisloanlibv4.fiscode.components
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appWhite
@@ -22,7 +27,17 @@ fun CustomModalBottomSheet(
         sheetState = bottomSheetState,
         sheetShape = sheetShape,
         sheetBackgroundColor = sheetBackgroundColor,
-        sheetContent = { sheetContent() }
+        sheetContent = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .imePadding()
+            ) {
+                sheetContent()
+            }
+
+        }
     ) {
         content()
     }

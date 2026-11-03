@@ -14,11 +14,15 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,6 +37,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.components.CurvedPrimaryButt
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.TopBar
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToLoanSummaryScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.azureBlue
 
 @Composable
@@ -64,6 +69,11 @@ fun ConsentHandlerScreen(
 
     Column(
         modifier = Modifier.fillMaxSize()
+            .background(color = appOrange)
+            .imePadding()
+            .statusBarsPadding()
+            .navigationBarsPadding()
+
     ) {
         val title = if (fromFlow.equals("Personal Loan")) {
             fromFlow

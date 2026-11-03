@@ -36,7 +36,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -195,8 +198,13 @@ fun FormSubmissionWebScreen(
         navigateToFISExitScreen(navController, loanId="1234")
 
     }
-    Column(modifier = Modifier.fillMaxSize()) {
-        TopBar(
+    Column(modifier = Modifier.fillMaxSize()
+        .background(color = appOrange)
+        .imePadding()
+        .statusBarsPadding()
+        .navigationBarsPadding()) {
+
+    TopBar(
             navController = navController,
             onBackClick = {
                 navigateApplyByCategoryScreen(navController)

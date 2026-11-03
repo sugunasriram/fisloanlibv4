@@ -26,6 +26,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.document.About
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.document.DocumentItem
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appWhite
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.backOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.backgroundOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.bold12Text400
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.bold14Text500
@@ -91,7 +92,7 @@ fun AboutUsView(
                 topBarText = stringResource(R.string.about_us),
                 showBackButton = true,
                 onBackClick = { navController.popBackStack() },
-                backgroundColor = backgroundOrange
+                backgroundColor = backOrange
             ) {
                 Column(
                     modifier = Modifier

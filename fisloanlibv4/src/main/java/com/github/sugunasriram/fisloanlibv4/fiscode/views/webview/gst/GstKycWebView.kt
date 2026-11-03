@@ -27,11 +27,15 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -56,6 +60,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFormRej
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.core.ApiPaths
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.sse.SSEData
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.sse.SSEViewModel
+import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appOrange
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.CommonMethods
 import com.github.sugunasriram.fisloanlibv4.fiscode.utils.storage.TokenManager
 import kotlinx.serialization.decodeFromString
@@ -203,10 +208,13 @@ fun ProceedWithKYCProcess(
     isSelfScrollable: Boolean = false
 ) {
     val activity = context as Activity
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        TopBar(
+    Column(modifier = Modifier.fillMaxSize()
+        .background(color = appOrange)
+        .imePadding()
+        .statusBarsPadding()
+        .navigationBarsPadding()) {
+
+    TopBar(
             navController = navController,
             onBackClick = { navigateApplyByCategoryScreen(navController) },
             topBarText = "Kyc Verification"
