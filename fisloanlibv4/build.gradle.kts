@@ -10,6 +10,19 @@ val libGroupId = "com.github.sugunasriram"
 val libArtifactId = "fisloanlibv4"
 val libVersion = "1.0.8"   // bump before each publish
 
+// ---- Environment selection (PreProd vs Prod) ----
+// Priority: -PfisEnv=prod|preprod  >  JitPack tag name (VERSION env, e.g. v2.0.57-staging / v2.0.56-prod)  >  preprod
+val prodBaseUrl = "https://ondcfs.jtechnoparks.in/jt-bap"
+val preProdBaseUrl = "https://stagingondcfs.jtechnoparks.in/jt-bap"
+val fisEnv: String = (project.findProperty("fisEnv") as String?)
+    ?: System.getenv("VERSION")?.let { tag ->
+        if (tag.contains("prod", ignoreCase = true) && !tag.contains("preprod", ignoreCase = true)) "prod" else "preprod"
+    }
+    ?: "preprod"
+val isProd = fisEnv.equals("prod", ignoreCase = true)
+val fisBaseUrl = if (isProd) prodBaseUrl else preProdBaseUrl
+logger.lifecycle("fisloanlibv4: env=${if (isProd) "PROD" else "PREPROD"} BASE_URL=$fisBaseUrl (VERSION=${System.getenv("VERSION")})")
+
 android {
     namespace = "com.github.sugunasriram.fisloanlibv4"
     compileSdk = 36
@@ -22,6 +35,10 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
         consumerProguardFiles("consumer-rules.pro")
+
+        buildConfigField("String", "BASE_URL", "\"$fisBaseUrl\"")
+        buildConfigField("String", "CONSENT_CALLBACK_REDIRECT_URL", "\"$fisBaseUrl/api/v1/finvu/consent-callback\"")
+        buildConfigField("String", "FLAVOR_NAME", "\"${if (isProd) "PROD" else "PREPROD"}\"")
     }
 
     lint {

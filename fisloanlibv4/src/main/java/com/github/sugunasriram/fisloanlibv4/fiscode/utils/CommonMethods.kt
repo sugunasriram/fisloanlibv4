@@ -65,8 +65,8 @@ import java.util.regex.Pattern
 
 class CommonMethods {
     companion object {
-//        const val BASE_URL = "https://stagingondcfs.jtechnoparks.in/jt-bap"
-        const val BASE_URL = "https://ondcfs.jtechnoparks.in/jt-bap"
+        // Set at build time from the tag / -PfisEnv (see fisloanlibv4/build.gradle.kts)
+        const val BASE_URL = com.github.sugunasriram.fisloanlibv4.BuildConfig.BASE_URL
     }
 
     private val emailPattern =

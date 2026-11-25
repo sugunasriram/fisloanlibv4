@@ -532,8 +532,7 @@ fun AAWebScreen(
                                     url: String?
                                 ): Boolean {
                                     url?.let {
-//                                        if (it == BuildConfig.CONSENT_CALLBACK_REDIRECT_URL) {
-                                        if (it == "https://stagingondcfs.jtechnoparks.in/jt-bap/api/v1/finvu/consent-callback") {
+                                        if (it == com.github.sugunasriram.fisloanlibv4.BuildConfig.CONSENT_CALLBACK_REDIRECT_URL) {
 //                                            navigateApplyByCategoryScreen(navController)
                                             navigateToFISExitScreen(navController, loanId="1234")
                                             return true
