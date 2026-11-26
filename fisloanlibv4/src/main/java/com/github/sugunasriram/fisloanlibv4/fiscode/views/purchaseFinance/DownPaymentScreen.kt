@@ -1501,6 +1501,7 @@ import kotlinx.coroutines.Job
 import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.navigation.compose.rememberNavController
 
 // FIX 1: Removed all top-level mutable vars.
 // These were global mutable state shared across all compositions — unsafe in Compose.
@@ -1793,6 +1794,7 @@ fun DownPaymentScreen(
                             .background(backgroundOrange)
                     ) {
                         ProductDetailsCard(
+                            navController = navController,
                             verifySessionResponse = verifySessionResponse,
 //                            amount = amount,
 //                            onAmountChange = { amount = it },
@@ -1805,7 +1807,7 @@ fun DownPaymentScreen(
                             onSkuChange = { pfProductSKUId = it },
                             onBrandChange = { pfProductBrand = it }
                         )
-                        userDetails?.data?.let { PFPersonalDetailsCard(profile = it) }
+                        userDetails?.data?.let { PFPersonalDetailsCard(navController = navController, profile = it) }
                         //As BFL doesn't allow for DownPayment
 //                        DownPaymentDetailsCard(
 //                            amount = amount,
@@ -1814,7 +1816,7 @@ fun DownPaymentScreen(
 //                            onAmountChange = { amount = it },
 //                            onValidationChanged = { showInValidAmountError = it }
 //                        )
-                        PreferredTenureCard(editLoanRequestViewModel)
+                        PreferredTenureCard(editLoanRequestViewModel,navController)
                     }
                 }
             }
@@ -1842,6 +1844,7 @@ private fun ConfirmExitDialog(
 
 @Composable
 fun ProductDetailsCard(
+    navController: NavHostController,
     verifySessionResponse: VerifySessionResponse,
 //    amount: Long,
 //    onAmountChange: (Long) -> Unit,
@@ -1897,7 +1900,7 @@ fun ProductDetailsCard(
         }
     }
 
-    DownPaymentCard(cardHeader = stringResource(R.string.product_details)) {
+    DownPaymentCard(navController = navController, cardHeader = stringResource(R.string.product_details)) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -2028,12 +2031,14 @@ fun ProductDetailsCard(
         }
     }
 }
-
 @Composable
-fun PFPersonalDetailsCard(profile: Profile) {
+fun PFPersonalDetailsCard(profile: Profile, navController: NavHostController) {
     DownPaymentCard(
+        navController = navController,
         cardHeader = stringResource(R.string.personal_details),
-        image = painterResource(R.drawable.personal_details)
+        image = painterResource(R.drawable.personal_details),
+        showEdit = true,
+        onEditClick = { navigateToUpdateProfileScreen(navController,"DownPayment") }
     ) {
         RegisterText(
             text = stringResource(id = R.string.please_review_details),
@@ -2101,6 +2106,7 @@ fun PFPersonalDetailsCard(profile: Profile) {
 
 @Composable
 fun DownPaymentDetailsCard(
+    navController: NavHostController,
     amount: Long,
     maxAmount: Long,
     showInValidAmountError: Boolean,
@@ -2136,6 +2142,7 @@ fun DownPaymentDetailsCard(
     }
 
     DownPaymentCard(
+        navController = navController,
         cardHeader = stringResource(R.string.down_payment),
         image = painterResource(R.drawable.down_payment)
     ) {
@@ -2214,8 +2221,9 @@ fun DownPaymentDetailsCard(
 }
 
 @Composable
-fun PreferredTenureCard(editLoanRequestViewModel: EditLoanRequestViewModel) {
+fun PreferredTenureCard(editLoanRequestViewModel: EditLoanRequestViewModel, navController: NavHostController) {
     DownPaymentCard(
+        navController = navController,
         cardHeader = stringResource(R.string.preferred_tenure),
         image = painterResource(R.drawable.tenure)
     ) {
@@ -2397,6 +2405,7 @@ fun DownPaymentScreenPreview() {
 
     Column(modifier = Modifier.background(Color.White)) {
         ProductDetailsCard(
+            navController = rememberNavController(),
             verifySessionResponse = verifySessionResponseObj,
 //            amount = 3000,
 //            onAmountChange = {},

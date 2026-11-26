@@ -102,6 +102,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.components.RegisterText
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.SideMenuProfileCard
 import com.github.sugunasriram.fisloanlibv4.fiscode.components.StartingText
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateApplyByCategoryScreen
+import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToDownPaymentScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.navigation.navigateToFISExitScreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.Document
 import com.github.sugunasriram.fisloanlibv4.fiscode.network.model.auth.DocumentUpload
@@ -316,8 +317,8 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
                 if (upDated && !shownMsg) {
                     CommonMethods().toastMessage(context = context, toastMsg = "Profile updated")
                     registerViewModel.updateShownMsg(true)
-                    navigateApplyByCategoryScreen(navController)
-//                    navController.popBackStack()
+                    if(fromFlow == "DownPayment") navController.popBackStack()
+                    else navigateApplyByCategoryScreen(navController)
                 }
                 CustomModalBottomSheet(
                     bottomSheetState = bottomSheet1Value,
@@ -428,7 +429,9 @@ fun UpdateProfileScreen(navController: NavHostController, fromFlow: String) {
                                 SideMenuProfileCard(
                                     userName = "", contact = "", displayUserInfo = false,
                                     navController = navController,
-                                    onBackClick = { navigateToFISExitScreen(navController, loanId="1234") }
+                                    onBackClick = {
+                                        if(fromFlow == "DownPayment") navController.popBackStack()
+                                        else navigateToFISExitScreen(navController, loanId="1234") }
                                 )
                             }
 
