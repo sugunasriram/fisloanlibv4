@@ -59,6 +59,7 @@ import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.loanStatusCardGreen
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.appRed
 import com.github.sugunasriram.fisloanlibv4.fiscode.ui.theme.normal14Text500
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.navigation.NavHostController
 
 @Composable
 fun DisplayCard(
@@ -397,17 +398,19 @@ fun DashedBorderCard(
 
 @Composable
 fun DownPaymentCard(
+    navController: NavHostController,
     modifier: Modifier = Modifier,
     cardColor: Color = appWhite,
     borderColor: Color = appWhite,
     cardHeader: String,
-    colorFilter : ColorFilter = ColorFilter.tint(appOrange),
     image: Painter = painterResource(R.drawable.product_details),
     start: Dp = 10.dp,
     end: Dp = 10.dp,
     roundedCornerDp: Dp = 8.dp,
     top: Dp = 5.dp,
     bottom: Dp = 5.dp,
+    showEdit: Boolean = false,
+    onEditClick: () -> Unit = {},
     content: @Composable () -> Unit
 ) {
     Column(
@@ -427,14 +430,25 @@ fun DownPaymentCard(
             Image(
                 painter = image,
                 contentDescription = "CardImage",
-                colorFilter = colorFilter,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(24.dp),
+                colorFilter = ColorFilter.tint(appOrange),
             )
             Text(
                 text = cardHeader,
                 style = normal16Text700,
                 modifier = Modifier.padding(start = 8.dp)
             )
+            Spacer(modifier = Modifier.weight(1f))
+
+            if (showEdit) {
+                Image(
+                    painter = painterResource(R.drawable.edit_image),
+                    contentDescription = "Edit",
+                    modifier = Modifier.size(24.dp)
+                        .clickable{onEditClick()},
+                    colorFilter = ColorFilter.tint(appOrange),
+                )
+            }
         }
         HorizontalDivider(color = appOrange, start = 0.dp, end = 0.dp, top = 0.dp)
         content()
