@@ -96,7 +96,7 @@ fun OfferLoaderScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = Color.Transparent)
+            .background(color = appWhite)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
